@@ -1,6 +1,10 @@
 from coldfront.config.base import INSTALLED_APPS, MIDDLEWARE, AUTHENTICATION_BACKENDS
 from coldfront.config.env import ENV
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 #------------------------------------------------------------------------------
 # Enable OpenID Connect Authentication Backend
 #------------------------------------------------------------------------------
@@ -28,6 +32,11 @@ MIDDLEWARE += [
     'mozilla_django_oidc.middleware.SessionRefresh',
 ]
 
+def username_algo(email, claims=None): 
+    logger.warn('DEBUG: \n{0}\n'.format(claims))
+    
+    return email
+
 OIDC_OP_JWKS_ENDPOINT = ENV.str('OIDC_OP_JWKS_ENDPOINT')
 OIDC_RP_SIGN_ALGO = ENV.str('OIDC_RP_SIGN_ALGO')
 OIDC_RP_CLIENT_ID = ENV.str('OIDC_RP_CLIENT_ID')
@@ -38,3 +47,4 @@ OIDC_OP_USER_ENDPOINT = ENV.str('OIDC_OP_USER_ENDPOINT')
 OIDC_VERIFY_SSL = ENV.bool('OIDC_VERIFY_SSL', default=True)
 OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS = ENV.int('OIDC_RENEW_ID_TOKEN_EXPIRY_SECONDS', default=3600)
 OIDC_USE_PKCE = ENV.bool('OIDC_USE_PKCE', default=False)
+OIDC_USERNAME_ALGO = username_algo
