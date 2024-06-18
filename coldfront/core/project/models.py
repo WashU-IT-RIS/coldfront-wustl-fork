@@ -77,7 +77,7 @@ We do not have information about your research. Please provide a detailed descri
         '''
 
     title = models.CharField(max_length=255,)
-    pi = models.ForeignKey(User, on_delete=models.CASCADE,)
+    pi = models.CharField(max_length=255, default=models.ForeignKey(User, on_delete=models.CASCADE,))
     description = models.TextField(
         default=DEFAULT_DESCRIPTION,
         validators=[
