@@ -33,11 +33,26 @@ class ActiveDirectoryAPI:
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
             f"(&(objectclass=person)(sAMAccountName={wustlkey}))",
-            attributes=["sAMAccountName", "mail"],
+            attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
 
         if not self.conn.response:
             raise ValueError("Invalid wustlkey")
+
+        return self.conn.response[0]
+
+    def get_user_by_email(self, email: str):
+        if not email:
+            raise ValueError(("email must be defined"))
+
+        self.conn.search(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            f"(&(objectclass=person)(mail={email}))",
+            attributes=["sAMAccountName", "mail", "givenName", "sn"],
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid email")
 
         return self.conn.response[0]
 
