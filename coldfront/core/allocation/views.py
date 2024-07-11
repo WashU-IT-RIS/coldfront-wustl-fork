@@ -23,6 +23,8 @@ from django.views import View
 from django.views.generic import ListView, TemplateView
 from django.views.generic.edit import CreateView, FormView, UpdateView
 
+from django.db.models import OuterRef, Subquery
+
 from coldfront.core.allocation.forms import (AllocationAccountForm,
                                              AllocationAddUserForm,
                                              AllocationAttributeCreateForm,
@@ -464,19 +466,36 @@ class AllocationTableView(LoginRequiredMixin, ListView):
         if allocation_search_form.is_valid():
             data = allocation_search_form.cleaned_data
             resource = Resource.objects.get(name="Storage2")
-            allocations = Allocation.objects.filter(resources=resource)
+            # allocations = Allocation.objects.filter(resources=resource)
 
+
+            department_sub_q = AllocationAttribute.objects.filter(
+                    allocation=OuterRef('pk'),
+                    allocation_attribute_type=department_type
+            ).values('value')[:1]
             # Project Title
-            if data.get('project'):
-                allocations = allocations.filter(
-                    project__title__icontains=data.get('project'))
+            # if data.get('project'):
+            #     allocations = allocations.filter(
+            #         project__title__icontains=data.get('project'))
 
+            allocations = Allocation.objects.annotate(
+                department_number=Subquery(department_sub_q)
+            )
+            allocations = Allocation.objects.filter(
+                resources=resource
+            )
             for allocation in allocations:
                 department_type = AllocationAttributeType.objects.get(name="department_number")
-                department_attribute = AllocationAttribute.objects.get(allocation=allocation, allocation_attribute_type=department_type)
-                
-                storage_name_type = AllocationAttributeType.objects.get(name="storage_name")
-                storage_name_attribute = AllocationAttribute.objects.get(allocation=allocation, allocation_attribute_type=storage_name_type)
+                # department_attribute = AllocationAttribute.objects.get(allocation=allocation, allocation_attribute_type=department_type)
+                # 
+                # storage_name_type = AllocationAttributeType.objects.get(name="storage_name")
+                # storage_name_attribute = AllocationAttribute.objects.get(allocation=allocation, allocation_attribute_type=storage_name_type)
+
+                # get all related allocation attributes
+
+                # need to process the attributes into a dictionary
+
+
 
                 view_list.append(
                     AllocationListItem(
