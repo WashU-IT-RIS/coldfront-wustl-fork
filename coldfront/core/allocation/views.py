@@ -487,6 +487,12 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             allocations = allocations.filter(
                 resources=resource
             )
+
+            if data.get('project'):
+                allocations = allocations.filter(
+                    project__title__icontains=data.get('project')
+                )
+
             for allocation in allocations:
                 # department_attribute = AllocationAttribute.objects.get(allocation=allocation, allocation_attribute_type=department_type)
                 # 
@@ -498,12 +504,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 # need to process the attributes into a dictionary
 
                 # Project Title
-                if data.get('project'):
-                    allocations = allocations.filter(
-                        project__title__icontains=data.get('project')
-                    )
-
-
 
                 view_list.append(
                     AllocationListItem(
