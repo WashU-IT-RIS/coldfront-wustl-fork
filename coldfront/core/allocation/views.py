@@ -468,7 +468,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             resource = Resource.objects.get(name="Storage2")
             # allocations = Allocation.objects.filter(resources=resource)
 
-
+            department_type = AllocationAttributeType.objects.get(name="department_number")
             department_sub_q = AllocationAttribute.objects.filter(
                     allocation=OuterRef('pk'),
                     allocation_attribute_type=department_type
@@ -485,7 +485,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 resources=resource
             )
             for allocation in allocations:
-                department_type = AllocationAttributeType.objects.get(name="department_number")
                 # department_attribute = AllocationAttribute.objects.get(allocation=allocation, allocation_attribute_type=department_type)
                 # 
                 # storage_name_type = AllocationAttributeType.objects.get(name="storage_name")
