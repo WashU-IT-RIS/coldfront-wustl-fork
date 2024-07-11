@@ -484,6 +484,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             #allocations = Allocation.objects.filter(
             #    resources=resource
             #)
+            allocations = allocations.filter(
+                resources=resource
+            )
             for allocation in allocations:
                 # department_attribute = AllocationAttribute.objects.get(allocation=allocation, allocation_attribute_type=department_type)
                 # 
