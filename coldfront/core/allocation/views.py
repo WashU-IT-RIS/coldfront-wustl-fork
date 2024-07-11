@@ -481,9 +481,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             allocations = Allocation.objects.annotate(
                 department_number=Subquery(department_sub_q)
             )
-            allocations = Allocation.objects.filter(
-                resources=resource
-            )
+            #allocations = Allocation.objects.filter(
+            #    resources=resource
+            #)
             for allocation in allocations:
                 # department_attribute = AllocationAttribute.objects.get(allocation=allocation, allocation_attribute_type=department_type)
                 # 
