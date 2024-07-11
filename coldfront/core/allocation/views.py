@@ -497,6 +497,12 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
                 # need to process the attributes into a dictionary
 
+                # Project Title
+                if data.get('project'):
+                    allocations = allocations.filter(
+                        project__title__icontains=data.get('project')
+                    )
+
 
 
                 view_list.append(
