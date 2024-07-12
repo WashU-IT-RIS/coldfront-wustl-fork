@@ -468,7 +468,8 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             resource = Resource.objects.get(name="Storage2")
             # allocations = Allocation.objects.filter(resources=resource)
 
-            department_type_sub_q = AllocationAttributeType.objects.get(name="department_number")
+            # filter here should return a queryset with only one member
+            department_type_sub_q = AllocationAttributeType.objects.filter(name="department_number")
             
             department_sub_q = AllocationAttribute.objects.filter(
                     allocation=OuterRef('pk'),
