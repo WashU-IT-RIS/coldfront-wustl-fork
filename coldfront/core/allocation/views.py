@@ -468,10 +468,11 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             resource = Resource.objects.get(name="Storage2")
             # allocations = Allocation.objects.filter(resources=resource)
 
-            department_type = AllocationAttributeType.objects.get(name="department_number")
+            department_type_sub_q = AllocationAttributeType.objects.get(name="department_number")
+            
             department_sub_q = AllocationAttribute.objects.filter(
                     allocation=OuterRef('pk'),
-                    allocation_attribute_type=department_type
+                    allocation_attribute_type=Subquery(department_type_sub_q)
             ).values('value')[:1]
             # Project Title
             # if data.get('project'):
