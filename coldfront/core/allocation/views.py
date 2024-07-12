@@ -495,7 +495,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 #     project__title__icontains=data.get('project')
                 # )
                 allocations = allocations.filter(
-                    department_number__icontains=data.get('project')
+                    project_title__icontains=data.get('project')
                 )
 
             for allocation in allocations:
