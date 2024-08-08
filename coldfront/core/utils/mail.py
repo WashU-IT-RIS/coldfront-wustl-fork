@@ -69,7 +69,7 @@ def send_email_template(subject, template_name, template_context, sender, receiv
         return
     
     
-    logger.want("SENDING EMAIL")
+    logger.warn("SENDING EMAIL")
     body = render_to_string(template_name, template_context)
 
     return send_email(subject, body, sender, receiver_list)
