@@ -53,6 +53,7 @@ def send_email(subject, body, sender, receiver_list, cc=[]):
                 cc=cc)
             email.send(fail_silently=False)
         else:
+            logger.warn(f"SENDING EMAIL TO {receiver_list}")
             send_mail(subject, body, sender,
                       receiver_list, fail_silently=False)
     except SMTPException as e:
