@@ -1,4 +1,6 @@
 import logging
+import pprint
+
 from smtplib import SMTPException
 
 from django.conf import settings
@@ -59,6 +61,7 @@ def send_email(subject, body, sender, receiver_list, cc=[]):
     except SMTPException as e:
         logger.error('Failed to send email to %s from %s with subject %s',
                      sender, ','.join(receiver_list), subject)
+        logger.error(pprint.pformat(e))
 
 
 def send_email_template(subject, template_name, template_context, sender, receiver_list):
