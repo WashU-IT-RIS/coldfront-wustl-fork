@@ -342,6 +342,14 @@ class Allocation(TimeStampedModel):
     def __str__(self):
         return "%s (%s)" % (self.get_parent_resource.name, self.project.pi)
 
+class AllocationLinkage(TimeStampedModel):
+    # jprew - TODO -confirm right behavior for deletion
+    parent = models.ForeignKey(Allocation, on_delete=models.CASCADE)
+    child = models.ForeignKey(Allocation, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.parent.pk}->{self.child.pk}"
+
 class AllocationAdminNote(TimeStampedModel):
     """ An allocation admin note is a note that an admin makes on an allocation.
     
