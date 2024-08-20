@@ -553,7 +553,7 @@ class AllocationCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     def get_success_url(self):
         msg = 'Allocation requested. It will be available once it is approved.'
         messages.success(self.request, msg)
-        return reverse('project-detail', kwargs={'pk': self.kwargs.get('project_pk')})
+        return reverse('updateAllocation', kwargs={'pk': self.kwargs.get('project_pk')})
 
 
 class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
