@@ -73,6 +73,15 @@ class Allocation(TimeStampedModel):
     """
 
     class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(status__name__in=["Active", "New", "Pending"])
+                & models.Q(
+                    allocation_attribute__allocation_attribute_type__name="storage_filesystem_path"
+                ) & models.Q(allocation_attribute__value__isunique=True),
+            )
+        ]
+
         ordering = ['end_date', ]
 
         permissions = (
@@ -526,7 +535,7 @@ class AllocationAttribute(TimeStampedModel):
             resources = resources,
             allocations = allocs)
         return expanded
-           
+
 class AllocationAttributeUsage(TimeStampedModel):
     """ Allocation attribute usage indicates the usage of an allocation attribute. 
     
