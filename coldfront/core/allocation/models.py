@@ -344,11 +344,13 @@ class Allocation(TimeStampedModel):
 
 class AllocationLinkage(TimeStampedModel):
     # jprew - TODO -confirm right behavior for deletion
-    parent = models.ForeignKey(Allocation, on_delete=models.CASCADE)
-    child = models.ForeignKey(Allocation, on_delete=models.CASCADE)
+    parent = models.ForeignKey(Allocation, on_delete=models.CASCADE, related_name="child_links")
+    children = models.ManyToManyField(Allocation, related_name="parent_links")
 
     def __str__(self):
-        return f"{self.parent.pk}->{self.child.pk}"
+        child_ids = [str(child.pk) for child in self.children.all()]
+        child_ids_str = ",".join(child_ids)
+        return f"{self.parent.pk}->{child_ids_str}"
 
 class AllocationAdminNote(TimeStampedModel):
     """ An allocation admin note is a note that an admin makes on an allocation.
