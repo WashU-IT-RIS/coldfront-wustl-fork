@@ -16,7 +16,9 @@ from coldfront.core.allocation.models import (Allocation, AllocationAccount,
                                               AllocationUser,
                                               AllocationUserNote,
                                               AllocationUserStatusChoice,
-                                              AttributeType)
+                                              AttributeType,
+                                              AllocationLinkage
+                                              )
 
 
 @admin.register(AllocationStatusChoice)
@@ -362,3 +364,8 @@ class AllocationChangeRequestAdmin(admin.ModelAdmin):
 class AllocationChangeStatusChoiceAdmin(admin.ModelAdmin):
     list_display = ('pk', 'allocation_change_request', 'allocation_attribute', 'new_value', )
 
+
+# jprew - right here
+@admin.register(AllocationLinkage)
+class AllocationLinkageAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'parent', 'children')
