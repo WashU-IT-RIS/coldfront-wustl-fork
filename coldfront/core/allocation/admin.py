@@ -368,4 +368,4 @@ class AllocationChangeStatusChoiceAdmin(admin.ModelAdmin):
 # jprew - right here
 @admin.register(AllocationLinkage)
 class AllocationLinkageAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'parent', 'children')
+    list_display = ('pk', 'parent')
