@@ -30,7 +30,7 @@ class ProjectCreateForm(forms.ModelForm):
         label="PI",
     )
 
-    sponsor_department_number = department_number = forms.CharField(
+    sponsor_department_number = forms.CharField(
         help_text="The department for billing associated with the sponsor (can be different than that for underlying allocations)",
         label="Sponsor Department Number",
     )
