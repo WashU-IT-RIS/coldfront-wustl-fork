@@ -25,6 +25,8 @@ class Command(BaseCommand):
         )
         for project in all_projects:
             if project.department_number is None:
-                print("Yep, it's None")
-            else:
-                print("Hey, it actually exists")
+                ProjectAttribute.objects.create(
+                    proj_attr_type=dep_type,
+                    project=project,
+                    value="Unknown"
+                )
