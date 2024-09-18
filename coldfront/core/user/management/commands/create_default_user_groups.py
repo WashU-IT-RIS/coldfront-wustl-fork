@@ -7,6 +7,7 @@ class Command(BaseCommand):
     help = "Create default user groups"
 
     def handle(self, *args, **options):
+        print("Creating default user groups ...")
         groups = ["RIS-UserSupport"]
         for group in groups:
             Group.objects.get_or_create(name=group)
