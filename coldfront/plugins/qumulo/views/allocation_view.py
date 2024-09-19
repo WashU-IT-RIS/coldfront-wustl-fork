@@ -31,6 +31,7 @@ class AllocationView(LoginRequiredMixin, FormView):
     form_class = AllocationForm
     template_name = "allocation.html"
     success_url = reverse_lazy("home")
+    context_object_name = "allocation_creation_data"
 
     def get_form_kwargs(self):
         kwargs = super(AllocationView, self).get_form_kwargs()
@@ -65,6 +66,11 @@ class AllocationView(LoginRequiredMixin, FormView):
         AllocationView.create_new_allocation(form_data, user, parent_allocation)
 
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["allocation_creation_data"] = False
+        return context
 
     @staticmethod
     def create_new_allocation(
