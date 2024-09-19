@@ -1,3 +1,6 @@
+const currentUrl = window.location.href;
+console.log("Current URL:", currentUrl);
+
 const protocols = Array.from(
   document.querySelectorAll(
     "#div_id_protocols div div.form-check input.form-check-input"
