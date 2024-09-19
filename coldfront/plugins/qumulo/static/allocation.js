@@ -1,6 +1,13 @@
 const currentUrl = window.location.href;
 console.log("Current URL:", currentUrl);
 
+const parent_alloc_elem = document.getElementById("id_parent_allocation");
+
+if (parent_alloc_elem) {
+  console.log("Parent Allocation:", parent_alloc_elem.value);
+} else {
+  console.log("No Parent Allocation");
+}
 const protocols = Array.from(
   document.querySelectorAll(
     "#div_id_protocols div div.form-check input.form-check-input"
