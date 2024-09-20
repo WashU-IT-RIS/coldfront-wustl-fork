@@ -2,6 +2,7 @@ from django.db.models import Q
 import logging
 import os
 
+from coldfront.config.env import ENV
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationStatusChoice,
@@ -174,7 +175,7 @@ class ResetAcl(object):
 
     def __init__(self, allocation: Allocation):
         self.allocation = allocation
-        self.debug = self._debug_value()
+        self.debug = ENV.bool('DEBUG', default=False)
         self.fs_path = allocation.get_attribute(name='storage_filesystem_path')
         self.is_allocation_root = QumuloAPI.is_allocation_root_path(
             self.fs_path
@@ -221,9 +222,6 @@ class ResetAcl(object):
     def __log_acl_reset(self, path):
         self.__log_acl(f'Resetting "directory content" ACLs for path: {path}')
     # </debugging functions>
-
-    def _debug_value(self):
-        return str(os.environ.get('DEBUG', False)).lower() == 'true'
 
     def _setup_qumulo_api(self):
         if self.qumulo_api is None:
