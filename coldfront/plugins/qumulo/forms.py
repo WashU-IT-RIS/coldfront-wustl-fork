@@ -269,4 +269,11 @@ class AllocationTableSearchForm(forms.Form):
         label="Department Number", max_length=100, required=False
     )
 
+    # jprew - HERE IT IS
     itsd_ticket = forms.CharField(label="ITSD Ticket", max_length=100, required=False)
+
+    group_children = forms.BooleanField(
+        label="Group Children",
+        initial=True,
+        required=False,
+    )
