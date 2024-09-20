@@ -272,7 +272,7 @@ class AllocationTableSearchForm(forms.Form):
     # jprew - HERE IT IS
     itsd_ticket = forms.CharField(label="ITSD Ticket", max_length=100, required=False)
 
-    group_children = forms.BooleanField(
+    no_grouping = forms.BooleanField(
         label="No Grouping",
         initial=False,
         required=False,
