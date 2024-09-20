@@ -1,3 +1,4 @@
+console.log("WHAT?");
 const protocols = Array.from(
   document.querySelectorAll(
     "#div_id_protocols div div.form-check input.form-check-input"
@@ -25,7 +26,8 @@ submitButton.addEventListener("click", (event) => {
   const id_project_pk_elem = document.getElementById("id_project_pk");
   const smb = protocols.find((protocol) => protocol.value === "smb");
   console.log("id_project_pk_elem", id_project_pk_elem);
-  console.log("id_project_pk_elem.hidden", id_project_pk_elem.hidden);
+  // console.log("id_project_pk_elem.hidden", id_project_pk_elem.hidden);
+  console.log("id_project_pk_elem.style.visibility", id_project_pk_elem.style.visibility);
   console.log("smb", smb.checked);
   console.log("confirmed", confirmed);
   // NOTE: we're using id_project_pk to determine whether we are on a
