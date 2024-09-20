@@ -24,6 +24,9 @@ const submitButton = document.getElementById("allocation_form_submit");
 submitButton.addEventListener("click", (event) => {
   const id_project_pk_elem = document.getElementById("id_project_pk");
   const smb = protocols.find((protocol) => protocol.value === "smb");
+  console.log("id_project_pk_elem", id_project_pk_elem);
+  console.log("smb", smb.checked);
+  console.log("confirmed", confirmed);
   // NOTE: we're using id_project_pk to determine whether we are on a
   // parent or sub-allocation creation page
   if (!id_project_pk_elem.hidden && !smb.checked && !confirmed) {
