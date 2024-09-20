@@ -159,6 +159,8 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 parent_to_children_map[linkage.parent.id] = children
 
             for allocation in allocations:
+                if order_by == "-id":
+                    raise Exception(f"No grouping value: {data.get('no_grouping')}")
                 if data.get("no_grouping", "off") != "on":
                     if str(allocation.pk) not in all_children:
                         # append a new item, plus any children
