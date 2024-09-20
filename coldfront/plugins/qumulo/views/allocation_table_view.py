@@ -153,7 +153,8 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             all_children = set()
 
             for linkage in allocation_linkages:
-                children = [str(child.id) for child in linkage.children.all()]
+                # jprew - this is why it's out of order
+                children = [str(child.id) for child in linkage.children.all().order_by(order_by)]
                 all_children.update(children)
                 parent_to_children_map[linkage.parent.id] = children
 
