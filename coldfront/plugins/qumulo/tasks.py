@@ -311,7 +311,11 @@ class ResetAcl(object):
         )
 
 
-def reset_allocation_acls(allocation: Allocation, reset_subs: bool = False):
+def reset_allocation_acls(
+    user_email: str,
+    allocation: Allocation,
+    reset_subs: bool = False
+):
     ra_object = ResetAcl(allocation)
     ra_object.run_allocation_acl_reset()
     if reset_subs and len(ra_object.sub_allocations) > 0:

@@ -17,7 +17,10 @@ from coldfront.core.allocation.models import (
     AllocationLinkage,
     AllocationUser,
 )
+from coldfront.core.user.models import User
+from coldfront.core.utils.mail import send_email
 from coldfront.plugins.qumulo.forms import UpdateAllocationForm
+from coldfront.plugins.qumulo.hooks import acl_reset_complete_hook
 from coldfront.plugins.qumulo.tasks import reset_allocation_acls
 from coldfront.plugins.qumulo.views.allocation_view import AllocationView
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -106,8 +109,10 @@ class UpdateAllocationView(AllocationView):
         global logger
         task_id = async_task(
             reset_allocation_acls,
+            User.objects.get(id=self.request.user.id).email,
             Allocation.objects.get(pk=self.kwargs.get("allocation_id")),
             True if self.request.POST.get('reset_sub_acls') == 'on' else False,
+            hook=acl_reset_complete_hook,
             q_options={
                 'retry': 90000,
                 'timeout': 86400
