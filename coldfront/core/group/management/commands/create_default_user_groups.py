@@ -109,10 +109,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Creating default user groups ...")
         for group in DEFAULT_RIS_USER_GROUPS:
-            print("Creating group: {}".format(group["name"]))
+            print(f"Creating group: {group["name"]}")
             Group.objects.get_or_create(name=group["name"])
             for permission in group["permissions"]:
-                print("Adding permission: {}".format(permission["codename"]))
+                print(f"Adding permission: {permission["codename"]}")
                 group_obj = Group.objects.get(name=group["name"])
                 group_obj.permissions.add(
                     Permission.objects.get(codename=permission["codename"])
