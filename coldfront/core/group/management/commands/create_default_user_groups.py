@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 
 from django.contrib.auth.models import Group, Permission
 
+# Default permissions for the RIS-UserSupport group
 DEFAULT_RIS_USERSUPPORT_GROUP_PROJECT_PERMISSIONS = [
     {"id": 53, "codename": "add_project"},
     {"id": 54, "codename": "change_project"},
@@ -171,16 +172,19 @@ DEFAULT_RIS_USERSUPPORT_GROUP_ALLOCATION_PERMISSIONS = [
     {"id": 252, "codename": "delete_allocationattributechangerequest"},
     {"id": 253, "codename": "view_allocationattributechangerequest"},
 ]
+
+# Combine all permissions for the RIS-UserSupport group
+DEFAULT_RIS_USERSUPPORT_GROUP_PERMISSIONS = (
+    DEFAULT_RIS_USERSUPPORT_GROUP_ALLOCATION_PERMISSIONS
+    + DEFAULT_RIS_USERSUPPORT_GROUP_PROJECT_PERMISSIONS
+)
+# Default user groups
 DEFAULT_RIS_USER_GROUPS = [
     {
         "name": "RIS-UserSupport",
         "permissions": DEFAULT_RIS_USERSUPPORT_GROUP_PERMISSIONS,
     }
 ]
-DEFAULT_RIS_USERSUPPORT_GROUP_PERMISSIONS = (
-    DEFAULT_RIS_USERSUPPORT_GROUP_ALLOCATION_PERMISSIONS
-    + DEFAULT_RIS_USERSUPPORT_GROUP_PROJECT_PERMISSIONS
-)
 
 
 class Command(BaseCommand):
