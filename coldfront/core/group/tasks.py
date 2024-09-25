@@ -6,10 +6,13 @@ from coldfront.core.project.models import Project, ProjectUser, ProjectUserRoleC
 def grant_usersupport_global_project_manager():
 
     group_name = "RIS-UserSupport"
-    projects = Project.objects.all()
-    users = User.objects.filter(groups__name=group_name)
-    for project in projects:
-        for user in users:
-            ProjectUser.objects.get_or_create(
-                user=user, project=project, role=ProjectUserRoleChoice("Manager")
+    all_projects = Project.objects.all()
+    all_group_users = User.objects.filter(groups__name=group_name).all()
+    manager_role = ProjectUserRoleChoice.objects.filter(name="Manager").first()
+
+    for project in all_projects:
+        for user in all_group_users:
+            project_user = ProjectUser.objects.get_or_create(
+                project=project, user=user, role=manager_role
             )
+            project_user.save()
