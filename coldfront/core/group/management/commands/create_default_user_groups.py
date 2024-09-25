@@ -184,7 +184,7 @@ class Command(BaseCommand):
         for group in DEFAULT_RIS_USER_GROUPS:
             group_obj, is_created = Group.objects.get_or_create(name=group["name"])
             permission_query_set = Permission.objects.filter(
-                codename__in=[p["id"] for p in group["permissions"]]
+                id__in=[p["id"] for p in group["permissions"]]
             ).all()
             group_obj.permissions.add(*permission_query_set)
 
