@@ -201,6 +201,7 @@ class Command(BaseCommand):
             permission_query_set = Permission.objects.filter(
                 codename__in=[p["codename"] for p in group["permissions"]]
             )
-            group_obj.permissions.add(permission_query_set)
+            for permission in permission_query_set:
+                group_obj.permissions.add(permission)
 
         print("Finished creating default user groups")
