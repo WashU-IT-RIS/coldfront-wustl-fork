@@ -106,7 +106,6 @@ class UpdateAllocationView(AllocationView):
         # know or learn what they should be.  Testing has shown that the DEV
         # infrastructure can process a directory tree of about 90,500 items in
         # 62 minutes.
-        global logger
         task_id = async_task(
             reset_allocation_acls,
             User.objects.get(id=self.request.user.id).email,
