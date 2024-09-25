@@ -14,7 +14,7 @@ def grant_usersupport_global_project_manager():
     all_projects = Project.objects.all()
     all_group_users = User.objects.filter(groups__name=group_name).all()
     manager_role = ProjectUserRoleChoice.objects.filter(name="Manager").first()
-    user_status = ProjectUserStatusChoice.objects.filter(name="active").first()
+    user_status = ProjectUserStatusChoice.objects.filter(name="Active").first()
 
     for project in all_projects:
         for user in all_group_users:
@@ -22,5 +22,5 @@ def grant_usersupport_global_project_manager():
                 project=project,
                 user=user,
                 role=manager_role,
-                project_user_status=user_status,
+                status=user_status,
             )
