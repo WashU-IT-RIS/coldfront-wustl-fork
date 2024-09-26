@@ -17,8 +17,10 @@ def grant_usersupport_global_project_manager():
     user_status = ProjectUserStatusChoice.objects.filter(name="Active").first()
 
     for project in all_projects:
+        print(f"Granting {group_name} users manager role on project {project.name}")
         for user in all_group_users:
-            ProjectUser.objects.update(
+            print(f"  - {user}")
+            ProjectUser.objects.update_or_create(
                 project=project,
                 user=user,
                 role=manager_role,
