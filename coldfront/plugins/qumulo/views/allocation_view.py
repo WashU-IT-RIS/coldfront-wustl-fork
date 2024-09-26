@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 
 from typing import Union
 
@@ -84,7 +84,7 @@ class AllocationView(LoginRequiredMixin, FormView):
             status=AllocationStatusChoice.objects.get(name="Pending"),
         )
 
-        logging.warn("sending email")
+        logging.warn(f"sending email. \nrequest: {request}")
 
         send_allocation_admin_email(
             allocation,
