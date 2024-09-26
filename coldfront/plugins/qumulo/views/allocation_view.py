@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 
 from typing import Union
 
@@ -24,6 +24,11 @@ from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.validators import validate_filesystem_path_unique
 
 from pathlib import PurePath
+
+from coldfront.core.utils.mail import send_allocation_admin_email
+from coldfront.core.utils.common import get_domain_url
+
+import logging
 
 
 class AllocationView(LoginRequiredMixin, FormView):
@@ -52,7 +57,7 @@ class AllocationView(LoginRequiredMixin, FormView):
         validate_filesystem_path_unique(absolute_path)
 
         self.new_allocation = AllocationView.create_new_allocation(
-            form_data, user, parent_allocation
+            form_data, user, self.request, parent_allocation
         )
         self.success_id = self.new_allocation.get("allocation").id
 
@@ -67,7 +72,7 @@ class AllocationView(LoginRequiredMixin, FormView):
 
     @staticmethod
     def create_new_allocation(
-        form_data, user, parent_allocation: Union[Allocation, None] = None
+        form_data, user, request, parent_allocation: Union[Allocation, None] = None
     ):
         project_pk = form_data.get("project_pk")
         project = get_object_or_404(Project, pk=project_pk)
@@ -77,6 +82,15 @@ class AllocationView(LoginRequiredMixin, FormView):
             justification="",
             quantity=1,
             status=AllocationStatusChoice.objects.get(name="Pending"),
+        )
+
+        logging.warn(f"sending email. \nrequest: {request}")
+
+        send_allocation_admin_email(
+            allocation,
+            "TEST IGNORE: New Allocation Request",
+            "email/new_allocation_request.txt",
+            domain_url=get_domain_url(request),
         )
 
         active_status = AllocationUserStatusChoice.objects.get(name="Active")

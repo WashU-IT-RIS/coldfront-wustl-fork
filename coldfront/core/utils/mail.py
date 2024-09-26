@@ -1,4 +1,6 @@
 import logging
+import pprint
+
 from smtplib import SMTPException
 
 from django.conf import settings
@@ -53,19 +55,25 @@ def send_email(subject, body, sender, receiver_list, cc=[]):
                 cc=cc)
             email.send(fail_silently=False)
         else:
+            logger.warn(f"SENDING EMAIL TO {receiver_list}")
             send_mail(subject, body, sender,
                       receiver_list, fail_silently=False)
     except SMTPException as e:
         logger.error('Failed to send email to %s from %s with subject %s',
                      sender, ','.join(receiver_list), subject)
+        logger.error(pprint.pformat(e))
 
 
 def send_email_template(subject, template_name, template_context, sender, receiver_list):
     """Helper function for sending emails from a template
     """
+    
+    logger.warn(f"EMAIL_ENABLED: {EMAIL_ENABLED}")
     if not EMAIL_ENABLED:
         return
-
+    
+    
+    logger.warn("SENDING EMAIL")
     body = render_to_string(template_name, template_context)
 
     return send_email(subject, body, sender, receiver_list)
