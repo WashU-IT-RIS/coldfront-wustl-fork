@@ -1,4 +1,5 @@
-from coldfront.core.user.models import User, Group
+from coldfront.core.user.models import User
+from django.contrib.auth.models import Group
 
 from coldfront.core.project.models import (
     Project,
