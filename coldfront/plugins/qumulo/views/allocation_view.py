@@ -57,7 +57,7 @@ class AllocationView(LoginRequiredMixin, FormView):
         validate_filesystem_path_unique(absolute_path)
 
         self.new_allocation = AllocationView.create_new_allocation(
-            form_data, user, parent_allocation, self.request
+            form_data, user, self.request, parent_allocation
         )
         self.success_id = self.new_allocation.get("allocation").id
 
