@@ -1,4 +1,4 @@
-from coldfront.core.user.models import User
+from coldfront.core.user.models import User, Group
 
 from coldfront.core.project.models import (
     Project,
@@ -11,18 +11,23 @@ from coldfront.core.project.models import (
 def grant_usersupport_global_project_manager():
 
     group_name = "RIS-UserSupport"
+    group = Group.objects.filter(name=group_name).first()
+
     all_projects = Project.objects.all()
-    all_group_users = User.objects.filter(groups__name=group_name).all()
-    manager_role = ProjectUserRoleChoice.objects.filter(name="Manager").first()
-    user_status = ProjectUserStatusChoice.objects.filter(name="Active").first()
+    group_users = User.objects.filter(groups=group)
+    role_choice = ProjectUserRoleChoice.objects.filter(name="Manager").first()
+    status_choice = ProjectUserStatusChoice.objects.filter(name="Active").first()
 
     for project in all_projects:
-        print(f"Granting {group_name} users manager role on project {project}")
-        for user in all_group_users:
-            print(f"  - {user}")
-            ProjectUser.objects.update_or_create(
-                project=project,
-                user=user,
-                role=manager_role,
-                status=user_status,
-            )
+        for user in group_users:
+            project_user = ProjectUser.objects.filter(
+                project=project, user=user
+            ).first()
+            if project_user:
+                project_user.role = role_choice
+                project_user.status = status_choice
+                project_user.save()
+            else:
+                ProjectUser.objects.create(
+                    project=project, user=user, role=role_choice, status=status_choice
+                )
