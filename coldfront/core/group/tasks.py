@@ -18,7 +18,7 @@ def grant_usersupport_global_project_manager():
 
     for project in all_projects:
         for user in all_group_users:
-            ProjectUser.objects.update_or_create(
+            ProjectUser.objects.update(
                 project=project,
                 user=user,
                 role=manager_role,
