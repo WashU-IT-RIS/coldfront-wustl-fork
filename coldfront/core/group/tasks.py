@@ -25,10 +25,15 @@ def grant_usersupport_global_project_manager():
                 project=project, user=user
             ).first()
             if project_user:
+                print(f"Updating existing ProjectUser {user} for {project}")
+                print(f"Role: old {project_user.role} new {role_choice}")
+                print(f"Status: old {project_user.status} new {status_choice}")
                 project_user.role = role_choice
                 project_user.status = status_choice
                 project_user.save()
             else:
-                ProjectUser.objects.create(
+                print(f"Creating ProjectUser {user} for {project}")
+                project_user = ProjectUser.objects.create(
                     project=project, user=user, role=role_choice, status=status_choice
                 )
+                print(f"Created new ProjectUser {project_user}")
