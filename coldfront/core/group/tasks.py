@@ -37,7 +37,6 @@ def grant_usersupport_global_project_manager() -> None:
                 project_user.role = role_choice
                 project_user.status = status_choice
                 project_user.enable_notifications = True
-                # project_user.save()
                 updated_project_users.append(project_user)
             else:
                 new_project_users.append(
