@@ -130,7 +130,7 @@ class Command(BaseCommand):
         # jprew - here is where I'm adding ITDEV-35273-related attribute types
         # for the allocation collection
         AllocationAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="Text"),
+            attribute_type=AttributeType.objects.get(name="Yes/No"),
             name="secure",
             is_required=True,
             is_private=False,
