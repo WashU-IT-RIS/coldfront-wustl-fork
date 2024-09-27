@@ -136,3 +136,12 @@ class Command(BaseCommand):
             is_private=False,
             is_changeable=False,
         )
+
+        # indicates whether the allocation is subject to being audited
+        AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Yes/No"),
+            name="audit",
+            is_required=True,
+            is_private=False,
+            is_changeable=False,
+        )
