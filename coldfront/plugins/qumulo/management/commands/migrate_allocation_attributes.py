@@ -28,7 +28,7 @@ class Command(BaseCommand):
         )
 
         for allocation in all_storage_2_allocations:
-            if getattr(allocation, attribute_name) is None:
+            if getattr(allocation, attribute_name, None) is None:
                 AllocationAttribute.objects.create(
                     allocation_attribute_type=attribute_type,
                     allocation=allocation,
