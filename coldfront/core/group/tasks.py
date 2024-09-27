@@ -9,7 +9,7 @@ from coldfront.core.project.models import (
 )
 
 
-def grant_usersupport_global_project_manager():
+def grant_usersupport_global_project_manager() -> None:
 
     group_name = "RIS-UserSupport"
     group = Group.objects.filter(name=group_name).first()
