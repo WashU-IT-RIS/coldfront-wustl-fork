@@ -23,21 +23,25 @@ def grant_usersupport_global_project_manager() -> None:
     if not role_choice or not status_choice:
         return
 
+    # Iterate over all projects
     for project in all_projects:
         project_users = ProjectUser.objects.filter(
             project=project, user__in=group_users
         )
-        existing_users = {pu.user_id: pu for pu in project_users}
+        existing_project_users = {pu.user_id: pu for pu in project_users}
 
         new_project_users = []
         updated_project_users = []
+        # Iterate over all users in the group
         for user in group_users:
-            if user.id in existing_users:
-                project_user = existing_users[user.id]
+            # If the user is already in the project, update their role and status
+            if user.id in existing_project_users:
+                project_user = existing_project_users[user.id]
                 project_user.role = role_choice
                 project_user.status = status_choice
                 project_user.enable_notifications = True
                 updated_project_users.append(project_user)
+            # Otherwise, add the user to the project
             else:
                 new_project_users.append(
                     ProjectUser(
@@ -49,9 +53,11 @@ def grant_usersupport_global_project_manager() -> None:
                     )
                 )
 
+        # Bulk update the project users
         if updated_project_users:
             ProjectUser.objects.bulk_update(
                 updated_project_users, ["role", "status", "enable_notifications"]
             )
+        # Bulk create the new project users
         if new_project_users:
             ProjectUser.objects.bulk_create(new_project_users)
