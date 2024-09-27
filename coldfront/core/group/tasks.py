@@ -18,16 +18,19 @@ def grant_usersupport_global_project_manager() -> None:
     role_choice = ProjectUserRoleChoice.objects.filter(name="Manager").first()
     status_choice = ProjectUserStatusChoice.objects.filter(name="Active").first()
 
+    # For each project, check if the user exists in the project
     for project in all_projects:
         for user in group_users:
             project_user = ProjectUser.objects.filter(
                 project=project, user=user
             ).first()
+            # If the user exists in the project, update the role, status, and enable_notifications
             if project_user:
                 project_user.role = role_choice
                 project_user.status = status_choice
                 project_user.enable_notifications = True
                 project_user.save()
+            # If the user does not exist in the project, create a new ProjectUser
             else:
                 project_user = ProjectUser.objects.create(
                     project=project,
