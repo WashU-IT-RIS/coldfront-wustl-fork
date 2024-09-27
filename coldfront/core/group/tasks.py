@@ -30,13 +30,15 @@ def grant_usersupport_global_project_manager() -> None:
         existing_users = {pu.user_id: pu for pu in project_users}
 
         new_project_users = []
+        updated_project_users = []
         for user in group_users:
             if user.id in existing_users:
                 project_user = existing_users[user.id]
                 project_user.role = role_choice
                 project_user.status = status_choice
                 project_user.enable_notifications = True
-                project_user.save()
+                # project_user.save()
+                updated_project_users.append(project_user)
             else:
                 new_project_users.append(
                     ProjectUser(
@@ -48,5 +50,9 @@ def grant_usersupport_global_project_manager() -> None:
                     )
                 )
 
+        if updated_project_users:
+            ProjectUser.objects.bulk_update(
+                updated_project_users, ["role", "status", "enable_notifications"]
+            )
         if new_project_users:
             ProjectUser.objects.bulk_create(new_project_users)
