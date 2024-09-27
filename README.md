@@ -48,3 +48,59 @@ subscribe ccr-open-coldfront-list@listserv.buffalo.edu first_name last_name
 ## License
 
 ColdFront is released under the GPLv3 license. See the LICENSE file.
+
+## Testing
+
+### Setup
+To run tests, the following variables should be included in a `.env` file in the root directory of the repo:
+
+```
+PLUGIN_QUMULO=True
+AD_SERVER_NAME=foo
+AD_USERNAME=bar
+AD_USER_PASS=bah
+STORAGE2_PATH=/foo/bar
+```
+
+### Running
+A complete test suite can be run with `manage.py test`.  You can target sub-groups of tests by including a specifying argument.  Ex: `manage.py.test coldfront.plugins.qumulo.tests` will run only unit tests for the qumulo plugin.
+
+Typically, you'll want to run non integration tests separately, which can be done with `python manage.py test --exclude-tag integration`.  Integrations can be run with `python manage.py test --tag integration`.
+
+### Set up Local Environment and Run tests
+
+1. Go to the root of the `coldfront-wustl-fork` repo.
+2. Create a (Python) virtual environment: `python3 -mvenv coldfront-venv`
+3. Activate the virtual environment: `source coldfront-venv/bin/activate`
+4. Install the dependencies
+```
+pip install --upgrade pip
+pip install -r requirements-dev.txt
+```
+5. Run a test to verify the installation: `python manage.py test coldfront.plugins.qumulo.tests`
+
+**Steps for local development**
+```
+python3 -mvenv coldfront-venv
+source coldfront-venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements-dev.txt
+python manage.py test coldfront.plugins.qumulo.tests
+```
+
+### Integration Test ENV
+Integration Tests need to be run while connected to a VPN.  The following variables need to be included for functioning integration tests.  Credentials should be stored in the `pass` store.
+
+```
+PLUGIN_QUMULO=True
+QUMULO_HOST=
+QUMULO_PORT=
+QUMULO_USER=
+QUMULO_PASS=
+DEBUG=TRUE
+AD_USER_PASS=
+AD_USERNAME=
+AD_SERVER_NAME=
+AD_GROUPS_OU=OU=QA,OU=RIS,OU=Groups,DC=accounts,DC=ad,DC=wustl,DC=edu
+STORAGE2_PATH=
+```
