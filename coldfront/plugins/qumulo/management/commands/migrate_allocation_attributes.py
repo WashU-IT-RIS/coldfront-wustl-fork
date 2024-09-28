@@ -14,6 +14,11 @@ class Command(BaseCommand):
         self._migrate_allocation_attribute("secure", "No")
         self._migrate_allocation_attribute("audit", "No")
 
+        # billing_startdate - nothing to do with the migration
+        # it needs to be handled manually or as part of metadata migration
+
+        # fileset_name - again, nothing to migrate here; that's part of the metadata migration
+
     def _migrate_allocation_attribute(self, attribute_name, default_value):
         attribute_type = AllocationAttributeType.objects.get(name=attribute_name)
         attribute_sub_q = AllocationAttribute.objects.filter(
