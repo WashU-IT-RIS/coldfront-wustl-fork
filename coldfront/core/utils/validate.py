@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 import formencode
 from formencode import validators, Invalid
+import json
 
 class AttributeValidator:
 
@@ -39,3 +40,10 @@ class AttributeValidator:
         except:
             raise ValidationError(
                 f'Invalid Value {self.value}. Date must be in format YYYY-MM-DD and date must be today or later.')
+    
+    def validate_json(self):
+        try:
+            _ = json.loads(self.value)
+        except:
+            raise ValidationError(
+                f'Invalid Value {self.value}. Value must be valid JSON.')

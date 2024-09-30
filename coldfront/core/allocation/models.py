@@ -1,5 +1,6 @@
 import datetime
 import importlib
+import json
 import logging
 from ast import literal_eval
 from enum import Enum
@@ -466,6 +467,12 @@ class AllocationAttribute(TimeStampedModel):
             except ValueError:
                 raise ValidationError(
                     'Invalid Value "%s" for "%s". Date must be in format YYYY-MM-DD' % (self.value, self.allocation_attribute_type.name))
+        elif expected_value_type == "JSON":
+            try:
+                _ = json.loads(self.value)
+            except:
+                raise ValidationError(
+                    'Invalid Value "%s" for "%s". Value must be valid JSON.' % (self.value, self.allocation_attribute_type.name))
 
     def __str__(self):
         return '%s' % (self.allocation_attribute_type.name)

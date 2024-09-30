@@ -432,6 +432,8 @@ class ProjectAttribute(TimeStampedModel):
             validator.validate_yes_no()
         elif expected_value_type == "Date":
             validator.validate_date()
+        elif expected_value_type == "JSON":
+            validator.validate_json()
 
     def __str__(self):
         return '%s' % (self.proj_attr_type.name)
