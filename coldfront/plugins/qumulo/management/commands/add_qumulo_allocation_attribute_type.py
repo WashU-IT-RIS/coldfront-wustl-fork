@@ -193,3 +193,11 @@ class Command(BaseCommand):
             is_private=False,
             is_changeable=False,
         )
+
+        AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Yes/No"),
+            name="subsidized",
+            is_required=True,
+            is_private=False,
+            is_changeable=False,
+        )
