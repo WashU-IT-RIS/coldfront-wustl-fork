@@ -5,6 +5,7 @@ from coldfront.core.group.tasks import grant_usersupport_global_project_manager
 
 from coldfront.core.project.models import (
     Project,
+    ProjectStatusChoice,
     ProjectUser,
     ProjectUserRoleChoice,
     ProjectUserStatusChoice,
@@ -13,7 +14,10 @@ from coldfront.core.project.models import (
 
 class GrantUserSupportGlobalProjectManagerTest(TestCase):
     def setUp(self):
-        project_status = ProjectUserStatusChoice.objects.get_or_create(name="Active")[0]
+        projectuser_status = ProjectUserStatusChoice.objects.get_or_create(
+            name="Active"
+        )[0]
+        project_status = ProjectStatusChoice.objects.get_or_create(name="Active")[0]
 
         # Create a group and three users
         self.group = Group.objects.get_or_create(name="RIS-UserSupport", id=1)[0]
