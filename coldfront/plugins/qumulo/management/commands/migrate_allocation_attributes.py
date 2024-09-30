@@ -33,7 +33,9 @@ class Command(BaseCommand):
         resource = Resource.objects.get(name="Storage2")
         all_storage_2_allocations = Allocation.objects.filter(resources=resource)
         all_storage_2_allocations = all_storage_2_allocations.annotate(
-            secure=Subquery(attribute_sub_q)
+            **{
+                attribute_name: Subquery(attribute_sub_q)
+            }
         )
 
         for allocation in all_storage_2_allocations:
