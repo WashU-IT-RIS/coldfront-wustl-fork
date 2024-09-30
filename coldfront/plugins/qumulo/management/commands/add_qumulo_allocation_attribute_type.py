@@ -185,3 +185,11 @@ class Command(BaseCommand):
             is_private=False,
             is_changeable=False,
         )
+
+        AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="JSON"),
+            name="itsm_comment",
+            is_required=False,
+            is_private=False,
+            is_changeable=False,
+        )
