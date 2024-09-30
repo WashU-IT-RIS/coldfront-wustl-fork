@@ -13,12 +13,10 @@ from coldfront.core.project.models import (
 
 class GrantUserSupportGlobalProjectManagerTest(TestCase):
     def setUp(self):
-        project_status = ProjectUserStatusChoice.objects.get_or_create(
-            name="Active"
-        ).first()
+        project_status = ProjectUserStatusChoice.objects.get_or_create(name="Active")[0]
 
         # Create a group and three users
-        self.group = Group.objects.get_or_create(name="RIS-UserSupport", id=1).first()
+        self.group = Group.objects.get_or_create(name="RIS-UserSupport", id=1)[0]
         # Create two users as PIs
         user1 = User.objects.get_or_create(username="user1", id=1)[0]
         user2 = User.objects.get_or_create(username="user2", id=2)[0]
