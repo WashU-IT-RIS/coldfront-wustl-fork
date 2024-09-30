@@ -15,52 +15,56 @@ from coldfront.core.project.models import (
 
 class GrantUserSupportGlobalProjectManagerTest(TestCase):
     def setUp(self):
-        self.projectuser_status = ProjectUserStatusChoice.objects.get_or_create(
+        self.projectuser_status, b = ProjectUserStatusChoice.objects.get_or_create(
             name="Active"
-        )[0]
-        self.project_status = ProjectStatusChoice.objects.get_or_create(name="Active")[
-            0
-        ]
-        field_of_science = FieldOfScience.objects.get_or_create(description="Other")[0]
+        )
+        self.project_status, b = ProjectStatusChoice.objects.get_or_create(
+            name="Active"
+        )
+        field_of_science, b = FieldOfScience.objects.get_or_create(description="Other")
 
         # Create a group and three users
-        self.group = Group.objects.get_or_create(name="RIS-UserSupport")[0]
-        # Create two users as PIs
-        self.user1 = User.objects.get_or_create(username="user1")[0]
-        self.user2 = User.objects.get_or_create(username="user2")[0]
-        # Create a user that is not a PI
-        self.user3 = User.objects.get_or_create(username="user3")[0]
-
-        # Add all users to the group
-        for user in [self.user1, self.user2, self.user3]:
-            user.groups.add(self.group)
+        self.group, b = Group.objects.get_or_create(name="RIS-UserSupport")
+        # Define user attributes
+        user_attributes = [
+            {"username": "user1"},
+            {"username": "user2"},
+            {"username": "user3"},
+        ]
+        # Create users and store them in an array
+        self.users = []
+        for attrs in user_attributes:
+            user, b = User.objects.get_or_create(**attrs)
+            self.users.append(user)
+            # Add the user to the group
+            self.users[user.username].groups.add(self.group)
 
         # Create two projects with separate PIs
-        self.project1 = Project.objects.get_or_create(
+        self.project1, b = Project.objects.get_or_create(
             title="Project1",
-            pi=self.user1,
+            pi=self.users[1],
             status=self.project_status,
             field_of_science=field_of_science,
-        )[0]
-        self.project2 = Project.objects.get_or_create(
+        )
+        self.project2, b = Project.objects.get_or_create(
             title="Project2",
-            pi=self.user2,
+            pi=self.users[2],
             status=self.project_status,
             field_of_science=field_of_science,
-        )[0]
+        )
 
-        self.projectuser_role_choice = ProjectUserRoleChoice.objects.get_or_create(
+        self.projectuser_role, b = ProjectUserRoleChoice.objects.get_or_create(
             name="Manager"
-        )[0]
+        )
 
     # Test that the grant_usersupport_global_project_manager function works as expected
     def test_grant_usersupport_global_project_manager(self):
         grant_usersupport_global_project_manager()
 
         for project in [self.project1, self.project2]:
-            for user in [self.user1, self.user2, self.user3]:
+            for user in self.users:
                 project_user = ProjectUser.objects.get(project=project, user=user)
-                self.assertEqual(project_user.role, self.projectuser_role_choice)
+                self.assertEqual(project_user.role, self.projectuser_role)
                 self.assertEqual(project_user.status, self.projectuser_status)
                 self.assertTrue(project_user.enable_notifications)
 
@@ -71,8 +75,8 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         self.assertFalse(ProjectUser.objects.exists())
 
     # Test that the function does not do anything if the role does not exist
-    def test_no_projectuser_role_choice(self):
-        self.projectuser_role_choice.delete()
+    def test_no_projectuser_role(self):
+        self.projectuser_role.delete()
         grant_usersupport_global_project_manager()
         self.assertFalse(ProjectUser.objects.exists())
 
