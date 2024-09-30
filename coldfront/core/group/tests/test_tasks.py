@@ -18,8 +18,8 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         self.user1 = User.objects.get_or_create(username="user1")
         self.user2 = User.objects.get_or_create(username="user2")
 
-        self.project1 = Project.objects.get_or_create(name="Project 1")
-        self.project2 = Project.objects.get_or_create(name="Project 2")
+        self.project1 = Project.objects.get_or_create(title="Project 1")
+        self.project2 = Project.objects.get_or_create(title="Project 2")
 
         self.role_choice = ProjectUserRoleChoice.objects.get_or_create(name="Manager")
         self.status_choice = ProjectUserStatusChoice.objects.get_or_create(
