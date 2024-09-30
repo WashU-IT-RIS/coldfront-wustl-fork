@@ -37,7 +37,8 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
             user, b = User.objects.get_or_create(**attrs)
             self.users.append(user)
             # Add the user to the group
-            self.users[user.username].groups.add(self.group)
+            index = self.users.index(user)
+            self.users[index].groups.add(self.group)
 
         # Create two projects with separate PIs
         self.project1, b = Project.objects.get_or_create(
