@@ -9,6 +9,7 @@ from coldfront.core.project.models import (
     ProjectUser,
     ProjectUserRoleChoice,
     ProjectUserStatusChoice,
+    FieldOfScience,
 )
 
 
@@ -17,7 +18,10 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         projectuser_status = ProjectUserStatusChoice.objects.get_or_create(
             name="Active"
         )[0]
-        project_status = ProjectStatusChoice.objects.get_or_create(name="Active")[0]
+        self.status_choice = project_status = ProjectStatusChoice.objects.get_or_create(
+            name="Active"
+        )[0]
+        field_of_science = FieldOfScience.objects.get_or_create(name="Other")[0]
 
         # Create a group and three users
         self.group = Group.objects.get_or_create(name="RIS-UserSupport")[0]
@@ -31,19 +35,22 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         self.user3 = user3
 
         # Create two projects with separate PIs
-        project1 = Project.objects.get_or_create(
-            title="Project1", pi=user1, status=project_status
+        self.project1 = Project.objects.get_or_create(
+            title="Project1",
+            pi=user1,
+            status=project_status,
+            field_of_science=field_of_science,
         )[0]
-        project2 = Project.objects.get_or_create(
-            title="Project2", pi=user2, status=project_status
+        self.project2 = Project.objects.get_or_create(
+            title="Project2",
+            pi=user2,
+            status=project_status,
+            field_of_science=field_of_science,
         )[0]
-        self.project1 = project1
-        self.project2 = project2
 
         self.role_choice = ProjectUserRoleChoice.objects.get_or_create(name="Manager")[
             0
         ]
-        self.status_choice = project_status
 
     # Test that the grant_usersupport_global_project_manager function works as expected
     def test_grant_usersupport_global_project_manager(self):
