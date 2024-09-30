@@ -44,7 +44,7 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         )[0]
         self.project2 = Project.objects.get_or_create(
             title="Project2",
-            pi=user2,
+            pi=self.user2,
             status=project_status,
             field_of_science=field_of_science,
         )[0]
