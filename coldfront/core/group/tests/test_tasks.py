@@ -28,10 +28,10 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
 
         # Create two projects with separate PIs
         project1 = Project.objects.get_or_create(
-            title="Project1", id=1, pi=user1, status=project_status
+            title="Project1", id=1, pi=1, status=project_status
         )
         project2 = Project.objects.get_or_create(
-            title="Project2", id=2, pi=user2, status=project_status
+            title="Project2", id=2, pi=2, status=project_status
         )
         self.project1 = project1
         self.project2 = project2
