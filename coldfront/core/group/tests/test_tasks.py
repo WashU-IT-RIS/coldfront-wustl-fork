@@ -20,22 +20,22 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         project_status = ProjectStatusChoice.objects.get_or_create(name="Active")[0]
 
         # Create a group and three users
-        self.group = Group.objects.get_or_create(name="RIS-UserSupport", id=1)[0]
+        self.group = Group.objects.get_or_create(name="RIS-UserSupport")[0]
         # Create two users as PIs
-        user1 = User.objects.get_or_create(username="user1", id=1)[0]
-        user2 = User.objects.get_or_create(username="user2", id=2)[0]
+        user1 = User.objects.get_or_create(username="user1")[0]
+        user2 = User.objects.get_or_create(username="user2")[0]
         self.user1 = user1
         self.user2 = user2
         # Create a user that is not a PI
-        user3 = User.objects.get_or_create(username="user3", id=3)[0]
+        user3 = User.objects.get_or_create(username="user3")[0]
         self.user3 = user3
 
         # Create two projects with separate PIs
         project1 = Project.objects.get_or_create(
-            title="Project1", id=1, pi=user1, status=project_status
+            title="Project1", pi=user1, status=project_status
         )[0]
         project2 = Project.objects.get_or_create(
-            title="Project2", id=2, pi=user2, status=project_status
+            title="Project2", pi=user2, status=project_status
         )[0]
         self.project1 = project1
         self.project2 = project2
