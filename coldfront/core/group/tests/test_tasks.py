@@ -21,7 +21,7 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         self.status_choice = project_status = ProjectStatusChoice.objects.get_or_create(
             name="Active"
         )[0]
-        field_of_science = FieldOfScience.objects.get_or_create(name="Other")[0]
+        field_of_science = FieldOfScience.objects.get_or_create(description="Other")[0]
 
         # Create a group and three users
         self.group = Group.objects.get_or_create(name="RIS-UserSupport")[0]
