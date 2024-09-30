@@ -13,11 +13,15 @@ class Command(BaseCommand):
         # since Coldfront UI allows direct editing
         self._migrate_allocation_attribute("secure", "No")
         self._migrate_allocation_attribute("audit", "No")
+        self._migrate_allocation_attribute("exempt", "No")
 
         # billing_startdate - nothing to do with the migration
         # it needs to be handled manually or as part of metadata migration
 
         # fileset_name - again, nothing to migrate here; that's part of the metadata migration
+        # fileset_alias - ditto
+
+
 
     def _migrate_allocation_attribute(self, attribute_name, default_value):
         attribute_type = AllocationAttributeType.objects.get(name=attribute_name)

@@ -169,3 +169,19 @@ class Command(BaseCommand):
             is_private=False,
             is_changeable=False,
         )
+
+        AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Text"),
+            name="fileset_alias",
+            is_required=False,
+            is_private=False,
+            is_changeable=False,
+        )
+
+        AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Yes/No"),
+            name="exempt",
+            is_required=True,
+            is_private=False,
+            is_changeable=False,
+        )
