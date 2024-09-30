@@ -38,8 +38,8 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
     def test_grant_usersupport_global_project_manager(self):
         grant_usersupport_global_project_manager()
 
-        for project, pb in [self.project1, self.project2]:
-            for user, ub in [self.user1, self.user2]:
+        for project in [self.project1, self.project2]:
+            for user in [self.user1, self.user2, self.user3]:
                 project_user = ProjectUser.objects.get(project=project, user=user)
                 self.assertEqual(project_user.role, self.role_choice)
                 self.assertEqual(project_user.status, self.status_choice)
