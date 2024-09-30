@@ -15,12 +15,12 @@ from coldfront.core.project.models import (
 
 class GrantUserSupportGlobalProjectManagerTest(TestCase):
     def setUp(self):
-        projectuser_status = ProjectUserStatusChoice.objects.get_or_create(
+        self.projectuser_status = ProjectUserStatusChoice.objects.get_or_create(
             name="Active"
         )[0]
-        self.status_choice = project_status = ProjectStatusChoice.objects.get_or_create(
-            name="Active"
-        )[0]
+        self.project_status = ProjectStatusChoice.objects.get_or_create(name="Active")[
+            0
+        ]
         field_of_science = FieldOfScience.objects.get_or_create(description="Other")[0]
 
         # Create a group and three users
@@ -39,19 +39,19 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         self.project1 = Project.objects.get_or_create(
             title="Project1",
             pi=self.user1,
-            status=project_status,
+            status=self.project_status,
             field_of_science=field_of_science,
         )[0]
         self.project2 = Project.objects.get_or_create(
             title="Project2",
             pi=self.user2,
-            status=project_status,
+            status=self.project_status,
             field_of_science=field_of_science,
         )[0]
 
-        self.role_choice = ProjectUserRoleChoice.objects.get_or_create(name="Manager")[
-            0
-        ]
+        self.projectuser_role_choice = ProjectUserRoleChoice.objects.get_or_create(
+            name="Manager"
+        )[0]
 
     # Test that the grant_usersupport_global_project_manager function works as expected
     def test_grant_usersupport_global_project_manager(self):
@@ -60,8 +60,8 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         for project in [self.project1, self.project2]:
             for user in [self.user1, self.user2, self.user3]:
                 project_user = ProjectUser.objects.get(project=project, user=user)
-                self.assertEqual(project_user.role, self.role_choice)
-                self.assertEqual(project_user.status, self.status_choice)
+                self.assertEqual(project_user.role, self.projectuser_role_choice)
+                self.assertEqual(project_user.status, self.projectuser_status)
                 self.assertTrue(project_user.enable_notifications)
 
     # Test that the function does not do anything if the group does not
@@ -71,13 +71,13 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         self.assertFalse(ProjectUser.objects.exists())
 
     # Test that the function does not do anything if the role does not exist
-    def test_no_role_choice(self):
-        self.role_choice.delete()
+    def test_no_projectuser_role_choice(self):
+        self.projectuser_role_choice.delete()
         grant_usersupport_global_project_manager()
         self.assertFalse(ProjectUser.objects.exists())
 
     # Test that the function does not do anything if the status choice does not exist
-    def test_no_status_choice(self):
-        self.status_choice.delete()
+    def test_no_projectuser_status(self):
+        self.projectuser_status.delete()
         grant_usersupport_global_project_manager()
         self.assertFalse(ProjectUser.objects.exists())
