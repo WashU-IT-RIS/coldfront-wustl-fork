@@ -22,12 +22,8 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         self.user3 = User.objects.get_or_create(username="user3", id=3)
 
         # Create two projects with separate PIs
-        self.project1 = Project.objects.get_or_create(
-            title="Project 1", id=1, pi_id=self.user1
-        )
-        self.project2 = Project.objects.get_or_create(
-            title="Project 2", id=2, pi_id=self.user2
-        )
+        self.project1 = Project.objects.get_or_create(title="Project 1", id=1, pi_id=1)
+        self.project2 = Project.objects.get_or_create(title="Project 2", id=2, pi_id=2)
 
         self.role_choice = ProjectUserRoleChoice.objects.get_or_create(name="Manager")
         self.status_choice = ProjectUserStatusChoice.objects.get_or_create(
