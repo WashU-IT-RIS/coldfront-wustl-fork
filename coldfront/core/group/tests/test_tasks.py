@@ -13,13 +13,21 @@ from coldfront.core.project.models import (
 
 class GrantUserSupportGlobalProjectManagerTest(TestCase):
     def setUp(self):
-        # Create a group and two users
+        # Create a group and three users
         self.group = Group.objects.get_or_create(name="RIS-UserSupport", id=1)
+        # Create two users as PIs
         self.user1 = User.objects.get_or_create(username="user1", id=1)
         self.user2 = User.objects.get_or_create(username="user2", id=2)
+        # Create a user that is not a PI
+        self.user3 = User.objects.get_or_create(username="user3", id=3)
 
-        self.project1 = Project.objects.get_or_create(title="Project 1", id=1)
-        self.project2 = Project.objects.get_or_create(title="Project 2", id=2)
+        # Create two projects with separate PIs
+        self.project1 = Project.objects.get_or_create(
+            title="Project 1", id=1, pi_id=self.user2.id
+        )
+        self.project2 = Project.objects.get_or_create(
+            title="Project 2", id=2, pi_id=self.user2.id
+        )
 
         self.role_choice = ProjectUserRoleChoice.objects.get_or_create(name="Manager")
         self.status_choice = ProjectUserStatusChoice.objects.get_or_create(
