@@ -13,10 +13,10 @@ from coldfront.core.project.models import (
 
 class GrantUserSupportGlobalProjectManagerTest(TestCase):
     def setUp(self):
+        # Create a group and two users
         self.group = Group.objects.get_or_create(name="RIS-UserSupport")
         self.user1 = User.objects.get_or_create(username="user1")
         self.user2 = User.objects.get_or_create(username="user2")
-        self.group.user_set.add(self.user1, self.user2)
 
         self.project1 = Project.objects.get_or_create(name="Project 1")
         self.project2 = Project.objects.get_or_create(name="Project 2")
@@ -26,6 +26,7 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
             name="Active"
         )
 
+    # Test that the grant_usersupport_global_project_manager function works as expected
     def test_grant_usersupport_global_project_manager(self):
         grant_usersupport_global_project_manager()
 
@@ -36,16 +37,19 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
                 self.assertEqual(project_user.status, self.status_choice)
                 self.assertTrue(project_user.enable_notifications)
 
+    # Test that the function does not do anything if the group does not
     def test_no_group(self):
         self.group.delete()
         grant_usersupport_global_project_manager()
         self.assertFalse(ProjectUser.objects.exists())
 
+    # Test that the function does not do anything if the role does not exist
     def test_no_role_choice(self):
         self.role_choice.delete()
         grant_usersupport_global_project_manager()
         self.assertFalse(ProjectUser.objects.exists())
 
+    # Test that the function does not do anything if the status choice does not exist
     def test_no_status_choice(self):
         self.status_choice.delete()
         grant_usersupport_global_project_manager()
