@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.test import Client, RequestFactory, TestCase
-from django.urls import reverse
 from unittest.mock import patch, call, MagicMock
 
 from coldfront.core.allocation.models import Allocation, AllocationUser

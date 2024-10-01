@@ -258,6 +258,13 @@ class ResetAcl(object):
                 )
 
     def _get_directory_contents(self, path, skip_filter=False):
+        def filter_helper(item):
+            return_value = True
+            for path in self.reset_exclude_paths:
+                if item['path'].startswith(path):
+                    return_value = False
+                    break
+            return return_value
         self._setup_qumulo_api()
         ed_resp = list(
             self.qumulo_api.rc.fs.enumerate_entire_directory(path=path)
@@ -275,15 +282,7 @@ class ResetAcl(object):
         )
         if skip_filter:
             return dc
-        return list(
-            filter(
-                (
-                    lambda item: item['path']
-                    not in self.reset_exclude_paths
-                ),
-                dc
-            )
-        )
+        return list(filter(filter_helper, dc))
 
     def run_allocation_acl_reset(self):
         self._setup_qumulo_api()
@@ -318,7 +317,7 @@ def reset_allocation_acls(
 ):
     ra_object = ResetAcl(allocation)
     ra_object.run_allocation_acl_reset()
-    if reset_subs and len(ra_object.sub_allocations) > 0:
+    if reset_subs:
         for sub in ra_object.sub_allocations:
             sub_ra_object = ResetAcl(sub)
             sub_ra_object.run_allocation_acl_reset()
