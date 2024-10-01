@@ -11,6 +11,7 @@ from coldfront.plugins.qumulo.tasks import (
     poll_ad_groups,
     conditionally_update_storage_allocation_status,
     conditionally_update_storage_allocation_statuses,
+    addUsersToADGroup,
 )
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
@@ -136,7 +137,9 @@ class TestPollAdGroups(TestCase):
         )
         acl_allocation_c.resources.add(resource_b)
 
-        with patch("coldfront.plugins.qumulo.tasks.poll_ad_group") as poll_ad_group_mock:
+        with patch(
+            "coldfront.plugins.qumulo.tasks.poll_ad_group"
+        ) as poll_ad_group_mock:
             poll_ad_groups()
 
             self.assertEqual(poll_ad_group_mock.call_count, 2)
@@ -245,3 +248,55 @@ class TestStorageAllocationStatuses(TestCase):
             self.assertEqual(
                 conditionally_update_storage_allocation_status_mock.call_count, 2
             )
+
+
+@patch("coldfront.plugins.qumulo.tasks.async_task")
+@patch("coldfront.plugins.qumulo.tasks.ActiveDirectoryAPI")
+class TestAddUsersToADGroup(TestCase):
+    def test_function_ends_on_empty_list(
+        self, mock_active_directory_api, mock_async_task
+    ):
+        try:
+            addUsersToADGroup([], "bar")
+        except Exception as e:
+            self.fail("Function failed with exception: " + e)
+
+    def test_checks_first_user_in_list(
+        self, mock_active_directory_api, mock_async_task
+    ):
+        active_directory_instance = MagicMock()
+        mock_active_directory_api.return_value = active_directory_instance
+
+        wustlkeys = ["foo"]
+
+        addUsersToADGroup(wustlkeys, "bar")
+
+        active_directory_instance.get_user.assert_called_once_with(wustlkeys[0])
+
+    def test_adds_user_to_group_after_check(
+        self, mock_active_directory_api, mock_async_task
+    ):
+        active_directory_instance = MagicMock()
+        mock_active_directory_api.return_value = active_directory_instance
+
+        wustlkeys = ["foo"]
+        group_name = "bar"
+
+        addUsersToADGroup(wustlkeys, group_name)
+
+        active_directory_instance.add_user_to_ad_group.assert_called_once_with(
+            wustlkeys[0], group_name
+        )
+
+    def test_adds_new_task_with_sliced_list(
+        self, mock_active_directory_api, mock_async_task
+    ):
+        wustlkeys = ["foo", "bar"]
+        group_name = "baz"
+
+        addUsersToADGroup(wustlkeys, group_name)
+
+        mock_async_task.assert_called_once()
+        self.assertTupleEqual(
+            mock_async_task.call_args[0], (addUsersToADGroup, (["bar"], group_name))
+        )

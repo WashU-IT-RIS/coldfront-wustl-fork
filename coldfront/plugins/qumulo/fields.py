@@ -15,7 +15,7 @@ from pathlib import PurePath
 
 class ADUserField(forms.Field):
     widget = MultiSelectLookupInput
-    default_validators = [validate_ad_users]
+    default_validators = []
 
     def prepare_value(self, value: list[str]):
         value_str = ",".join(value)

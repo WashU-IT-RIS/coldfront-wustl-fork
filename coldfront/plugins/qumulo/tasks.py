@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django_q.tasks import async_task
 import logging
 
 from coldfront.core.allocation.models import (
@@ -95,6 +96,19 @@ def ingest_quotas_with_daily_usage() -> None:
     quota_usages = __get_quota_usages_from_qumulo(logger)
     __set_daily_quota_usages(quota_usages, logger)
     __validate_results(quota_usages, logger)
+
+
+def addUsersToADGroup(wustlkeys: list, group_name: str) -> None:
+    if not wustlkeys:
+        return
+
+    active_directory_api = ActiveDirectoryAPI()
+
+    active_directory_api.get_user(wustlkeys[0])
+
+    active_directory_api.add_user_to_ad_group(wustlkeys[0], group_name)
+
+    async_task(addUsersToADGroup, (wustlkeys[1:], group_name))
 
 
 def __get_quota_usages_from_qumulo(logger):
