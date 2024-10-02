@@ -11,7 +11,7 @@ def load_initial_data(apps, schema_editor):
 
 class Migration(migrations.Migration):
 
-    dependencies = []
+    dependencies = [("grant", "0002_auto_20230406_1310")]
 
     operations = [
         migrations.RunPython(load_initial_data),
