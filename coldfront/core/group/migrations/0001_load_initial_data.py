@@ -3,8 +3,16 @@
 from django.db import migrations
 
 
+def load_initial_data(apps, schema_editor):
+    from django.core.management import call_command
+
+    call_command("loaddata", "coldfront/core/group/fixtures/default_user_groups.yaml")
+
+
 class Migration(migrations.Migration):
 
     dependencies = []
 
-    operations = []
+    operations = [
+        migrations.RunPython(load_initial_data),
+    ]
