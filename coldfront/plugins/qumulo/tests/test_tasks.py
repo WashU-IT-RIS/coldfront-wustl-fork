@@ -15,7 +15,11 @@ from coldfront.plugins.qumulo.tasks import (
 )
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
-from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationStatusChoice,
+    AllocationUser,
+)
 from coldfront.core.resource.models import Resource
 
 from qumulo.lib.request import RequestError
@@ -253,11 +257,45 @@ class TestStorageAllocationStatuses(TestCase):
 @patch("coldfront.plugins.qumulo.tasks.async_task")
 @patch("coldfront.plugins.qumulo.tasks.ActiveDirectoryAPI")
 class TestAddUsersToADGroup(TestCase):
+    def setUp(self) -> None:
+        self.client = Client()
+
+        build_data = build_models()
+
+        self.project = build_data["project"]
+        self.user = build_data["user"]
+
+        self.form_data = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["foo"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "general",
+        }
+
+        self.client.force_login(self.user)
+
+        return super().setUp()
+
     def test_function_ends_on_empty_list(
         self, mock_active_directory_api, mock_async_task
     ):
+        wustlkeys = []
+        self.form_data["ro_users"] = wustlkeys
+
+        allocation = create_allocation(self.project, self.user, self.form_data)
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="ro"
+        )
+
         try:
-            addUsersToADGroup([], "bar")
+            addUsersToADGroup([], acl_allocation)
         except Exception as e:
             self.fail("Function failed with exception: " + e)
 
@@ -268,8 +306,14 @@ class TestAddUsersToADGroup(TestCase):
         mock_active_directory_api.return_value = active_directory_instance
 
         wustlkeys = ["foo"]
+        self.form_data["rw_users"] = wustlkeys
 
-        addUsersToADGroup(wustlkeys, "bar")
+        allocation = create_allocation(self.project, self.user, self.form_data)
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="rw"
+        )
+
+        addUsersToADGroup(wustlkeys, acl_allocation)
 
         active_directory_instance.get_user.assert_called_once_with(wustlkeys[0])
 
@@ -280,9 +324,15 @@ class TestAddUsersToADGroup(TestCase):
         mock_active_directory_api.return_value = active_directory_instance
 
         wustlkeys = ["foo"]
-        group_name = "bar"
+        self.form_data["rw_users"] = wustlkeys
 
-        addUsersToADGroup(wustlkeys, group_name)
+        allocation = create_allocation(self.project, self.user, self.form_data)
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="rw"
+        )
+        group_name = acl_allocation.get_attribute("storage_acl_name")
+
+        addUsersToADGroup(wustlkeys, acl_allocation)
 
         active_directory_instance.add_user_to_ad_group.assert_called_once_with(
             wustlkeys[0], group_name
@@ -292,11 +342,97 @@ class TestAddUsersToADGroup(TestCase):
         self, mock_active_directory_api, mock_async_task
     ):
         wustlkeys = ["foo", "bar"]
-        group_name = "baz"
+        self.form_data["rw_users"] = wustlkeys
 
-        addUsersToADGroup(wustlkeys, group_name)
+        allocation = create_allocation(self.project, self.user, self.form_data)
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="rw"
+        )
+
+        addUsersToADGroup(wustlkeys, acl_allocation)
 
         mock_async_task.assert_called_once()
         self.assertTupleEqual(
-            mock_async_task.call_args[0], (addUsersToADGroup, (["bar"], group_name))
+            mock_async_task.call_args[0],
+            (addUsersToADGroup, (["bar"], acl_allocation, [])),
         )
+
+    def test_appends_bad_user_list_on_invalid_user(
+        self, mock_active_directory_api, mock_async_task
+    ):
+        active_directory_instance = MagicMock()
+        active_directory_instance.get_user.side_effect = ValueError("Invalid wustlkey")
+        mock_active_directory_api.return_value = active_directory_instance
+
+        wustlkeys = ["foo", "bar"]
+        self.form_data["rw_users"] = wustlkeys
+
+        allocation = create_allocation(self.project, self.user, self.form_data)
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="rw"
+        )
+
+        try:
+            addUsersToADGroup(wustlkeys, acl_allocation)
+        except Exception as e:
+            self.fail("Function failed with exception: " + e)
+
+        mock_async_task.assert_called_once()
+        self.assertTupleEqual(
+            mock_async_task.call_args[0],
+            (addUsersToADGroup, (["bar"], acl_allocation, ["foo"])),
+        )
+
+    def test_removes_bad_users_on_completion(
+        self, mock_active_directory_api, mock_async_task
+    ):
+        mock_async_task.side_effect = lambda *args: args[0](*args[1])
+
+        wustlkeys = ["foo", "bar", "baz"]
+        good_keys = wustlkeys[0:1]
+
+        active_directory_instance = MagicMock()
+        active_directory_instance.get_user.side_effect = (
+            lambda username: self.__get_user_mock(username, good_keys)
+        )
+        mock_active_directory_api.return_value = active_directory_instance
+
+        form_data = self.form_data
+        form_data["rw_users"] = wustlkeys
+
+        garbage_allocation = create_allocation(
+            project=self.project, user=self.user, form_data=form_data
+        )
+        base_allocation = create_allocation(
+            project=self.project, user=self.user, form_data=form_data
+        )
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=base_allocation, resource_name="rw"
+        )
+
+        addUsersToADGroup(wustlkeys, acl_allocation, [])
+
+        allocation_users = list(
+            map(
+                lambda allocation_user: allocation_user.user.username,
+                AllocationUser.objects.filter(allocation=acl_allocation),
+            )
+        )
+        self.assertListEqual(allocation_users, good_keys)
+
+        garbage_acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=garbage_allocation, resource_name="rw"
+        )
+        garbage_allocation_users = list(
+            map(
+                lambda allocation_user: allocation_user.user.username,
+                AllocationUser.objects.filter(allocation=garbage_acl_allocation),
+            )
+        )
+        self.assertListEqual(garbage_allocation_users, wustlkeys)
+
+    def __get_user_mock(self, username: str, good_users: bool):
+        if username in good_users:
+            return None
+        else:
+            raise ValueError("Invalid wustlkey")

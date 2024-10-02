@@ -8,6 +8,7 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
     AllocationAttributeUsage,
+    AllocationUser,
 )
 from coldfront.core.resource.models import Resource
 
@@ -98,17 +99,27 @@ def ingest_quotas_with_daily_usage() -> None:
     __validate_results(quota_usages, logger)
 
 
-def addUsersToADGroup(wustlkeys: list, group_name: str) -> None:
-    if not wustlkeys:
+def addUsersToADGroup(
+    wustlkeys: list, acl_allocation: Allocation, bad_keys: list = []
+) -> None:
+    if len(wustlkeys) == 0:
+        if len(bad_keys) > 0:
+            username_filter = Q(user__username__in=bad_keys)
+            allocation_filter = Q(allocation=acl_allocation)
+            AllocationUser.objects.filter(username_filter & allocation_filter).delete()
         return
 
+    group_name = acl_allocation.get_attribute("storage_acl_name")
     active_directory_api = ActiveDirectoryAPI()
 
-    active_directory_api.get_user(wustlkeys[0])
+    try:
+        active_directory_api.get_user(wustlkeys[0])
+    except ValueError:
+        bad_keys.append(wustlkeys[0])
 
     active_directory_api.add_user_to_ad_group(wustlkeys[0], group_name)
 
-    async_task(addUsersToADGroup, (wustlkeys[1:], group_name))
+    async_task(addUsersToADGroup, (wustlkeys[1:], acl_allocation, bad_keys))
 
 
 def __get_quota_usages_from_qumulo(logger):
