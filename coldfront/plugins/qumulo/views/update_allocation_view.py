@@ -38,6 +38,16 @@ class UpdateAllocationView(AllocationView):
         context = super().get_context_data(**kwargs)
         context['form_title'] = 'Update Allocation'
         context['allocation_has_children'] = self._allocation_linkage_exists()
+        allocation_id = self.kwargs.get("allocation_id")
+        allocation = Allocation.objects.get(pk=allocation_id)
+        alloc_status = allocation.status.name
+
+        if alloc_status == "Pending":
+            pending_status = True
+        else:
+            pending_status = False
+        context["is_pending"] = pending_status
+
         return context
 
     def get_form_kwargs(self):
