@@ -1,7 +1,7 @@
 from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.core.paginator import EmptyPage, Paginator
 from django.db.models.query import QuerySet
 from django.views.generic import ListView
 
@@ -15,7 +15,7 @@ from coldfront.core.allocation.models import (
 )
 from coldfront.core.resource.models import Resource
 
-from django.db.models import OuterRef, Subquery, CharField, F, Value
+from django.db.models import OuterRef, Subquery
 
 from collections import defaultdict
 
@@ -153,13 +153,64 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             all_children = set()
 
             for linkage in allocation_linkages:
-                children = [str(child.id) for child in linkage.children.all()]
+                linkage_children = linkage.children.all().annotate(
+                    department_number=Subquery(department_sub_q),
+                    itsd_ticket=Subquery(itsd_ticket_sub_q),
+                    file_path=Subquery(file_path_sub_q),
+                    service_rate=Subquery(service_rate_sub_q),
+                )
+                linkage_children = linkage_children.order_by(order_by)
+                children = [str(child.id) for child in linkage_children]
                 all_children.update(children)
                 parent_to_children_map[linkage.parent.id] = children
 
             for allocation in allocations:
-                if str(allocation.pk) not in all_children:
-                    # append a new item, plus any children
+                if not data.get("no_grouping", False):
+                    if str(allocation.pk) not in all_children:
+                        # append a new item, plus any children
+                        view_list.append(
+                            AllocationListItem(
+                                id=allocation.pk,
+                                pi_last_name=allocation.project.pi.last_name,
+                                pi_first_name=allocation.project.pi.first_name,
+                                pi_user_name=allocation.project.pi.username,
+                                project_id=allocation.project.pk,
+                                project_name=allocation.project.title,
+                                resource_name=resource.name,
+                                allocation_status=allocation.status.name,
+                                department_number=allocation.department_number,
+                                itsd_ticket=allocation.itsd_ticket,
+                                file_path=allocation.file_path,
+                                service_rate=allocation.service_rate,
+                                child_allocation_ids=parent_to_children_map[
+                                    allocation.id
+                                ],
+                                is_child=False,
+                            )
+                        )
+                        for child_id in parent_to_children_map[allocation.id]:
+                            child_allocation = all_allocations.get(child_id, None)
+                            # if child doesn't match filter, then we won't have retrieved it
+                            if child_allocation:
+                                view_list.append(
+                                    AllocationListItem(
+                                        id=child_allocation.pk,
+                                        pi_last_name=child_allocation.project.pi.last_name,
+                                        pi_first_name=child_allocation.project.pi.first_name,
+                                        pi_user_name=child_allocation.project.pi.username,
+                                        project_id=child_allocation.project.pk,
+                                        project_name=child_allocation.project.title,
+                                        resource_name=resource.name,
+                                        allocation_status=child_allocation.status.name,
+                                        department_number=child_allocation.department_number,
+                                        itsd_ticket=child_allocation.itsd_ticket,
+                                        file_path=child_allocation.file_path,
+                                        service_rate=child_allocation.service_rate,
+                                        child_allocation_ids=[],
+                                        is_child=True,
+                                    )
+                                )
+                else:
                     view_list.append(
                         AllocationListItem(
                             id=allocation.pk,
@@ -175,30 +226,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                             file_path=allocation.file_path,
                             service_rate=allocation.service_rate,
                             child_allocation_ids=parent_to_children_map[allocation.id],
-                            is_child=False,
+                            is_child=(str(allocation.pk) in all_children),
                         )
                     )
-                    for child_id in parent_to_children_map[allocation.id]:
-                        child_allocation = all_allocations[child_id]
-                        view_list.append(
-                            AllocationListItem(
-                                id=child_allocation.pk,
-                                pi_last_name=child_allocation.project.pi.last_name,
-                                pi_first_name=child_allocation.project.pi.first_name,
-                                pi_user_name=child_allocation.project.pi.username,
-                                project_id=child_allocation.project.pk,
-                                project_name=child_allocation.project.title,
-                                resource_name=resource.name,
-                                allocation_status=child_allocation.status.name,
-                                department_number=child_allocation.department_number,
-                                itsd_ticket=child_allocation.itsd_ticket,
-                                file_path=child_allocation.file_path,
-                                service_rate=child_allocation.service_rate,
-                                child_allocation_ids=[],
-                                is_child=True,
-                            )
-                        )
-            
 
         return view_list
 

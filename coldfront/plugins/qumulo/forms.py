@@ -223,7 +223,6 @@ class CreateSubAllocationForm(AllocationForm):
         }
 
 
-
 class ProjectCreateForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user_id = kwargs.pop("user_id")
@@ -252,7 +251,6 @@ class ProjectCreateForm(forms.Form):
 
 
 class AllocationTableSearchForm(forms.Form):
-    project_name = forms.CharField(label="Project Name", max_length=100, required=False)
     pi_last_name = forms.CharField(label="PI Surname", max_length=100, required=False)
 
     pi_first_name = forms.CharField(
@@ -270,3 +268,9 @@ class AllocationTableSearchForm(forms.Form):
     )
 
     itsd_ticket = forms.CharField(label="ITSD Ticket", max_length=100, required=False)
+
+    no_grouping = forms.BooleanField(
+        label="No Grouping",
+        initial=False,
+        required=False,
+    )

@@ -91,6 +91,63 @@ class AllocationTableViewTests(TestCase):
         self.assertEqual(len(qs), 1)
         self.assertEqual(qs[0].id, other_allocation.id)
 
+    def test_queryset_order_by(self):
+        # call build_models again to get a different set of projects/users
+        other_models = build_user_plus_project(
+            username="jack.frost", project_name="Ice Age Project"
+        )
+
+        other_project = other_models["project"]
+        other_user = other_models["user"]
+
+        other_form_data = {
+            "storage_filesystem_path": "xyz",
+            "storage_export_path": "abc",
+            "storage_ticket": "ITSD-78910",
+            "storage_name": "general_store",
+            "storage_quota": 8,
+            "protocols": ["nfs"],
+            "rw_users": ["test2"],
+            "ro_users": ["test3"],
+            "cost_center": "Scrooge McDuck",
+            "department_number": "Whale-watching",
+            "service_rate": "consumption",
+        }
+
+        other_allocation = create_allocation(other_project, other_user, other_form_data)
+
+        query_params = {
+            "order_by": "department_number",
+            "direction": "asc",
+        }
+        request = RequestFactory().get(
+            "src/coldfront.plugins.qumulo/views/allocation_table_view.py",
+            data=query_params,
+        )
+        view = AllocationTableView()
+        view.request = request
+
+        qs = view.get_queryset()
+        self.assertEqual(len(qs), 2)
+        self.assertEqual(qs[0].id, self.allocation.id)
+        self.assertEqual(qs[1].id, other_allocation.id)
+
+        query_params = {
+            "order_by": "department_number",
+            "direction": "des",
+        }
+        request = RequestFactory().get(
+            "src/coldfront.plugins.qumulo/views/allocation_table_view.py",
+            data=query_params,
+        )
+        view = AllocationTableView()
+        view.request = request
+
+        qs = view.get_queryset()
+        self.assertEqual(len(qs), 2)
+        self.assertEqual(qs[0].id, other_allocation.id)
+        self.assertEqual(qs[1].id, self.allocation.id)
+
     def test_parent_child_allocation_query(self):
         attr_type = AttributeType.objects.create(name="ParentChildAttributeType")
         attr_type.save()
@@ -160,9 +217,7 @@ class AllocationTableViewTests(TestCase):
 
         self.assertEqual(len(qs), 3)
 
-        self.assertEqual(
-            qs[0].child_allocation_ids, [str(qs[1].id), str(qs[2].id)]
-        )
+        self.assertEqual(qs[0].child_allocation_ids, [str(qs[1].id), str(qs[2].id)])
 
     def test_result_pagination(self):
         # call build_models again to get a different set of projects/users
@@ -253,3 +308,62 @@ class AllocationTableViewTests(TestCase):
         self.assertEqual(
             third_page_by_three.object_list, second_page_by_three.object_list
         )
+
+    def test_parent_child_grouping_logic(self):
+        # set up a allocation that sorts before its parent
+
+        other_form_data = {
+            "storage_filesystem_path": "xyz",
+            "storage_export_path": "abc",
+            "storage_ticket": "ITSD-78910",
+            "storage_name": "general_store",
+            "storage_quota": 8,
+            "protocols": ["nfs"],
+            "rw_users": ["test2"],
+            "ro_users": ["test3"],
+            "cost_center": "Scrooge McDuck",
+            "department_number": "Whale-watching",
+            "service_rate": "consumption",
+        }
+
+        child_allocation = create_allocation(
+            self.project, self.user, other_form_data, self.allocation
+        )
+
+        query_params = {
+            "order_by": "itsd_ticket",
+            "direction": "des",
+        }
+        request = RequestFactory().get(
+            "src/coldfront.plugins.qumulo/views/allocation_table_view.py",
+            data=query_params,
+        )
+        view = AllocationTableView()
+        view.request = request
+
+        qs = view.get_queryset()
+
+        # this is in descending order, so ITSD-78910 *should* be sorted before ITSD-54321,
+        # but it won't be because ITSD-78910 is associated with the child
+        self.assertEqual(len(qs), 2)
+        self.assertEqual(qs[0].id, self.allocation.id)
+        self.assertEqual(qs[0].itsd_ticket, "ITSD-54321")
+        self.assertEqual(qs[1].id, child_allocation.id)
+        self.assertEqual(qs[1].itsd_ticket, "ITSD-78910")
+
+        # now, add no_grouping to the query_params
+        query_params["no_grouping"] = "on"
+        request = RequestFactory().get(
+            "src/coldfront.plugins.qumulo/views/allocation_table_view.py",
+            data=query_params,
+        )
+        view = AllocationTableView()
+        view.request = request
+
+        # order should be flipped
+        qs = view.get_queryset()
+        self.assertEqual(len(qs), 2)
+        self.assertEqual(qs[0].id, child_allocation.id)
+        self.assertEqual(qs[0].itsd_ticket, "ITSD-78910")
+        self.assertEqual(qs[1].id, self.allocation.id)
+        self.assertEqual(qs[1].itsd_ticket, "ITSD-54321")

@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 
 from typing import Optional
 
@@ -30,7 +30,7 @@ from pathlib import PurePath
 class AllocationView(LoginRequiredMixin, FormView):
     form_class = AllocationForm
     template_name = "allocation.html"
-    success_url = reverse_lazy("home")
+    new_allocation = None
 
     def get_form_kwargs(self):
         kwargs = super(AllocationView, self).get_form_kwargs()
@@ -62,14 +62,52 @@ class AllocationView(LoginRequiredMixin, FormView):
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
         validate_filesystem_path_unique(absolute_path)
 
-        AllocationView.create_new_allocation(form_data, user, parent_allocation)
+        self.new_allocation = AllocationView.create_new_allocation(
+            form_data, user, parent_allocation
+        )
+        self.success_id = self.new_allocation.get("allocation").id
 
         return super().form_valid(form)
+
+    def get_success_url(self):
+
+        return reverse(
+            "qumulo:updateAllocation",
+            kwargs={"allocation_id": self.success_id},
+        )
+
+    @staticmethod
+    def _handle_sub_allocation_scoping(
+        sub_allocation_name: str, parent_allocation_name: str
+    ):
+        """
+        NOTE:
+          if sub_allocation_name is same as parent, or is completely different, then
+          prepend parent name to sub name
+          if sub-allocation name provided already *has* parent name prepended (but is not identical to parent name)
+          use it directly
+        EXAMPLE:
+          parent: foo + sub: bar => foo-bar
+          parent: foo + sub: foo => foo-foo
+          parent: foo + sub: foo-blah => foo-blah
+        """
+        if (
+            sub_allocation_name.startswith(parent_allocation_name)
+            and sub_allocation_name != parent_allocation_name
+        ):
+            return sub_allocation_name
+        return f"{parent_allocation_name}-{sub_allocation_name}"
 
     @staticmethod
     def create_new_allocation(
         form_data, user, parent_allocation: Optional[Allocation] = None
     ):
+        if parent_allocation:
+            form_data["storage_name"] = AllocationView._handle_sub_allocation_scoping(
+                form_data["storage_name"],
+                parent_allocation.get_attribute(name="storage_name"),
+            )
+
         project_pk = form_data.get("project_pk")
         project = get_object_or_404(Project, pk=project_pk)
 
