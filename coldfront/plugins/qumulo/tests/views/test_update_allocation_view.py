@@ -462,11 +462,13 @@ class UpdateAllocationViewTests(TestCase):
         self, mock_ActiveDirectoryAPI: MagicMock
     ):
         request = RequestFactory().post('/irrelevant', {'reset_acls': 'set'})
+        request.user = self.user
         form=UpdateAllocationForm(data=self.form_data, user_id=self.user.id)
         form.cleaned_data = {
             'protocols': ['smb'],
             'storage_export_path': 'bar',
-            'storage_ticket': 'ITSD-12345'
+            'storage_ticket': 'ITSD-12345',
+            'storage_filesystem_path': '/storage2-dev/fs1'
         }
         form.clean()
         view = UpdateAllocationView(form=form, user_id=self.user.id)
