@@ -43,4 +43,3 @@ def run_setup():
     call_command("add_allocation_defaults")
     call_command("add_default_publication_sources")
     call_command("add_scheduled_tasks")
-    call_command("create_default_user_groups")
