@@ -6,7 +6,7 @@ from django.db import migrations
 def load_initial_data(apps, schema_editor):
     from django.core.management import call_command
 
-    call_command("loaddata", "default_user_groups.json")
+    call_command("loaddata", "default_user_groups")
 
 
 class Migration(migrations.Migration):
