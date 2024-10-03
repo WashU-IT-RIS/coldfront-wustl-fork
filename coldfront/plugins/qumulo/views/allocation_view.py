@@ -43,24 +43,24 @@ class AllocationView(LoginRequiredMixin, FormView):
         form_data = form.cleaned_data
         user = self.request.user
 
-        #storage_filesystem_path = form_data.get("storage_filesystem_path")
-        #is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
-        #if is_absolute_path:
-        #    absolute_path = storage_filesystem_path
-        #else:
-        #    # also need to retrieve the parent path if provided
-        #    if parent_allocation:
-        #        # should already contain storage_root path
-        #        root_val = parent_allocation.get_attribute(
-        #            name="storage_filesystem_path"
-        #        ).strip("/")
-        #        prepend_val = f"{root_val}/Active"
-        #    else:
-        #        storage_root = os.environ.get("STORAGE2_PATH").strip("/")
-        #        prepend_val = storage_root
+        storage_filesystem_path = form_data.get("storage_filesystem_path")
+        is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
+        if is_absolute_path:
+            absolute_path = storage_filesystem_path
+        else:
+            # also need to retrieve the parent path if provided
+            if parent_allocation:
+                # should already contain storage_root path
+                root_val = parent_allocation.get_attribute(
+                    name="storage_filesystem_path"
+                ).strip("/")
+                prepend_val = f"{root_val}/Active"
+            else:
+                storage_root = os.environ.get("STORAGE2_PATH").strip("/")
+                prepend_val = storage_root
+            absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
 
-        #    absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
-        #validate_filesystem_path_unique(absolute_path)
+        validate_filesystem_path_unique(absolute_path)
 
         self.new_allocation = AllocationView.create_new_allocation(
             form_data, user, parent_allocation
