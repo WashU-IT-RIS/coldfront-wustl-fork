@@ -453,3 +453,22 @@ class TestAddUsersToADGroup(TestCase):
             return None
         else:
             raise ValueError("Invalid wustlkey")
+
+    def test_does_not_add_bad_users_to_group(
+        self, mock_active_directory_api: MagicMock, mock_async_task: MagicMock
+    ):
+        active_directory_instance = MagicMock()
+        active_directory_instance.get_user.side_effect = ValueError("Invalid wustlkey")
+        mock_active_directory_api.return_value = active_directory_instance
+
+        wustlkeys = ["foo"]
+        self.form_data["rw_users"] = wustlkeys
+
+        allocation = create_allocation(self.project, self.user, self.form_data)
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="rw"
+        )
+
+        addUsersToADGroup(wustlkeys, acl_allocation)
+
+        active_directory_instance.add_user_to_ad_group.assert_not_called()

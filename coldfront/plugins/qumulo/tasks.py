@@ -118,10 +118,9 @@ def addUsersToADGroup(
 
     try:
         active_directory_api.get_user(wustlkeys[0])
+        active_directory_api.add_user_to_ad_group(wustlkeys[0], group_name)
     except ValueError:
         bad_keys.append(wustlkeys[0])
-
-    active_directory_api.add_user_to_ad_group(wustlkeys[0], group_name)
 
     async_task(addUsersToADGroup, (wustlkeys[1:], acl_allocation, bad_keys))
 
