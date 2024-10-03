@@ -3,6 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 from django.urls import reverse
 
+from django_q.tasks import async_task
+
 from typing import Union
 
 import json
@@ -22,6 +24,8 @@ from coldfront.core.allocation.models import (
 from coldfront.plugins.qumulo.forms import AllocationForm
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.validators import validate_filesystem_path_unique
+from coldfront.plugins.qumulo.tasks import addUsersToADGroup
+from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 from pathlib import PurePath
 
@@ -95,11 +99,14 @@ class AllocationView(LoginRequiredMixin, FormView):
             form_data, project, allocation
         )
 
+        active_directory_api = ActiveDirectoryAPI()
         for access_allocation in access_allocations:
             access_users = AllocationUser.objects.filter(allocation=access_allocation)
-            AclAllocations.create_ad_group_and_add_users(
-                access_users, access_allocation
+
+            active_directory_api.create_ad_group(
+                group_name=access_allocation.get_attribute(name="storage_acl_name")
             )
+            async_task(addUsersToADGroup, (access_users, access_allocation))
 
         return {"allocation": allocation, "access_allocations": access_allocations}
 

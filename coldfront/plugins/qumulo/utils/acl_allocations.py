@@ -24,6 +24,7 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
+
 class AclAllocations:
     def __init__(self, project_pk):
         self.project_pk = project_pk
@@ -233,15 +234,9 @@ class AclAllocations:
         if is_base_allocation:
             fs_path = f"{fs_path}/Active"
 
-        path_parents = list(
-            map(
-                lambda parent: str(parent),
-                PurePath(fs_path).parents
-            )
-        )
+        path_parents = list(map(lambda parent: str(parent), PurePath(fs_path).parents))
         storage_env_path = (
-            f'{os.environ.get("STORAGE2_PATH", "").rstrip().rstrip("/")}'
-            '/'
+            f'{os.environ.get("STORAGE2_PATH", "").rstrip().rstrip("/")}' "/"
         )
 
         for path in path_parents:

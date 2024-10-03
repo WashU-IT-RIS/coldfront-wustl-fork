@@ -9,6 +9,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
 )
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
+from coldfront.plugins.qumulo.tasks import addUsersToADGroup
 
 from coldfront.core.allocation.models import (
     AllocationChangeRequest,
@@ -19,6 +20,7 @@ from coldfront.core.allocation.models import (
 )
 
 
+@patch("coldfront.plugins.qumulo.views.update_allocation_view.async_task")
 @patch("coldfront.plugins.qumulo.views.update_allocation_view.ActiveDirectoryAPI")
 class UpdateAllocationViewTests(TestCase):
     def setUp(self):
@@ -52,7 +54,7 @@ class UpdateAllocationViewTests(TestCase):
         )
 
     def test_get_access_users_returns_one_user(
-        self, mock_ActiveDirectoryAPI: MagicMock
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
     ):
         form_data = {
             "storage_filesystem_path": "foo",
@@ -75,7 +77,7 @@ class UpdateAllocationViewTests(TestCase):
         self.assertCountEqual(access_users, form_data["rw_users"])
 
     def test_get_access_users_returns_multiple_users(
-        self, mock_ActiveDirectoryAPI: MagicMock
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
     ):
         form_data = {
             "storage_filesystem_path": "foo",
@@ -98,7 +100,7 @@ class UpdateAllocationViewTests(TestCase):
         self.assertCountEqual(access_users, form_data["rw_users"])
 
     def test_get_access_users_returns_no_users(
-        self, mock_ActiveDirectoryAPI: MagicMock
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
     ):
         form_data = {
             "storage_filesystem_path": "foo",
@@ -121,7 +123,7 @@ class UpdateAllocationViewTests(TestCase):
         self.assertCountEqual(access_users, form_data["ro_users"])
 
     def test_set_access_users_ignores_unchanged(
-        self, mock_ActiveDirectoryAPI: MagicMock
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
     ):
 
         form_data = {
@@ -149,7 +151,9 @@ class UpdateAllocationViewTests(TestCase):
 
             mock_add_user_to_access_allocation.assert_not_called()
 
-    def test_set_access_users_adds_new_user(self, mock_ActiveDirectoryAPI: MagicMock):
+    def test_set_access_users_adds_new_user(
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
+    ):
         form_data = {
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
@@ -184,7 +188,9 @@ class UpdateAllocationViewTests(TestCase):
                 "baz", access_allocation
             )
 
-    def test_set_access_users_adds_new_users(self, mock_ActiveDirectoryAPI: MagicMock):
+    def test_set_access_users_adds_new_users(
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
+    ):
         form_data = {
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
@@ -230,7 +236,10 @@ class UpdateAllocationViewTests(TestCase):
 
             mock_add_user_to_access_allocation.assert_has_calls(calls)
 
-    def test_set_access_users_removes_user(self, mock_ActiveDirectoryAPI: MagicMock):
+    def test_set_access_users_removes_user(
+        self,
+        mock_ActiveDirectoryAPI: MagicMock,
+    ):
         form_data = {
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
@@ -264,9 +273,9 @@ class UpdateAllocationViewTests(TestCase):
 
         self.assertNotIn("test", access_usernames)
 
-    def test_set_access_users_adds_user_to_ad(self, mock_ActiveDirectoryAPI: MagicMock):
-        mock_active_directory_api = mock_ActiveDirectoryAPI.return_value
-
+    def test_set_access_users_adds_user_to_ad(
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
+    ):
         form_data = {
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
@@ -292,11 +301,13 @@ class UpdateAllocationViewTests(TestCase):
             storage_allocation, "rw"
         )
 
-        mock_active_directory_api.add_user_to_ad_group.assert_called_once_with(
-            "baz", access_allocation.get_attribute("storage_acl_name")
+        mock_async_task.assert_called_once_with(
+            addUsersToADGroup, (new_rw_users, access_allocation)
         )
 
-    def test_set_access_users_removes_user(self, mock_ActiveDirectoryAPI: MagicMock):
+    def test_set_access_users_removes_user(
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
+    ):
         mock_active_directory_api = mock_ActiveDirectoryAPI.return_value
 
         form_data = {
@@ -329,7 +340,7 @@ class UpdateAllocationViewTests(TestCase):
         )
 
     def test_attribute_change_request_creation(
-        self, mock_ActiveDirectoryAPI: MagicMock
+        self, mock_ActiveDirectoryAPI: MagicMock, mock_async_task: MagicMock
     ):
         # allocation and allocation attributes already created
 
