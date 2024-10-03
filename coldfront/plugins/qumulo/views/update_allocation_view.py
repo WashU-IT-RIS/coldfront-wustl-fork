@@ -183,13 +183,11 @@ class UpdateAllocationView(AllocationView):
             self.set_access_users(key, access_users, allocation)
 
     def form_valid(self, form: UpdateAllocationForm):
-        import pdb
-        pdb.set_trace()
         if 'reset_acls' in self.request.POST:
             self._reset_acls()
         else:
             self._updated_fields_handler(form)
-        return super().form_valid(form)
+        return super(AllocationView, self).form_valid(form)
 
     @staticmethod
     def _handle_attribute_change(
