@@ -7,6 +7,10 @@ from coldfront.core.group.management.commands.create_default_user_groups import 
 
 
 class CreateDefaultUserGroupsTest(TestCase):
+    """
+    Test the create_default_user_groups management command
+    """
+
     def test_create_default_user_groups(self):
         # Ensure no groups exist before running the command
         self.assertEqual(Group.objects.count(), 0)
