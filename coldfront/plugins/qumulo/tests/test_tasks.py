@@ -248,6 +248,7 @@ class TestStorageAllocationStatuses(TestCase):
                 conditionally_update_storage_allocation_status_mock.call_count, 2
             )
 
+@patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
 class TestResetAcl(TestCase):
     def setUp(self) -> None:
         self.form_data = {
@@ -309,12 +310,16 @@ class TestResetAcl(TestCase):
         self.mock_directory_expected_values['filtered_entries_count'] = \
                 expected_filter_count
 
-    def test_reset_acl_on_sub_allocation_has_no_exclude_paths(self):
+    def test_reset_acl_on_sub_allocation_has_no_exclude_paths(
+        self, qumulo_api_mock: MagicMock
+    ):
         sub_allocation = self._createSubAllocation()
         reset = ResetAcl(sub_allocation)
         self.assertEqual(0, len(reset.reset_exclude_paths))
 
-    def test_root_sub_allocation_reset_acl_exclude_path(self):
+    def test_root_sub_allocation_reset_acl_exclude_path(
+        self, qumulo_api_mock: MagicMock
+    ):
         sub_allocation = self._createSubAllocation()
         reset = ResetAcl(self.root_allocation)
         self.assertEqual(1, len(reset.reset_exclude_paths))
@@ -323,7 +328,9 @@ class TestResetAcl(TestCase):
             reset.reset_exclude_paths[0]
         )
 
-    def test_reset_acl_directory_contents_filter(self):
+    def test_reset_acl_directory_contents_filter(
+        self, qumulo_api_mock: MagicMock
+    ):
         sub_allocation = self._createSubAllocation()
         reset = ResetAcl(self.root_allocation)
         reset.qumulo_api = MagicMock()
