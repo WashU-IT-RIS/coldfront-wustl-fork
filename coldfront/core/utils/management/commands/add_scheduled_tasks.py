@@ -32,6 +32,7 @@ class Command(BaseCommand):
             "coldfront.core.group.tasks.grant_usersupport_global_project_manager",
             name="Grant RIS-UserSupport Manager status over all Projects",
             schedule_type=Schedule.MINUTES,
+            minutes=5,
             next_run=(timezone.now() + datetime.timedelta(minutes=5)).replace(
                 hour=0, minute=0, second=0, microsecond=0
             ),
