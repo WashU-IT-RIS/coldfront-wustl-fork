@@ -60,8 +60,8 @@ class AllocationView(LoginRequiredMixin, FormView):
                 prepend_val = storage_root
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
-        validate_filesystem_path_unique(absolute_path)
-
+        # validate_filesystem_path_unique(absolute_path)
+        # jprew - above *should* be handled as part of the field validation (?), why is it here?
         self.new_allocation = AllocationView.create_new_allocation(
             form_data, user, parent_allocation
         )
