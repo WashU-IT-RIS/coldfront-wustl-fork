@@ -101,11 +101,6 @@ def validate_leading_forward_slash(value: str):
 
 
 def validate_parent_directory(value: str):
-    raise ValidationError(
-        message="TEST VALIDATION ERROR",
-        code="invalid",
-    )
-    return
     qumulo_api = QumuloAPI()
     sub_directories = value.strip("/").split("/")
 

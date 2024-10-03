@@ -27,11 +27,11 @@ class ADUserField(forms.Field):
 class StorageFileSystemPathField(forms.CharField):
     default_validators = [
         validate_parent_directory,
-        # validate_filesystem_path_unique,
+        validate_filesystem_path_unique,
     ]
 
     def run_validators(self, value: str) -> None:
-        # validate_relative_path(value)
+        validate_relative_path(value)
         storage_root = os.environ.get("STORAGE2_PATH").strip("/")
         full_path = f"/{storage_root}/{value}"
 
