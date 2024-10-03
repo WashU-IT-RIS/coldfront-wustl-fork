@@ -195,7 +195,7 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["storage_name"].disabled = True
         self.fields["storage_filesystem_path"].disabled = True
 
-        self.fields["storage_filesystem_path"].validators = []
+        # self.fields["storage_filesystem_path"].validators = []
         self.fields["storage_name"].validators = []
 
 
