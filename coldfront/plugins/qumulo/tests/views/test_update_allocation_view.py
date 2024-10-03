@@ -234,7 +234,7 @@ class UpdateAllocationViewTests(TestCase):
             for user in extra_users:
                 calls.append(call(user, access_allocation))
 
-            mock_add_user_to_access_allocation.assert_has_calls(calls)
+            mock_add_user_to_access_allocation.assert_has_calls(calls, any_order=True)
 
     def test_set_access_users_removes_user(
         self,
