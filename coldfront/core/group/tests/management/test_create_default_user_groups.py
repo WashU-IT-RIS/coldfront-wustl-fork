@@ -1,7 +1,7 @@
 from django.core.management import call_command
 from django.test import TestCase
 from django.contrib.auth.models import Group, Permission
-from coldfront.core.user_group.management.commands.create_default_user_groups import (
+from coldfront.core.group.management.commands.create_default_user_groups import (
     DEFAULT_RIS_USER_GROUPS,
 )
 
