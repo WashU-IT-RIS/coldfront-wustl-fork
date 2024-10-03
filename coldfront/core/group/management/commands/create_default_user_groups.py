@@ -181,10 +181,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Creating default user groups ...")
         for user_group in DEFAULT_RIS_USER_GROUPS:
-            group_obj, b = Group.objects.get_or_create(name=user_group["name"])
+            new_user_group, _ = Group.objects.get_or_create(name=user_group["name"])
             permission_query_set = Permission.objects.filter(
                 id__in=[permission["id"] for permission in user_group["permissions"]]
             ).all()
-            group_obj.permissions.add(*permission_query_set)
+            new_user_group.permissions.add(*permission_query_set)
 
         print("Finished creating default user groups")

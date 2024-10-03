@@ -20,13 +20,13 @@ class CreateDefaultUserGroupsTest(TestCase):
 
         # Check that the groups were created
         for user_group in DEFAULT_RIS_USER_GROUPS:
-            group_obj = Group.objects.get(name=user_group["name"])
-            self.assertIsNotNone(group_obj)
+            new_user_group = Group.objects.get(name=user_group["name"])
+            self.assertIsNotNone(new_user_group)
             self.assertEqual(
-                group_obj.permissions.count(), len(user_group["permissions"])
+                new_user_group.permissions.count(), len(user_group["permissions"])
             )
 
             # Check that the permissions were added to the user_group
             for permission in user_group["permissions"]:
                 perm_obj = Permission.objects.get(id=permission["id"])
-                self.assertIn(perm_obj, group_obj.permissions.all())
+                self.assertIn(perm_obj, new_user_group.permissions.all())

@@ -15,16 +15,16 @@ from coldfront.core.project.models import (
 
 class GrantUserSupportGlobalProjectManagerTest(TestCase):
     def setUp(self):
-        self.projectuser_status, b = ProjectUserStatusChoice.objects.get_or_create(
+        self.projectuser_status, _ = ProjectUserStatusChoice.objects.get_or_create(
             name="Active"
         )
-        self.project_status, b = ProjectStatusChoice.objects.get_or_create(
+        self.project_status, _ = ProjectStatusChoice.objects.get_or_create(
             name="Active"
         )
-        field_of_science, b = FieldOfScience.objects.get_or_create(description="Other")
+        field_of_science, _ = FieldOfScience.objects.get_or_create(description="Other")
 
         # Create a group and three users
-        self.group, b = Group.objects.get_or_create(name="RIS-UserSupport")
+        self.group, _ = Group.objects.get_or_create(name="RIS-UserSupport")
         # Define user attributes
         user_attributes = [
             {"username": "user1"},
@@ -34,27 +34,27 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         # Create users and store them in an array
         self.users = []
         for attrs in user_attributes:
-            user, b = User.objects.get_or_create(**attrs)
+            user, _ = User.objects.get_or_create(**attrs)
             self.users.append(user)
             # Add the user to the group
             index = self.users.index(user)
             self.users[index].groups.add(self.group)
 
         # Create two projects with separate PIs
-        self.project1, b = Project.objects.get_or_create(
+        self.project1, _ = Project.objects.get_or_create(
             title="Project1",
             pi=self.users[1],
             status=self.project_status,
             field_of_science=field_of_science,
         )
-        self.project2, b = Project.objects.get_or_create(
+        self.project2, _ = Project.objects.get_or_create(
             title="Project2",
             pi=self.users[2],
             status=self.project_status,
             field_of_science=field_of_science,
         )
 
-        self.projectuser_role, b = ProjectUserRoleChoice.objects.get_or_create(
+        self.projectuser_role, _ = ProjectUserRoleChoice.objects.get_or_create(
             name="Manager"
         )
 
