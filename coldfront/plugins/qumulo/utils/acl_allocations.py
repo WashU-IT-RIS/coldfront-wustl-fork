@@ -88,24 +88,6 @@ class AclAllocations:
         )
 
     @staticmethod
-    def create_ad_group_and_add_users(
-        wustlkeys: list,
-        allocation: Allocation,
-        active_directory_api: Optional[ActiveDirectoryAPI] = None,
-    ) -> None:
-        if not active_directory_api:
-            active_directory_api = ActiveDirectoryAPI()
-
-        group_name = allocation.get_attribute(name="storage_acl_name")
-
-        active_directory_api.create_ad_group(group_name)
-
-        for wustlkey in wustlkeys:
-            active_directory_api.add_user_to_ad_group(
-                wustlkey=wustlkey, group_name=group_name
-            )
-
-    @staticmethod
     def get_access_allocation(storage_allocation: Allocation, resource_name: str):
         def filter_func(access_allocation: Allocation):
             try:
