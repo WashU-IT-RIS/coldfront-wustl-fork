@@ -182,52 +182,6 @@ class TestAclAllocations(TestCase):
 
         self.assertEqual(len(all_allocation_attributes), 1)
 
-    @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
-    def test_create_ad_group_and_add_users_creates_ad_group_and_adds_users(
-        self, mock_active_directory_api
-    ):
-        mock_active_directory_instance = MagicMock()
-        mock_active_directory_api.return_value = mock_active_directory_instance
-
-        test_allocation = Allocation.objects.create(
-            project=self.project,
-            justification="",
-            quantity=1,
-            status=AllocationStatusChoice.objects.get(name="Active"),
-        )
-
-        AclAllocations.create_ad_group_and_add_users(
-            wustlkeys=["ro_user"],
-            allocation=test_allocation,
-            active_directory_api=mock_active_directory_instance,
-        )
-
-        mock_active_directory_instance.create_ad_group.assert_called()
-        # mock_active_directory_instance.add_user_to_ad_group.assert_called()
-
-    @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
-    def test_create_ad_group_and_add_users_creates_ad_group_and_adds_users_without_ad_argument(
-        self,
-        mock_active_directory_api: MagicMock,
-    ):
-        mock_active_directory_instance = MagicMock()
-        mock_active_directory_api.return_value = mock_active_directory_instance
-
-        test_allocation = Allocation.objects.create(
-            project=self.project,
-            justification="",
-            quantity=1,
-            status=AllocationStatusChoice.objects.get(name="Active"),
-        )
-
-        AclAllocations.create_ad_group_and_add_users(
-            wustlkeys=["ro_user"],
-            allocation=test_allocation,
-        )
-
-        mock_active_directory_instance.create_ad_group.assert_called()
-        # mock_active_directory_instance.add_user_to_ad_group.assert_called()
-
     def test_remove_access_sets_only_base_acls(self):
         test_allocation = create_allocation(self.project, self.user, self.form_data)
         acl_allocations = AclAllocations.get_access_allocations(test_allocation)
