@@ -27,6 +27,8 @@ from qumulo.lib.request import RequestError
 import datetime
 from django.utils import timezone
 
+from coldfront.core.utils.mail import send_email_template
+
 
 @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
 class TestPollAdGroup(TestCase):
@@ -284,7 +286,7 @@ class TestAddUsersToADGroup(TestCase):
         return super().setUp()
 
     def test_function_ends_on_empty_list(
-        self, mock_active_directory_api, mock_async_task
+        self, mock_active_directory_api: MagicMock, mock_async_task: MagicMock
     ):
         wustlkeys = []
         self.form_data["ro_users"] = wustlkeys
@@ -300,7 +302,7 @@ class TestAddUsersToADGroup(TestCase):
             self.fail("Function failed with exception: " + e)
 
     def test_checks_first_user_in_list(
-        self, mock_active_directory_api, mock_async_task
+        self, mock_active_directory_api: MagicMock, mock_async_task: MagicMock
     ):
         active_directory_instance = MagicMock()
         mock_active_directory_api.return_value = active_directory_instance
@@ -318,7 +320,7 @@ class TestAddUsersToADGroup(TestCase):
         active_directory_instance.get_user.assert_called_once_with(wustlkeys[0])
 
     def test_adds_user_to_group_after_check(
-        self, mock_active_directory_api, mock_async_task
+        self, mock_active_directory_api: MagicMock, mock_async_task: MagicMock
     ):
         active_directory_instance = MagicMock()
         mock_active_directory_api.return_value = active_directory_instance
@@ -339,7 +341,7 @@ class TestAddUsersToADGroup(TestCase):
         )
 
     def test_adds_new_task_with_sliced_list(
-        self, mock_active_directory_api, mock_async_task
+        self, mock_active_directory_api: MagicMock, mock_async_task: MagicMock
     ):
         wustlkeys = ["foo", "bar"]
         self.form_data["rw_users"] = wustlkeys
@@ -358,7 +360,7 @@ class TestAddUsersToADGroup(TestCase):
         )
 
     def test_appends_bad_user_list_on_invalid_user(
-        self, mock_active_directory_api, mock_async_task
+        self, mock_active_directory_api: MagicMock, mock_async_task: MagicMock
     ):
         active_directory_instance = MagicMock()
         active_directory_instance.get_user.side_effect = ValueError("Invalid wustlkey")
@@ -372,10 +374,7 @@ class TestAddUsersToADGroup(TestCase):
             storage_allocation=allocation, resource_name="rw"
         )
 
-        try:
-            addUsersToADGroup(wustlkeys, acl_allocation)
-        except Exception as e:
-            self.fail("Function failed with exception: " + e)
+        addUsersToADGroup(wustlkeys, acl_allocation)
 
         mock_async_task.assert_called_once()
         self.assertTupleEqual(
@@ -384,7 +383,7 @@ class TestAddUsersToADGroup(TestCase):
         )
 
     def test_removes_bad_users_on_completion(
-        self, mock_active_directory_api, mock_async_task
+        self, mock_active_directory_api: MagicMock, mock_async_task: MagicMock
     ):
         mock_async_task.side_effect = lambda *args: args[0](*args[1])
 
@@ -411,7 +410,6 @@ class TestAddUsersToADGroup(TestCase):
         )
 
         addUsersToADGroup(wustlkeys, acl_allocation, [])
-
         allocation_users = list(
             map(
                 lambda allocation_user: allocation_user.user.username,
@@ -430,6 +428,25 @@ class TestAddUsersToADGroup(TestCase):
             )
         )
         self.assertListEqual(garbage_allocation_users, wustlkeys)
+
+    @patch("coldfront.plugins.qumulo.tasks.send_email_template")
+    def test_sends_notifications_on_bad_users(
+        self,
+        mock_send_email_template: MagicMock,
+        mock_active_directory_api: MagicMock,
+        mock_async_task,
+    ):
+        wustlkeys = ["foo", "bar"]
+        self.form_data["rw_users"] = wustlkeys
+
+        allocation = create_allocation(self.project, self.user, self.form_data)
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="rw"
+        )
+
+        addUsersToADGroup([], acl_allocation, wustlkeys)
+
+        mock_send_email_template.assert_called_once()
 
     def __get_user_mock(self, username: str, good_users: bool):
         if username in good_users:

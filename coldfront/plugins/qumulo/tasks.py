@@ -11,6 +11,8 @@ from coldfront.core.allocation.models import (
     AllocationUser,
 )
 from coldfront.core.resource.models import Resource
+from coldfront.core.utils.mail import send_email_template, email_template_context
+from coldfront.core.utils.common import import_from_settings
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -107,6 +109,25 @@ def addUsersToADGroup(
             username_filter = Q(user__username__in=bad_keys)
             allocation_filter = Q(allocation=acl_allocation)
             AllocationUser.objects.filter(username_filter & allocation_filter).delete()
+
+            ctx = email_template_context()
+
+            CENTER_BASE_URL = import_from_settings("CENTER_BASE_URL")
+            ctx["allocation_url"] = f"{CENTER_BASE_URL}/allocation/{acl_allocation.id}"
+            ctx["access_type"] = (
+                "Read Only"
+                if acl_allocation.resources.first().name == "ro"
+                else "Read Write"
+            )
+            ctx["invalid_users"] = bad_keys
+
+            send_email_template(
+                subject="Users not found in Storage Allocation",
+                template_name="email/invalid_users.txt",
+                template_context=ctx,
+                sender=import_from_settings("DEFAULT_FROM_EMAIL"),
+                receiver_list=[],
+            )
         return
 
     group_name = acl_allocation.get_attribute("storage_acl_name")
