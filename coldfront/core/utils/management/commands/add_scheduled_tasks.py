@@ -30,6 +30,8 @@ class Command(BaseCommand):
 
         schedule(
             "coldfront.core.group.tasks.grant_usersupport_global_project_manager",
-            schedule_type=Schedule.DAILY,
-            next_run=date,
+            schedule_type=Schedule.MINUTES,
+            next_run=(timezone.now() + datetime.timedelta(minutes=5)).replace(
+                hour=0, minute=0, second=0, microsecond=0
+            ),
         )
