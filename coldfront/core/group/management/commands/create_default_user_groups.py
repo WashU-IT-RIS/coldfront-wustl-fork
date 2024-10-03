@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 
-# Default permissions for the RIS-UserSupport group
+# Default permissions for the RIS-UserSupport user_group
 DEFAULT_RIS_USERSUPPORT_GROUP_PROJECT_PERMISSIONS = [
     {"id": 53, "codename": "add_project"},
     {"id": 54, "codename": "change_project"},
@@ -157,7 +157,7 @@ DEFAULT_RIS_USERSUPPORT_GROUP_ALLOCATION_PERMISSIONS = [
     {"id": 253, "codename": "view_allocationattributechangerequest"},
 ]
 
-# Combine all permissions for the RIS-UserSupport group
+# Combine all permissions for the RIS-UserSupport user_group
 DEFAULT_RIS_USERSUPPORT_GROUP_PERMISSIONS = []
 DEFAULT_RIS_USERSUPPORT_GROUP_PERMISSIONS.append(
     DEFAULT_RIS_USERSUPPORT_GROUP_PROJECT_PERMISSIONS,
@@ -181,10 +181,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Creating default user groups ...")
-        for group in DEFAULT_RIS_USER_GROUPS:
-            group_obj, is_created = Group.objects.get_or_create(name=group["name"])
+        for user_group in DEFAULT_RIS_USER_GROUPS:
+            group_obj, b = Group.objects.get_or_create(name=user_group["name"])
             permission_query_set = Permission.objects.filter(
-                id__in=[p["id"] for p in group["permissions"]]
+                id__in=[permission["id"] for permission in user_group["permissions"]]
             ).all()
             group_obj.permissions.add(*permission_query_set)
 
