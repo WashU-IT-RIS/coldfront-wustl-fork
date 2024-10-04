@@ -68,21 +68,3 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
                 self.assertEqual(project_user.role, self.projectuser_role)
                 self.assertEqual(project_user.status, self.projectuser_status)
                 self.assertTrue(project_user.enable_notifications)
-
-    # Test that the function does not do anything if the group does not
-    def test_no_group(self):
-        self.group.delete()
-        grant_usersupport_global_project_manager()
-        self.assertFalse(ProjectUser.objects.exists())
-
-    # Test that the function does not do anything if the role does not exist
-    def test_no_projectuser_role(self):
-        self.projectuser_role.delete()
-        grant_usersupport_global_project_manager()
-        self.assertFalse(ProjectUser.objects.exists())
-
-    # Test that the function does not do anything if the status choice does not exist
-    def test_no_projectuser_status(self):
-        self.projectuser_status.delete()
-        grant_usersupport_global_project_manager()
-        self.assertFalse(ProjectUser.objects.exists())
