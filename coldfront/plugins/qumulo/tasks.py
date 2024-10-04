@@ -223,6 +223,10 @@ class ResetAcl(object):
         self.__log_acl(f'Resetting "directory content" ACLs for path: {path}')
     # </debugging functions>
 
+    # bmulligan 20241004: we use this to make ad-hoc connections to qumulo as
+    # the API client gets used throughout this class.  this technique was
+    # developed because the framework was complaining that certain sub-classes
+    # or dependent objects (SSL-related) "couldn't be pickled"
     def _setup_qumulo_api(self):
         if self.qumulo_api is None:
             self.qumulo_api = QumuloAPI()
