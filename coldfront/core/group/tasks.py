@@ -19,11 +19,15 @@ def grant_usersupport_global_project_manager() -> None:
         raise ValueError(f"Group {group_name} not found")
 
     # If the role or status choices do not exist raise an exception
-    project_user_role = ProjectUserRoleChoice.objects.filter(name="Manager").first()
-    project_user_status = ProjectUserStatusChoice.objects.filter(name="Active").first()
+    role_name = "Manager"
+    project_user_role = ProjectUserRoleChoice.objects.filter(name=role_name).first()
+    status_name = "Active"
+    project_user_status = ProjectUserStatusChoice.objects.filter(
+        name=status_name
+    ).first()
     if not project_user_role and project_user_status:
         raise ValueError(
-            f"ProjectUserRole {project_user_role} or ProjectUserStatus {project_user_status} not found"
+            f"ProjectUserRole {role_name} or ProjectUserStatus {status_name} not found"
         )
 
     # If the group does not exist raise an exception
