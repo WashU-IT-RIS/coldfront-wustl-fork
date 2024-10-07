@@ -15,7 +15,11 @@ from coldfront.plugins.qumulo.validators import (
     validate_storage_name,
 )
 
-from coldfront.plugins.qumulo.constants import STORAGE_SERVICE_RATES, PROTOCOL_OPTIONS
+from coldfront.plugins.qumulo.constants import (
+    STORAGE_SERVICE_RATES,
+    PROTOCOL_OPTIONS,
+    BILLING_CYCLE_OPTIONS,
+)
 
 
 from coldfront.core.allocation.models import (
@@ -58,6 +62,14 @@ class AllocationForm(forms.Form):
         help_text="Who should be contacted regarding billing details. Accepts a single WUSTL key.",
         label="Billing Contact",
         validators=[validate_single_ad_user],
+        required=False,
+    )
+    billing_cycle = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(),
+        choices=BILLING_CYCLE_OPTIONS,
+        label="Billing Cycle Options",
+        help_text="Choose one billing cycle option from the above list",
+        initial=["prepaid"],
         required=False,
     )
     service_rate = forms.ChoiceField(
