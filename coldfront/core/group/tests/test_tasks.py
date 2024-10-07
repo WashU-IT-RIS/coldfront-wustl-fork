@@ -57,7 +57,7 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
         )
 
     # POSITIVE TESTS
-    # Test that the grant_usersupport_global_project_manager function works as expected
+    # Test that all users are no part of the expected group
     def test_grant_usersupport_global_project_manager(self):
         grant_usersupport_global_project_manager()
 
@@ -69,3 +69,23 @@ class GrantUserSupportGlobalProjectManagerTest(TestCase):
                 self.assertTrue(project_user.enable_notifications)
 
     # NEGATIVE TESTS
+    # Test for ValueError when the group does not exist
+    def test_grant_usersupport_global_project_manager_group_not_found(self):
+        self.group.delete()
+
+        with self.assertRaises(ValueError):
+            grant_usersupport_global_project_manager()
+
+    # Test for ValueError when the role or status choices do not exist
+    def test_grant_usersupport_global_project_manager_role_not_found(self):
+        self.projectuser_role.delete()
+
+        with self.assertRaises(ValueError):
+            grant_usersupport_global_project_manager()
+
+    # Test for ValueError when no projects are found
+    def test_grant_usersupport_global_project_manager_no_projects(self):
+        Project.objects.all().delete()
+
+        with self.assertRaises(ValueError):
+            grant_usersupport_global_project_manager()
