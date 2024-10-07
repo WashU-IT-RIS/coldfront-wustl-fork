@@ -418,57 +418,6 @@ class TestAddUsersToADGroup(TestCase):
             (addUsersToADGroup, (["bar"], acl_allocation, ["foo"])),
         )
 
-    # def test_removes_bad_users_on_completion(
-    #     self,
-    #     mock_active_directory_api: MagicMock,
-    #     mock_async_task: MagicMock,
-    #     mock_allocation_view_AD: MagicMock,
-    #     mock_allocation_view_async_task,
-    # ):
-    #     mock_async_task.side_effect = lambda *args: args[0](*args[1])
-
-    #     wustlkeys = ["foo", "bar", "baz"]
-    #     good_keys = wustlkeys[0:1]
-
-    #     active_directory_instance = MagicMock()
-    #     active_directory_instance.get_user.side_effect = (
-    #         lambda username: self.__get_user_mock(username, good_keys)
-    #     )
-    #     mock_active_directory_api.return_value = active_directory_instance
-
-    #     form_data = self.form_data
-    #     form_data["rw_users"] = wustlkeys
-
-    #     garbage_allocation = self.create_allocation(
-    #         user=self.user, form_data=form_data
-    #     )["allocation"]
-    #     base_allocation = self.create_allocation(user=self.user, form_data=form_data)[
-    #         "allocation"
-    #     ]
-    #     acl_allocation = AclAllocations.get_access_allocation(
-    #         storage_allocation=base_allocation, resource_name="rw"
-    #     )
-
-    #     addUsersToADGroup(wustlkeys, acl_allocation, [])
-    #     allocation_users = list(
-    #         map(
-    #             lambda allocation_user: allocation_user.user.username,
-    #             AllocationUser.objects.filter(allocation=acl_allocation),
-    #         )
-    #     )
-    #     self.assertListEqual(allocation_users, good_keys)
-
-    #     garbage_acl_allocation = AclAllocations.get_access_allocation(
-    #         storage_allocation=garbage_allocation, resource_name="rw"
-    #     )
-    #     garbage_allocation_users = list(
-    #         map(
-    #             lambda allocation_user: allocation_user.user.username,
-    #             AllocationUser.objects.filter(allocation=garbage_acl_allocation),
-    #         )
-    #     )
-    #     self.assertListEqual(garbage_allocation_users, wustlkeys)
-
     @patch("coldfront.plugins.qumulo.tasks.send_email_template")
     def test_sends_notifications_on_bad_users(
         self,
