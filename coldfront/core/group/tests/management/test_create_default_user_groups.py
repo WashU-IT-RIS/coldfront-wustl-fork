@@ -35,7 +35,7 @@ class CreateDefaultUserGroupsTest(TestCase):
         )
 
     # NEGATIVE TESTS
-    # Test that the RIS-UserSupport group has all permissions in the auth_permission table
+    # Test that the RIS-UserSupport group DOES NOT have all permissions in the auth_permission table
     def test_ris_usersupport_group_all_permissions(self):
         call_command("create_default_user_groups")
         group = Group.objects.filter(name="RIS-UserSupport").first()
