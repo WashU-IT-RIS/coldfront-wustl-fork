@@ -110,9 +110,9 @@ def addUsersToADGroup(
 ) -> None:
     if len(wustlkeys) == 0:
         if len(bad_keys) > 0:
-            username_filter = Q(user__username__in=bad_keys)
-            allocation_filter = Q(allocation=acl_allocation)
-            AllocationUser.objects.filter(username_filter & allocation_filter).delete()
+            # username_filter = Q(user__username__in=bad_keys)
+            # allocation_filter = Q(allocation=acl_allocation)
+            # AllocationUser.objects.filter(username_filter & allocation_filter).delete()
 
             __send_invalid_users_email(acl_allocation, bad_keys)
         return
