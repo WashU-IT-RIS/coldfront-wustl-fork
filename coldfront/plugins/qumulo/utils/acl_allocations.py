@@ -77,16 +77,6 @@ class AclAllocations:
         except LDAPException as e:
             Allocation.delete(allocation)
 
-    def create_acl_allocations(self, ro_users: list, rw_users: list):
-        active_directory_api = ActiveDirectoryAPI()
-
-        self.create_acl_allocation(
-            acl_type="ro", users=ro_users, active_directory_api=active_directory_api
-        )
-        self.create_acl_allocation(
-            acl_type="rw", users=rw_users, active_directory_api=active_directory_api
-        )
-
     @staticmethod
     def get_access_allocation(storage_allocation: Allocation, resource_name: str):
         def filter_func(access_allocation: Allocation):

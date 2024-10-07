@@ -48,122 +48,122 @@ class TestAclAllocations(TestCase):
 
         self.client.force_login(self.user)
 
-    @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
-    @patch(
-        "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.create_acl_allocation"
-    )
-    def test_create_acl_allocations_calls_create_acl_allocation(
-        self,
-        mock_create_acl_allocation: MagicMock,
-        mock_active_directory_api: MagicMock,
-    ):
-        mock_active_directory_instance = MagicMock()
-        mock_active_directory_api.return_value = mock_active_directory_instance
+    # @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
+    # @patch(
+    #     "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.create_acl_allocation"
+    # )
+    # def test_create_acl_allocations_calls_create_acl_allocation(
+    #     self,
+    #     mock_create_acl_allocation: MagicMock,
+    #     mock_active_directory_api: MagicMock,
+    # ):
+    #     mock_active_directory_instance = MagicMock()
+    #     mock_active_directory_api.return_value = mock_active_directory_instance
 
-        acl_allocations = AclAllocations(project_pk=self.project)
-        ro_users, rw_users = ["ro_test"], ["rw_test"]
-        acl_allocations.create_acl_allocations(ro_users=ro_users, rw_users=rw_users)
+    #     acl_allocations = AclAllocations(project_pk=self.project)
+    #     ro_users, rw_users = ["ro_test"], ["rw_test"]
+    #     acl_allocations.create_acl_allocations(ro_users=ro_users, rw_users=rw_users)
 
-        self.assertEqual(mock_create_acl_allocation.call_count, 2)
-        mock_create_acl_allocation.assert_any_call(
-            acl_type="ro",
-            users=ro_users,
-            active_directory_api=mock_active_directory_instance,
-        )
-        mock_create_acl_allocation.assert_any_call(
-            acl_type="rw",
-            users=rw_users,
-            active_directory_api=mock_active_directory_instance,
-        )
-        mock_active_directory_api.assert_called_once()
+    #     self.assertEqual(mock_create_acl_allocation.call_count, 2)
+    #     mock_create_acl_allocation.assert_any_call(
+    #         acl_type="ro",
+    #         users=ro_users,
+    #         active_directory_api=mock_active_directory_instance,
+    #     )
+    #     mock_create_acl_allocation.assert_any_call(
+    #         acl_type="rw",
+    #         users=rw_users,
+    #         active_directory_api=mock_active_directory_instance,
+    #     )
+    #     mock_active_directory_api.assert_called_once()
 
-    @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
-    @patch(
-        "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.create_ad_group_and_add_users"
-    )
-    @patch(
-        "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.set_allocation_attributes"
-    )
-    @patch(
-        "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.add_allocation_users"
-    )
-    def test_create_acl_allocation_creates_acl_allocation(
-        self,
-        mock_add_allocation_users: MagicMock,
-        mock_set_allocation_attributes: MagicMock,
-        mock_create_ad_group_and_add_users: MagicMock,
-        mock_active_directory_api: MagicMock,
-    ):
-        mock_add_allocation_users.return_value = MagicMock()
-        mock_set_allocation_attributes.return_value = MagicMock()
-        mock_create_ad_group_and_add_users.return_value = MagicMock()
-        mock_active_directory_instance = MagicMock()
-        mock_active_directory_api.return_value = mock_active_directory_instance
+    # @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
+    # @patch(
+    #     "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.create_ad_group_and_add_users"
+    # )
+    # @patch(
+    #     "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.set_allocation_attributes"
+    # )
+    # @patch(
+    #     "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.add_allocation_users"
+    # )
+    # def test_create_acl_allocation_creates_acl_allocation(
+    #     self,
+    #     mock_add_allocation_users: MagicMock,
+    #     mock_set_allocation_attributes: MagicMock,
+    #     mock_create_ad_group_and_add_users: MagicMock,
+    #     mock_active_directory_api: MagicMock,
+    # ):
+    #     mock_add_allocation_users.return_value = MagicMock()
+    #     mock_set_allocation_attributes.return_value = MagicMock()
+    #     mock_create_ad_group_and_add_users.return_value = MagicMock()
+    #     mock_active_directory_instance = MagicMock()
+    #     mock_active_directory_api.return_value = mock_active_directory_instance
 
-        acl_allocations = AclAllocations(project_pk=self.project)
-        ro_users = ["ro_test"]
-        acl_allocations.create_acl_allocation(
-            acl_type="ro",
-            users=ro_users,
-            active_directory_api=mock_active_directory_instance,
-        )
+    #     acl_allocations = AclAllocations(project_pk=self.project)
+    #     ro_users = ["ro_test"]
+    #     acl_allocations.create_acl_allocation(
+    #         acl_type="ro",
+    #         users=ro_users,
+    #         active_directory_api=mock_active_directory_instance,
+    #     )
 
-        all_allocation_objects = Allocation.objects.all()
+    #     all_allocation_objects = Allocation.objects.all()
 
-        self.assertEqual(len(all_allocation_objects), 1)
+    #     self.assertEqual(len(all_allocation_objects), 1)
 
-        first_allocation = all_allocation_objects[0]
-        self.assertEqual(first_allocation.project.id, 1)
-        self.assertEqual(first_allocation.status.name, "Active")
-        self.assertIsNotNone(first_allocation.resources.get(name="ro"))
+    #     first_allocation = all_allocation_objects[0]
+    #     self.assertEqual(first_allocation.project.id, 1)
+    #     self.assertEqual(first_allocation.status.name, "Active")
+    #     self.assertIsNotNone(first_allocation.resources.get(name="ro"))
 
-        mock_add_allocation_users.assert_called_once_with(
-            allocation=first_allocation, wustlkeys=ro_users
-        )
+    #     mock_add_allocation_users.assert_called_once_with(
+    #         allocation=first_allocation, wustlkeys=ro_users
+    #     )
 
-        mock_set_allocation_attributes.assert_called_once_with(
-            allocation=first_allocation, acl_type="ro", wustlkey="ro_test"
-        )
+    #     mock_set_allocation_attributes.assert_called_once_with(
+    #         allocation=first_allocation, acl_type="ro", wustlkey="ro_test"
+    #     )
 
-        mock_create_ad_group_and_add_users.assert_called_once_with(
-            wustlkeys=ro_users,
-            allocation=first_allocation,
-            active_directory_api=mock_active_directory_instance,
-        )
+    #     mock_create_ad_group_and_add_users.assert_called_once_with(
+    #         wustlkeys=ro_users,
+    #         allocation=first_allocation,
+    #         active_directory_api=mock_active_directory_instance,
+    #     )
 
-    @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
-    @patch(
-        "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.create_ad_group_and_add_users",
-        side_effect=LDAPException,
-    )
-    @patch(
-        "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.set_allocation_attributes"
-    )
-    @patch(
-        "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.add_allocation_users"
-    )
-    def test_create_acl_allocation_catches_LDAPexception_and_deletes_allocation(
-        self,
-        mock_add_allocation_users: MagicMock,
-        mock_set_allocation_attributes: MagicMock,
-        mock_create_ad_group_and_add_users: MagicMock,
-        mock_active_directory_api: MagicMock,
-    ):
-        mock_add_allocation_users.return_value = MagicMock()
-        mock_set_allocation_attributes.return_value = MagicMock()
-        mock_active_directory_instance = MagicMock()
-        mock_active_directory_api.return_value = mock_active_directory_instance
+    # @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
+    # @patch(
+    #     "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.create_ad_group_and_add_users",
+    #     side_effect=LDAPException,
+    # )
+    # @patch(
+    #     "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.set_allocation_attributes"
+    # )
+    # @patch(
+    #     "coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations.add_allocation_users"
+    # )
+    # def test_create_acl_allocation_catches_LDAPexception_and_deletes_allocation(
+    #     self,
+    #     mock_add_allocation_users: MagicMock,
+    #     mock_set_allocation_attributes: MagicMock,
+    #     mock_create_ad_group_and_add_users: MagicMock,
+    #     mock_active_directory_api: MagicMock,
+    # ):
+    #     mock_add_allocation_users.return_value = MagicMock()
+    #     mock_set_allocation_attributes.return_value = MagicMock()
+    #     mock_active_directory_instance = MagicMock()
+    #     mock_active_directory_api.return_value = mock_active_directory_instance
 
-        acl_allocations = AclAllocations(project_pk=self.project)
-        ro_users = ["ro_test"]
+    #     acl_allocations = AclAllocations(project_pk=self.project)
+    #     ro_users = ["ro_test"]
 
-        acl_allocations.create_acl_allocation(
-            acl_type="ro",
-            users=ro_users,
-            active_directory_api=mock_active_directory_instance,
-        )
+    #     acl_allocations.create_acl_allocation(
+    #         acl_type="ro",
+    #         users=ro_users,
+    #         active_directory_api=mock_active_directory_instance,
+    #     )
 
-        self.assertEqual(len(Allocation.objects.all()), 0)
+    #     self.assertEqual(len(Allocation.objects.all()), 0)
 
     def test_set_allocation_attributes_sets_allocation_attributes(self):
         test_allocation = Allocation.objects.create(

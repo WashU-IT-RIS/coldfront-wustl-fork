@@ -12,8 +12,6 @@ from coldfront.core.allocation.signals import (
     allocation_change_approved,
 )
 
-from django.core.management import call_command
-
 
 def mock_get_attribute(name):
     attribute_dict = {

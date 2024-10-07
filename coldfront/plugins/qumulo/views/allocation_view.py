@@ -104,7 +104,7 @@ class AllocationView(LoginRequiredMixin, FormView):
 
     @staticmethod
     def create_new_allocation(
-        form_data, user, parent_allocation: Optional[Allocation] = None
+        form_data: dict, user, parent_allocation: Optional[Allocation] = None
     ):
         if parent_allocation:
             form_data["storage_name"] = AllocationView._handle_sub_allocation_scoping(
