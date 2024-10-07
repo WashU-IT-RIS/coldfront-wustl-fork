@@ -124,7 +124,7 @@ class UpdateAllocationView(AllocationView):
         for key in access_keys:
             access_users = form_data[key + "_users"]
             self.set_access_users(key, access_users, allocation)
-        
+
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
 
@@ -168,10 +168,10 @@ class UpdateAllocationView(AllocationView):
             allocation_user.user.username for allocation_user in allocation_users
         ]
 
-        users_to_add = set(access_users) - set(allocation_usernames)
-        for access_user in users_to_add:
-            AclAllocations.add_user_to_access_allocation(access_user, access_allocation)
-        async_task(addUsersToADGroup, (access_users, access_allocation))
+        # users_to_add = set(access_users) - set(allocation_usernames)
+        # for access_user in users_to_add:
+        #     AclAllocations.add_user_to_access_allocation(access_user, access_allocation)
+        # async_task(addUsersToADGroup, (access_users, access_allocation))
 
         users_to_remove = set(allocation_usernames) - set(access_users)
         for allocation_username in users_to_remove:

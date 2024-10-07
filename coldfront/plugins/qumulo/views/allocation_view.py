@@ -171,10 +171,10 @@ class AllocationView(LoginRequiredMixin, FormView):
                 value, project, form_data["storage_name"], storage_allocation
             )
 
-            for username in value["users"]:
-                AclAllocations.add_user_to_access_allocation(
-                    username, access_allocation
-                )
+            # for username in value["users"]:
+            # AclAllocations.add_user_to_access_allocation(
+            #         username, access_allocation
+            #     )
 
             access_allocations.append(access_allocation)
 
