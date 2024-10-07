@@ -6,6 +6,7 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
 )
 from coldfront.plugins.qumulo.forms import CreateSubAllocationForm
+from coldfront.plugins.qumulo.views.allocation_view import AllocationView
 from coldfront.plugins.qumulo.views.update_allocation_view import UpdateAllocationView
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
@@ -63,4 +64,6 @@ class CreateSubAllocationView(UpdateAllocationView):
     def form_valid(self, form: CreateSubAllocationForm):
         allocation_id = self.kwargs.get("allocation_id")
         parent_allocation = Allocation.objects.get(pk=allocation_id)
-        return super().form_valid(form, parent_allocation=parent_allocation)
+        return super(AllocationView, self).form_valid(
+            form, parent_allocation=parent_allocation
+        )
