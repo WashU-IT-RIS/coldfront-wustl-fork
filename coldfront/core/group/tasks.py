@@ -13,6 +13,7 @@ def grant_usersupport_global_project_manager() -> None:
     Grant the RIS-UserSupport group Manager status over all Projects
     """
 
+    # If the group does not exist raise an exception
     group_name = "RIS-UserSupport"
     group = Group.objects.filter(name=group_name).first()
     if not group:
@@ -20,8 +21,8 @@ def grant_usersupport_global_project_manager() -> None:
 
     # If the role or status choices do not exist raise an exception
     role_name = "Manager"
-    project_user_role = ProjectUserRoleChoice.objects.filter(name=role_name).first()
     status_name = "Active"
+    project_user_role = ProjectUserRoleChoice.objects.filter(name=role_name).first()
     project_user_status = ProjectUserStatusChoice.objects.filter(
         name=status_name
     ).first()
@@ -30,7 +31,7 @@ def grant_usersupport_global_project_manager() -> None:
             f"ProjectUserRole {role_name} or ProjectUserStatus {status_name} not found"
         )
 
-    # If the group does not exist raise an exception
+    # If no projects found raise and exception
     all_projects = Project.objects.all()
     if not all_projects:
         raise ValueError("No projects found")
