@@ -15,6 +15,7 @@ class Command(BaseCommand):
         self._migrate_allocation_attribute("audit", "No")
         self._migrate_allocation_attribute("exempt", "No")
         self._migrate_allocation_attribute("subsidized", "No")
+        self._migrate_allocation_attribute("billing_cycle", "monthly")
 
         # billing_startdate - nothing to do with the migration
         # it needs to be handled manually or as part of metadata migration

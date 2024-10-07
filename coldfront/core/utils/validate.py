@@ -47,3 +47,12 @@ class AttributeValidator:
         except:
             raise ValidationError(
                 f'Invalid Value {self.value}. Value must be valid JSON.')
+    
+    def validate_billing_cycle(self):
+        BILLING_CYCLE_OPTIONS = ['monthly', 'prepaid']
+        try:
+            validate = validators.OneOf(BILLING_CYCLE_OPTIONS)
+            validate.to_python(self.value)
+        except:
+            raise ValidationError(
+                f'Invalid Value {self.value}. Value must be one of {BILLING_CYCLE_OPTIONS}.')
