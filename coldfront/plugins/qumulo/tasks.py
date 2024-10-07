@@ -117,14 +117,21 @@ def addUsersToADGroup(
             __send_invalid_users_email(acl_allocation, bad_keys)
         return
 
+    wustlkey = wustlkeys[0]
     group_name = acl_allocation.get_attribute("storage_acl_name")
     active_directory_api = ActiveDirectoryAPI()
 
+    success = False
     try:
-        active_directory_api.get_user(wustlkeys[0])
-        active_directory_api.add_user_to_ad_group(wustlkeys[0], group_name)
+        active_directory_api.get_user(wustlkey)
+        success = True
     except ValueError:
-        bad_keys.append(wustlkeys[0])
+        bad_keys.append(wustlkey)
+        success = False
+
+    if success:
+        active_directory_api.add_user_to_ad_group(wustlkey, group_name)
+        AclAllocations.add_user_to_access_allocation(wustlkey, acl_allocation)
 
     async_task(addUsersToADGroup, (wustlkeys[1:], acl_allocation, bad_keys))
 

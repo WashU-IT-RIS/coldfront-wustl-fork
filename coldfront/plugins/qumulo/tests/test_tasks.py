@@ -523,42 +523,42 @@ class TestAddUsersToADGroup(TestCase):
 
         active_directory_instance.add_user_to_ad_group.assert_not_called()
 
-    # def test_ads_good_users_to_allocation(
-    #     self,
-    #     mock_active_directory_api: MagicMock,
-    #     mock_async_task: MagicMock,
-    #     mock_allocation_view_AD: MagicMock,
-    #     mock_allocation_view_async_task,
-    # ):
-    #     mock_async_task.side_effect = lambda *args: args[0](*args[1])
+    def test_ads_good_users_to_allocation(
+        self,
+        mock_active_directory_api: MagicMock,
+        mock_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task,
+    ):
+        mock_async_task.side_effect = lambda *args: args[0](*args[1])
 
-    #     wustlkeys = ["foo", "bar", "baz", "bah"]
-    #     good_keys = wustlkeys[0:2]
+        wustlkeys = ["foo", "bar", "baz", "bah"]
+        good_keys = wustlkeys[0:2]
 
-    #     active_directory_instance = MagicMock()
-    #     active_directory_instance.get_user.side_effect = (
-    #         lambda username: self.__get_user_mock(username, good_keys)
-    #     )
-    #     mock_active_directory_api.return_value = active_directory_instance
+        active_directory_instance = MagicMock()
+        active_directory_instance.get_user.side_effect = (
+            lambda username: self.__get_user_mock(username, good_keys)
+        )
+        mock_active_directory_api.return_value = active_directory_instance
 
-    #     form_data = self.form_data
-    #     form_data["rw_users"] = wustlkeys
+        form_data = self.form_data
+        form_data["rw_users"] = wustlkeys
 
-    #     base_allocation = self.create_allocation(user=self.user, form_data=form_data)[
-    #         "allocation"
-    #     ]
-    #     acl_allocation = AclAllocations.get_access_allocation(
-    #         storage_allocation=base_allocation, resource_name="rw"
-    #     )
+        base_allocation = self.create_allocation(user=self.user, form_data=form_data)[
+            "allocation"
+        ]
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=base_allocation, resource_name="rw"
+        )
 
-    #     addUsersToADGroup(wustlkeys, acl_allocation, [])
-    #     allocation_users = list(
-    #         map(
-    #             lambda allocation_user: allocation_user.user.username,
-    #             AllocationUser.objects.filter(allocation=acl_allocation),
-    #         )
-    #     )
-    #     self.assertListEqual(allocation_users, good_keys)
+        addUsersToADGroup(wustlkeys, acl_allocation, [])
+        allocation_users = list(
+            map(
+                lambda allocation_user: allocation_user.user.username,
+                AllocationUser.objects.filter(allocation=acl_allocation),
+            )
+        )
+        self.assertListEqual(allocation_users, good_keys)
 
 
 @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
