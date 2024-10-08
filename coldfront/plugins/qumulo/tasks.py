@@ -39,6 +39,8 @@ def poll_ad_group(
 
     success = False
 
+    logger.warn(f'Polling Allocation Group "{group_dn}"')
+
     try:
         qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
         success = True
