@@ -61,6 +61,11 @@ class CreateSubAllocationView(UpdateAllocationView):
     def form_valid(self, form: CreateSubAllocationForm):
         allocation_id = self.kwargs.get("allocation_id")
         parent_allocation = Allocation.objects.get(pk=allocation_id)
+        # jprew - skipping update form_valid because *that* skips
+        # the base class form_valid
+
+        # TODO - remove this logic from form_valid; it doesn't belong
+        # in the view layer
         return super(UpdateAllocationView, self).form_valid(
             form, parent_allocation=parent_allocation
         )
