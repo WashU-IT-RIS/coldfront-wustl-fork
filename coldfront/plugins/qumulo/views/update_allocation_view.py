@@ -34,6 +34,9 @@ class UpdateAllocationView(AllocationView):
     template_name = "update_allocation.html"
     success_url = reverse_lazy("home")
 
+    def get_success_url(self):
+        return self.success_url
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form_title'] = 'Update Allocation'
