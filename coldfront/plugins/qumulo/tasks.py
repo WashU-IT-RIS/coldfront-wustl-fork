@@ -62,7 +62,9 @@ def poll_ad_group(
 
 
 def poll_ad_groups() -> None:
+    logger.warn("GETTING RESOURCES")
     resources = Resource.objects.filter(Q(name="rw") | Q(name="ro"))
+    logger.warn(f"got {len(resources)} resources")
     acl_allocations = Allocation.objects.filter(
         status__name="Pending", resources__in=resources
     )
@@ -175,19 +177,15 @@ class ResetAcl(object):
 
     def __init__(self, allocation: Allocation):
         self.allocation = allocation
-        self.debug = ENV.bool('DEBUG', default=False)
-        self.fs_path = allocation.get_attribute(name='storage_filesystem_path')
-        self.is_allocation_root = QumuloAPI.is_allocation_root_path(
-            self.fs_path
-        )
+        self.debug = ENV.bool("DEBUG", default=False)
+        self.fs_path = allocation.get_attribute(name="storage_filesystem_path")
+        self.is_allocation_root = QumuloAPI.is_allocation_root_path(self.fs_path)
         access_allocations = AclAllocations.get_access_allocations(allocation)
         self.rw_group = AclAllocations.get_allocation_rwro_group_name(
-            access_allocations,
-            'rw'
+            access_allocations, "rw"
         )
         self.ro_group = AclAllocations.get_allocation_rwro_group_name(
-            access_allocations,
-            'ro'
+            access_allocations, "ro"
         )
         self.reset_exclude_paths = []
         if self.is_allocation_root:
@@ -200,16 +198,13 @@ class ResetAcl(object):
             if links is not None:
                 for child in links.children.all():
                     self.reset_exclude_paths.append(
-                        child \
-                            .get_attribute(name='storage_filesystem_path') \
-                            .rstrip('/')
+                        child.get_attribute(name="storage_filesystem_path").rstrip("/")
                     )
                     self.sub_allocations.append(child)
         else:
             self._setup_qumulo_api()
             self.parent_aces = AclAllocations.get_sub_allocation_parent_aces(
-                allocation,
-                self.qumulo_api
+                allocation, self.qumulo_api
             )
 
     # <debugging functions>
@@ -221,6 +216,7 @@ class ResetAcl(object):
 
     def __log_acl_reset(self, path):
         self.__log_acl(f'Resetting "directory content" ACLs for path: {path}')
+
     # </debugging functions>
 
     # bmulligan 20241004: we use this to make ad-hoc connections to qumulo as
@@ -234,29 +230,26 @@ class ResetAcl(object):
     def _set_directory_content_acls(self, contents):
         self._setup_qumulo_api()
         for item in contents:
-            item_path = item.get('path', None)
-            item_type = item.get('type', None)
+            item_path = item.get("path", None)
+            item_type = item.get("type", None)
             if None in [item_path, item_type]:
                 # problem: raise some kind of exception or something
-                debug = {'item_path': item_path, 'item_type': item_type}
+                debug = {"item_path": item_path, "item_type": item_type}
                 continue
             acl = AcesManager.get_base_acl()
-            if item_type == 'FS_FILE_TYPE_FILE':
-                acl['aces'] = AcesManager.get_allocation_existing_file_aces(
-                    self.rw_group,
-                    self.ro_group
+            if item_type == "FS_FILE_TYPE_FILE":
+                acl["aces"] = AcesManager.get_allocation_existing_file_aces(
+                    self.rw_group, self.ro_group
                 )
-            elif item_type == 'FS_FILE_TYPE_DIRECTORY':
-                acl['aces'] = \
-                    AcesManager.get_allocation_existing_directory_aces(
-                        self.rw_group,
-                        self.ro_group
-                    )
+            elif item_type == "FS_FILE_TYPE_DIRECTORY":
+                acl["aces"] = AcesManager.get_allocation_existing_directory_aces(
+                    self.rw_group, self.ro_group
+                )
                 if not self.is_allocation_root:
-                    acl['aces'].extend(self.parent_aces)
+                    acl["aces"].extend(self.parent_aces)
             self.__log_acl_reset(item_path)
             self.qumulo_api.rc.fs.set_acl_v2(path=item_path, acl=acl)
-            if item_type == 'FS_FILE_TYPE_DIRECTORY':
+            if item_type == "FS_FILE_TYPE_DIRECTORY":
                 self._set_directory_content_acls(
                     self._get_directory_contents(item_path, True)
                 )
@@ -265,25 +258,22 @@ class ResetAcl(object):
         def filter_helper(item):
             return_value = True
             for path in self.reset_exclude_paths:
-                if item['path'].startswith(path):
+                if item["path"].startswith(path):
                     return_value = False
                     break
             return return_value
+
         self._setup_qumulo_api()
-        ed_resp = list(
-            self.qumulo_api.rc.fs.enumerate_entire_directory(path=path)
-        )
+        ed_resp = list(self.qumulo_api.rc.fs.enumerate_entire_directory(path=path))
         for entry in ed_resp:
             entry.update(
                 (
-                    (k, entry['path'].rstrip('/'))
-                    for k, v in entry.items() if k == 'path'
+                    (k, entry["path"].rstrip("/"))
+                    for k, v in entry.items()
+                    if k == "path"
                 )
             )
-        dc = sorted(
-            ed_resp,
-            key=lambda entry: entry['path']
-        )
+        dc = sorted(ed_resp, key=lambda entry: entry["path"])
         if skip_filter:
             return dc
         return list(filter(filter_helper, dc))
@@ -294,7 +284,7 @@ class ResetAcl(object):
         acl = AcesManager.get_base_acl()
         # 1.) Clear aces from exisitng ACLs
         if self.is_allocation_root:
-            initial_walk_path = f'{fs_path}/Active'
+            initial_walk_path = f"{fs_path}/Active"
             for path in [fs_path, initial_walk_path]:
                 self.qumulo_api.rc.fs.set_acl_v2(path=path, acl=acl)
         else:
@@ -303,21 +293,15 @@ class ResetAcl(object):
         # 2.) Run logic to set default ACLs on allocation directories
         AclAllocations.reset_allocation_acls(self.allocation, self.qumulo_api)
         # 3.) Walk the directory tree setting default file and directory ACLs
-        self.__log_acl(
-            f'Starting ACL reset walk with path: {initial_walk_path}'
-        )
+        self.__log_acl(f"Starting ACL reset walk with path: {initial_walk_path}")
         self._set_directory_content_acls(
             self._get_directory_contents(initial_walk_path)
         )
-        self.__log_acl(
-            f'...{initial_walk_path} ACL reset directory walk complete'
-        )
+        self.__log_acl(f"...{initial_walk_path} ACL reset directory walk complete")
 
 
 def reset_allocation_acls(
-    user_email: str,
-    allocation: Allocation,
-    reset_subs: bool = False
+    user_email: str, allocation: Allocation, reset_subs: bool = False
 ):
     ra_object = ResetAcl(allocation)
     ra_object.run_allocation_acl_reset()
