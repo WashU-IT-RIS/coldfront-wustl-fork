@@ -5,6 +5,8 @@ import formencode
 from formencode import validators, Invalid
 import json
 
+from coldfront.core.constants import BILLING_CYCLE_OPTIONS
+
 class AttributeValidator:
 
     def __init__(self, value):
@@ -49,7 +51,6 @@ class AttributeValidator:
                 f'Invalid Value {self.value}. Value must be valid JSON.')
     
     def validate_billing_cycle(self):
-        BILLING_CYCLE_OPTIONS = ['monthly', 'prepaid']
         try:
             validate = validators.OneOf(BILLING_CYCLE_OPTIONS)
             validate.to_python(self.value)
