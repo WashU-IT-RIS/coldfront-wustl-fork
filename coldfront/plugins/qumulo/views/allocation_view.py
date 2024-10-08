@@ -6,6 +6,7 @@ from django.urls import reverse_lazy, reverse
 from typing import Optional
 
 import json
+import logging
 import os
 
 from coldfront.core.allocation.models import (
@@ -31,6 +32,9 @@ class AllocationView(LoginRequiredMixin, FormView):
     form_class = AllocationForm
     template_name = "allocation.html"
     new_allocation = None
+    success_url = reverse_lazy("home")
+    success_id = None
+    logger = logging.getLogger(__name__)
 
     def get_form_kwargs(self):
         kwargs = super(AllocationView, self).get_form_kwargs()
@@ -59,17 +63,20 @@ class AllocationView(LoginRequiredMixin, FormView):
                 prepend_val = storage_root
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
-        validate_filesystem_path_unique(absolute_path)
+        # validate_filesystem_path_unique(absolute_path)
 
         self.new_allocation = AllocationView.create_new_allocation(
             form_data, user, parent_allocation
         )
         self.success_id = self.new_allocation.get("allocation").id
+        self.logger.warn(f'AllocationView set success_id: {self.success_id}')
 
         return super().form_valid(form)
 
     def get_success_url(self):
-
+        self.logger.warn(f'AllocationView get_success_url() called; success_id is {self.success_id}.')
+        if self.success_id is None:
+            return super().get_success_url()
         return reverse(
             "qumulo:updateAllocation",
             kwargs={"allocation_id": self.success_id},

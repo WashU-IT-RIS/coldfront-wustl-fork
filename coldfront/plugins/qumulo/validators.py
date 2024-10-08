@@ -165,8 +165,8 @@ def validate_storage_name(value: str):
 def validate_relative_path(value: str):
     path = PurePath(value)
     if (
-        PurePath(value).is_absolute()
-        or len(path.parts) != 1
+        not PurePath(value).is_absolute()
+        and len(path.parts) != 1
     ):
         raise ValidationError(
             message=gettext_lazy("Only relative paths with no slashes are allowed"),

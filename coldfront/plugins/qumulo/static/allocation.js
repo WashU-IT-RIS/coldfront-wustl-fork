@@ -20,32 +20,36 @@ if (!nfsCheckBox.checked) {
 
 let confirmed = false;
 
+window.addEventListener('load', (windowEvent) => {
 const submitButton = document.getElementById("allocation_form_submit");
-submitButton.addEventListener("click", (event) => {
-  const id_project_pk_elem = document.getElementById("div_id_project_pk");
-  const smb = protocols.find((protocol) => protocol.value === "smb");
+  submitButton.addEventListener("click", (event) => {
+    const id_project_pk_elem = document.getElementById("div_id_project_pk");
+    const smb = protocols.find((protocol) => protocol.value === "smb");
 
-  // NOTE: we're using id_project_pk to determine whether we are on a
-  // parent or sub-allocation creation page
-  if (id_project_pk_elem && !smb.checked && !confirmed) {
-    const modal = $("#smb_warning_modal");
-    modal.modal("show");
+    // NOTE: we're using id_project_pk to determine whether we are on a
+    // parent or sub-allocation creation page
+    if (id_project_pk_elem && !smb.checked && !confirmed) {
+      const modal = $("#smb_warning_modal");
+      modal.modal("show");
 
-    event.preventDefault();
-  }
+      event.preventDefault();
+    }
+  });
 });
 
 
 const dialogSubmitButton = document.getElementById("smb_warning_button_submit");
-dialogSubmitButton.addEventListener("click", (event) => {
-  confirmed = true;
+if( dialogSubmitButton ){
+  dialogSubmitButton.addEventListener("click", (event) => {
+    confirmed = true;
 
-  const modal = $("#smb_warning_modal");
-  modal.modal("hide");
+    const modal = $("#smb_warning_modal");
+    modal.modal("hide");
 
-  submitButton.click();
-  confirmed = false;
-});
+    submitButton.click();
+    confirmed = false;
+  });
+}
 
 function handleExportPathInput(event) {
   const isChecked = event.target.checked;

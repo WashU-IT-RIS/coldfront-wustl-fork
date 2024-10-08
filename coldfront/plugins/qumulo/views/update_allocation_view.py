@@ -30,6 +30,7 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 logger = logging.getLogger(__name__)
 
 class UpdateAllocationView(AllocationView):
+    logger = logging.getLogger(__name__)
     form_class = UpdateAllocationForm
     template_name = "update_allocation.html"
     success_url = reverse_lazy("home")
@@ -154,7 +155,10 @@ class UpdateAllocationView(AllocationView):
             allocation=allocation,
         )
 
-        if storage_quota_attribute.value != form_data.get("storage_quota"):
+        if (
+            float(storage_quota_attribute.value) != 
+            float(form_data.get("storage_quota"))
+        ):
             AllocationAttributeChangeRequest.objects.create(
                 allocation_attribute=storage_quota_attribute,
                 allocation_change_request=allocation_change_request,
@@ -177,21 +181,48 @@ class UpdateAllocationView(AllocationView):
                 new_value=storage_protocols,
             )
 
+        storage_ticket = form_data.get('storage_ticket')
+        storage_ticket_attribute = AllocationAttribute.objects.get(
+            allocation_attribute_type=AllocationAttributeType.objects.get(
+                name="storage_ticket"
+            ),
+            allocation=allocation,
+        )
+
+        if storage_ticket_attribute.value != storage_ticket:
+            AllocationAttributeChangeRequest.objects.create(
+                allocation_attribute=storage_ticket_attribute,
+                allocation_change_request=allocation_change_request,
+                new_value=storage_ticket,
+            )
+
         access_keys = ["rw", "ro"]
         for key in access_keys:
             access_users = form_data[key + "_users"]
             self.set_access_users(key, access_users, allocation)
-        
+
         # needed for redirect logic to work
-        self.success_id = str(allocation.id)
+        # bmulligan 20241008: no, it isn't--now handled in AllocationView
+        # self.success_id = str(allocation.id)
 
     def form_valid(self, form: UpdateAllocationForm):
+        self.logger.warn('UpdateAllocationView form_valid() called')
         if 'reset_acls' in self.request.POST:
+            self.logger.warn('UpdateAllocationView form_valid() calling reset_acls()')
             self._reset_acls()
         else:
+            self.logger.warn('UpdateAllocationView form_valid() calling updated_fields_handler()')
             self._updated_fields_handler(form)
         return super(AllocationView, self).form_valid(form=form)
 
+
+    def post(self, request, *args, **kwargs):
+        form = UpdateAllocationForm(request.POST, user_id=request.user.id)
+        if form.is_valid():
+            self.logger.warn('UpdateAllocationView.post() form is valid')
+        else:
+            self.logger.warn(f'UpdateAllocationView.post() form is not valid, errors: {form.errors}, post: {request.POST}')
+        return super().post(request, *args, **kwargs)
 
     @staticmethod
     def _handle_attribute_change(

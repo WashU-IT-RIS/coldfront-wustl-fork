@@ -242,7 +242,10 @@ class QumuloAPI:
                     else:
                         logging.warn("Name or Export Path is not defined.")
 
-        self.update_quota(fs_path=fs_path, limit_in_bytes=limit_in_bytes)
+        try:
+            self.update_quota(fs_path=fs_path, limit_in_bytes=limit_in_bytes)
+        except RequestError:
+            self.create_quota(fs_path=fs_path, limit_in_bytes=limit_in_bytes)
 
     def update_nfs_export(
         self, export_id, export_path=None, fs_path=None, description=None
