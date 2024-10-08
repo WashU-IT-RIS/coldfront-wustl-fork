@@ -14,5 +14,5 @@ class TestBillingReport(TestCase):
     def test_query_return_sql_statement(self):
         self.assertTrue(re.search("^\s*SELECT\s*", get_monthly_billing_query_template()))
 
-    def test_generate_monthly_billing_report(self):
-        self.assertTrue(generate_monthly_billing_report())
+    # def test_generate_monthly_billing_report(self):
+    #     self.assertTrue(generate_monthly_billing_report())

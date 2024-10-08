@@ -1,6 +1,9 @@
+import logging
 import csv
 from datetime import datetime, timedelta
 from django.db import connection
+
+logger = logging.getLogger(__name__)
 
 YYYY_MM_DD = "%Y-%m-%d"
 
@@ -110,10 +113,10 @@ FROM (
 ) AS report where report.billing_unit > 0;
 """
 
-def get_report_header():
+def get_report_header() -> str:
     return REPORT_HEADER
 
-def get_monthly_billing_query_template():
+def get_monthly_billing_query_template() -> str:
     return QUERY_MONTHLY_BILLING
 
 def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).strftime(YYYY_MM_DD)) -> bool:
@@ -124,11 +127,17 @@ def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).s
     # The service month for billing
     billing_month = datetime.strptime(delivery_date, YYYY_MM_DD).strftime("%B")
 
-    with connection.cursor() as cursor:
-        monthly_billing_query = get_monthly_billing_query_template() % (document_date, billing_month, delivery_date, usage_date)
-        print(monthly_billing_query)
-        cursor.execute(monthly_billing_query)
-        rows = cursor.fetchall()
+    monthly_billing_query = get_monthly_billing_query_template() % (document_date, billing_month, delivery_date, usage_date)
+    logger.debug("Monthly billing query: %s", monthly_billing_query)
+
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute(monthly_billing_query)
+            rows = cursor.fetchall()
+
+    except Exception as e:
+        logger.error("[Error] Database error: %s", e)
+        return False
 
     filename = '/tmp/RIS-%s-storage2-active-billing.csv' % billing_month
     file_handle = open(filename, 'w')
@@ -139,5 +148,5 @@ def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).s
     billing_report = csv.writer(file_handle)
     billing_report.writerows(rows)
     file_handle.close()
-    
-    return True 
+
+    return True
