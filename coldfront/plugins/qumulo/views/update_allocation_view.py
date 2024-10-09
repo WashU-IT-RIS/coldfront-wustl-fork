@@ -53,6 +53,13 @@ class UpdateAllocationView(AllocationView):
 
         return context
 
+    def form_valid(self, form: UpdateAllocationForm):
+        if "reset_acls" in self.request.POST:
+            self._reset_acls()
+        else:
+            self._updated_fields_handler(form)
+        return super(AllocationView, self).form_valid(form=form)
+
     def get_form_kwargs(self):
         kwargs = super(UpdateAllocationView, self).get_form_kwargs()
         kwargs["user_id"] = self.request.user.id
@@ -175,13 +182,6 @@ class UpdateAllocationView(AllocationView):
 
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
-
-    def form_valid(self, form: UpdateAllocationForm):
-        if "reset_acls" in self.request.POST:
-            self._reset_acls()
-        else:
-            self._updated_fields_handler(form)
-        return super(AllocationView, self).form_valid(form=form)
 
     @staticmethod
     def _handle_attribute_change(

@@ -144,7 +144,7 @@ class AllocationView(LoginRequiredMixin, FormView):
             active_directory_api.create_ad_group(
                 group_name=access_allocation.get_attribute(name="storage_acl_name")
             )
-            async_task(addUsersToADGroup, (access_users, access_allocation))
+            async_task(addUsersToADGroup, access_users, access_allocation)
 
         return {"allocation": allocation, "access_allocations": access_allocations}
 
