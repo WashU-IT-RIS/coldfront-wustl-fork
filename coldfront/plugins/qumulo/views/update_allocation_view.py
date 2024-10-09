@@ -219,7 +219,7 @@ class UpdateAllocationView(AllocationView):
             allocation_user.user.username for allocation_user in allocation_users
         ]
 
-        users_to_add = set(access_users) - set(allocation_usernames)
+        users_to_add = list(set(access_users) - set(allocation_usernames))
         # for access_user in users_to_add:
         # AclAllocations.add_user_to_access_allocation(access_user, access_allocation)
         async_task(addUsersToADGroup, users_to_add, access_allocation)
