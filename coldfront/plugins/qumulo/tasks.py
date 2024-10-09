@@ -106,7 +106,7 @@ def ingest_quotas_with_daily_usage() -> None:
 
 
 def addUsersToADGroup(
-    wustlkeys: list, acl_allocation: Allocation, bad_keys: list = []
+    wustlkeys: list[str], acl_allocation: Allocation, bad_keys: list = []
 ) -> None:
     logger.warning(
         f"Adding {wustlkeys} to {acl_allocation.get_attribute('storage_acl_name')}"

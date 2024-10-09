@@ -139,7 +139,9 @@ class AllocationView(LoginRequiredMixin, FormView):
 
         active_directory_api = ActiveDirectoryAPI()
         for access_allocation in access_allocations:
-            access_users = AllocationUser.objects.filter(allocation=access_allocation)
+            access_users = list(
+                AllocationUser.objects.filter(allocation=access_allocation)
+            )
 
             active_directory_api.create_ad_group(
                 group_name=access_allocation.get_attribute(name="storage_acl_name")
