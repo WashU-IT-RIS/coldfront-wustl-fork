@@ -2,9 +2,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django_q.tasks import async_task
 
-from django_q.tasks import async_task
-
-from typing import Union, Optional
+from typing import Union
 
 import json
 import logging
@@ -23,7 +21,7 @@ from coldfront.core.allocation.models import (
 from coldfront.core.user.models import User
 from coldfront.plugins.qumulo.forms import UpdateAllocationForm
 from coldfront.plugins.qumulo.hooks import acl_reset_complete_hook
-from coldfront.plugins.qumulo.tasks import reset_allocation_acls
+from coldfront.plugins.qumulo.tasks import reset_allocation_acls, addUsersToADGroup
 from coldfront.plugins.qumulo.views.allocation_view import AllocationView
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
@@ -221,10 +219,10 @@ class UpdateAllocationView(AllocationView):
             allocation_user.user.username for allocation_user in allocation_users
         ]
 
-        # users_to_add = set(access_users) - set(allocation_usernames)
-        # for access_user in users_to_add:
-        #     AclAllocations.add_user_to_access_allocation(access_user, access_allocation)
-        # async_task(addUsersToADGroup, (access_users, access_allocation))
+        users_to_add = set(access_users) - set(allocation_usernames)
+        for access_user in users_to_add:
+            # AclAllocations.add_user_to_access_allocation(access_user, access_allocation)
+            async_task(addUsersToADGroup, (access_users, access_allocation))
 
         users_to_remove = set(allocation_usernames) - set(access_users)
         for allocation_username in users_to_remove:
