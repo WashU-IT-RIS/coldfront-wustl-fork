@@ -147,7 +147,7 @@ def __send_invalid_users_email(acl_allocation, bad_keys):
         template_name="email/invalid_users.txt",
         template_context=ctx,
         sender=import_from_settings("DEFAULT_FROM_EMAIL"),
-        receiver_list=[],
+        receiver_list=[],  # TODO: add receiver list
     )
 
 
