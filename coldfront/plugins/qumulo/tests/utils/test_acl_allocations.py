@@ -13,7 +13,6 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationStatusChoice,
 )
-from ldap3.core.exceptions import LDAPException
 
 from deepdiff import DeepDiff
 

@@ -1,11 +1,7 @@
-from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
-from typing import Optional
-
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
-    AllocationLinkage,
     AllocationStatusChoice,
     Resource,
     AllocationUserStatusChoice,
@@ -196,64 +192,6 @@ class AclAllocations:
         if is_base_allocation:
             fs_path = f"{fs_path}/Active"
 
-        qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
-
-    @staticmethod
-    def set_or_reset_allocation_acls(
-        allocation: Allocation, qumulo_api: QumuloAPI, reset: bool
-    ):
-        global logger
-        fs_path = allocation.get_attribute("storage_filesystem_path")
-        acl = qumulo_api.rc.fs.get_acl_v2(fs_path)
-
-        access_allocations = AclAllocations.get_access_allocations(allocation)
-        # start: this piece might want to use get_allocation_rwro_group_name() above
-        rw_allocation = next(
-            filter(
-                lambda access_allocation: access_allocation.resources.filter(
-                    name="rw"
-                ).exists(),
-                access_allocations,
-            )
-        )
-        ro_allocation = next(
-            filter(
-                lambda access_allocation: access_allocation.resources.filter(
-                    name="ro"
-                ).exists(),
-                access_allocations,
-            )
-        )
-
-        rw_groupname = rw_allocation.get_attribute(name="storage_acl_name")
-        ro_groupname = ro_allocation.get_attribute(name="storage_acl_name")
-        # end: this piece might want to use get_allocation_rwro_group_name()
-        # above
-
-        acl["aces"].extend(AcesManager.get_allocation_aces(rw_groupname, ro_groupname))
-
-        is_base_allocation = QumuloAPI.is_allocation_root_path(fs_path)
-
-        AclAllocations.set_traverse_acl(
-            fs_path=fs_path,
-            rw_groupname=rw_groupname,
-            ro_groupname=ro_groupname,
-            qumulo_api=qumulo_api,
-            is_base_allocation=is_base_allocation,
-        )
-
-        if is_base_allocation:
-            fs_path = f"{fs_path}/Active"
-        else:
-            # bmulligan 20240910: this seems awkward, but the point for now is
-            # to accommodate explict "resets" on sub-allocations and not run
-            # the operation on sub-allocation creation.
-            if reset:
-                acl["aces"].extend(
-                    AclAllocations.get_sub_allocation_parent_aces(
-                        allocation, qumulo_api
-                    )
-                )
         qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
 
     @staticmethod
