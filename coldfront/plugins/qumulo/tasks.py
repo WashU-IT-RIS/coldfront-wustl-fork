@@ -132,7 +132,7 @@ def addUsersToADGroup(
         active_directory_api.add_user_to_ad_group(wustlkey, group_name)
         AclAllocations.add_user_to_access_allocation(wustlkey, acl_allocation)
 
-    async_task(addUsersToADGroup, (wustlkeys[1:], acl_allocation, bad_keys))
+    async_task(addUsersToADGroup, wustlkeys[1:], acl_allocation, bad_keys)
 
 
 def __send_invalid_users_email(acl_allocation, bad_keys):
