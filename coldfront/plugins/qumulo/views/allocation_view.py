@@ -143,6 +143,10 @@ class AllocationView(LoginRequiredMixin, FormView):
                 AllocationUser.objects.filter(allocation=access_allocation)
             )
 
+            resource = access_allocation.resources.first()
+            form_key = f"{resource.name.lower()}_users"
+            access_users = (form_data[form_key],)
+
             active_directory_api.create_ad_group(
                 group_name=access_allocation.get_attribute(name="storage_acl_name")
             )
