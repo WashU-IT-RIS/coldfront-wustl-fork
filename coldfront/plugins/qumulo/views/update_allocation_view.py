@@ -222,7 +222,7 @@ class UpdateAllocationView(AllocationView):
         users_to_add = set(access_users) - set(allocation_usernames)
         for access_user in users_to_add:
             # AclAllocations.add_user_to_access_allocation(access_user, access_allocation)
-            async_task(addUsersToADGroup, (access_users, access_allocation))
+            async_task(addUsersToADGroup, access_users, access_allocation)
 
         users_to_remove = set(allocation_usernames) - set(access_users)
         for allocation_username in users_to_remove:
