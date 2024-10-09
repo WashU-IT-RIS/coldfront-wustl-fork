@@ -386,7 +386,7 @@ class TestAddUsersToADGroup(TestCase):
         mock_async_task.assert_called_once()
         self.assertTupleEqual(
             mock_async_task.call_args[0],
-            (addUsersToADGroup, (["bar"], acl_allocation, [])),
+            (addUsersToADGroup, ["bar"], acl_allocation, []),
         )
 
     def test_appends_bad_user_list_on_invalid_user(
@@ -415,7 +415,7 @@ class TestAddUsersToADGroup(TestCase):
         mock_async_task.assert_called_once()
         self.assertTupleEqual(
             mock_async_task.call_args[0],
-            (addUsersToADGroup, (["bar"], acl_allocation, ["foo"])),
+            (addUsersToADGroup, ["bar"], acl_allocation, ["foo"]),
         )
 
     @patch("coldfront.plugins.qumulo.tasks.send_email_template")
@@ -479,7 +479,7 @@ class TestAddUsersToADGroup(TestCase):
         mock_allocation_view_AD: MagicMock,
         mock_allocation_view_async_task,
     ):
-        mock_async_task.side_effect = lambda *args: args[0](*args[1])
+        mock_async_task.side_effect = lambda *args: args[0](*args[1:])
 
         wustlkeys = ["foo", "bar", "baz", "bah"]
         good_keys = wustlkeys[0:2]

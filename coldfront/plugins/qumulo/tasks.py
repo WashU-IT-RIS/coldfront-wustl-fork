@@ -108,9 +108,6 @@ def ingest_quotas_with_daily_usage() -> None:
 def addUsersToADGroup(
     wustlkeys: list[str], acl_allocation: Allocation, bad_keys: list = []
 ) -> None:
-    logger.warning(
-        f"Adding {wustlkeys} to {acl_allocation.get_attribute('storage_acl_name')}"
-    )
     if len(wustlkeys) == 0:
         if len(bad_keys) > 0:
             __send_invalid_users_email(acl_allocation, bad_keys)
