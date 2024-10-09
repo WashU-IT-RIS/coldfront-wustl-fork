@@ -25,7 +25,6 @@ def mock_get_attribute(name):
 
 
 @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
-@patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
 class TestSignals(TestCase):
     def setUp(self) -> int:
         self.client = Client()
@@ -57,7 +56,6 @@ class TestSignals(TestCase):
 
     def test_allocation_activate_creates_allocation(
         self,
-        mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
     ):
         qumulo_instance = mock_QumuloAPI.return_value
@@ -79,7 +77,6 @@ class TestSignals(TestCase):
     def test_allocation_activate_handles_missing_attribute_error(
         self,
         mock_getLogger: MagicMock,
-        mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
     ):
         qumulo_instance = mock_QumuloAPI.return_value
@@ -98,7 +95,6 @@ class TestSignals(TestCase):
 
     def test_allocation_change_approved_updates_allocation(
         self,
-        mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
     ):
         qumulo_instance = mock_QumuloAPI.return_value
@@ -118,7 +114,8 @@ class TestSignals(TestCase):
         )
 
     def test_allocation_disable_removes_acls(
-        self, mock_ACL_ActiveDirectoryApi: MagicMock, mock_QumuloAPI: MagicMock
+        self,
+        mock_QumuloAPI: MagicMock,
     ):
         qumulo_instance = mock_QumuloAPI.return_value
 

@@ -1,7 +1,7 @@
 from django.urls import reverse_lazy
 from django_q.tasks import async_task
 
-from typing import Union
+from typing import Union, Optional
 
 import json
 
