@@ -5,7 +5,6 @@ from django_q.tasks import async_task
 from typing import Union
 
 import json
-import logging
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -27,18 +26,13 @@ from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 
-logger = logging.getLogger(__name__)
-
-
 class UpdateAllocationView(AllocationView):
     form_class = UpdateAllocationForm
-    template_name = "update_allocation.html"
+    template_name = "allocation.html"
     success_url = reverse_lazy("home")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["form_title"] = "Update Allocation"
-        context["allocation_has_children"] = self._allocation_linkage_exists()
         allocation_id = self.kwargs.get("allocation_id")
         allocation = Allocation.objects.get(pk=allocation_id)
         alloc_status = allocation.status.name
@@ -50,13 +44,6 @@ class UpdateAllocationView(AllocationView):
         context["is_pending"] = pending_status
 
         return context
-
-    def form_valid(self, form: UpdateAllocationForm):
-        if "reset_acls" in self.request.POST:
-            self._reset_acls()
-        else:
-            self._updated_fields_handler(form)
-        return super(AllocationView, self).form_valid(form=form)
 
     def get_form_kwargs(self):
         kwargs = super(UpdateAllocationView, self).get_form_kwargs()
@@ -95,42 +82,9 @@ class UpdateAllocationView(AllocationView):
         kwargs["initial"] = form_data
         return kwargs
 
-    def _acl_reset_message(self):
-        name = Allocation.objects.get(
-            pk=self.kwargs.get("allocation_id")
-        ).get_attribute(name="storage_name")
-        return (
-            f"ACL reset initiated for {name}.  "
-            "An e-mail notification will be sent when the task completes."
-        )
-
-    def _allocation_linkage_exists(self):
-        has_linkage = True
-        try:
-            AllocationLinkage.objects.get(
-                parent=Allocation.objects.get(pk=self.kwargs.get("allocation_id"))
-            )
-        except AllocationLinkage.DoesNotExist:
-            has_linkage = False
-        return has_linkage
-
-    def _reset_acls(self):
-        # bmulligan (20240903): "retry" and "timeout" are intended to be
-        # arbitrarily high values.  It would be good if the application could
-        # know or learn what they should be.  Testing has shown that the DEV
-        # infrastructure can process a directory tree of about 90,500 items in
-        # 62 minutes.
-        task_id = async_task(
-            reset_allocation_acls,
-            User.objects.get(id=self.request.user.id).email,
-            Allocation.objects.get(pk=self.kwargs.get("allocation_id")),
-            True if self.request.POST.get("reset_sub_acls") == "on" else False,
-            hook=acl_reset_complete_hook,
-            q_options={"retry": 90000, "timeout": 86400},
-        )
-        messages.add_message(self.request, messages.SUCCESS, self._acl_reset_message())
-
-    def _updated_fields_handler(self, form: UpdateAllocationForm):
+    def form_valid(
+        self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
+    ):
         form_data = form.cleaned_data
 
         allocation = Allocation.objects.get(pk=self.kwargs.get("allocation_id"))
@@ -143,36 +97,32 @@ class UpdateAllocationView(AllocationView):
             end_date_extension=10,
         )
 
-        storage_quota_attribute = AllocationAttribute.objects.get(
-            allocation_attribute_type=AllocationAttributeType.objects.get(
-                name="storage_quota"
-            ),
-            allocation=allocation,
-        )
+        # NOTE - "storage_protocols" will have special handling
+        attributes_to_check = [
+            "cost_center",
+            "department_number",
+            "technical_contact",
+            "billing_contact",
+            "service_rate",
+            "storage_ticket",
+            "storage_quota",
+        ]
 
-        if storage_quota_attribute.value != form_data.get("storage_quota"):
-            AllocationAttributeChangeRequest.objects.create(
-                allocation_attribute=storage_quota_attribute,
+        form_values = [form_data.get(field_name) for field_name in attributes_to_check]
+
+        # handle "storage_protocols" separately
+        attributes_to_check.append("storage_protocols")
+        form_values.append(json.dumps(form_data.get("protocols")))
+
+        for attribute_name, form_value in zip(attributes_to_check, form_values):
+            UpdateAllocationView._handle_attribute_change(
+                allocation=allocation,
                 allocation_change_request=allocation_change_request,
-                new_value=form_data.get("storage_quota"),
+                attribute_name=attribute_name,
+                form_value=form_value,
             )
 
-        storage_protocols = json.dumps(form_data.get("protocols"))
-
-        storage_protocols_attribute = AllocationAttribute.objects.get(
-            allocation_attribute_type=AllocationAttributeType.objects.get(
-                name="storage_protocols"
-            ),
-            allocation=allocation,
-        )
-
-        if storage_protocols_attribute.value != storage_protocols:
-            AllocationAttributeChangeRequest.objects.create(
-                allocation_attribute=storage_protocols_attribute,
-                allocation_change_request=allocation_change_request,
-                new_value=storage_protocols,
-            )
-
+        # RW and RO users are not handled via an AllocationChangeRequest
         access_keys = ["rw", "ro"]
         for key in access_keys:
             access_users = form_data[key + "_users"]
@@ -180,6 +130,8 @@ class UpdateAllocationView(AllocationView):
 
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
+
+        return super(AllocationView, self).form_valid(form=form)
 
     @staticmethod
     def _handle_attribute_change(
@@ -220,8 +172,6 @@ class UpdateAllocationView(AllocationView):
         ]
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
-        # for access_user in users_to_add:
-        # AclAllocations.add_user_to_access_allocation(access_user, access_allocation)
         async_task(addUsersToADGroup, users_to_add, access_allocation)
 
         users_to_remove = set(allocation_usernames) - set(access_users)

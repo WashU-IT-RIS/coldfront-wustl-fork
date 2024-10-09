@@ -152,41 +152,55 @@ class AclAllocations:
         )
 
     @staticmethod
-    def get_allocation_rwro_group_name(access_allocations, rwro):
-        allocation = next(
+    def set_allocation_acls(
+        base_allocation: Allocation,
+        qumulo_api: QumuloAPI,
+    ):
+        fs_path = base_allocation.get_attribute("storage_filesystem_path")
+        acl = qumulo_api.rc.fs.get_acl_v2(fs_path)
+
+        access_allocations = AclAllocations.get_access_allocations(base_allocation)
+
+        rw_allocation = next(
             filter(
                 lambda access_allocation: access_allocation.resources.filter(
-                    name=rwro
+                    name="rw"
                 ).exists(),
                 access_allocations,
             )
         )
-        return allocation.get_attribute(name="storage_acl_name")
-
-    @staticmethod
-    def reset_allocation_acls(allocation: Allocation, qumulo_api: QumuloAPI):
-        return AclAllocations.set_or_reset_allocation_acls(
-            allocation,
-            qumulo_api,
-            True
+        ro_allocation = next(
+            filter(
+                lambda access_allocation: access_allocation.resources.filter(
+                    name="ro"
+                ).exists(),
+                access_allocations,
+            )
         )
 
-    @staticmethod
-    def set_allocation_acls(
-        allocation: Allocation,
-        qumulo_api: QumuloAPI,
-    ):
-        return AclAllocations.set_or_reset_allocation_acls(
-            allocation,
-            qumulo_api,
-            False
+        rw_groupname = rw_allocation.get_attribute(name="storage_acl_name")
+        ro_groupname = ro_allocation.get_attribute(name="storage_acl_name")
+
+        acl["aces"].extend(AcesManager.get_allocation_aces(rw_groupname, ro_groupname))
+
+        is_base_allocation = QumuloAPI.is_allocation_root_path(fs_path)
+
+        AclAllocations.set_traverse_acl(
+            fs_path=fs_path,
+            rw_groupname=rw_groupname,
+            ro_groupname=ro_groupname,
+            qumulo_api=qumulo_api,
+            is_base_allocation=is_base_allocation,
         )
+
+        if is_base_allocation:
+            fs_path = f"{fs_path}/Active"
+
+        qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
 
     @staticmethod
     def set_or_reset_allocation_acls(
-        allocation: Allocation,
-        qumulo_api: QumuloAPI,
-        reset: bool
+        allocation: Allocation, qumulo_api: QumuloAPI, reset: bool
     ):
         global logger
         fs_path = allocation.get_attribute("storage_filesystem_path")
@@ -216,12 +230,7 @@ class AclAllocations:
         # end: this piece might want to use get_allocation_rwro_group_name()
         # above
 
-        acl["aces"].extend(
-            AcesManager.get_allocation_aces(
-                rw_groupname,
-                ro_groupname
-            )
-        )
+        acl["aces"].extend(AcesManager.get_allocation_aces(rw_groupname, ro_groupname))
 
         is_base_allocation = QumuloAPI.is_allocation_root_path(fs_path)
 
@@ -240,37 +249,12 @@ class AclAllocations:
             # to accommodate explict "resets" on sub-allocations and not run
             # the operation on sub-allocation creation.
             if reset:
-                acl['aces'].extend(
+                acl["aces"].extend(
                     AclAllocations.get_sub_allocation_parent_aces(
-                        allocation,
-                        qumulo_api
+                        allocation, qumulo_api
                     )
                 )
         qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
-
-    # 20240909 This function is a "working stub."
-    # 20240910: It has been updated to return "standard" access aces for parent
-    # ACL groups on a sub-allocation so those aces can be added to those for
-    # the sub-allocation ACL groups.
-    @staticmethod
-    def get_sub_allocation_parent_aces(
-        allocation: Allocation,
-        qumulo_api: QumuloAPI
-    ):
-        global logger
-        # 1.) use linkage to get parent and parent groups
-        parent = AllocationLinkage.objects.get(children=allocation).parent
-        access_allocations = AclAllocations.get_access_allocations(parent)
-        rw_group = AclAllocations.get_allocation_rwro_group_name(
-            access_allocations,
-            'rw'
-        )
-        ro_group = AclAllocations.get_allocation_rwro_group_name(
-            access_allocations,
-            'ro'
-        )
-        # 2.) return ACL "aces" for parent groups
-        return AcesManager.get_allocation_aces(rw_group, ro_group)
 
     @staticmethod
     def set_traverse_acl(
