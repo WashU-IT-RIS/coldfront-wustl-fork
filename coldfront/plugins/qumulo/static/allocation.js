@@ -18,11 +18,11 @@ if (!nfsCheckBox.checked) {
     "hidden";
 }
 
-const billingCycleChoice = document.getElementByID('id_billing_cycle');
-const additionalFieldContainer = document.getElementById('prepaid_time')
+const billingCycleChoice = document.getElementByID("id_billing_cycle");
+const additionalFieldContainer = document.getElementById("prepaid_time")
 
-menuChoice.addEventListener('change', function() {
-  if (menuChoice.value != 'Prepaid') {
+menuChoice.addEventListener("change", function() {
+  if (menuChoice.value != "prepaid") {
     document.getElementById("div_id_prepaid_time").style.visibility =
     "hidden";
   }});
