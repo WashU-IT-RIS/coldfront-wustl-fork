@@ -21,7 +21,7 @@ if (!nfsCheckBox.checked) {
 const billingCycleChoice = document.getElementById("div_id_billing_cycle");
 const additionalFieldContainer = document.getElementById("prepaid_time")
 
-menuChoice.addEventListener("change", function() {
+billingCycleChoice.addEventListener("change", function() {
   if (menuChoice.value === "prepaid") {
     document.getElementById("div_id_prepaid_time").style.visibility =
     "visible";
