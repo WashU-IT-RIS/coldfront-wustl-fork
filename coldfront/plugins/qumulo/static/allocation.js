@@ -19,10 +19,10 @@ if (!nfsCheckBox.checked) {
 }
 
 const billingCycleChoice = document.getElementById("div_id_billing_cycle");
-const additionalFieldContainer = document.getElementById("prepaid_time")
+const additionalFieldContainer = document.getElementById("div_id_prepaid_time")
 
 billingCycleChoice.addEventListener("change", function() {
-  if (menuChoice.value === "prepaid") {
+  if (additionalFieldContainer.value === "prepaid") {
     document.getElementById("div_id_prepaid_time").style.visibility =
     "visible";
   }});
