@@ -18,6 +18,15 @@ if (!nfsCheckBox.checked) {
     "hidden";
 }
 
+const billingCycleChoice = document.getElementByID('id_billing_cycle');
+const additionalFieldContainer = document.getElementById('prepaid_time')
+
+menuChoice.addEventListener('change', function() {
+  if (menuChoice.value != 'Prepaid') {
+    document.getElementById("div_id_prepaid_time").style.visibility =
+    "hidden";
+  }});
+
 let confirmed = false;
 
 const submitButton = document.getElementById("allocation_form_submit");
