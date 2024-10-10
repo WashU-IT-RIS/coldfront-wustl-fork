@@ -48,4 +48,14 @@ Create Allocation
 
 {% block javascript %}
 {{ form.media }}
+const menuChoice = document.getElementByID('id_billing_cycle');
+const additionalFieldContainer = document.getElementById('prepaid_time')
+
+menuChoice.addEventListener('change', function() {
+  if (menuChoice.value === 'Prepaid') {
+    additionalFieldContainer.style.display = 'block';
+  } else {
+    additionalFieldContainer.style.display = 'none';
+  }
+});
 {% endblock javascript%}
