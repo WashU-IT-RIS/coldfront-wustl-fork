@@ -12,6 +12,11 @@ from coldfront.core.allocation.signals import (
     allocation_change_approved,
 )
 
+from coldfront.core.allocation.models import (
+    AllocationAttributeType,
+    AllocationAttribute,
+)
+
 from django.core.management import call_command
 
 
@@ -113,6 +118,42 @@ class TestSignals(TestCase):
 
         qumulo_instance.update_allocation.assert_called_once_with(
             protocols=["nfs"],
+            fs_path=mock_get_attribute("storage_filesystem_path"),
+            export_path=mock_get_attribute("storage_export_path"),
+            name=mock_get_attribute("storage_name"),
+            limit_in_bytes=mock_get_attribute("storage_quota") * (2**40),
+        )
+
+    def test_allocation_change_approved_handles_empty_protocols(
+        self,
+        mock_ACL_ActiveDirectoryApi: MagicMock,
+        mock_QumuloAPI: MagicMock,
+    ):
+        protocols_attribute = AllocationAttribute.objects.get(
+            allocation_attribute_type=AllocationAttributeType.objects.get(
+                name="storage_protocols"
+            ),
+            allocation=self.storage_allocation,
+        )
+        qumulo_instance = mock_QumuloAPI.return_value
+
+        protocols_attribute = AllocationAttribute.objects.get(
+            allocation_attribute_type=AllocationAttributeType.objects.get(
+                name="storage_protocols"
+            ),
+            allocation=self.storage_allocation,
+        )
+        protocols_attribute.value = "[]"
+        protocols_attribute.save()
+
+        allocation_change_approved.send(
+            sender=self.__class__,
+            allocation_pk=self.storage_allocation.pk,
+            allocation_change_pk=1,
+        )
+
+        qumulo_instance.update_allocation.assert_called_once_with(
+            protocols=[],
             fs_path=mock_get_attribute("storage_filesystem_path"),
             export_path=mock_get_attribute("storage_export_path"),
             name=mock_get_attribute("storage_name"),
