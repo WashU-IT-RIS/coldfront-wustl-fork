@@ -210,10 +210,11 @@ class QumuloAPI:
         name: str = None,
         limit_in_bytes: int = 0,
     ):
-        if not protocols:
-            raise ValueError("protocols should be defined.")
 
-        self.validate_protocols(protocols=protocols)
+        if protocols:
+            self.validate_protocols(protocols=protocols)
+        else:
+            protocols = []
 
         for protocol in self.valid_protocols:
             if protocol in protocols:
