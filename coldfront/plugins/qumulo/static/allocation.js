@@ -22,9 +22,9 @@ const billingCycleChoice = document.getElementByID("id_billing_cycle");
 const additionalFieldContainer = document.getElementById("prepaid_time")
 
 menuChoice.addEventListener("change", function() {
-  if (menuChoice.value != "prepaid") {
+  if (menuChoice.value === "prepaid") {
     document.getElementById("div_id_prepaid_time").style.visibility =
-    "hidden";
+    "visible";
   }});
 
 let confirmed = false;
