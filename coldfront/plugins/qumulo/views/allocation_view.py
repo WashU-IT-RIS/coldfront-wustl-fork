@@ -234,6 +234,8 @@ class AllocationView(LoginRequiredMixin, FormView):
             "department_number",
             "technical_contact",
             "billing_contact",
+            "billing_cycle",
+            "prepaid_time",
             "service_rate",
         ]
 
