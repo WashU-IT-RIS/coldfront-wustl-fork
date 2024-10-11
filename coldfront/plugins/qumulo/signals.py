@@ -2,6 +2,7 @@ from django.dispatch import receiver
 
 import logging
 import json
+from datetime import datetime, timedelta
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -33,7 +34,13 @@ def on_allocation_save_retrieve_additional_user_data(
     bill_cycle = allocation_obj.get_attribute(name="billing_cycle")
     if bill_cycle == "prepaid":
         prepaid_months = allocation_obj.get_attribute(name="prepaid_time")
-
+        start_date = allocation_obj.get_attribute(name="start_date")
+        prepaid_until = datetime(
+            start_date.year + (start_date.month + prepaid_months - 1) // 12,
+            (start_date.month + prepaid_months - 1) % 12 + 1,
+            start_date.day,
+        )
+        print(prepaid_until)
     if created and "admin" not in instance.username:
         _ = update_user_with_additional_data(instance.username)
 
