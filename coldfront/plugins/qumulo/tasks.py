@@ -23,6 +23,7 @@ from qumulo.lib.request import RequestError
 
 import time
 from datetime import datetime
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 SECONDS_IN_AN_HOUR = 60 * 60
@@ -103,33 +104,85 @@ def ingest_quotas_with_daily_usage() -> None:
 
 
 def addUsersToADGroup(
-    wustlkeys: list[str], acl_allocation: Allocation, bad_keys: list = []
+    wustlkeys: list[str],
+    acl_allocation: Allocation,
+    bad_keys: Optional[list[str]] = None,
+    good_keys: Optional[list[dict]] = None,
 ) -> None:
+    if bad_keys is None:
+        bad_keys = []
+    if good_keys is None:
+        good_keys = []
+
     if len(wustlkeys) == 0:
-        if len(bad_keys) > 0:
-            __send_invalid_users_email(acl_allocation, bad_keys)
-        return
+        return __ad_users_and_handle_errors(
+            wustlkeys, acl_allocation, good_keys, bad_keys
+        )
 
-    wustlkey = wustlkeys[0]
-    group_name = acl_allocation.get_attribute("storage_acl_name")
     active_directory_api = ActiveDirectoryAPI()
+    wustlkey = wustlkeys[0]
 
+    user = None
     success = False
     try:
-        active_directory_api.get_user(wustlkey)
+        user = active_directory_api.get_user(wustlkey)
         success = True
     except ValueError:
         bad_keys.append(wustlkey)
         success = False
 
     if success:
-        active_directory_api.add_user_to_ad_group(wustlkey, group_name)
-        AclAllocations.add_user_to_access_allocation(wustlkey, acl_allocation)
+        good_keys.append({"wustlkey": wustlkey, "dn": user["dn"]})
 
-    async_task(addUsersToADGroup, wustlkeys[1:], acl_allocation, bad_keys)
+    async_task(addUsersToADGroup, wustlkeys[1:], acl_allocation, bad_keys, good_keys)
 
 
-def __send_invalid_users_email(acl_allocation, bad_keys):
+def __ad_users_and_handle_errors(
+    wustlkeys: list[str],
+    acl_allocation: Allocation,
+    good_keys: list[dict],
+    bad_keys: list[str],
+) -> None:
+    active_directory_api = ActiveDirectoryAPI()
+    group_name = acl_allocation.get_attribute("storage_acl_name")
+
+    if len(good_keys) > 0:
+        user_dns = [user["dn"] for user in good_keys]
+        try:
+            active_directory_api.add_user_dns_to_ad_group(user_dns, group_name)
+        except Exception as e:
+            logger.error(f"Error adding users to AD group: {e}")
+            __send_error_adding_users_email(acl_allocation)
+            return
+
+        for user in good_keys:
+            AclAllocations.add_user_to_access_allocation(
+                user["wustlkey"], acl_allocation
+            )
+    if len(bad_keys) > 0:
+        __send_invalid_users_email(acl_allocation, bad_keys)
+    return
+
+
+def __send_error_adding_users_email(acl_allocation: Allocation) -> None:
+    ctx = email_template_context()
+
+    CENTER_BASE_URL = import_from_settings("CENTER_BASE_URL")
+    ctx["allocation_url"] = f"{CENTER_BASE_URL}/allocation/{acl_allocation.id}"
+    ctx["access_type"] = (
+        "Read Only" if acl_allocation.resources.first().name == "ro" else "Read Write"
+    )
+
+    send_email_template(
+        subject="Error adding users to Storage Allocation",
+        template_name="email/error_adding_users.txt",
+        template_context=ctx,
+        sender=import_from_settings("DEFAULT_FROM_EMAIL"),
+        receiver_list=[],  # TODO: add receiver list
+    )
+
+
+def __send_invalid_users_email(acl_allocation: Allocation, bad_keys: list[str]) -> None:
     ctx = email_template_context()
 
     CENTER_BASE_URL = import_from_settings("CENTER_BASE_URL")

@@ -67,16 +67,18 @@ class ActiveDirectoryAPI:
             attributes={"sAMAccountName": group_name},
         )
 
+    def add_user_dns_to_ad_group(self, user_dns: list[str], group_name: str):
+        group_dn = self.get_group_dn(group_name)
+
+        ad_add_members_to_groups(self.conn, [user_dns], group_dn)
+
     def add_user_to_ad_group(self, wustlkey: str, group_name: str):
         group_dn = self.get_group_dn(group_name)
 
         user = self.get_user(wustlkey)
         user_dn = user["dn"]
 
-        res = ad_add_members_to_groups(
-            self.conn, members_dn=[user_dn, "bad"], groups_dn=group_dn
-        )
-        logging.warning(res)
+        ad_add_members_to_groups(self.conn, user_dn, group_dn)
 
     def get_group_dn(self, group_name: str) -> str:
         groups_OU = os.environ.get("AD_GROUPS_OU")
