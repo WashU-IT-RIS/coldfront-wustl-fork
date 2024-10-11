@@ -64,7 +64,7 @@ class AllocationForm(forms.Form):
         validators=[validate_single_ad_user],
         required=False,
     )
-    billing_cycle = forms.BooleanFieldField(
+    billing_cycle = forms.BooleanField(
         # widget=forms.CheckboxInput()
         choices=BILLING_CYCLE_OPTIONS,
         label="Billing Cycle Options",
