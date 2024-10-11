@@ -506,3 +506,32 @@ class TestAddUsersToADGroup(TestCase):
             )
         )
         self.assertListEqual(allocation_users, good_keys)
+
+    # def test_adds_user_to_invalid_list_on_add_fail(
+    #     self,
+    #     mock_active_directory_api: MagicMock,
+    #     mock_async_task: MagicMock,
+    #     mock_allocation_view_AD: MagicMock,
+    #     mock_allocation_view_async_task,
+    # ):
+    #     active_directory_instance = MagicMock()
+    #     active_directory_instance.get_user.side_effect = ValueError("Invalid wustlkey")
+    #     mock_active_directory_api.return_value = active_directory_instance
+
+    #     wustlkeys = ["foo", "bar"]
+    #     self.form_data["rw_users"] = wustlkeys
+
+    #     allocation = self.create_allocation(user=self.user, form_data=self.form_data)[
+    #         "allocation"
+    #     ]
+    #     acl_allocation = AclAllocations.get_access_allocation(
+    #         storage_allocation=allocation, resource_name="rw"
+    #     )
+
+    #     addUsersToADGroup(wustlkeys, acl_allocation)
+
+    #     mock_async_task.assert_called_once()
+    #     self.assertTupleEqual(
+    #         mock_async_task.call_args[0],
+    #         (addUsersToADGroup, ["bar"], acl_allocation, ["foo"]),
+    #     )

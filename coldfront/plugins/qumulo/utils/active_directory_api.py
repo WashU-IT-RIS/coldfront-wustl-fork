@@ -71,7 +71,7 @@ class ActiveDirectoryAPI:
         user = self.get_user(wustlkey)
         user_dn = user["dn"]
 
-        ad_add_members_to_groups(self.conn, user_dn, group_dn)
+        res = ad_add_members_to_groups(self.conn, [user_dn, "bad"], group_dn)
 
     def get_group_dn(self, group_name: str) -> str:
         groups_OU = os.environ.get("AD_GROUPS_OU")
