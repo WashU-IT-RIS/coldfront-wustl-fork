@@ -25,7 +25,7 @@ const cycles = Array.from(
 );
 const prepaidCheckBox = cycles.find((cycle) => cycle.value === "prepaid");
 const additionalFieldContainer = document.getElementById("div_id_prepaid_time")
-
+prepaidCheckBox.addEventListener("change");
 // billingCycleChoice.addEventListener("change", function() {
 //   if (additionalFieldContainer.value === "prepaid") {
 //     document.getElementById("div_id_prepaid_time").style.visibility =
