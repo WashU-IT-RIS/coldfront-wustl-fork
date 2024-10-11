@@ -65,7 +65,7 @@ class AllocationForm(forms.Form):
         required=False,
     )
     billing_cycle = forms.MultipleChoiceField(
-        widget=forms.CheckboxInput,
+        widget=forms.CheckboxSelectMultiple(),
         choices=BILLING_CYCLE_OPTIONS,
         label="Billing Cycle Options",
         help_text="Choose one billing cycle option from the above list",
