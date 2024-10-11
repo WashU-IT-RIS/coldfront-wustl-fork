@@ -30,17 +30,6 @@ import sys
 def on_allocation_save_retrieve_additional_user_data(
     sender, instance, created, **kwargs
 ):
-    allocation_obj = Allocation.objects.get(pk=kwargs["allocation_pk"])
-    bill_cycle = allocation_obj.get_attribute(name="billing_cycle")
-    if bill_cycle == "prepaid":
-        prepaid_months = allocation_obj.get_attribute(name="prepaid_time")
-        start_date = allocation_obj.get_attribute(name="start_date")
-        prepaid_until = datetime(
-            start_date.year + (start_date.month + prepaid_months - 1) // 12,
-            (start_date.month + prepaid_months - 1) % 12 + 1,
-            start_date.day,
-        )
-        print(prepaid_until)
     if created and "admin" not in instance.username:
         _ = update_user_with_additional_data(instance.username)
 
@@ -57,6 +46,16 @@ def on_allocation_activate(sender, **kwargs):
     protocols = json.loads(allocation_obj.get_attribute(name="storage_protocols"))
     name = allocation_obj.get_attribute(name="storage_name")
     limit_in_bytes = allocation_obj.get_attribute(name="storage_quota") * (2**40)
+    bill_cycle = allocation_obj.get_attribute(name="billing_cycle")
+    if bill_cycle == "prepaid":
+        prepaid_months = allocation_obj.get_attribute(name="prepaid_time")
+        start_date = allocation_obj.get_attribute(name="start_date")
+        prepaid_until = datetime(
+            start_date.year + (start_date.month + prepaid_months - 1) // 12,
+            (start_date.month + prepaid_months - 1) % 12 + 1,
+            start_date.day,
+        )
+        print(prepaid_until)
 
     try:
         # Create allocation
