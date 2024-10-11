@@ -25,7 +25,7 @@ const cycles = Array.from(
 );
 const prepaidCheckBox = cycles.find((cycle) => cycle.value === "prepaid");
 const additionalFieldContainer = document.getElementById("div_id_prepaid_time")
-prepaidCheckBox.addEventListener("change");
+prepaidCheckBox.addEventListener("change", handlePrepaidTimeInput);
 // billingCycleChoice.addEventListener("change", function() {
 //   if (additionalFieldContainer.value === "prepaid") {
 //     document.getElementById("div_id_prepaid_time").style.visibility =
@@ -76,5 +76,19 @@ function handleExportPathInput(event) {
     document.getElementById("div_id_storage_export_path").style.visibility =
       "hidden";
     document.getElementById("id_storage_export_path").value = "";
+  }
+}
+
+function handlePrepaidTimeInput(event) {
+  const isChecked = event.target.checked;
+
+  if (isChecked) {
+    document.getElementById("id_prepaid_time").value = "";
+    document.getElementById("div_id_prepaid_time").style.visibility =
+      "visible";
+  } else {
+    document.getElementById("div_id_prepaid_time").style.visibility =
+      "hidden";
+    document.getElementById("id_storage_prepaid_time").value = "";
   }
 }
