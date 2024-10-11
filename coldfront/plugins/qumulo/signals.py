@@ -29,6 +29,11 @@ import sys
 def on_allocation_save_retrieve_additional_user_data(
     sender, instance, created, **kwargs
 ):
+    allocation_obj = Allocation.objects.get(pk=kwargs["allocation_pk"])
+    bill_cycle = allocation_obj.get_attribute(name="billing_cycle")
+    if bill_cycle == "prepaid":
+        prepaid_months = allocation_obj.get_attribute(name="prepaid_time")
+
     if created and "admin" not in instance.username:
         _ = update_user_with_additional_data(instance.username)
 
