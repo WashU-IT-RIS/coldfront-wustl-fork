@@ -16,3 +16,25 @@ class Command(BaseCommand):
             is_unique=False,
             is_changeable=True,
         )
+
+        # NOTE: we'll keep "regular" allocations (even condo allocations) in "regular"
+        # projects; a condo_group project is a special thing that lets us check the 
+        # sum of its allocations and bill them differently
+        ProjectAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Yes/No"),
+            name="is_condo_group",
+            is_required=True,
+            is_private=False,
+            is_unique=False,
+            is_changeable=True,
+        )
+
+        ProjectAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Int"),
+            name="quota_limit",
+            is_required=False,
+            is_private=False,
+            is_unique=False,
+            is_changeable=True,
+        )
+

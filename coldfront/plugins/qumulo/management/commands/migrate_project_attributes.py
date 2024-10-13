@@ -11,22 +11,31 @@ class Command(BaseCommand):
         
         # for sponsor department number use "unknown"
         # can be updated manually later if necessary
-        dep_type = ProjectAttributeType.objects.get(name="sponsor_department_number")
-        dep_sub_q = ProjectAttribute.objects.filter(
-            project=OuterRef("pk"), 
-            proj_attr_type=dep_type
-        ).values("value")[:1]
+        self._migrate_project_attribute("sponsor_department_number", "unknown")
+        self._migrate_project_attribute("is_condo_group", "No")
 
+        # no need to migrate quota_limit; that's only for condo_group projects
+    
+    def _migrate_project_attribute(self, attribute_name, default_value):
+        attribute_type = ProjectAttributeType.objects.get(name=attribute_name)
+        attribute_sub_q = ProjectAttribute.objects.filter(
+            allocation=OuterRef("pk"),
+            allocation_attribute_type=attribute_type
+        ).values("value")[:1]
 
         # find all projects
         all_projects = Project.objects.all()
         all_projects = all_projects.annotate(
-            department_number=Subquery(dep_sub_q)
+            **{
+                attribute_name: Subquery(attribute_sub_q)
+            }
         )
+
         for project in all_projects:
-            if project.department_number is None:
+            if getattr(project, attribute_name, None) is None:
                 ProjectAttribute.objects.create(
-                    proj_attr_type=dep_type,
+                    proj_attr_type=attribute_type,
                     project=project,
-                    value="Unknown"
+                    value=default_value
                 )
+
