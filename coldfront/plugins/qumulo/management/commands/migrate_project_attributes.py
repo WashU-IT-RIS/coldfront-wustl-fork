@@ -19,8 +19,8 @@ class Command(BaseCommand):
     def _migrate_project_attribute(self, attribute_name, default_value):
         attribute_type = ProjectAttributeType.objects.get(name=attribute_name)
         attribute_sub_q = ProjectAttribute.objects.filter(
-            allocation=OuterRef("pk"),
-            allocation_attribute_type=attribute_type
+            project=OuterRef("pk"),
+            proj_attr_type=attribute_type
         ).values("value")[:1]
 
         # find all projects
