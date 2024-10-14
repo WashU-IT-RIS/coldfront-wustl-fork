@@ -1,4 +1,5 @@
 from django.db.models import Q
+from django.contrib.auth.models import User
 from django_q.tasks import async_task
 import logging
 import os
@@ -173,12 +174,15 @@ def __send_error_adding_users_email(acl_allocation: Allocation) -> None:
         "Read Only" if acl_allocation.resources.first().name == "ro" else "Read Write"
     )
 
+    user_support_users = User.objects.filter(groups__name="RIS_UserSupport")
+    user_support_emails = [user.email for user in user_support_users if user.email]
+
     send_email_template(
         subject="Error adding users to Storage Allocation",
         template_name="email/error_adding_users.txt",
         template_context=ctx,
         sender=import_from_settings("DEFAULT_FROM_EMAIL"),
-        receiver_list=[],  # TODO: add receiver list
+        receiver_list=user_support_emails,
     )
 
 
@@ -192,12 +196,15 @@ def __send_invalid_users_email(acl_allocation: Allocation, bad_keys: list[str]) 
     )
     ctx["invalid_users"] = bad_keys
 
+    user_support_users = User.objects.filter(groups__name="RIS_UserSupport")
+    user_support_emails = [user.email for user in user_support_users if user.email]
+
     send_email_template(
         subject="Users not found in Storage Allocation",
         template_name="email/invalid_users.txt",
         template_context=ctx,
         sender=import_from_settings("DEFAULT_FROM_EMAIL"),
-        receiver_list=[],  # TODO: add receiver list
+        receiver_list=user_support_emails,
     )
 
 

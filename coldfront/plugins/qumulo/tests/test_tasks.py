@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
+from django.contrib.auth.models import User, Group
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, ANY
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
@@ -22,6 +23,7 @@ from coldfront.core.allocation.models import (
     AllocationUser,
 )
 from coldfront.core.resource.models import Resource
+from coldfront.core.project.models import Project
 
 from qumulo.lib.request import RequestError
 
@@ -268,8 +270,8 @@ class TestAddUsersToADGroup(TestCase):
 
         build_data = build_models()
 
-        self.project = build_data["project"]
-        self.user = build_data["user"]
+        self.project: Project = build_data["project"]
+        self.user: User = build_data["user"]
 
         self.form_data = {
             "project_pk": self.project.id,
@@ -592,6 +594,10 @@ class TestAddUsersToADGroup(TestCase):
             storage_allocation=allocation, resource_name="rw"
         )
 
+        ris_group = Group.objects.get_or_create(name="RIS_UserSupport")
+        self.user.groups.add(ris_group[0].id)
+        self.user.save()
+
         addUsersToADGroup(
             [],
             acl_allocation,
@@ -599,4 +605,43 @@ class TestAddUsersToADGroup(TestCase):
             [{"wustlkey": wustlkey, "dn": "foo"} for wustlkey in wustlkeys],
         )
 
-        mock_send_email_template.assert_called_once()
+        mock_send_email_template.assert_called_once_with(
+            subject="Error adding users to Storage Allocation",
+            template_name="email/error_adding_users.txt",
+            template_context=ANY,
+            sender=ANY,
+            receiver_list=[self.user.email],
+        )
+
+    @patch("coldfront.plugins.qumulo.tasks.send_email_template")
+    def test_sends_email_to_user_support(
+        self,
+        mock_send_email_template: MagicMock,
+        mock_active_directory_api: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
+        mock_async_task,
+    ):
+        wustlkeys = ["foo", "bar"]
+        self.form_data["rw_users"] = wustlkeys
+
+        allocation = self.create_allocation(user=self.user, form_data=self.form_data)[
+            "allocation"
+        ]
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="rw"
+        )
+
+        ris_group = Group.objects.get_or_create(name="RIS_UserSupport")
+        self.user.groups.add(ris_group[0].id)
+        self.user.save()
+
+        addUsersToADGroup([], acl_allocation, wustlkeys)
+
+        mock_send_email_template.assert_called_once_with(
+            subject="Users not found in Storage Allocation",
+            template_name="email/invalid_users.txt",
+            template_context=ANY,
+            sender=ANY,
+            receiver_list=[self.user.email],
+        )
