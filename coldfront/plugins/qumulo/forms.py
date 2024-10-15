@@ -75,6 +75,7 @@ class AllocationForm(forms.Form):
         help_text="Prepaid Time in Months",
         label="Prepaid Time",
         required=False,
+        initial=None,
     )
     service_rate = forms.ChoiceField(
         help_text="Service rate option for the Storage2 allocation",
