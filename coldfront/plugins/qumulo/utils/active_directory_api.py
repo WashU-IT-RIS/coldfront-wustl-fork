@@ -6,6 +6,8 @@ from ldap3.extend.microsoft.addMembersToGroups import (
 import os
 from dotenv import load_dotenv
 
+import logging
+
 load_dotenv(override=True)
 
 
@@ -64,6 +66,11 @@ class ActiveDirectoryAPI:
             "group",
             attributes={"sAMAccountName": group_name},
         )
+
+    def add_user_dns_to_ad_group(self, user_dns: list[str], group_name: str):
+        group_dn = self.get_group_dn(group_name)
+
+        ad_add_members_to_groups(self.conn, [user_dns], group_dn)
 
     def add_user_to_ad_group(self, wustlkey: str, group_name: str):
         group_dn = self.get_group_dn(group_name)

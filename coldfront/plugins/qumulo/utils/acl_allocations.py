@@ -1,6 +1,3 @@
-from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
-from typing import Optional
-
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
@@ -23,6 +20,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
+
 
 class AclAllocations:
     def __init__(self, project_pk):
@@ -75,34 +73,6 @@ class AclAllocations:
             )
         except LDAPException as e:
             Allocation.delete(allocation)
-
-    def create_acl_allocations(self, ro_users: list, rw_users: list):
-        active_directory_api = ActiveDirectoryAPI()
-
-        self.create_acl_allocation(
-            acl_type="ro", users=ro_users, active_directory_api=active_directory_api
-        )
-        self.create_acl_allocation(
-            acl_type="rw", users=rw_users, active_directory_api=active_directory_api
-        )
-
-    @staticmethod
-    def create_ad_group_and_add_users(
-        wustlkeys: list,
-        allocation: Allocation,
-        active_directory_api: Optional[ActiveDirectoryAPI] = None,
-    ) -> None:
-        if not active_directory_api:
-            active_directory_api = ActiveDirectoryAPI()
-
-        group_name = allocation.get_attribute(name="storage_acl_name")
-
-        active_directory_api.create_ad_group(group_name)
-
-        for wustlkey in wustlkeys:
-            active_directory_api.add_user_to_ad_group(
-                wustlkey=wustlkey, group_name=group_name
-            )
 
     @staticmethod
     def get_access_allocation(storage_allocation: Allocation, resource_name: str):
@@ -186,6 +156,7 @@ class AclAllocations:
         acl = qumulo_api.rc.fs.get_acl_v2(fs_path)
 
         access_allocations = AclAllocations.get_access_allocations(base_allocation)
+
         rw_allocation = next(
             filter(
                 lambda access_allocation: access_allocation.resources.filter(
@@ -220,6 +191,7 @@ class AclAllocations:
 
         if is_base_allocation:
             fs_path = f"{fs_path}/Active"
+
         qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
 
     @staticmethod
@@ -233,15 +205,9 @@ class AclAllocations:
         if is_base_allocation:
             fs_path = f"{fs_path}/Active"
 
-        path_parents = list(
-            map(
-                lambda parent: str(parent),
-                PurePath(fs_path).parents
-            )
-        )
+        path_parents = list(map(lambda parent: str(parent), PurePath(fs_path).parents))
         storage_env_path = (
-            f'{os.environ.get("STORAGE2_PATH", "").rstrip().rstrip("/")}'
-            '/'
+            f'{os.environ.get("STORAGE2_PATH", "").rstrip().rstrip("/")}' "/"
         )
 
         for path in path_parents:
