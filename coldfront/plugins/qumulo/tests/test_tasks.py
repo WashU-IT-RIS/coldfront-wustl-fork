@@ -469,7 +469,7 @@ class TestAddUsersToADGroup(TestCase):
 
         mock_send_email_template.assert_called_once()
 
-    def __get_user_mock(self, username: str, good_users: bool):
+    def __get_user_mock(self, username: str, good_users: list[str]) -> dict:
         mock_user_response = {
             "dn": "user_dn",
         }

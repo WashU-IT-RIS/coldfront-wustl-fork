@@ -2,7 +2,6 @@ import os
 from django import forms
 
 from coldfront.plugins.qumulo.validators import (
-    validate_ad_users,
     validate_filesystem_path_unique,
     validate_parent_directory,
     validate_relative_path,

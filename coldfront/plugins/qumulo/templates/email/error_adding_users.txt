@@ -3,4 +3,4 @@ Notice for the following allocation:
 
 There was an error in adding users for the {{ access_type }} access level.
 
-Please try again or contact User Support.  The allocation will still be created or updated as normal, but addition user access has not been added.
+Please try again or contact User Support.  The allocation will still be created or updated as normal, but no user access has been configured or updated.

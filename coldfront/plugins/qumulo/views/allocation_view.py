@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from django_q.tasks import async_task
 
-from typing import Optional
+from typing import Optional, Dict, Any
 
 import json
 import os
@@ -103,7 +103,7 @@ class AllocationView(LoginRequiredMixin, FormView):
 
     @staticmethod
     def create_new_allocation(
-        form_data: dict, user, parent_allocation: Optional[Allocation] = None
+        form_data: Dict[str, Any], user, parent_allocation: Optional[Allocation] = None
     ):
         if parent_allocation:
             form_data["storage_name"] = AllocationView._handle_sub_allocation_scoping(
@@ -156,7 +156,7 @@ class AllocationView(LoginRequiredMixin, FormView):
 
     @staticmethod
     def create_access_privileges(
-        form_data: dict, project: Project, storage_allocation: Allocation
+        form_data: Dict[str, Any], project: Project, storage_allocation: Allocation
     ) -> list[Allocation]:
         rw_users = {
             "name": "RW Users",
@@ -219,7 +219,9 @@ class AllocationView(LoginRequiredMixin, FormView):
 
     @staticmethod
     def set_allocation_attributes(
-        form_data: dict, allocation, parent_allocation: Optional[Allocation] = None
+        form_data: Dict[str, Any],
+        allocation,
+        parent_allocation: Optional[Allocation] = None,
     ):
         # NOTE - parent-child linkage handled separately as it is not an
         # attribute like the other fields

@@ -40,7 +40,7 @@ class AllocationViewTests(TestCase):
         mock_AclAllocations: MagicMock,
         mock_ActiveDirectoryValidator: MagicMock,
         mock_async_task: MagicMock,
-        mock_AcitveDirectoryAPI: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
     ):
         AllocationView.create_new_allocation(self.form_data, self.user)
 
@@ -58,7 +58,7 @@ class AllocationViewTests(TestCase):
         mock_AclAllocations: MagicMock,
         mock_ActiveDirectoryValidator: MagicMock,
         mock_async_task: MagicMock,
-        mock_AcitveDirectoryAPI: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
     ):
         AllocationView.create_new_allocation(self.form_data, self.user)
         allocation = Allocation.objects.first()
