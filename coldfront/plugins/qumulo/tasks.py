@@ -153,7 +153,7 @@ def __ad_users_and_handle_errors(
             active_directory_api.add_user_dns_to_ad_group(user_dns, group_name)
         except Exception as e:
             logger.error(f"Error adding users to AD group: {e}")
-            __send_error_adding_users_email(acl_allocation)
+            __send_error_adding_users_email(acl_allocation, wustlkeys)
             return
 
         for user in good_keys:
@@ -165,7 +165,9 @@ def __ad_users_and_handle_errors(
     return
 
 
-def __send_error_adding_users_email(acl_allocation: Allocation) -> None:
+def __send_error_adding_users_email(
+    acl_allocation: Allocation, wustlkeys: list[str]
+) -> None:
     ctx = email_template_context()
 
     CENTER_BASE_URL = import_from_settings("CENTER_BASE_URL")
@@ -173,6 +175,7 @@ def __send_error_adding_users_email(acl_allocation: Allocation) -> None:
     ctx["access_type"] = (
         "Read Only" if acl_allocation.resources.first().name == "ro" else "Read Write"
     )
+    ctx["wustlkeys"] = wustlkeys
 
     user_support_users = User.objects.filter(groups__name="RIS_UserSupport")
     user_support_emails = [user.email for user in user_support_users if user.email]
