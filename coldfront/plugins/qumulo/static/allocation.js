@@ -75,8 +75,10 @@ function handlePrepaidTimeInput(event) {
   if (billOptions.value == "prepaid") {
     document.getElementById("div_id_prepaid_time").style.visibility =
       "visible";
+      document.getElementById("div_id_prepaid_time").value = "";
   } else {
     document.getElementById("div_id_prepaid_time").style.visibility =
       "hidden";
+    document.getElementById("div_id_prepaid_time").value = ""
   }
 }
