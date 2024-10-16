@@ -254,6 +254,14 @@ class AllocationView(LoginRequiredMixin, FormView):
                     allocation=allocation,
                     value=json.dumps(protocols),
                 )
+            # elif allocation_attribute_name == "billing cycle":
+            #     protocols = form_data.get("protocols")
+
+            #     AllocationAttribute.objects.create(
+            #         allocation_attribute_type=allocation_attribute_type,
+            #         allocation=allocation,
+            #         value=json.dumps(protocols),
+            #     )
             else:
                 value = form_data.get(allocation_attribute_name)
                 if value is None:

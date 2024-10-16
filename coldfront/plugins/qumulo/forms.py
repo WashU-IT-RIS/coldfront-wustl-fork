@@ -64,12 +64,10 @@ class AllocationForm(forms.Form):
         validators=[validate_single_ad_user],
         required=False,
     )
-    billing_cycle = forms.MultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple(),
+    billing_cycle = forms.ChoiceField(
         choices=BILLING_CYCLE_OPTIONS,
         label="Billing Cycle Options",
         help_text="Choose one billing cycle option from the above list",
-        initial=["monthly"],
     )
     prepaid_time = forms.IntegerField(
         help_text="Prepaid Time in Months",
