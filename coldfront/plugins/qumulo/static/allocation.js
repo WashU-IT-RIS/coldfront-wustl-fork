@@ -72,13 +72,13 @@ function handleExportPathInput(event) {
 
 function handlePrepaidTimeInput(event) {
 
-  if (billOptions.value == "prepaid") {
+  if (billOptions.value != "prepaid") {
     document.getElementById("div_id_prepaid_time").style.visibility =
-      "visible";
+      "hidden";
       document.getElementById("div_id_prepaid_time").value = "";
   } else {
     document.getElementById("div_id_prepaid_time").style.visibility =
-      "hidden";
+      "visible";
     document.getElementById("div_id_prepaid_time").value = ""
   }
 }
