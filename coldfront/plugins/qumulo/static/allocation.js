@@ -19,10 +19,10 @@ if (!nfsCheckBox.checked) {
 }
 
 
-const billOptions = document.getElementById("div_id_billing_cycle")
+const billOptions = document.getElementById("div_id_billing_cycle").value
 const additionalFieldContainer = document.getElementById("div_id_prepaid_time")
 billOptions.addEventListener("change", handlePrepaidTimeInput);
-if (billOptions.value != "prepaid") {
+if (billOptions != "prepaid") {
   document.getElementById("div_id_prepaid_time").style.visibility =
     "hidden";
 }
@@ -72,7 +72,7 @@ function handleExportPathInput(event) {
 
 function handlePrepaidTimeInput(event) {
 
-  if (billOptions.value == "prepaid") {
+  if (billOptions == "prepaid") {
     document.getElementById("div_id_prepaid_time").style.visibility =
       "visible";
       document.getElementById("div_id_prepaid_time").value = "";
