@@ -81,9 +81,8 @@ function handleExportPathInput(event) {
 }
 
 function handlePrepaidTimeInput(event) {
-  const isChecked = event.target.checked;
 
-  if (isChecked) {
+  if (billOptions.value == "prepaid") {
     document.getElementById("id_prepaid_time").value = "";
     document.getElementById("div_id_prepaid_time").style.visibility =
       "visible";
