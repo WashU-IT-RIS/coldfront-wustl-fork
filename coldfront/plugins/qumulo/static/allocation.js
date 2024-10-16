@@ -24,7 +24,7 @@ if (!nfsCheckBox.checked) {
 //   )
 // );
 // const prepaidOption = cycles.find((cycle) => cycle.value === "prepaid");
-const billOptions = document.getElementById("div_id_billin_cycle")
+const billOptions = document.getElementById("div_id_billing_cycle")
 const additionalFieldContainer = document.getElementById("div_id_prepaid_time")
 billOptions.addEventListener("change", handlePrepaidTimeInput);
 // billingCycleChoice.addEventListener("change", function() {
