@@ -38,3 +38,12 @@ class Command(BaseCommand):
             is_changeable=True,
         )
 
+        ProjectAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Text"),
+            name="sla_name",
+            is_required=False,
+            is_private=False,
+            is_unique=False,
+            is_changeable=True,
+        )
+
