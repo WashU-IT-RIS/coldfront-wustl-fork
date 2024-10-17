@@ -18,9 +18,8 @@ if (!nfsCheckBox.checked) {
     "hidden";
 }
 
-
-const billOptions = document.getElementById("div_id_billing_cycle")
-const additionalFieldContainer = document.getElementById("div_id_prepaid_time")
+const billOptions = document.getElementById("div_id_billing_cycle");
+const additionalFieldContainer = document.getElementById("div_id_prepaid_time");
 billOptions.addEventListener("change", handlePrepaidTimeInput);
 // if (billOptions.value != "prepaid") {
 //   document.getElementById("div_id_prepaid_time").style.visibility =
@@ -43,7 +42,6 @@ submitButton.addEventListener("click", (event) => {
     event.preventDefault();
   }
 });
-
 
 const dialogSubmitButton = document.getElementById("smb_warning_button_submit");
 dialogSubmitButton.addEventListener("click", (event) => {
@@ -71,18 +69,16 @@ function handleExportPathInput(event) {
 }
 
 function handlePrepaidTimeInput(event) {
-  const bill_cycle_value = event.target.value
-  const prepaid_time = document.getElementById("div_id_prepaid_time")
+  const bill_cycle_value = event.target.value;
+  const prepaid_time = document.getElementById("div_id_prepaid_time");
 
-  console.log({billing_cycle_value, prepaid_time, target:event.target})
+  console.log({ bill_cycle_value, prepaid_time, target: event.target });
 
   if (bill_cycle_value != "prepaid") {
-    prepaid_time.style.visibility =
-      "hidden";
-      prepaid_time.value = "";
+    prepaid_time.style.visibility = "hidden";
+    prepaid_time.value = "";
   } else {
-    prepaid_time.style.visibility =
-      "visible";
-      prepaid_time.value = ""
+    prepaid_time.style.visibility = "visible";
+    prepaid_time.value = "";
   }
 }
