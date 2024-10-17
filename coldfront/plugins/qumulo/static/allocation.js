@@ -74,7 +74,7 @@ function handlePrepaidTimeInput(event) {
   const bill_cycle_value = event.target.value
   const prepaid_time = document.getElementById("id_prepaid_time")
 
-  console.log({billing_cycle_value, prepaid_time, target:event.target})
+  console.log({bill_cycle_value, prepaid_time, target:event.target})
 
   if (bill_cycle_value != "prepaid") {
     prepaid_time.style.visibility =
