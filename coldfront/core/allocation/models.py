@@ -1,5 +1,6 @@
 import datetime
 import importlib
+import json
 import logging
 from ast import literal_eval
 from enum import Enum
@@ -17,6 +18,8 @@ from coldfront.core.project.models import Project, ProjectPermission
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import import_from_settings
 import coldfront.core.attribute_expansion as attribute_expansion
+
+from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -487,6 +490,15 @@ class AllocationAttribute(TimeStampedModel):
             except ValueError:
                 raise ValidationError(
                     'Invalid Value "%s" for "%s". Date must be in format YYYY-MM-DD' % (self.value, self.allocation_attribute_type.name))
+        elif expected_value_type == "JSON":
+            try:
+                _ = json.loads(self.value)
+            except:
+                raise ValidationError(
+                    'Invalid Value "%s" for "%s". Value must be valid JSON.' % (self.value, self.allocation_attribute_type.name))
+        elif expected_value_type == "BillingCycle" and self.value not in BILLING_CYCLE_OPTIONS:
+            raise ValidationError(
+                'Invalid Value "%s" for "%s". Value must be one of %s.' % (self.value, self.allocation_attribute_type.name, BILLING_CYCLE_OPTIONS))
 
     def __str__(self):
         return '%s' % (self.allocation_attribute_type.name)
