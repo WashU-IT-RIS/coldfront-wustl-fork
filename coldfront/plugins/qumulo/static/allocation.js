@@ -73,6 +73,9 @@ function handleExportPathInput(event) {
 function handlePrepaidTimeInput(event) {
   const bill_cycle_value = event.target.value
   const prepaid_time = document.getElementById("div_id_prepaid_time")
+
+  console.log({billing_cycle_value, prepaid_time, target:event.target})
+
   if (bill_cycle_value != "prepaid") {
     prepaid_time.style.visibility =
       "hidden";
