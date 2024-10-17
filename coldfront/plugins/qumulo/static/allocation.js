@@ -71,14 +71,15 @@ function handleExportPathInput(event) {
 }
 
 function handlePrepaidTimeInput(event) {
-
-  if (billOptions.value != "prepaid") {
-    document.getElementById("div_id_prepaid_time").style.visibility =
+  const bill_cycle_value = event.target.value
+  const prepaid_time = document.getElementById("div_id_prepaid_time")
+  if (bill_cycle_value != "prepaid") {
+    prepaid_time.style.visibility =
       "hidden";
-      document.getElementById("div_id_prepaid_time").value = "";
+      prepaid_time.value = "";
   } else {
-    document.getElementById("div_id_prepaid_time").style.visibility =
+    prepaid_time.style.visibility =
       "visible";
-    document.getElementById("div_id_prepaid_time").value = ""
+      prepaid_time.value = ""
   }
 }
