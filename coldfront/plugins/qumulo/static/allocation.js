@@ -19,8 +19,8 @@ if (!nfsCheckBox.checked) {
 }
 
 
-const billOptions = document.getElementById("div_id_billing_cycle")
-const additionalFieldContainer = document.getElementById("div_id_prepaid_time")
+const billOptions = document.getElementById("id_billing_cycle")
+const additionalFieldContainer = document.getElementById("id_prepaid_time")
 billOptions.addEventListener("change", handlePrepaidTimeInput);
 // if (billOptions.value != "prepaid") {
 //   document.getElementById("div_id_prepaid_time").style.visibility =
@@ -72,7 +72,7 @@ function handleExportPathInput(event) {
 
 function handlePrepaidTimeInput(event) {
   const bill_cycle_value = event.target.value
-  const prepaid_time = document.getElementById("div_id_prepaid_time")
+  const prepaid_time = document.getElementById("id_prepaid_time")
 
   console.log({billing_cycle_value, prepaid_time, target:event.target})
 
