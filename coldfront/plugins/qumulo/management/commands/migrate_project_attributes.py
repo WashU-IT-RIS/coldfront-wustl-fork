@@ -14,8 +14,6 @@ class Command(BaseCommand):
         self._migrate_project_attribute("sponsor_department_number", "unknown")
         self._migrate_project_attribute("is_condo_group", "No")
 
-        # no need to migrate quota_limit; that's only for condo_group projects
-        # similarly, no need to migrate sla_name
     
     def _migrate_project_attribute(self, attribute_name, default_value):
         attribute_type = ProjectAttributeType.objects.get(name=attribute_name)

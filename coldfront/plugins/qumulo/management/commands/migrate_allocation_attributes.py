@@ -8,20 +8,13 @@ from django.db.models import OuterRef, Subquery
 class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Updating Qumulo Allocation Attributes")
-        # updating required allocation attributes for all projects
-        # need to add something to keep `secure` from being changed later
-        # since Coldfront UI allows direct editing
+
         self._migrate_allocation_attribute("secure", "No")
         self._migrate_allocation_attribute("audit", "No")
         self._migrate_allocation_attribute("exempt", "No")
         self._migrate_allocation_attribute("subsidized", "No")
         self._migrate_allocation_attribute("billing_cycle", "monthly")
 
-        # billing_startdate - nothing to do with the migration
-        # it needs to be handled manually or as part of metadata migration
-
-        # fileset_name - again, nothing to migrate here; that's part of the metadata migration
-        # fileset_alias - ditto
 
 
 
