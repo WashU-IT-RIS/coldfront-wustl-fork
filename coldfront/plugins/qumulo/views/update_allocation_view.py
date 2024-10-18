@@ -134,7 +134,11 @@ class UpdateAllocationView(AllocationView):
         )
 
 
-    def _updated_fields_handler(self, form: UpdateAllocationForm):
+    def _updated_fields_handler(
+        self,
+        form: UpdateAllocationForm,
+        parent_allocation: Optional[Allocation] = None
+    ):
         form_data = form.cleaned_data
 
         allocation = Allocation.objects.get(pk=self.kwargs.get("allocation_id"))
@@ -147,49 +151,49 @@ class UpdateAllocationView(AllocationView):
             end_date_extension=10,
         )
 
-        storage_quota_attribute = AllocationAttribute.objects.get(
-            allocation_attribute_type=AllocationAttributeType.objects.get(
-                name="storage_quota"
-            ),
-            allocation=allocation,
-        )
+        # NOTE - "storage_protocols" will have special handling
+        attributes_to_check = [
+            "cost_center",
+            "department_number",
+            "technical_contact",
+            "billing_contact",
+            "service_rate",
+            "storage_ticket",
+            "storage_quota",
+        ]
 
-        if storage_quota_attribute.value != form_data.get("storage_quota"):
-            AllocationAttributeChangeRequest.objects.create(
-                allocation_attribute=storage_quota_attribute,
+        form_values = [form_data.get(field_name) for field_name in attributes_to_check]
+
+        # handle "storage_protocols" separately
+        attributes_to_check.append("storage_protocols")
+        form_values.append(json.dumps(form_data.get("protocols")))
+
+        for attribute_name, form_value in zip(attributes_to_check, form_values):
+            UpdateAllocationView._handle_attribute_change(
+                allocation=allocation,
                 allocation_change_request=allocation_change_request,
-                new_value=form_data.get("storage_quota"),
+                attribute_name=attribute_name,
+                form_value=form_value,
             )
 
-        storage_protocols = json.dumps(form_data.get("protocols"))
-
-        storage_protocols_attribute = AllocationAttribute.objects.get(
-            allocation_attribute_type=AllocationAttributeType.objects.get(
-                name="storage_protocols"
-            ),
-            allocation=allocation,
-        )
-
-        if storage_protocols_attribute.value != storage_protocols:
-            AllocationAttributeChangeRequest.objects.create(
-                allocation_attribute=storage_protocols_attribute,
-                allocation_change_request=allocation_change_request,
-                new_value=storage_protocols,
-            )
-
+        # RW and RO users are not handled via an AllocationChangeRequest
         access_keys = ["rw", "ro"]
         for key in access_keys:
             access_users = form_data[key + "_users"]
             self.set_access_users(key, access_users, allocation)
-        
+
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
 
-    def form_valid(self, form: UpdateAllocationForm):
+    def form_valid(
+        self,
+        form: UpdateAllocationForm,
+        parent_allocation: Optional[Allocation] = None
+    ):
         if 'reset_acls' in self.request.POST:
             self._reset_acls()
         else:
-            self._updated_fields_handler(form)
+            self._updated_fields_handler(form, parent_allocation)
         return super(AllocationView, self).form_valid(form=form)
 
     @staticmethod

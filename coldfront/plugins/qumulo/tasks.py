@@ -1,4 +1,5 @@
 from django.db.models import Q
+import json
 import logging
 import os
 
@@ -212,6 +213,9 @@ class ResetAcl(object):
                 self.qumulo_api
             )
 
+    class BadDirectoryEntry(Exception):
+        pass
+
     # <debugging functions>
     def __log_acl(self, msg):
         global logger
@@ -236,10 +240,12 @@ class ResetAcl(object):
         for item in contents:
             item_path = item.get('path', None)
             item_type = item.get('type', None)
+            item_ok = True
             if None in [item_path, item_type]:
-                # problem: raise some kind of exception or something
-                debug = {'item_path': item_path, 'item_type': item_type}
-                continue
+                msg_data = {'path': item_path, 'type': item_type}
+                raise BadDirectoryEntry(
+                    f'Improper null value found in: {json.dumps(msg_data)}'
+                )
             acl = AcesManager.get_base_acl()
             if item_type == 'FS_FILE_TYPE_FILE':
                 acl['aces'] = AcesManager.get_allocation_existing_file_aces(
@@ -254,7 +260,6 @@ class ResetAcl(object):
                     )
                 if not self.is_allocation_root:
                     acl['aces'].extend(self.parent_aces)
-            self.__log_acl_reset(item_path)
             self.qumulo_api.rc.fs.set_acl_v2(path=item_path, acl=acl)
             if item_type == 'FS_FILE_TYPE_DIRECTORY':
                 self._set_directory_content_acls(
