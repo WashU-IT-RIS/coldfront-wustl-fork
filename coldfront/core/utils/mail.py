@@ -19,6 +19,17 @@ EMAIL_SIGNATURE = import_from_settings('EMAIL_SIGNATURE')
 EMAIL_CENTER_NAME = import_from_settings('CENTER_NAME')
 CENTER_BASE_URL = import_from_settings('CENTER_BASE_URL')
 
+def allocation_email_recipients(allocation_obj):
+    receiver_list = []
+    allocation_users = allocation_obj.allocationuser_set.exclude(
+        status__name__in=['Removed', 'Error']
+    )
+    for allocation_user in allocation_users:
+        if allocation_user.allocation.project.projectuser_set.get(
+                                user=allocation_user.user).enable_notifications:
+            receiver_list.append(allocation_user.user.email)
+    return receiver_list
+
 def send_email(subject, body, sender, receiver_list, cc=[]):
     """Helper function for sending emails
     """
@@ -135,3 +146,31 @@ def send_allocation_customer_email(allocation_obj, subject, template_name, url_p
         EMAIL_SENDER,
         email_receiver_list
     )
+
+def send_acl_reset_email(task_object):
+    """Send allocation ACL Reset customer emails
+    """
+    ctx = email_template_context()
+    ctx['task_duration'] = '{:.2f}'.format(task_object.time_taken())
+    ctx['task_name'] = task_object.name
+    ctx['allocation_name'] = allocation_name = \
+        task_object.args[1].get_attribute('storage_name')
+    recipients = [task_object.args[0]]
+    recipients.extend(allocation_email_recipients(task_object.args[1]))
+    if task_object.success:
+        send_email_template(
+            f'Sucessful ACL Reset for Allocation {allocation_name}',
+            'email/allocation_acl_reset_success.txt',
+            ctx,
+            EMAIL_SENDER,
+            recipients
+        )
+    else:
+        ctx['task_error_message'] = task_object.result
+        send_email_template(
+            f'ACL Reset Failure for Allocation {allocation_name}',
+            'email/allocation_acl_reset_failure.txt',
+            ctx,
+            EMAIL_SENDER,
+            recipients
+        )
