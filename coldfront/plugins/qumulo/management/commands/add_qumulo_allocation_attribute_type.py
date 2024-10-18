@@ -126,3 +126,11 @@ class Command(BaseCommand):
             is_changeable=True,
             is_unique=False,
         )
+
+        AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="BillingCycle"),
+            name="billing_cycle",
+            is_required=True,
+            is_private=False,
+            is_changeable=True,
+        )
