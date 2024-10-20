@@ -477,8 +477,6 @@ class AllocationAttribute(TimeStampedModel):
 
         expected_value_type = self.allocation_attribute_type.attribute_type.name.strip()
 
-        expected_value_type = self.proj_attr_type.attribute_type.name.strip()
-
         validator = AttributeValidator(self.value)
 
         if expected_value_type == "Int":
