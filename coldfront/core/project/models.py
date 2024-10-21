@@ -434,8 +434,9 @@ class ProjectAttribute(TimeStampedModel):
             validator.validate_date()
         elif expected_value_type == "JSON":
             validator.validate_json()
-        elif expected_value_type == "BillingCycle":
-            validator.validate_billing_cycle()
+        
+
+        # jprew - TODO - determine whether to add a ProjectValidator here
 
     def __str__(self):
         return '%s' % (self.proj_attr_type.name)

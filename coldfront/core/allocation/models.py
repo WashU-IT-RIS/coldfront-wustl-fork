@@ -19,7 +19,7 @@ from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import import_from_settings
 import coldfront.core.attribute_expansion as attribute_expansion
 
-from coldfront.core.utils.validate import AttributeValidator
+from coldfront.core.utils.validate import AttributeValidator, AllocationAttributeValidator
 
 from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 
@@ -475,22 +475,30 @@ class AllocationAttribute(TimeStampedModel):
             raise ValidationError("'{}' attribute already exists for this allocation.".format(
                 self.allocation_attribute_type))
 
-        expected_value_type = self.allocation_attribute_type.attribute_type.name.strip()
+        expected_attr_type = self.allocation_attribute_type.attribute_type.name.strip()
 
-        validator = AttributeValidator(self.value)
+        expected_alloc_attr_type = self.allocation_attribute_type.name.strip()
 
-        if expected_value_type == "Int":
-            validator.validate_int()
-        elif expected_value_type == "Float":
-            validator.validate_float()
-        elif expected_value_type == "Yes/No":
-            validator.validate_yes_no()
-        elif expected_value_type == "Date":
-            validator.validate_date()
-        elif expected_value_type == "JSON":
-            validator.validate_json()
-        elif expected_value_type == "BillingCycle":
-            validator.validate_billing_cycle()
+        # AttributeType-level validators
+        attr_validator = AttributeValidator(self.value)
+
+        if expected_attr_type == "Int":
+            attr_validator.validate_int()
+        elif expected_attr_type == "Float":
+            attr_validator.validate_float()
+        elif expected_attr_type == "Yes/No":
+            attr_validator.validate_yes_no()
+        elif expected_attr_type == "Date":
+            attr_validator.validate_date()
+        elif expected_attr_type == "JSON":
+            attr_validator.validate_json()
+        
+        # AllocationAttributeType-level validators
+        alloc_validator = AllocationAttributeValidator(self.value)
+
+        if expected_alloc_attr_type == "billing_cycle":
+            alloc_validator.validate_billing_cycle()
+
 
     def __str__(self):
         return '%s' % (self.allocation_attribute_type.name)

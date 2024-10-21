@@ -62,3 +62,21 @@ class AttributeValidator:
             raise ValidationError(
                 f"Invalid Value {self.value}. Value must be one of {BILLING_CYCLE_OPTIONS}."
             )
+
+class AllocationAttributeValidator:
+
+    def __init__(self, value):
+        self.value = value
+
+    def validate_billing_cycle(self):
+        try:
+            validate = validators.OneOf(BILLING_CYCLE_OPTIONS)
+            validate.to_python(self.value)
+        except:
+            raise ValidationError(
+                f"Invalid Value {self.value}. Value must be one of {BILLING_CYCLE_OPTIONS}."
+            )
+
+# jprew - TODO - do we need this?
+# class ProjectAttributeValidator:
+#     pass

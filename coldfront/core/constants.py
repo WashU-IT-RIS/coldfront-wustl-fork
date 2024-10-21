@@ -9,5 +9,4 @@ ALL_ATTRIBUTE_TYPES = [
     "No",
     "Attribute Expanded Text",
     "JSON",
-    "BillingCycle",
 ]

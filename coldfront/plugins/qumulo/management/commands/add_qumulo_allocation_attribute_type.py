@@ -147,14 +147,6 @@ class Command(BaseCommand):
         )
 
         AllocationAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="Yes/No"),
-            name="audit",
-            is_required=True,
-            is_private=False,
-            is_changeable=False,
-        )
-
-        AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Date"),
             name="billing_startdate",
             is_required=True,
