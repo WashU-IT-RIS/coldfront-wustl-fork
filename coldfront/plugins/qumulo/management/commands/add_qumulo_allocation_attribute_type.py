@@ -211,6 +211,14 @@ class Command(BaseCommand):
         )
 
         AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="PrepaidTime"),
+            name="prepaid_time",
+            is_required=True,
+            is_private=False,
+            is_changeable=True,
+        )
+
+        AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Text"),
             name="sla_name",
             is_required=False,
