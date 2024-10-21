@@ -1,5 +1,6 @@
 import datetime
 import importlib
+import json
 import logging
 from ast import literal_eval
 from enum import Enum
@@ -17,6 +18,10 @@ from coldfront.core.project.models import Project, ProjectPermission
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import import_from_settings
 import coldfront.core.attribute_expansion as attribute_expansion
+
+from coldfront.core.utils.validate import AttributeValidator
+
+from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -472,21 +477,20 @@ class AllocationAttribute(TimeStampedModel):
 
         expected_value_type = self.allocation_attribute_type.attribute_type.name.strip()
 
-        if expected_value_type == "Int" and not isinstance(literal_eval(self.value), int):
-            raise ValidationError(
-                'Invalid Value "%s" for "%s". Value must be an integer.' % (self.value, self.allocation_attribute_type.name))
-        elif expected_value_type == "Float" and not (isinstance(literal_eval(self.value), float) or isinstance(literal_eval(self.value), int)):
-            raise ValidationError(
-                'Invalid Value "%s" for "%s". Value must be a float.' % (self.value, self.allocation_attribute_type.name))
-        elif expected_value_type == "Yes/No" and self.value not in ["Yes", "No"]:
-            raise ValidationError(
-                'Invalid Value "%s" for "%s". Allowed inputs are "Yes" or "No".' % (self.value, self.allocation_attribute_type.name))
+        validator = AttributeValidator(self.value)
+
+        if expected_value_type == "Int":
+            validator.validate_int()
+        elif expected_value_type == "Float":
+            validator.validate_float()
+        elif expected_value_type == "Yes/No":
+            validator.validate_yes_no()
         elif expected_value_type == "Date":
-            try:
-                datetime.datetime.strptime(self.value.strip(), "%Y-%m-%d")
-            except ValueError:
-                raise ValidationError(
-                    'Invalid Value "%s" for "%s". Date must be in format YYYY-MM-DD' % (self.value, self.allocation_attribute_type.name))
+            validator.validate_date()
+        elif expected_value_type == "JSON":
+            validator.validate_json()
+        elif expected_value_type == "BillingCycle":
+            validator.validate_billing_cycle()
 
     def __str__(self):
         return '%s' % (self.allocation_attribute_type.name)

@@ -8,23 +8,15 @@ from coldfront.core.allocation.models import (
     AllocationUserStatusChoice,
 )
 
+from coldfront.core.constants import ALL_ATTRIBUTE_TYPES
+
 
 class Command(BaseCommand):
     help = "Add default allocation related choices"
 
     def handle(self, *args, **options):
 
-        for attribute_type in (
-            "Date",
-            "Float",
-            "Int",
-            "Text",
-            "Yes/No",
-            "No",
-            "Attribute Expanded Text",
-            "JSON",
-            "BILLING_CYCLE",
-        ):
+        for attribute_type in ALL_ATTRIBUTE_TYPES:
             AttributeType.objects.get_or_create(name=attribute_type)
 
         for choice in (
