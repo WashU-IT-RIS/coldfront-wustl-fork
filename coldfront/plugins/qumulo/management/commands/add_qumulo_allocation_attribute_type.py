@@ -203,7 +203,7 @@ class Command(BaseCommand):
         )
 
         AllocationAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="BillingCycle"),
+            attribute_type=AttributeType.objects.get(name="Text"),
             name="billing_cycle",
             is_required=True,
             is_private=False,
