@@ -457,7 +457,7 @@ class AllocationAttribute(TimeStampedModel):
     allocation_attribute_type = models.ForeignKey(
         AllocationAttributeType, on_delete=models.CASCADE)
     allocation = models.ForeignKey(Allocation, on_delete=models.CASCADE)
-    value = models.CharField(max_length=128)
+    value = models.CharField(max_length=8192)
     history = HistoricalRecords()
 
     def save(self, *args, **kwargs):
