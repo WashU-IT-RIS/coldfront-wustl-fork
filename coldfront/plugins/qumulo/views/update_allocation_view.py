@@ -99,6 +99,8 @@ class UpdateAllocationView(AllocationView):
             "service_rate",
             "storage_ticket",
             "storage_quota",
+            "billing_cycle",
+            "prepaid_time",
         ]
 
         form_values = [form_data.get(field_name) for field_name in attributes_to_check]
@@ -120,7 +122,7 @@ class UpdateAllocationView(AllocationView):
         for key in access_keys:
             access_users = form_data[key + "_users"]
             self.set_access_users(key, access_users, allocation)
-        
+
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
 
