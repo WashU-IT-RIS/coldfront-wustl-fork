@@ -62,6 +62,8 @@ class UpdateAllocationView(AllocationView):
             "technical_contact",
             "billing_contact",
             "service_rate",
+            "billing_cycle",
+            "prepaid_time",
         ]
         for key in allocation_attribute_keys:
             form_data[key] = self.get_allocation_attribute(
@@ -99,8 +101,6 @@ class UpdateAllocationView(AllocationView):
             "service_rate",
             "storage_ticket",
             "storage_quota",
-            "billing_cycle",
-            "prepaid_time",
         ]
 
         form_values = [form_data.get(field_name) for field_name in attributes_to_check]
