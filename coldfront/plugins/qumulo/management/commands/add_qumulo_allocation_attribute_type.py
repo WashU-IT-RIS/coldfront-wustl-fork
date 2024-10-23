@@ -226,3 +226,11 @@ class Command(BaseCommand):
             is_unique=False,
             is_changeable=True,
         )
+        AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Date"),
+            name="prepaid_expiration",
+            is_required=False,
+            is_private=False,
+            is_unique=False,
+            is_changeable=False,
+        )

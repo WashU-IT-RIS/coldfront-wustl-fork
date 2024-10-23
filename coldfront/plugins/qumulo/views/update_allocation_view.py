@@ -64,6 +64,7 @@ class UpdateAllocationView(AllocationView):
             "service_rate",
             "billing_cycle",
             "prepaid_time",
+            "prepaid_expiration",
         ]
         for key in allocation_attribute_keys:
             form_data[key] = self.get_allocation_attribute(
