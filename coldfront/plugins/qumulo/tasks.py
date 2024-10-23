@@ -153,8 +153,8 @@ def __validate_results(quota_usages, logger) -> bool:
     ).count()
     usage_pulled_from_qumulo = len(quota_usages["quotas"])
 
-    logger.info("Usages ingested for today: ", daily_usage_ingested)
-    logger.info("Usages pulled from QUMULO: ", usage_pulled_from_qumulo)
+    logger.warn(f"Usages ingested for today: {daily_usage_ingested}")
+    logger.warn(f"Usages pulled from QUMULO: {usage_pulled_from_qumulo}")
 
     success = usage_pulled_from_qumulo == daily_usage_ingested
     if success:
