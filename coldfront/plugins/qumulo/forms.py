@@ -216,6 +216,8 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["storage_filesystem_path"].validators = []
         self.fields["storage_name"].validators = []
 
+        self.fields["prepaid_expiration"].disabled = True
+
 
 class CreateSubAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
