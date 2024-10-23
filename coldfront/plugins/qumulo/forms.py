@@ -34,6 +34,7 @@ class AllocationForm(forms.Form):
         self.user_id = kwargs.pop("user_id")
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
+        self.fields["prepaid_expiration"].widget = forms.HiddenInput()
 
     class Media:
         js = ("allocation.js",)
