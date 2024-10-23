@@ -109,6 +109,10 @@ class AllocationForm(forms.Form):
         label="ITSD Ticket",
         validators=[validate_ticket],
     )
+    prepaid_expiration = forms.CharField(
+        help_text="Allocation is paid until this date",
+        label="Prepaid Expiration Date",
+    )
     rw_users = ADUserField(
         label="Read/Write Users",
         initial="",
