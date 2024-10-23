@@ -218,6 +218,7 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["storage_name"].validators = []
 
         self.fields["prepaid_expiration"].disabled = True
+        self.fields["prepaid_expiration"].widget = forms.DateField()
 
 
 class CreateSubAllocationForm(AllocationForm):
