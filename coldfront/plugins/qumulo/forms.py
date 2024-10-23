@@ -34,7 +34,6 @@ class AllocationForm(forms.Form):
         self.user_id = kwargs.pop("user_id")
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
-        self.fields["prepaid_expiration"].is_hidden = True
 
     class Media:
         js = ("allocation.js",)
@@ -109,10 +108,6 @@ class AllocationForm(forms.Form):
         help_text="Associated IT Service Desk Ticket",
         label="ITSD Ticket",
         validators=[validate_ticket],
-    )
-    prepaid_expiration = forms.CharField(
-        help_text="Allocation is paid until this date",
-        label="Prepaid Expiration Date",
     )
     rw_users = ADUserField(
         label="Read/Write Users",
@@ -217,8 +212,12 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["storage_filesystem_path"].validators = []
         self.fields["storage_name"].validators = []
 
+        self.fields["prepaid_expiration"] = forms.DateField(
+            help_text="Allocation is paid until this date",
+            label="Prepaid Expiration Date",
+            required=True,
+        )
         self.fields["prepaid_expiration"].disabled = True
-        self.fields["prepaid_expiration"].is_hidden = False
 
 
 class CreateSubAllocationForm(AllocationForm):
