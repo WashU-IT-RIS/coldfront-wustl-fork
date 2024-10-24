@@ -310,8 +310,11 @@ class TestAclAllocations(TestCase):
         form_data["storage_filesystem_path"] = f"{os.environ.get('STORAGE2_PATH')}/foo"
 
         group_name_base = f"storage-{form_data['storage_name']}"
-        expected_aces = AcesManager.get_allocation_aces(
-            f"{group_name_base}-rw", f"{group_name_base}-ro"
+        expected_aces = AcesManager.default_copy()
+        expected_aces.extend(
+            AcesManager.get_allocation_aces(
+                f"{group_name_base}-rw", f"{group_name_base}-ro"
+            )
         )
 
         allocation = create_allocation(self.project, self.user, form_data)
@@ -421,8 +424,11 @@ class TestAclAllocations(TestCase):
 
         group_name_base = f"storage-{form_data['storage_name']}"
 
-        expected_aces = AcesManager.get_allocation_aces(
-            f"{group_name_base}-rw", f"{group_name_base}-ro"
+        expected_aces = AcesManager.default_copy()
+        expected_aces.extend(
+            AcesManager.get_allocation_aces(
+                f"{group_name_base}-rw", f"{group_name_base}-ro"
+            )
         )
 
         allocation = create_allocation(self.project, self.user, form_data)
