@@ -1,12 +1,17 @@
+import os
+
 from venv import logger
 from django.test import TestCase, Client
 
+from unittest import mock
 from unittest.mock import patch, MagicMock
 
 from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
 )
+
+from coldfront.plugins.qumulo.utils import qumulo_api
 from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
@@ -646,6 +651,15 @@ class TestIngestAllocationDailyUsages(TestCase):
 
         return super().setUp()
 
+    def test_qumulo_result_set_page_limit_should_be_set(self) -> None:
+        page_limit = qumulo_api.QumuloAPI.get_result_set_page_limit()
+        self.assertIsNotNone(page_limit)
+
+    @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": ""})
+    def test_qumulo_result_set_page_limit_should_raise_an_exception_if_not_set(self) -> None:
+        with self.assertRaises(TypeError):
+            qumulo_api.QumuloAPI.get_result_set_page_limit()
+
     def test_after_allocation_create_usage_is_zero(self) -> None:
 
         # after allocations are created, expect usage to be zero
@@ -672,6 +686,7 @@ class TestIngestAllocationDailyUsages(TestCase):
 
             self.assertEqual(allocation_attribute_usage.value, 0)
             self.assertEqual(allocation_attribute_usage.history.first().value, 0)
+            self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
     def test_after_getting_daily_usages_from_qumulo_api(
@@ -725,7 +740,5 @@ class TestIngestAllocationDailyUsages(TestCase):
 
             usage = int(qumulo_quota.get("capacity_usage"))
             self.assertEqual(allocation_attribute_usage.value, usage)
-            self.assertEqual(
-                allocation_attribute_usage.history.first().value,
-                usage,
-            )
+            self.assertEqual(allocation_attribute_usage.history.first().value, usage)
+            self.assertGreater(allocation_attribute_usage.history.count(), 1)
