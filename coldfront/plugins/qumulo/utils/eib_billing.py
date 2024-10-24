@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from django.db import connection
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
 
 YYYY_MM_DD = "%Y-%m-%d"
 
@@ -26,11 +28,11 @@ SELECT
   'ISP0000030' internal_service_provider,
   'USD' currency,
   '%s' document_date,
-  CONCAT('FY25 ', '%s', ' Monthly for ', report.sponsor) memo,
+  'FY25 ' || '%s' || ' Monthly for ' || report.sponsor memo,
   '1' row_id,
   NULL internal_service_delivery_line_id,
   '1' internal_service_delivery_line_number,
-  CONCAT('"', 'WashU IT RIS ', report.service_name, ' - ', report.service_rate_category, '; Usage: ', report.billing_unit, ' X Rate: ', report.rate, ' X Per: ', report.service_unit, '"') item_description,
+  '"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.billing_unit || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"' item_description,
   'SC510' spend_category,
   '1' quantity,
   'EA' unit_of_measure,
@@ -38,7 +40,7 @@ SELECT
   report.fee extended_amount,
   NULL requester,
   report.delivery_date delivery_date,
-  CONCAT('"', report.storage_name, '"') fileset_memo,
+  '"' || report.storage_name || '"' fileset_memo,
   report.cost_center cost_center,
   NULL fund,
   NULL,
@@ -70,6 +72,9 @@ FROM (
       u.username sponsor,
       service_rate_category,
       cost_center,
+      'monthly' billing_cycle,
+      true subsidized,
+      false exampt,
       CASE service_rate_category
         WHEN 'consumption' THEN 13
         WHEN 'subscription' THEN 634
@@ -78,10 +83,16 @@ FROM (
       END rate,
       storage_quota,
       CASE service_rate_category
-        WHEN 'consumption' THEN GREATEST(haau.value /1024/1024/1024/1024 -5, 0)
-        WHEN 'subscription' THEN CEILING(GREATEST(storage_quota::REAL /1024/1024/1024/1024/100, 0))
-        WHEN 'subscription_500tb' THEN CEILING(GREATEST(storage_quota::REAL /1024/1024/1024/1024/500, 0))
-        WHEN 'condo' THEN CEILING(GREATEST(storage_quota::REAL /1024/1024/1024/1024/500, 0))
+        WHEN 'consumption' THEN (
+          SELECT MAX(consumption_billing_unit)
+          FROM (
+            SELECT CAST(haau.value AS FLOAT8) /1024/1024/1024/1024 -5 consumption_billing_unit
+            UNION SELECT 0
+          ) AS positive_billing_unit
+        )
+        WHEN 'subscription' THEN CEILING(CAST(storage_quota AS FLOAT8) /1024/1024/1024/1024/100)
+        WHEN 'subscription_500tb' THEN CEILING(CAST(storage_quota AS FLOAT8) /1024/1024/1024/1024/500)
+        WHEN 'condo' THEN CEILING(CAST(storage_quota AS FLOAT8) /1024/1024/1024/1024/500)
       END billing_unit,
       CASE service_rate_category
         WHEN 'consumption' THEN 'TB'
@@ -113,11 +124,23 @@ FROM (
 ) AS report where report.billing_unit > 0;
 """
 
+filename = ""
+
+def reset_filename() -> None:
+    global filename
+    filename = "/tmp/RIS-%s-storage2-active-billing.csv"
+
+def get_filename() -> str:
+    return filename
+
+
 def get_report_header() -> str:
     return REPORT_HEADER
 
+
 def get_monthly_billing_query_template() -> str:
     return QUERY_MONTHLY_BILLING
+
 
 def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).strftime(YYYY_MM_DD)) -> bool:
     # The date when the billing report was generated
@@ -127,8 +150,12 @@ def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).s
     # The service month for billing
     billing_month = datetime.strptime(delivery_date, YYYY_MM_DD).strftime("%B")
 
+    reset_filename()
+    global filename
+    # The temporary report file for the service month
+    filename = get_filename() % billing_month
+
     monthly_billing_query = get_monthly_billing_query_template() % (document_date, billing_month, delivery_date, usage_date)
-    logger.debug("Monthly billing query: %s", monthly_billing_query)
 
     try:
         with connection.cursor() as cursor:
@@ -137,9 +164,9 @@ def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).s
 
     except Exception as e:
         logger.error("[Error] Database error: %s", e)
+        logger.debug("Monthly billing query: %s", monthly_billing_query)
         return False
 
-    filename = '/tmp/RIS-%s-storage2-active-billing.csv' % billing_month
     file_handle = open(filename, 'w')
     file_handle.write(get_report_header())
     file_handle.close()
