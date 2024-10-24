@@ -20,6 +20,7 @@ from ldap3.core.exceptions import LDAPException
 
 from pathlib import PurePath
 
+import copy
 import os
 from dotenv import load_dotenv
 
@@ -220,35 +221,24 @@ class AclAllocations:
         acl = qumulo_api.rc.fs.get_acl_v2(fs_path)
 
         access_allocations = AclAllocations.get_access_allocations(allocation)
-        # start: this piece might want to use get_allocation_rwro_group_name() above
-        rw_allocation = next(
-            filter(
-                lambda access_allocation: access_allocation.resources.filter(
-                    name="rw"
-                ).exists(),
-                access_allocations,
-            )
+        rw_groupname = AclAllocations.get_allocation_rwro_group_name(
+            access_allocations,
+            'rw'
         )
-        ro_allocation = next(
-            filter(
-                lambda access_allocation: access_allocation.resources.filter(
-                    name="ro"
-                ).exists(),
-                access_allocations,
-            )
+        ro_groupname = AclAllocations.get_allocation_rwro_group_name(
+            access_allocations,
+            'ro'
         )
 
-        rw_groupname = rw_allocation.get_attribute(name="storage_acl_name")
-        ro_groupname = ro_allocation.get_attribute(name="storage_acl_name")
-        # end: this piece might want to use get_allocation_rwro_group_name()
-        # above
-
-        acl["aces"].extend(
+        aces = copy.deepcopy(acl['aces'])
+        for extension in [
+            AcesManager.default_copy(),
             AcesManager.get_allocation_aces(
                 rw_groupname,
                 ro_groupname
             )
-        )
+        ]:
+            aces.extend(extension)
 
         is_base_allocation = QumuloAPI.is_allocation_root_path(fs_path)
 
@@ -262,17 +252,19 @@ class AclAllocations:
 
         if is_base_allocation:
             fs_path = f"{fs_path}/Active"
-        else:
+
+        if not is_base_allocation and reset:
             # bmulligan 20240910: this seems awkward, but the point for now is
             # to accommodate explict "resets" on sub-allocations and not run
             # the operation on sub-allocation creation.
-            if reset:
-                acl['aces'].extend(
-                    AclAllocations.get_sub_allocation_parent_aces(
-                        allocation,
-                        qumulo_api
-                    )
+            aces.extend(
+                AclAllocations.get_sub_allocation_parent_aces(
+                    allocation,
+                    qumulo_api
                 )
+            )
+
+        acl['aces'] = AcesManager.filter_duplicates(aces)
         qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
 
     # 20240909 This function is a "working stub."
@@ -317,8 +309,7 @@ class AclAllocations:
             )
         )
         storage_env_path = (
-            f'{os.environ.get("STORAGE2_PATH", "").rstrip().rstrip("/")}'
-            '/'
+            f'{os.environ.get("STORAGE2_PATH", "").rstrip(" /")}/'
         )
 
         for path in path_parents:

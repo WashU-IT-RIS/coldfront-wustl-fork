@@ -1,3 +1,6 @@
+import hashlib
+import json
+
 class AcesManager(object):
     @staticmethod
     def get_base_acl():
@@ -525,5 +528,58 @@ class AcesManager(object):
             }
         ]
 
-    def default_copy(self):
-        return self.default_aces.copy()
+    @staticmethod
+    def default_copy():
+        return AcesManager.default_aces.copy()
+
+    @staticmethod
+    def normalize_trustee(trustee: dict):
+        if 'name' not in trustee:
+            return trustee
+        normalized_trustee = {
+            'name': trustee['name'].replace('ACCOUNTS\\', '')
+        }
+        domain = trustee.get('domain', None)
+        if 'domain' is not None:
+            normalized_trustee['domain'] = domain
+        return normalized_trustee
+
+    @staticmethod
+    def filter_duplicates(aces):
+        trustee_hashes = set([])
+        cleaned_aces = []
+        for ace in aces:
+            normalized_trustee = AcesManager.normalize_trustee(
+                ace.get("trustee", {})
+            )
+            ace['trustee'] = normalized_trustee
+            trustee_hash = AcesManager.sha256(normalized_trustee)
+            if trustee_hash in trustee_hashes:
+                create_new_ace = True
+                for index, cleaned_ace in enumerate(cleaned_aces):
+                    if AcesManager.sha256(cleaned_ace["trustee"]) != trustee_hash:
+                        continue
+                    if sorted(cleaned_ace["flags"]) != sorted(ace["flags"]):
+                        continue
+                    if cleaned_ace["type"] != ace["type"]:
+                        continue
+                    cleaned_ace["rights"] = AcesManager.merge_rights(
+                        ace["rights"], cleaned_ace["rights"]
+                    )
+                    cleaned_aces[index] = cleaned_ace
+                    create_new_ace = False
+                    break
+                if create_new_ace is True:
+                    cleaned_aces.append(ace)
+            else:
+                cleaned_aces.append(ace)
+                trustee_hashes.add(trustee_hash)
+        return cleaned_aces
+
+    @staticmethod
+    def merge_rights(dirty, clean):
+        return list(set(dirty).union(set(clean)))
+
+    @staticmethod
+    def sha256(value):
+        return hashlib.sha256(json.dumps(value).encode("utf-8")).hexdigest()
