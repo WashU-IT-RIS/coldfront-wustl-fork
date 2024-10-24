@@ -279,7 +279,10 @@ class QumuloAPI:
         page_limit = os.environ.get("QUMULO_RESULT_SET_PAGE_LIMIT")
 
         if page_limit is None or not bool(page_limit.strip()):
-            raise TypeError("The QUMULO_RESULT_SET_PAGE_LIMIT should be set.")
+            # Uncomment below once we have a chance to propagate 
+            # the QUMULO_RESULT_SET_PAGE_LIMIT variable.
+            # raise TypeError("The QUMULO_RESULT_SET_PAGE_LIMIT should be set.")
+            return 2000
 
         return int(page_limit)
 
