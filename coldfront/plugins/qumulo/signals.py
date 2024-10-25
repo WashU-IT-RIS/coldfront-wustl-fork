@@ -65,6 +65,7 @@ def on_allocation_activate(sender, **kwargs):
             fs_path=fs_path,
             name=name,
             limit_in_bytes=limit_in_bytes,
+            prepaid_expiration=prepaid_until,
         )
 
         qumulo_api.setup_allocation(fs_path)
