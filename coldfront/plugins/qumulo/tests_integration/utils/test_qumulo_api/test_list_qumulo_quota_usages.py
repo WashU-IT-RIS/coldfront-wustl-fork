@@ -38,7 +38,7 @@ class TestGetAllQuotasWithStatus(TestCase):
         
     @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "1000000"}) # Arbitrary large number
     @tag('integration')
-    def test_get_quotas_with_usage_page_limit_exceeding_qumuloa_allocations(self):
+    def test_get_quotas_with_usage_page_limit_exceeding_qumulo_allocations(self):
         qumulo_api = QumuloAPI()
         all_quotas = qumulo_api.get_all_quotas_with_usage()
         paging = all_quotas.get("paging")
