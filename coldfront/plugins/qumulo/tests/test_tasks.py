@@ -353,26 +353,10 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
         for qumulo_quota in self.quotas["quotas"]:
             allocation_attribute_usage = None
-            # try:
             storage_filesystem_path_attribute = AllocationAttribute.objects.get(
                 value=qumulo_quota["path"],
                 allocation_attribute_type=self.storage_filesystem_path_attribute_type,
             )
-            # except AllocationAttribute.DoesNotExist:
-            #     path = qumulo_quota["path"]
-            #     if path[-1] != "/":
-            #         continue
-
-            #     try:
-            #         storage_filesystem_path_attribute = AllocationAttribute.objects.get(
-            #             value=path[:-1],
-            #             allocation_attribute_type=self.storage_filesystem_path_attribute_type,
-            #         )
-            #     except AllocationAttribute.DoesNotExist:
-            #         # When the storage_path_attribute for path is not found,
-            #         # the allocation_attribute_usage should not exist.
-            #         self.assertIsNone(allocation_attribute_usage)
-            #         continue
 
             allocation = storage_filesystem_path_attribute.allocation
             storage_quota_attribute = AllocationAttribute.objects.get(
