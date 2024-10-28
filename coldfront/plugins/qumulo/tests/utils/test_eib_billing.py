@@ -125,7 +125,7 @@ def set_allocation_form_data_with_500TB_subscription():
     }
     return form_data
 
-def set_allocation_form_data_with_1000TB_subscription():
+def set_allocation_form_data_with_500TB_subscription_500tb():
     form_data = {
         "storage_name": '500tb-subscription_500tb',
         "storage_quota": '500',
@@ -406,9 +406,9 @@ class TestBillingReport(TestCase):
         billing_amount = float(data[len(data)-1][19])
         # Confirm the billing amount for 5 unit of Consumption cost model is $65 
         # hardcoded
-        self.assertEqual(billing_amount - 65, 0)
+        self.assertEqual(billing_amount - 65.0, 0)
 
-        os.system(f"rm -f {filename}")
+        os.remove(filename)
 
 
     # @skip("skip for now")
@@ -425,7 +425,7 @@ class TestBillingReport(TestCase):
             set_allocation_form_data_with_5TB_subscription,
             set_allocation_form_data_with_100TB_subscription,
             set_allocation_form_data_with_500TB_subscription,
-            set_allocation_form_data_with_1000TB_subscription,
+            set_allocation_form_data_with_500TB_subscription_500tb,
             set_allocation_form_data_with_500TB_condo,
         ]
 
@@ -436,7 +436,7 @@ class TestBillingReport(TestCase):
                 form_data=allocation()
             )
 
-        # Update the status of the created allocation from Pending to Active
+        # Update the status of the created allocations from Pending to Active
         for allocation in Allocation.objects.all():
             if (allocation.resources.first().name == "Storage2"):
                 allocation.status=AllocationStatusChoice.objects.get(name="Active")
@@ -464,11 +464,14 @@ class TestBillingReport(TestCase):
 
         row = 1
         for idx in range(num_lines_header, len(data)):
-            print("Row%s: %s" % (idx, data[idx]))
+            # print("Row%s: %s" % (idx, data[idx]))
             row_num = data[idx][1]
             self.assertEqual(str(row), row_num)
             billing_amount = data[idx][19].replace('"','')
             fileset_memo = data[idx][22].replace('"','')
+
+            # Confirm the billing amounts of each test cases
+            # hardcoded
             if (fileset_memo == '5tb-consumption'):
                 self.assertFalse(True)
             elif (fileset_memo == '15tb-consumption'):
@@ -490,4 +493,4 @@ class TestBillingReport(TestCase):
                 self.assertFalse(True)
             row += 1
 
-        os.system(f"rm -f {filename}")
+        os.remove(filename)
