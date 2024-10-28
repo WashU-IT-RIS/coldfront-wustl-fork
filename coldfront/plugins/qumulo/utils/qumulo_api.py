@@ -74,6 +74,13 @@ class QumuloAPI:
         readme_meta = self.rc.fs.create_file(dir_path=path, name=file_name)
         with open("/etc/allocation-README.txt", "r") as arf:
             self.rc.fs.write_file(id_=readme_meta["id"], data_file=arf)
+        fs_path = f"{path}/{file_name}"
+        acl = AcesManager().get_base_acl()
+
+        aces = AcesManager.default_aces
+        acl["aces"] = aces
+
+        self.rc.fs.set_acl_v2(path=fs_path, acl=acl)
 
     def create_protocol(self, export_path: str, fs_path: str, name: str, protocol: str):
         if name == None:
@@ -266,10 +273,26 @@ class QumuloAPI:
         # /<storage-cluster-name>/<filesystem>/<allocation_name>
         return re.fullmatch(r"^/[^/]+/[^/]+/[^/]+$", fs_path.rstrip("/")) is not None
 
-    def get_all_quotas_with_usage(self, page_size=None, if_match=None) -> str:
+
+    @staticmethod
+    def get_result_set_page_limit() -> int:
+        page_limit = os.environ.get("QUMULO_RESULT_SET_PAGE_LIMIT")
+
+        if page_limit is None or not bool(page_limit.strip()):
+            # Uncomment below once we have a chance to propagate 
+            # the QUMULO_RESULT_SET_PAGE_LIMIT variable.
+            # raise TypeError("The QUMULO_RESULT_SET_PAGE_LIMIT should be set.")
+            return 2000
+
+        return int(page_limit)
+
+
+    def get_all_quotas_with_usage(self, page_limit=None, if_match=None) -> str:
         tries = 0
         MAX_TRIES = 3  # move to configurable constant
         SNOOZE = 15
+        page_limit = (page_limit or QumuloAPI.get_result_set_page_limit())
+
         all_quotas_with_usage = None
 
         while tries < MAX_TRIES:
@@ -277,7 +300,7 @@ class QumuloAPI:
                 tries = tries + 1
                 # TODO: check for malformed JSON and check response code if available
                 all_quotas_with_usage = self.rc.quota.get_all_quotas_with_status(
-                    page_size, if_match
+                    page_limit, if_match
                 )
                 break
             except Exception as e:

@@ -1,6 +1,6 @@
 from django.urls import reverse_lazy
 
-from typing import Union
+from typing import Union, Optional
 
 import json
 
@@ -23,6 +23,20 @@ class UpdateAllocationView(AllocationView):
     form_class = UpdateAllocationForm
     template_name = "allocation.html"
     success_url = reverse_lazy("home")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        allocation_id = self.kwargs.get("allocation_id")
+        allocation = Allocation.objects.get(pk=allocation_id)
+        alloc_status = allocation.status.name
+
+        if alloc_status == "Pending":
+            pending_status = True
+        else:
+            pending_status = False
+        context["is_pending"] = pending_status
+
+        return context
 
     def get_form_kwargs(self):
         kwargs = super(UpdateAllocationView, self).get_form_kwargs()
@@ -61,7 +75,9 @@ class UpdateAllocationView(AllocationView):
         kwargs["initial"] = form_data
         return kwargs
 
-    def form_valid(self, form: UpdateAllocationForm):
+    def form_valid(
+        self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
+    ):
         form_data = form.cleaned_data
 
         allocation = Allocation.objects.get(pk=self.kwargs.get("allocation_id"))
@@ -104,8 +120,11 @@ class UpdateAllocationView(AllocationView):
         for key in access_keys:
             access_users = form_data[key + "_users"]
             self.set_access_users(key, access_users, allocation)
+        
+        # needed for redirect logic to work
+        self.success_id = str(allocation.id)
 
-        return super(AllocationView, self).form_valid(form)
+        return super(AllocationView, self).form_valid(form=form)
 
     @staticmethod
     def _handle_attribute_change(
