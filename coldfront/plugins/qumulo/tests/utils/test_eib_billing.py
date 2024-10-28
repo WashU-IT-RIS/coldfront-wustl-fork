@@ -1,14 +1,17 @@
 import os
+import csv 
 import re
 import hashlib
 from datetime import datetime
 
 from django.db import connection
 from django.test import TestCase, Client
+from unittest import skip
 from unittest.mock import patch, MagicMock
 
 from coldfront.core.allocation.models import (
     Allocation,
+    AllocationStatusChoice,
     AllocationAttribute,
     AllocationAttributeType,
 )
@@ -124,17 +127,17 @@ def set_allocation_form_data_with_500TB_subscription():
 
 def set_allocation_form_data_with_1000TB_subscription():
     form_data = {
-        "storage_name": '1000tb-subscription',
-        "storage_quota": '1000',
+        "storage_name": '500tb-subscription_500tb',
+        "storage_quota": '500',
         "protocols": ["smb"],
-        "storage_filesystem_path": '/storage2/fs1/1000tb-subscription',
-        "storage_export_path": '/storage2/fs1/1000tb-subscription',
+        "storage_filesystem_path": '/storage2/fs1/500tb-subscription_500tb',
+        "storage_export_path": '/storage2/fs1/500tb-subscription_500tb',
         "rw_users": ['test'],
         "ro_users": ['test1'],
         "storage_ticket": 'ITSD-1234',
         "cost_center": 'CC0000123',
         "department_number": 'CH000123',
-        "service_rate": 'subscription',
+        "service_rate": 'subscription_500tb',
     }
     return form_data
 
@@ -158,10 +161,10 @@ def mock_get_quotas_1() -> str:
     return{
         "quotas": [
             {
-                "id": "100",
-                "path": "/storage2/fs1/5tb-consumption",
-                "limit": "5000000000000",
-                "capacity_usage": "100",                
+                "id": "101",
+                "path": "/storage2/fs1/15tb-consumption",
+                "limit": "15000000000000",
+                "capacity_usage": "10995116277760",                
             },
         ]
     }
@@ -179,13 +182,13 @@ def mock_get_quotas_2() -> str:
                 "id": "101",
                 "path": "/storage2/fs1/15tb-consumption",
                 "limit": "15000000000000",
-                "capacity_usage": "10000000000000",                
+                "capacity_usage": "10995116277760",                
             },
             {
                 "id": "102",
                 "path": "/storage2/fs1/100tb-consumption",
                 "limit": "100000000000000",
-                "capacity_usage": "20",                
+                "capacity_usage": "10995116277760",                
             },
             {
                 "id": "103",
@@ -203,12 +206,12 @@ def mock_get_quotas_2() -> str:
                 "id": "105",
                 "path": "/storage2/fs1/500tb-subscription",
                 "limit": "500000000000000",
-                "capacity_usage": "2",                
+                "capacity_usage": "200000000000000",                
             },
             {
                 "id": "106",
-                "path": "/storage2/fs1/1000tb-subscription",
-                "limit": "1000000000000000",
+                "path": "/storage2/fs1/500tb-subscription_500tb",
+                "limit": "500000000000000",
                 "capacity_usage": "2",                
             },
             {
@@ -248,18 +251,26 @@ class TestBillingReport(TestCase):
     def test_query_return_sql_statement(self):
         self.assertTrue(re.search("^\s*SELECT\s*", get_monthly_billing_query_template()))
 
+    # @skip("skip for now")
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
-    def test_create_an_allocation_and_ingest_usage(self, qumulo_api_mock: MagicMock) -> None:
+    def test_create_an_allocation_ingest_usage_and_generate_billing_report(self, qumulo_api_mock: MagicMock) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quotas_1()
         qumulo_api_mock.return_value = qumulo_api
 
-    # def test_a_new_entry_in_database(self):
         create_allocation(
             project=self.project,
             user=self.user,
-            form_data=set_allocation_form_data_with_5TB_consumption()
+            form_data=set_allocation_form_data_with_15TB_consumption()
         )
+
+        # Update the status of the created allocation from Pending to Active
+        for allocation in Allocation.objects.all():
+            if (allocation.resources.first().name == 'Storage2'):
+                allocation.status=AllocationStatusChoice.objects.get(name="Active")
+                allocation.save()
+
+        # Confirm creating 1 Storage2 allocation
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT count(*)
@@ -270,10 +281,19 @@ class TestBillingReport(TestCase):
                     ON r.id=ar.resource_id
                 WHERE r.name='Storage2';
             """)
-            row = cursor.fetchone()
-            self.assertEqual(1, row[0])
+            rows = cursor.fetchall()
 
-            # Exam the attributes of the new allocation
+        self.assertEqual(1, rows[0][0])
+
+        storage2_allocations = []
+        for allocation in Allocation.objects.all():
+            if (allocation.resources.first().name == 'Storage2'):
+                storage2_allocations.append(allocation) 
+
+        self.assertEqual(1, len(storage2_allocations))
+
+        # Exam the attributes of the new allocation
+        with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT aat.name, aa.value
                 FROM allocation_allocation a
@@ -284,16 +304,41 @@ class TestBillingReport(TestCase):
             """)
             rows = cursor.fetchall()
 
-        for row in rows: print(row)
+        for row in rows:
+            print(row)
 
-        storage2_allocations = []
-        for allocation in Allocation.objects.all():
-            if (allocation.resources.first().name == 'Storage2'):
-                storage2_allocations.append(allocation) 
+        # Exam the allocation attributes that have initial usage as 0.0
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT aa.allocation_id,
+                    storage_filesystem_path,
+                    aa.value quota_tb,
+                    aau.value usage,
+                    ROUND(CAST(aau.value AS NUMERIC)/1024/1024/1024/1024, 2) usage_tb
+                FROM allocation_allocationattribute aa
+                LEFT JOIN allocation_allocationattributetype aat
+                    ON aa.allocation_attribute_type_id = aat.id
+                LEFT JOIN allocation_allocationattributeusage aau
+                    ON aa.id=aau.allocation_attribute_id
+                LEFT JOIN (
+                    SELECT aa.allocation_id, aa.value storage_filesystem_path
+                        FROM allocation_allocationattribute aa
+                        JOIN allocation_allocationattributetype aat
+                           ON aa.allocation_attribute_type_id=aat.id
+                        WHERE aat.name='storage_filesystem_path'
+                    ) AS storage_filesystem_path
+                    ON aa.allocation_id=storage_filesystem_path.allocation_id
+                WHERE aat.has_usage IS TRUE;
+            """)
+            rows = cursor.fetchall()
 
-        self.assertEqual(1, len(storage2_allocations))
+        for row in rows:
+            print(row)
+            self.assertEqual(float(row[3]) - 0, 0)
 
         ingest_quotas_with_daily_usage()
+
+        # Exam the updated usage of the allocation
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT aat.*, aau.value, aau.modified
@@ -303,6 +348,7 @@ class TestBillingReport(TestCase):
             """) 
             rows = cursor.fetchall()
 
+        # Exam the billing usage of the allocation from the history table
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT aa.allocation_id id,
@@ -311,13 +357,19 @@ class TestBillingReport(TestCase):
                     aa.value quota,
                     aau.value now_usage,
                     ROUND(CAST(aau.value AS NUMERIC) /1024/1024/1024/1024, 2) now_usage_tb,
-                    ROUND(CAST(haau.value AS NUMERIC) /1024/1024/1024/1024, 2) history_usage_tb,
-                    haau.modified history_timestamp
+                    ROUND(CAST(most_recent_haau.value AS NUMERIC) /1024/1024/1024/1024, 2) history_usage_tb,
+                    most_recent_haau.recent_modified history_timestamp
                 FROM allocation_allocationattributeusage aau
                 JOIN allocation_allocationattribute aa
                     ON aa.id = aau.allocation_attribute_id
-                JOIN allocation_historicalallocationattributeusage haau
-                    ON aau.allocation_attribute_id = haau.allocation_attribute_id
+                JOIN (
+                    SELECT allocation_attribute_id,
+                        MAX(modified) recent_modified,
+                        value
+                    FROM allocation_historicalallocationattributeusage
+                    GROUP BY allocation_attribute_id, DATE(modified)
+                    ) AS most_recent_haau
+                    ON aau.allocation_attribute_id = most_recent_haau.allocation_attribute_id
                 JOIN allocation_allocationattributetype aat
                     ON aat.id = aa.allocation_attribute_type_id
                 JOIN (
@@ -328,22 +380,38 @@ class TestBillingReport(TestCase):
                         WHERE aat.name = 'storage_filesystem_path'
                     ) AS storage_filesystem_path
                     ON aa.allocation_id = storage_filesystem_path.allocation_id
-                ORDER BY id DESC, history_timestamp DESC
+                ORDER BY id DESC, history_timestamp DESC;
             """) 
             rows = cursor.fetchall()
 
-        for row in rows: print(row)
+        for row in rows:
+            print(row)
 
-        print(datetime.today().strftime('%Y-%m-%d'))
+        # Confirm the status of the allocation is Active
+        for allocation in Allocation.objects.all():
+            if (allocation.resources.first().name == "Storage2"):
+                self.assertEqual(allocation.status.name, "Active")
+
         generate_monthly_billing_report(datetime.today().strftime('%Y-%m-%d'))
 
         filename = get_filename()
         self.assertFalse(re.search("RIS-%s-storage2-active-billing.csv", filename))
         self.assertTrue(re.search("RIS-[A-Za-z]+-storage2-active-billing.csv", filename))
         self.assertTrue(os.path.exists(filename))
-        os.system(f'ls -l {filename}')
+        os.system(f"ls -l {filename}")
+
+        with open(filename) as csvreport:
+            data = list(csv.reader(csvreport))
+
+        billing_amount = float(data[len(data)-1][19])
+        # Confirm the billing amount for 5 unit of Consumption cost model is $65 
+        # hardcoded
+        self.assertEqual(billing_amount - 65, 0)
+
+        os.system(f"rm -f {filename}")
 
 
+    # @skip("skip for now")
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
     def test_create_allocations_ingest_usages_generate_billing_report(self, qumulo_api_mock: MagicMock) -> None:
         qumulo_api = MagicMock()
@@ -351,6 +419,7 @@ class TestBillingReport(TestCase):
         qumulo_api_mock.return_value = qumulo_api
 
         allocations = [
+            set_allocation_form_data_with_5TB_consumption,
             set_allocation_form_data_with_15TB_consumption,
             set_allocation_form_data_with_100TB_consumption,
             set_allocation_form_data_with_5TB_subscription,
@@ -367,52 +436,58 @@ class TestBillingReport(TestCase):
                 form_data=allocation()
             )
 
+        # Update the status of the created allocation from Pending to Active
+        for allocation in Allocation.objects.all():
+            if (allocation.resources.first().name == "Storage2"):
+                allocation.status=AllocationStatusChoice.objects.get(name="Active")
+                allocation.save()
+
+        storage2_allocations = []
+        for allocation in Allocation.objects.all():
+            if (allocation.resources.first().name == "Storage2" and
+                allocation.status.name == "Active"):
+                storage2_allocations.append(allocation) 
+
+        self.assertEqual(len(storage2_allocations), len(allocations))
+
         ingest_quotas_with_daily_usage()
-
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT aa.allocation_id id,
-                    aa.created,
-                    storage_filesystem_path path,
-                    aa.value quota,
-                    aau.value now_usage,
-                    ROUND(CAST(aau.value AS NUMERIC) /1024/1024/1024/1024, 2) now_usage_tb,
-                    ROUND(CAST(haau.value AS NUMERIC) /1024/1024/1024/1024, 2) history_usage_tb,
-                    haau.modified history_timestamp
-                FROM allocation_allocationattributeusage aau
-                JOIN allocation_allocationattribute aa
-                    ON aa.id = aau.allocation_attribute_id
-                JOIN allocation_historicalallocationattributeusage haau
-                    ON aau.allocation_attribute_id = haau.allocation_attribute_id
-                JOIN allocation_allocationattributetype aat
-                    ON aat.id = aa.allocation_attribute_type_id
-                JOIN (
-                    SELECT aa.allocation_id, aa.value storage_filesystem_path
-                        FROM allocation_allocationattribute aa
-                        JOIN allocation_allocationattributetype aat
-                           ON aa.allocation_attribute_type_id = aat.id
-                        WHERE aat.name = 'storage_filesystem_path'
-                    ) AS storage_filesystem_path
-                    ON aa.allocation_id = storage_filesystem_path.allocation_id
-                ORDER BY id DESC, history_timestamp DESC
-            """) 
-            rows = cursor.fetchall()
-
-        for row in rows: print(row)
-
         generate_monthly_billing_report(datetime.today().strftime('%Y-%m-%d'))
 
-    # Test billing report with expected entires from the mock data
-    #   Create mock data
-    #     * allocations
-    #   Ingest the mock data into the mock database
-    #   Connect to the mock database
-    #   Query mock database
-    #   Generate report
-    #   Validate the report for
-    #     * consumption ratesk
-    #     * subscription rates
-    #     * condo rates
+        filename = get_filename()
+        with open(filename) as csvreport:
+            data = list(csv.reader(csvreport))
 
-    # def test_generate_monthly_billing_report(self):
-    #     self.assertTrue(generate_monthly_billing_report())
+        header = get_report_header()
+        num_lines_header = len(header.splitlines())
+        print("Numer of lines of the report header: %s" % num_lines_header)
+        self.assertEqual(num_lines_header, 5)
+
+        row = 1
+        for idx in range(num_lines_header, len(data)):
+            print("Row%s: %s" % (idx, data[idx]))
+            row_num = data[idx][1]
+            self.assertEqual(str(row), row_num)
+            billing_amount = data[idx][19].replace('"','')
+            fileset_memo = data[idx][22].replace('"','')
+            if (fileset_memo == '5tb-consumption'):
+                self.assertFalse(True)
+            elif (fileset_memo == '15tb-consumption'):
+                self.assertEqual(float(billing_amount) - 65.0, 0)
+            elif (fileset_memo == '100tb-consumption'):
+                self.assertEqual(float(billing_amount) - 65.0, 0)
+            elif (fileset_memo == '5tb-subscription'):
+                self.assertEqual(float(billing_amount) - 634.0, 0)
+            elif (fileset_memo == '100tb-subscription'):
+                self.assertEqual(float(billing_amount) - 634.0, 0)
+            elif (fileset_memo == '500tb-subscription'):
+                self.assertEqual(float(billing_amount) - 3170.0, 0)
+            elif (fileset_memo == '500tb-subscription_500tb'):
+                self.assertEqual(float(billing_amount) - 2643.0, 0)
+            elif (fileset_memo == '500tb-condo'):
+                self.assertEqual(float(billing_amount) - 529.0, 0)
+            else:
+                print(fileset_memo, billing_amount)
+                self.assertFalse(True)
+            row += 1
+
+        os.system(f"rm -f {filename}")

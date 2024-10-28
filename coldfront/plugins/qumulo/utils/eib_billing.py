@@ -64,7 +64,7 @@ FROM (
     data.billing_unit*data.rate fee
   FROM (
     SELECT
-      DATE(haau.modified) usage_date,
+      DATE(most_recent_haau.recent_modified) usage_date,
       '1' service_id,
       department_number,
       storage_name,
@@ -86,13 +86,13 @@ FROM (
         WHEN 'consumption' THEN (
           SELECT MAX(consumption_billing_unit)
           FROM (
-            SELECT CAST(haau.value AS FLOAT8) /1024/1024/1024/1024 -5 consumption_billing_unit
+            SELECT CAST(most_recent_haau.value AS FLOAT8) /1024/1024/1024/1024 -5 consumption_billing_unit
             UNION SELECT 0
           ) AS positive_billing_unit
         )
-        WHEN 'subscription' THEN CEILING(CAST(storage_quota AS FLOAT8) /1024/1024/1024/1024/100)
-        WHEN 'subscription_500tb' THEN CEILING(CAST(storage_quota AS FLOAT8) /1024/1024/1024/1024/500)
-        WHEN 'condo' THEN CEILING(CAST(storage_quota AS FLOAT8) /1024/1024/1024/1024/500)
+        WHEN 'subscription' THEN CEILING(CAST(storage_quota AS FLOAT8) /100)
+        WHEN 'subscription_500tb' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
+        WHEN 'condo' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
       END billing_unit,
       CASE service_rate_category
         WHEN 'consumption' THEN 'TB'
@@ -111,13 +111,20 @@ FROM (
     LEFT JOIN (SELECT aa.allocation_id, aa.value department_number FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='department_number') AS department_number ON a.id=department_number.allocation_id
     LEFT JOIN (SELECT aa.allocation_id, aa.value service_rate_category FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='service_rate') AS service_rate_category ON a.id=service_rate_category.allocation_id
     LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value storage_quota FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='storage_quota') AS storage_quota ON a.id=storage_quota.allocation_id
-    JOIN allocation_historicalallocationattributeusage haau ON storage_quota.id=haau.allocation_attribute_id
+    JOIN (
+      SELECT allocation_attribute_id,
+        MAX(modified) recent_modified,
+        value
+      FROM allocation_historicalallocationattributeusage
+      GROUP BY allocation_attribute_id, DATE(modified)
+    ) AS most_recent_haau
+      ON storage_quota.id=most_recent_haau.allocation_attribute_id
     JOIN allocation_allocation_resources ar ON ar.allocation_id=a.id
     JOIN resource_resource r ON r.id=ar.resource_id
     WHERE
       r.name = 'Storage2'
     AND
-      DATE(haau.modified) = '%s'
+      DATE(most_recent_haau.recent_modified) = '%s'
     AND
       astatus.name = 'Active'
   ) AS data
@@ -156,6 +163,7 @@ def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).s
     filename = get_filename() % billing_month
 
     monthly_billing_query = get_monthly_billing_query_template() % (document_date, billing_month, delivery_date, usage_date)
+    # logger.debug("Monthly billing query: %s", monthly_billing_query)
 
     try:
         with connection.cursor() as cursor:
