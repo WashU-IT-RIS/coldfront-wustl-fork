@@ -392,7 +392,7 @@ mock_quotas = {
     "paging": {"next": ""},
 }
 
-quota_data_coldfront_allocations = {
+quota_mock_allocation_data = {
     "/storage2/fs1/sleong/": {"limit": "100000000000000"},
     "/storage2/fs1/prewitt_test/": {"limit": "1099511627776"},
     "/storage2/fs1/tychele_test": {"limit": "109951162777600"},

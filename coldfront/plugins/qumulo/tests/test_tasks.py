@@ -6,7 +6,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
     mock_quotas,
-    quota_data_coldfront_allocations,
+    quota_mock_allocation_data,
 )
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_group,
@@ -268,10 +268,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         self.user = build_data["user"]
         self.quotas = mock_quotas
 
-        for index, (path, details) in enumerate(
-            quota_data_coldfront_allocations.items()
-        ):
-
+        for index, (path, details) in enumerate(quota_mock_allocation_data.items()):
             form_data = {
                 "storage_filesystem_path": path,
                 "storage_export_path": path,
@@ -285,6 +282,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
                 "department_number": "Time Travel Services",
                 "service_rate": "general",
             }
+
             create_allocation(project=self.project, user=self.user, form_data=form_data)
 
         self.storage_filesystem_path_attribute_type = (
@@ -297,9 +295,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         return super().setUp()
 
     def test_after_allocation_create_usage_is_zero(self) -> None:
-
-        # after allocations are created, expect usage to be zero
-        for path in quota_data_coldfront_allocations:
+        for path in quota_mock_allocation_data:
             allocation_attribute_usage = None
             try:
                 storage_filesystem_path_attribute = AllocationAttribute.objects.get(
@@ -331,47 +327,43 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         qumulo_api.get_all_quotas_with_usage.return_value = mock_quotas
         qumulo_api_mock.return_value = qumulo_api
 
-        exceptionRaised = False
         try:
             ingest_quotas_with_daily_usage()
         except:
-            exceptionRaised = True
-
-        self.assertFalse(exceptionRaised)
+            self.fail("Ingest quotas raised exception")
 
         for qumulo_quota in self.quotas["quotas"]:
-
             allocation_attribute_usage = None
             try:
-                try:
-                    storage_filesystem_path_attribute = AllocationAttribute.objects.get(
-                        value=qumulo_quota.get("path"),
-                        allocation_attribute_type=self.storage_filesystem_path_attribute_type,
-                    )
-                except AllocationAttribute.DoesNotExist:
-                    path = qumulo_quota.get("path")
-                    if path[-1] != "/":
-                        continue
+                storage_filesystem_path_attribute = AllocationAttribute.objects.get(
+                    value=qumulo_quota.get("path"),
+                    allocation_attribute_type=self.storage_filesystem_path_attribute_type,
+                )
+            except AllocationAttribute.DoesNotExist:
+                path = qumulo_quota.get("path")
+                if path[-1] != "/":
+                    continue
 
+                try:
                     storage_filesystem_path_attribute = AllocationAttribute.objects.get(
                         value=path[:-1],
                         allocation_attribute_type=self.storage_filesystem_path_attribute_type,
                     )
+                except AllocationAttribute.DoesNotExist:
+                    # When the storage_path_attribute for path is not found,
+                    # the allocation_attribute_usage should not exist.
+                    self.assertIsNone(allocation_attribute_usage)
+                    continue
 
-                allocation = storage_filesystem_path_attribute.allocation
-                storage_quota_attribute = AllocationAttribute.objects.get(
-                    allocation=allocation,
-                    allocation_attribute_type=self.storage_quota_attribute_type,
-                )
+            allocation = storage_filesystem_path_attribute.allocation
+            storage_quota_attribute = AllocationAttribute.objects.get(
+                allocation=allocation,
+                allocation_attribute_type=self.storage_quota_attribute_type,
+            )
 
-                allocation_attribute_usage = (
-                    storage_quota_attribute.allocationattributeusage
-                )
-            except AllocationAttribute.DoesNotExist:
-                # When the storage_path_attribute for path is not found,
-                # the allocation_attribute_usage should not exist.
-                self.assertIsNone(allocation_attribute_usage)
-                continue
+            allocation_attribute_usage = (
+                storage_quota_attribute.allocationattributeusage
+            )
 
             usage = int(qumulo_quota.get("capacity_usage"))
             self.assertEqual(allocation_attribute_usage.value, usage)
