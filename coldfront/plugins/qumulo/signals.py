@@ -47,6 +47,7 @@ def on_allocation_activate(sender, **kwargs):
     name = allocation_obj.get_attribute(name="storage_name")
     limit_in_bytes = allocation_obj.get_attribute(name="storage_quota") * (2**40)
     bill_cycle = allocation_obj.get_attribute(name="billing_cycle")
+    prepaid_until = allocation_obj.get_attribute(name="prepaid_expiration")
     if bill_cycle == "prepaid":
         prepaid_months = allocation_obj.get_attribute(name="prepaid_time")
         begin_date = allocation_obj.start_date
@@ -56,6 +57,8 @@ def on_allocation_activate(sender, **kwargs):
             begin_date.day,
         )
         print(prepaid_until)
+    else:
+        prepaid_until = None
 
     try:
         # Create allocation
@@ -65,7 +68,6 @@ def on_allocation_activate(sender, **kwargs):
             fs_path=fs_path,
             name=name,
             limit_in_bytes=limit_in_bytes,
-            prepaid_expiration=prepaid_until,
         )
 
         qumulo_api.setup_allocation(fs_path)
