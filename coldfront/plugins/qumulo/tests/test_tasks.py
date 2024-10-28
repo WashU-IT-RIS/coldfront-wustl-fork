@@ -5,8 +5,7 @@ from unittest.mock import patch, MagicMock
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
-    mock_quotas,
-    quota_mock_allocation_data,
+    mock_quota_data,
 )
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_group,
@@ -266,14 +265,31 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
         self.project = build_data["project"]
         self.user = build_data["user"]
-        self.quotas = mock_quotas
 
-        for index, (path, details) in enumerate(quota_mock_allocation_data.items()):
+        quotas = list(
+            map(
+                lambda quota_key_value: (
+                    {
+                        "id": quota_key_value[1]["id"],
+                        "path": quota_key_value[0],
+                        "limit": quota_key_value[1]["limit"],
+                        "capacity_usage": quota_key_value[1]["usage"],
+                    }
+                ),
+                mock_quota_data.items(),
+            )
+        )
+        self.quotas = {"quotas": quotas, "paging": {"next": ""}}
+
+        for index, (path, value) in enumerate(mock_quota_data.items()):
+            if "exclude" in path:
+                continue
+
             form_data = {
                 "storage_filesystem_path": path,
                 "storage_export_path": path,
                 "storage_name": f"for_tester_{index}",
-                "storage_quota": details.get("limit"),
+                "storage_quota": value["limit"],
                 "protocols": ["nfs"],
                 "rw_users": [f"user_{index}_rw"],
                 "ro_users": [f"user_{index}_ro"],
@@ -295,7 +311,10 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         return super().setUp()
 
     def test_after_allocation_create_usage_is_zero(self) -> None:
-        for path in quota_mock_allocation_data:
+        for path in mock_quota_data.keys():
+            if "exclude" in path:
+                continue
+
             allocation_attribute_usage = None
             try:
                 storage_filesystem_path_attribute = AllocationAttribute.objects.get(
@@ -324,7 +343,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         self, qumulo_api_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
-        qumulo_api.get_all_quotas_with_usage.return_value = mock_quotas
+        qumulo_api.get_all_quotas_with_usage.return_value = self.quotas
         qumulo_api_mock.return_value = qumulo_api
 
         try:
@@ -334,26 +353,26 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
         for qumulo_quota in self.quotas["quotas"]:
             allocation_attribute_usage = None
-            try:
-                storage_filesystem_path_attribute = AllocationAttribute.objects.get(
-                    value=qumulo_quota.get("path"),
-                    allocation_attribute_type=self.storage_filesystem_path_attribute_type,
-                )
-            except AllocationAttribute.DoesNotExist:
-                path = qumulo_quota.get("path")
-                if path[-1] != "/":
-                    continue
+            # try:
+            storage_filesystem_path_attribute = AllocationAttribute.objects.get(
+                value=qumulo_quota["path"],
+                allocation_attribute_type=self.storage_filesystem_path_attribute_type,
+            )
+            # except AllocationAttribute.DoesNotExist:
+            #     path = qumulo_quota["path"]
+            #     if path[-1] != "/":
+            #         continue
 
-                try:
-                    storage_filesystem_path_attribute = AllocationAttribute.objects.get(
-                        value=path[:-1],
-                        allocation_attribute_type=self.storage_filesystem_path_attribute_type,
-                    )
-                except AllocationAttribute.DoesNotExist:
-                    # When the storage_path_attribute for path is not found,
-                    # the allocation_attribute_usage should not exist.
-                    self.assertIsNone(allocation_attribute_usage)
-                    continue
+            #     try:
+            #         storage_filesystem_path_attribute = AllocationAttribute.objects.get(
+            #             value=path[:-1],
+            #             allocation_attribute_type=self.storage_filesystem_path_attribute_type,
+            #         )
+            #     except AllocationAttribute.DoesNotExist:
+            #         # When the storage_path_attribute for path is not found,
+            #         # the allocation_attribute_usage should not exist.
+            #         self.assertIsNone(allocation_attribute_usage)
+            #         continue
 
             allocation = storage_filesystem_path_attribute.allocation
             storage_quota_attribute = AllocationAttribute.objects.get(
