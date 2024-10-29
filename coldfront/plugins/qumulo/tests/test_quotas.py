@@ -844,9 +844,11 @@ class TestIngestAllocationDailyUsages(TestCase):
             allocation__status=self.status_active,
         )
 
-        allocation = storage_filesystem_path_attribute.allocation
+        active_allocation = storage_filesystem_path_attribute.allocation
+        self.assertEqual(active_allocation.status, self.status_active)
+
         storage_quota_attribute = AllocationAttribute.objects.get(
-            allocation=allocation,
+            allocation=active_allocation,
             allocation_attribute_type=self.storage_quota_attribute_type,
         )
 
