@@ -18,7 +18,7 @@ from coldfront.plugins.qumulo.validators import (
 from coldfront.plugins.qumulo.constants import (
     STORAGE_SERVICE_RATES,
     PROTOCOL_OPTIONS,
-    BILLING_CYCLES,
+    BILLING_CYCLES_OPTIONS,
 )
 
 
@@ -67,7 +67,7 @@ class AllocationForm(forms.Form):
     billing_cycle = forms.ChoiceField(
         help_text="The billing cycle of the allocation",
         label="Billing Cycle",
-        choices=BILLING_CYCLES,
+        choices=BILLING_CYCLES_OPTIONS,
         required=True,
     )
     service_rate = forms.ChoiceField(
