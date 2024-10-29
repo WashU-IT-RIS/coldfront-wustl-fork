@@ -704,7 +704,7 @@ class TestIngestAllocationDailyUsages(TestCase):
                     allocation=allocation,
                     allocation_attribute_type=self.storage_quota_attribute_type,
                 )
-                print(path)
+
                 allocation_attribute_usage = (
                     storage_quota_attribute_type.allocationattributeusage
                 )
