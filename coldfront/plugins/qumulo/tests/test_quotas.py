@@ -641,7 +641,7 @@ class TestIngestAllocationDailyUsages(TestCase):
         self.user = build_data["user"]
         self.quotas = mock_get_quotas()
         self.status_active = AllocationStatusChoiceFactory(name="Active")
-        self.status_pending = AllocationStatusChoiceFactory(name="Pending")
+        self.status_ready_for_deletion = AllocationStatusChoiceFactory(name="Ready for Deletion")
 
         for index, (path, details) in enumerate(coldfront_allocations().items()):
 
@@ -822,11 +822,11 @@ class TestIngestAllocationDailyUsages(TestCase):
         allocation_active.status = self.status_active
         allocation_active.save()
 
-        allocation_pending = create_allocation(
+        allocation_ready_for_deletion = create_allocation(
             project=self.project, user=self.user, form_data=form_data
         )
-        allocation_pending.status = self.status_pending
-        allocation_pending.save()
+        allocation_ready_for_deletion.status = self.status_ready_for_deletion
+        allocation_ready_for_deletion.save()
 
         try:
             ingest_quotas_with_daily_usage()
