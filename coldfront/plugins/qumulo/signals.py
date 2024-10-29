@@ -57,7 +57,9 @@ def on_allocation_activate(sender, **kwargs):
             (begin_date.month + prepaid_months - 1) % 12 + 1,
             begin_date.day,
         )
+        print(exp)
         print(prepaid_until)
+        prepaid_until.value = 0
     else:
         prepaid_until = None
 
