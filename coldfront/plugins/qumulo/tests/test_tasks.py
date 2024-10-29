@@ -266,20 +266,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         self.project = build_data["project"]
         self.user = build_data["user"]
 
-        quotas = list(
-            map(
-                lambda quota_key_value: (
-                    {
-                        "id": quota_key_value[1]["id"],
-                        "path": quota_key_value[0],
-                        "limit": quota_key_value[1]["limit"],
-                        "capacity_usage": quota_key_value[1]["usage"],
-                    }
-                ),
-                mock_quota_data.items(),
-            )
-        )
-        self.quotas = {"quotas": quotas, "paging": {"next": ""}}
+        self.quotas = self.__get_qumulo_quoata_data(mock_quota_data)
 
         for index, (path, value) in enumerate(mock_quota_data.items()):
             if "exclude" in path:
@@ -309,6 +296,24 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         )
 
         return super().setUp()
+
+    def __get_qumulo_quoata_data(self, quota_data: dict) -> dict:
+        quotas = list(
+            map(
+                lambda quota_key_value: (
+                    {
+                        "id": quota_key_value[1]["id"].rstrip(
+                            "./"
+                        ),  # stripping rear slash to reflect qumulo response
+                        "path": quota_key_value[0],
+                        "limit": quota_key_value[1]["limit"],
+                        "capacity_usage": quota_key_value[1]["usage"],
+                    }
+                ),
+                quota_data.items(),
+            )
+        )
+        return {"quotas": quotas, "paging": {"next": ""}}
 
     def test_after_allocation_create_usage_is_zero(self) -> None:
         for path in mock_quota_data.keys():

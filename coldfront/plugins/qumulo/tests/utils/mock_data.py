@@ -230,7 +230,7 @@ def set_allocation_attributes(
             )
 
 
-mock_quota_data = {
+mock_quota_base_allocations = {
     "/storage2/fs1/exlude/": {
         "id": "111111111",
         "limit": "20000000000000",
@@ -271,11 +271,6 @@ mock_quota_data = {
         "limit": "5497558138880",
         "usage": "40960",
     },
-    "/storage2/fs1/hong.chen_test/Active/hong.chen_suballocation/": {
-        "id": "42020003",
-        "limit": "5497558138880",
-        "usage": "4096",
-    },
     "/storage2/fs1/i2_test/": {
         "id": "38760895",
         "limit": "109951162777600",
@@ -300,11 +295,6 @@ mock_quota_data = {
         "id": "34717218",
         "limit": "1099511627776",
         "usage": "53248",
-    },
-    "/storage2/fs1/prewitt_test/Active/prewitt_test_2_a/": {
-        "id": "36850003",
-        "limit": "1099511627776",
-        "usage": "4096",
     },
     "/storage2/fs1/prewitt_test_2/": {
         "id": "36860003",
@@ -336,11 +326,6 @@ mock_quota_data = {
         "limit": "109951162777600",
         "usage": "57344",
     },
-    "/storage2/fs1/tychele_test/Active/tychele_suballoc_test/": {
-        "id": "36290003",
-        "limit": "109951162777600",
-        "usage": "4096",
-    },
     "/storage2/fs1/tychele_test2/": {
         "id": "52929568",
         "limit": "109951162777600",
@@ -362,3 +347,24 @@ mock_quota_data = {
         "usage": "16384",
     },
 }
+
+mock_quota_sub_allocations = {
+    "/storage2/fs1/hong.chen_test/Active/hong.chen_suballocation/": {
+        "id": "42020003",
+        "limit": "5497558138880",
+        "usage": "4096",
+    },
+    "/storage2/fs1/prewitt_test/Active/prewitt_test_2_a/": {
+        "id": "36850003",
+        "limit": "1099511627776",
+        "usage": "4096",
+    },
+    "/storage2/fs1/tychele_test/Active/tychele_suballoc_test/": {
+        "id": "36290003",
+        "limit": "109951162777600",
+        "usage": "4096",
+    },
+}
+
+mock_quota_data = dict(mock_quota_base_allocations)
+mock_quota_data.update(mock_quota_sub_allocations)
