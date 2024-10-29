@@ -2,7 +2,7 @@ import os
 import csv 
 import re
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 
 from django.db import connection
 from django.test import TestCase, Client
@@ -334,6 +334,7 @@ class TestBillingReport(TestCase):
 
         for row in rows:
             print(row)
+            # Confirm the initial usage is 0
             self.assertEqual(float(row[3]) - 0, 0)
 
         ingest_quotas_with_daily_usage()
@@ -392,7 +393,7 @@ class TestBillingReport(TestCase):
             if (allocation.resources.first().name == "Storage2"):
                 self.assertEqual(allocation.status.name, "Active")
 
-        generate_monthly_billing_report(datetime.today().strftime('%Y-%m-%d'))
+        generate_monthly_billing_report(datetime.now(timezone.utc).strftime('%Y-%m-%d'))
 
         filename = get_filename()
         self.assertFalse(re.search("RIS-%s-storage2-active-billing.csv", filename))
@@ -403,9 +404,9 @@ class TestBillingReport(TestCase):
         with open(filename) as csvreport:
             data = list(csv.reader(csvreport))
 
-        billing_amount = float(data[len(data)-1][19])
         # Confirm the billing amount for 5 unit of Consumption cost model is $65 
         # hardcoded
+        billing_amount = float(data[len(data)-1][19])
         self.assertEqual(billing_amount - 65.0, 0)
 
         os.remove(filename)
@@ -451,7 +452,7 @@ class TestBillingReport(TestCase):
         self.assertEqual(len(storage2_allocations), len(allocations))
 
         ingest_quotas_with_daily_usage()
-        generate_monthly_billing_report(datetime.today().strftime('%Y-%m-%d'))
+        generate_monthly_billing_report(datetime.now(timezone.utc).strftime('%Y-%m-%d'))
 
         filename = get_filename()
         with open(filename) as csvreport:
