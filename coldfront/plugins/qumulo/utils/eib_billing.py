@@ -74,7 +74,7 @@ FROM (
       cost_center,
       'monthly' billing_cycle,
       true subsidized,
-      false exampt,
+      false exempt,
       CASE service_rate_category
         WHEN 'consumption' THEN 13
         WHEN 'subscription' THEN 634
@@ -133,9 +133,11 @@ FROM (
 
 filename = ""
 
+
 def reset_filename() -> None:
     global filename
     filename = "/tmp/RIS-%s-storage2-active-billing.csv"
+
 
 def get_filename() -> str:
     return filename
@@ -149,11 +151,17 @@ def get_monthly_billing_query_template() -> str:
     return QUERY_MONTHLY_BILLING
 
 
-def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).strftime(YYYY_MM_DD)) -> bool:
+def generate_monthly_billing_report(
+    usage_date=datetime.today().replace(day=1).strftime(YYYY_MM_DD),
+) -> bool:
     # The date when the billing report was generated
     document_date = datetime.today().strftime("%m/%d/%Y")
     # The first day of the service month
-    delivery_date = (datetime.strptime(usage_date, YYYY_MM_DD).replace(day=1) - timedelta(1)).replace(day=1).strftime(YYYY_MM_DD)
+    delivery_date = (
+        (datetime.strptime(usage_date, YYYY_MM_DD).replace(day=1) - timedelta(1))
+        .replace(day=1)
+        .strftime(YYYY_MM_DD)
+    )
     # The service month for billing
     billing_month = datetime.strptime(delivery_date, YYYY_MM_DD).strftime("%B")
 
@@ -162,7 +170,12 @@ def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).s
     # The temporary report file for the service month
     filename = get_filename() % billing_month
 
-    monthly_billing_query = get_monthly_billing_query_template() % (document_date, billing_month, delivery_date, usage_date)
+    monthly_billing_query = get_monthly_billing_query_template() % (
+        document_date,
+        billing_month,
+        delivery_date,
+        usage_date,
+    )
     # logger.debug("Monthly billing query: %s", monthly_billing_query)
 
     try:
@@ -175,11 +188,11 @@ def generate_monthly_billing_report(usage_date=datetime.today().replace(day=1).s
         logger.debug("Monthly billing query: %s", monthly_billing_query)
         return False
 
-    file_handle = open(filename, 'w')
+    file_handle = open(filename, "w")
     file_handle.write(get_report_header())
     file_handle.close()
 
-    file_handle = open(filename, 'a')
+    file_handle = open(filename, "a")
     billing_report = csv.writer(file_handle)
     billing_report.writerows(rows)
     file_handle.close()

@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 SECONDS_IN_AN_HOUR = 60 * 60
 SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
 
+
 def poll_ad_group(
     acl_allocation: Allocation,
     expiration_seconds: int = SECONDS_IN_A_DAY,
@@ -157,7 +158,9 @@ def __validate_results(quota_usages, logger) -> bool:
     if success:
         logger.warn("Successful ingestion of quota daily usage.")
     else:
-        logger.warn("Unsuccessful ingestion of quota daily usage. Not all the QUMULO usage data was stored in Coldfront.")
+        logger.warn(
+            "Unsuccessful ingestion of quota daily usage. Not all the QUMULO usage data was stored in Coldfront."
+        )
         logger.warn(f"Usages pulled from QUMULO: {usage_pulled_from_qumulo}")
         logger.warn(f"Usages ingested for today: {daily_usage_ingested}")
 
