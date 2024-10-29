@@ -8,7 +8,7 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.core.allocation.signals import (
     allocation_activate,
     allocation_disable,
@@ -57,10 +57,14 @@ def on_allocation_activate(sender, **kwargs):
             (begin_date.month + prepaid_months - 1) % 12 + 1,
             begin_date.day,
         )
-        print(exp)
-        print(prepaid_until)
     else:
         prepaid_until = None
+
+    AllocationAttribute.get_or_create(
+        allocation_attribute_type=datetime,
+        allocation="prepaid_expiration",
+        value=prepaid_until,
+    )
 
     try:
         # Create allocation
