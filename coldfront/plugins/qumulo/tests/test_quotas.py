@@ -828,13 +828,10 @@ class TestIngestAllocationDailyUsages(TestCase):
         allocation_pending.status = self.status_pending
         allocation_pending.save()
 
-        exceptionRaised = False
         try:
             ingest_quotas_with_daily_usage()
         except:
-            exceptionRaised = True
-
-        self.assertFalse(exceptionRaised)
+            self.fail("ingest_quotas failed")
 
         storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
             "allocation"
