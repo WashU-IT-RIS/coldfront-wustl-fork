@@ -169,7 +169,6 @@ class QumuloAPI:
         except RequestError:
             pass
 
-        # return self.rc.quota.delete_quota(file_attr["id"])
         return z
 
     def delete_nfs_export(self, export_id):

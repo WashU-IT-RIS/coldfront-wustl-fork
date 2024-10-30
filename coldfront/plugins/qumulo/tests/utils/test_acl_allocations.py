@@ -606,3 +606,24 @@ class TestAclAllocations(TestCase):
             call_args_list[1].kwargs["acl"], expected_acl, ignore_order=True
         )
         self.assertFalse(diff)
+
+    def test_is_base_allocation_confirms_base_allocation(self):
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo"
+        self.assertTrue(AclAllocations.is_base_allocation(path))
+
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/"
+        self.assertTrue(AclAllocations.is_base_allocation(path))
+
+    def test_is_base_allocation_rejects_sub_allocation(self):
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/Active/bar"
+        self.assertFalse(AclAllocations.is_base_allocation(path))
+
+    def test_is_base_allocation_rejects_gibberish_allocations(self):
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/Active"
+        self.assertFalse(AclAllocations.is_base_allocation(path))
+
+        path = "/foo"
+        self.assertFalse(AclAllocations.is_base_allocation(path))
+
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/bar/Active"
+        self.assertFalse(AclAllocations.is_base_allocation(path))
