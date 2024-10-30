@@ -8,7 +8,11 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
 
-from coldfront.core.allocation.models import Allocation, AllocationAttribute
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationAttributeType,
+)
 from coldfront.core.allocation.signals import (
     allocation_activate,
     allocation_disable,
@@ -47,7 +51,7 @@ def on_allocation_activate(sender, **kwargs):
     name = allocation_obj.get_attribute(name="storage_name")
     limit_in_bytes = allocation_obj.get_attribute(name="storage_quota") * (2**40)
     bill_cycle = allocation_obj.get_attribute(name="billing_cycle")
-    allocation_attribute_obj_type = allocation_obj.get_attribute(
+    allocation_attribute_obj_type = AllocationAttributeType.objects.get(
         name="prepaid_expiration"
     )
     exp = allocation_obj.get_attribute(name="prepaid_expiration")
