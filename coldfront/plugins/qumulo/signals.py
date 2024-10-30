@@ -60,8 +60,8 @@ def on_allocation_activate(sender, **kwargs):
     else:
         prepaid_until = None
 
-    AllocationAttribute.prepaid_expiration.get_or_create(
-        allocation_attribute_type=datetime,
+    AllocationAttribute.objects.get_or_create(
+        allocation_attribute_type="prepaid_expiration",
         allocation=allocation_obj,
         value=prepaid_until,
     )
