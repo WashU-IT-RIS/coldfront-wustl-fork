@@ -149,8 +149,6 @@ class AclAllocations:
     def is_base_allocation(path: str):
         STORAGE2_PATH = os.environ.get("STORAGE2_PATH").rstrip("/")
 
-        print(path, STORAGE2_PATH)
-
         return re.fullmatch("^" + STORAGE2_PATH + "/[^/]*/?$", path) != None
 
     @staticmethod

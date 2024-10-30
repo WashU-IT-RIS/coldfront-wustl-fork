@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.utils import timezone
 
+from unittest import skip
 from unittest.mock import patch, MagicMock
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
@@ -18,6 +19,7 @@ from coldfront.plugins.qumulo.tasks import (
     ingest_quotas_with_daily_usage,
 )
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
+from coldfront.plugins.qumulo import tasks as qumulo_api
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -26,6 +28,7 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
 )
 from coldfront.core.resource.models import Resource
+from coldfront.core.test_helpers.factories import AllocationStatusChoiceFactory
 
 from qumulo.lib.request import RequestError
 
@@ -275,6 +278,11 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             get_mock_quota_data(self.STORAGE2_PATH)
         )
 
+        self.status_active = AllocationStatusChoiceFactory(name="Active")
+        self.status_ready_for_deletion = AllocationStatusChoiceFactory(
+            name="Ready for Deletion"
+        )
+
         for index, (path, value) in enumerate(
             get_mock_quota_data(self.STORAGE2_PATH).items()
         ):
@@ -295,7 +303,12 @@ class TestIngestQuotasWithDailyUsages(TestCase):
                 "service_rate": "general",
             }
 
-            create_allocation(project=self.project, user=self.user, form_data=form_data)
+            # create_allocation(project=self.project, user=self.user, form_data=form_data)
+            allocation = create_allocation(
+                project=self.project, user=self.user, form_data=form_data
+            )
+            allocation.status = self.status_active
+            allocation.save()
 
         self.storage_filesystem_path_attribute_type = (
             AllocationAttributeType.objects.get(name="storage_filesystem_path")
@@ -327,6 +340,22 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         )
         return {"quotas": quotas, "paging": {"next": ""}}
 
+    def test_qumulo_result_set_page_limit_should_be_set(self) -> None:
+        page_limit = qumulo_api.QumuloAPI.get_result_set_page_limit()
+        self.assertIsNotNone(page_limit)
+
+    @skip("Until we have a chance to propagte the ENV variable.")
+    def test_qumulo_result_set_page_limit_should_raise_an_exception_if_not_set(
+        self,
+    ) -> None:
+        old_page_limit = os.environ.get("QUMULO_RESULT_SET_PAGE_LIMIT")
+        os.environ["QUMULO_RESULT_SET_PAGE_LIMIT"] = ""
+
+        with self.assertRaises(TypeError):
+            qumulo_api.QumuloAPI.get_result_set_page_limit()
+
+        os.environ["QUMULO_RESULT_SET_PAGE_LIMIT"] = old_page_limit
+
     def test_after_allocation_create_usage_is_zero(self) -> None:
         for path in get_mock_quota_data(self.STORAGE2_PATH).keys():
             if "exclude" in path:
@@ -334,11 +363,15 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
             allocation_attribute_usage = None
             try:
-                storage_filesystem_path_attribute = AllocationAttribute.objects.get(
+                storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
+                    "allocation"
+                ).get(
                     value=path.rstrip("/"),
                     allocation_attribute_type=self.storage_filesystem_path_attribute_type,
+                    allocation__status=self.status_active,
                 )
                 allocation = storage_filesystem_path_attribute.allocation
+
                 storage_quota_attribute_type = AllocationAttribute.objects.get(
                     allocation=allocation,
                     allocation_attribute_type=self.storage_quota_attribute_type,
@@ -354,6 +387,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
             self.assertEqual(allocation_attribute_usage.value, 0)
             self.assertEqual(allocation_attribute_usage.history.first().value, 0)
+            self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
     def test_after_getting_daily_usages_from_qumulo_api(
@@ -372,10 +406,12 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             get_mock_quota_base_allocations(self.STORAGE2_PATH)
         )
         for qumulo_quota in base_quotas["quotas"]:
-            allocation_attribute_usage = None
-            storage_filesystem_path_attribute = AllocationAttribute.objects.get(
+            storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
+                "allocation"
+            ).get(
                 value=qumulo_quota["path"].rstrip("/"),
                 allocation_attribute_type=self.storage_filesystem_path_attribute_type,
+                allocation__status=self.status_active,
             )
 
             allocation = storage_filesystem_path_attribute.allocation
@@ -390,10 +426,8 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
             usage = int(qumulo_quota.get("capacity_usage"))
             self.assertEqual(allocation_attribute_usage.value, usage)
-            self.assertEqual(
-                allocation_attribute_usage.history.first().value,
-                usage,
-            )
+            self.assertEqual(allocation_attribute_usage.history.first().value, usage)
+            self.assertGreater(allocation_attribute_usage.history.count(), 1)
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
     def test_doesnt_ingest_sub_allocation_data(
@@ -430,3 +464,80 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
             self.assertEqual(allocation_attribute_usage.value, 0)
             self.assertEqual(allocation_attribute_usage.history.first().value, 0)
+
+    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    def test_filtering_out_not_active_allocations(
+        self, qumulo_api_mock: MagicMock
+    ) -> None:
+        index = 1
+        path = f"{self.STORAGE2_PATH}/status_test"
+        limit = "100000000000000"
+        capacity_usage = "37089837494272"
+
+        mock_quota = {
+            "quotas": [
+                {
+                    "id": index,
+                    "path": path,
+                    "limit": limit,
+                    "capacity_usage": capacity_usage,
+                }
+            ],
+            "paging": {"next": ""},
+        }
+
+        qumulo_api = MagicMock()
+        qumulo_api.get_all_quotas_with_usage.return_value = mock_quota
+        qumulo_api_mock.return_value = qumulo_api
+
+        form_data = {
+            "storage_filesystem_path": path,
+            "storage_export_path": path,
+            "storage_name": f"for_tester_{index}",
+            "storage_quota": limit,
+            "protocols": ["nfs"],
+            "rw_users": [f"user_{index}_rw"],
+            "ro_users": [f"user_{index}_ro"],
+            "storage_ticket": f"ITSD-{index}",
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "general",
+        }
+        allocation_active = create_allocation(
+            project=self.project, user=self.user, form_data=form_data
+        )
+        allocation_active.status = self.status_active
+        allocation_active.save()
+
+        allocation_ready_for_deletion = create_allocation(
+            project=self.project, user=self.user, form_data=form_data
+        )
+        allocation_ready_for_deletion.status = self.status_ready_for_deletion
+        allocation_ready_for_deletion.save()
+
+        try:
+            ingest_quotas_with_daily_usage()
+        except:
+            self.fail("ingest_quotas failed")
+
+        storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
+            "allocation"
+        ).get(
+            value=path,
+            allocation_attribute_type=self.storage_filesystem_path_attribute_type,
+            allocation__status=self.status_active,
+        )
+        active_allocation = storage_filesystem_path_attribute.allocation
+
+        self.assertEqual(active_allocation.status, self.status_active)
+
+        storage_quota_attribute = AllocationAttribute.objects.get(
+            allocation=active_allocation,
+            allocation_attribute_type=self.storage_quota_attribute_type,
+        )
+        allocation_attribute_usage = storage_quota_attribute.allocationattributeusage
+        usage = int(capacity_usage)
+
+        self.assertEqual(allocation_attribute_usage.value, usage)
+        self.assertEqual(allocation_attribute_usage.history.first().value, usage)
+        self.assertGreater(allocation_attribute_usage.history.count(), 1)
