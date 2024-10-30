@@ -89,6 +89,18 @@ def conditionally_update_storage_allocation_statuses() -> None:
         conditionally_update_storage_allocation_status(allocation)
 
 
+def conditionally_update_billing_cycle_type() -> None:
+    resource = Resource.objects.get(name="Storage2")
+    allocations = Allocation.objects.filter(
+        billing__cycle="Prepaid", resources=resource
+    )
+    logger.warn(f"Checking {len(allocations)} qumulo allocations")
+
+    for allocation in allocations:
+        if allocation.prepaid_expiration == datetime.today().strftime("%Y-%m-%d"):
+            allocation.billing_cycle = "monthly"
+
+
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
