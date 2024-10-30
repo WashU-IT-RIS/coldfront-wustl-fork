@@ -47,7 +47,9 @@ def on_allocation_activate(sender, **kwargs):
     name = allocation_obj.get_attribute(name="storage_name")
     limit_in_bytes = allocation_obj.get_attribute(name="storage_quota") * (2**40)
     bill_cycle = allocation_obj.get_attribute(name="billing_cycle")
-    prepaid_until = allocation_obj.get_attribute(name="prepaid_expiration")
+    allocation_attribute_obj_type = allocation_obj.get_attribute(
+        name="prepaid_expiration"
+    )
     exp = allocation_obj.get_attribute(name="prepaid_expiration")
     if bill_cycle == "prepaid":
         prepaid_months = allocation_obj.get_attribute(name="prepaid_time")
@@ -61,7 +63,7 @@ def on_allocation_activate(sender, **kwargs):
         prepaid_until = None
 
     AllocationAttribute.objects.get_or_create(
-        allocation_attribute_type="prepaid_expiration",
+        allocation_attribute_type=allocation_attribute_obj_type,
         allocation=allocation_obj,
         value=prepaid_until,
     )
