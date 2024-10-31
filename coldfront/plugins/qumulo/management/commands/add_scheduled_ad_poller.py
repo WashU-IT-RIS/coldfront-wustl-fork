@@ -29,9 +29,9 @@ class Command(BaseCommand):
         )
 
 
-def sequential_poll_and_check() -> None:
-    poll_ad_groups()
-    conditionally_update_storage_allocation_statuses()
+# def sequential_poll_and_check() -> None:
+#     poll_ad_groups()
+#     conditionally_update_storage_allocation_statuses()
 
 
 def daily_billing_status_check() -> None:
