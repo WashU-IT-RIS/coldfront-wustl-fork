@@ -326,7 +326,7 @@ class TestAclAllocations(TestCase):
         ) as mock_set_traverse_acl:
             AclAllocations.set_allocation_acls(allocation, mock_qumulo_api)
 
-            mock_set_acl_v2.assert_called_once()
+            self.assertEqual(mock_set_acl_v2.call_count, 2)
             call_args = mock_set_acl_v2.call_args
 
             self.assertEqual(
@@ -369,7 +369,7 @@ class TestAclAllocations(TestCase):
         ) as mock_set_traverse_acl:
             AclAllocations.set_allocation_acls(allocation, mock_qumulo_api)
 
-            mock_set_acl_v2.assert_called_once()
+            self.assertEqual(mock_set_acl_v2.call_count, 2)
             call_args = mock_set_acl_v2.call_args
 
             self.assertEqual(
@@ -399,7 +399,7 @@ class TestAclAllocations(TestCase):
         ) as mock_set_traverse_acl:
             AclAllocations.set_allocation_acls(allocation, mock_qumulo_api)
 
-            mock_set_acl_v2.assert_called_once()
+            self.assertEqual(mock_set_acl_v2.call_count, 2)
 
             group_name_base = f"storage-{form_data['storage_name']}"
             mock_set_traverse_acl.assert_called_once_with(
