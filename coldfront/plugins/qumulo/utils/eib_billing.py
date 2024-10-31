@@ -73,8 +73,8 @@ FROM (
       service_rate_category,
       cost_center,
       'monthly' billing_cycle,
-      true subsidized,
-      false exempt,
+      TRUE subsidized,
+      FALSE exempt,
       CASE service_rate_category
         WHEN 'consumption' THEN 13
         WHEN 'subscription' THEN 634
@@ -128,6 +128,8 @@ FROM (
     AND
       astatus.name = 'Active'
   ) AS data
+  WHERE billing_cycle = 'monthly'
+    AND exempt <> TRUE
 ) AS report where report.billing_unit > 0;
 """
 
