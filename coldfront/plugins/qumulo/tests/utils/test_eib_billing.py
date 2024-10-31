@@ -49,7 +49,7 @@ def construct_usage_data_in_json(filesystem_path: str, quota: str, usage: str):
     return quota_in_json
 
 
-def mock_get_allocation_attributes():
+def mock_get_quota_service_rate_categories():
     allocation_attributes = [
         (5, "consumption"),
         (15, "consumption"),
@@ -93,7 +93,7 @@ def mock_get_quotas() -> str:
     }
 
 
-class TestBillingReport(TestCase):
+class TestEIBBilling(TestCase):
     def setUp(self) -> None:
         self.client = Client()
         build_data = build_models()
@@ -138,10 +138,15 @@ class TestBillingReport(TestCase):
             form_data=construct_allocation_form_data(15, "consumption"),
         )
 
-        for allocation in Allocation.objects.all():
-            if allocation.resources.first().name == "Storage2":
-                allocation.status = AllocationStatusChoice.objects.get(name="Active")
-                allocation.save()
+        # Update the status of the created allocations from Pending to Active
+        for allocation in Allocation.objects.filter(
+            resources__name="Storage2",
+            status__name__in=[
+                "Pending",
+            ],
+        ):
+            allocation.status = AllocationStatusChoice.objects.get(name="Active")
+            allocation.save()
 
         # Confirm creating 1 Storage2 allocation
         with connection.cursor() as cursor:
@@ -239,9 +244,12 @@ class TestBillingReport(TestCase):
             self.assertNotEqual(float(row[3]) - 0, 0)
 
         # Confirm the status of the allocation is Active
-        for allocation in Allocation.objects.all():
-            if allocation.resources.first().name == "Storage2":
-                self.assertEqual(allocation.status.name, "Active")
+        allocations = Allocation.objects.filter(resources__name="Storage2").exclude(
+            status__name__in=[
+                "Active",
+            ]
+        )
+        self.assertEqual(len(list(allocations)), 0)
 
         eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
         eib_billing.generate_monthly_billing_report()
@@ -272,9 +280,9 @@ class TestBillingReport(TestCase):
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quotas()
         qumulo_api_mock.return_value = qumulo_api
 
-        allocation_attributes = mock_get_allocation_attributes()
+        quota_service_rate_categories = mock_get_quota_service_rate_categories()
 
-        for quota, service_rate_category in allocation_attributes:
+        for quota, service_rate_category in quota_service_rate_categories:
             create_allocation(
                 project=self.project,
                 user=self.user,
@@ -282,20 +290,19 @@ class TestBillingReport(TestCase):
             )
 
         # Update the status of the created allocations from Pending to Active
-        for allocation in Allocation.objects.all():
-            if allocation.resources.first().name == "Storage2":
-                allocation.status = AllocationStatusChoice.objects.get(name="Active")
-                allocation.save()
+        for allocation in Allocation.objects.filter(
+            resources__name="Storage2",
+            status__name__in=[
+                "Pending",
+            ],
+        ):
+            allocation.status = AllocationStatusChoice.objects.get(name="Active")
+            allocation.save()
 
-        storage2_allocations = []
-        for allocation in Allocation.objects.all():
-            if (
-                allocation.resources.first().name == "Storage2"
-                and allocation.status.name == "Active"
-            ):
-                storage2_allocations.append(allocation)
-
-        self.assertEqual(len(storage2_allocations), len(allocation_attributes))
+        storage2_allocations = Allocation.objects.filter(
+            resources__name="Storage2", status__name__in=["Active"]
+        )
+        self.assertEqual(len(storage2_allocations), len(quota_service_rate_categories))
 
         ingest_quotas_with_daily_usage()
         eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
