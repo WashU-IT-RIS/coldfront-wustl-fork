@@ -91,6 +91,7 @@ def conditionally_update_storage_allocation_statuses() -> None:
 
 def conditionally_update_billing_cycle_type() -> None:
     resource = Resource.objects.get(name="Storage2")
+    allocation_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
     allocations = Allocation.objects.filter(
         billing__cycle="Prepaid", resources=resource
     )
