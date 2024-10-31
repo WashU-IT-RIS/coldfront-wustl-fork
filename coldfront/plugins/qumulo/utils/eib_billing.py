@@ -33,9 +33,6 @@ class EIBBilling:
     def get_filename(self) -> str:
         return self.filename
 
-    # def set_filename(self, filename) -> None:
-    #     self.filename = filename
-
     def get_report_header(self) -> str:
         report_header = """Submit Internal Service Delivery,,,,,,,,,,,,,,,,,,,,,,,,,,,
 Area,All,,Business Process Parameters,Internal Service Delivery Data,,,,,,,Internal Service Delivery Line Data+,,,,,,,,,,,,,
