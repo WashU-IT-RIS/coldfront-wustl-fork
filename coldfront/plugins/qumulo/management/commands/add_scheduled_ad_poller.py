@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+import logging
 
 from django_q.models import Schedule
 
@@ -7,6 +8,8 @@ from coldfront.plugins.qumulo.tasks import (
     conditionally_update_storage_allocation_statuses,
     conditionally_update_billing_cycle_type,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -35,4 +38,5 @@ class Command(BaseCommand):
 
 
 def daily_billing_status_check() -> None:
+    logger.warn(f"Checking {len(allocations)} qumulo allocations")
     conditionally_update_billing_cycle_type()
