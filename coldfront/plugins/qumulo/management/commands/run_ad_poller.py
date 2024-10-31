@@ -5,6 +5,7 @@ from django_q.tasks import async_chain
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_groups,
     conditionally_update_storage_allocation_statuses,
+    conditionally_update_billing_cycle_type,
 )
 
 
@@ -16,5 +17,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Running AD Poller")
         async_chain(
-            [(poll_ad_groups), (conditionally_update_storage_allocation_statuses)]
+            [
+                (poll_ad_groups),
+                (conditionally_update_storage_allocation_statuses),
+                (conditionally_update_billing_cycle_type),
+            ]
         )
