@@ -265,10 +265,9 @@ class TestStorageAllocationStatuses(TestCase):
 class TestIngestQuotasWithDailyUsages(TestCase):
     def setUp(self) -> None:
         self.original_storage_path = os.environ.get("STORAGE2_PATH")
-        self.STORAGE2_PATH = "/storage2/fs1"
+        self.STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
         os.environ["STORAGE2_PATH"] = self.STORAGE2_PATH
 
-        self.client = Client()
         build_data = build_models()
 
         self.project = build_data["project"]
@@ -303,7 +302,6 @@ class TestIngestQuotasWithDailyUsages(TestCase):
                 "service_rate": "general",
             }
 
-            # create_allocation(project=self.project, user=self.user, form_data=form_data)
             allocation = create_allocation(
                 project=self.project, user=self.user, form_data=form_data
             )

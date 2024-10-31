@@ -149,7 +149,9 @@ class AclAllocations:
     def is_base_allocation(path: str):
         STORAGE2_PATH = os.environ.get("STORAGE2_PATH").rstrip("/")
 
-        return re.fullmatch("^" + STORAGE2_PATH + "/[^/]*/?$", path) != None
+        purePath = PurePath(path)
+
+        return purePath.match(f"{STORAGE2_PATH}/*/")
 
     @staticmethod
     def remove_acl_access(allocation: Allocation):
