@@ -383,7 +383,7 @@ def get_mock_quota_response(quota_data: str, STORAGE2_PATH: str) -> dict:
     )
     quotas.append(
         {
-            "path": f"{STORAGE2_PATH}/exlude/",
+            "path": f"{STORAGE2_PATH}/not_in_coldfront/",
             "id": "111111111",
             "limit": "20000000000000",
             "capacity_usage": "1",
