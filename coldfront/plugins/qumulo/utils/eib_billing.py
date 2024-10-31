@@ -1,5 +1,6 @@
 import logging
 import csv
+import re
 from datetime import datetime, timedelta
 from django.db import connection
 
@@ -174,6 +175,22 @@ WHERE report.billing_unit > 0;
             self.usage_date,
         )
         # logger.debug("Monthly billing query: %s", monthly_billing_query)
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT version();")
+                row = cursor.fetchone()
+                if re.search("mariadb", row, re.IGNORECASE):
+                    monthly_billing_query.replace("||", "")
+
+        except Exception as e:
+            logger.error("[Warning] Database error: %s", e)
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT sqlite_version();")
+                row = cursor.fetchone()
+
+            print(f"sqlite version: {row}")
+            pass
 
         try:
             with connection.cursor() as cursor:
