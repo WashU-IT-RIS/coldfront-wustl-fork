@@ -19,12 +19,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
 )
 
-from coldfront.plugins.qumulo.utils.eib_billing import (
-    get_report_header,
-    get_monthly_billing_query_template,
-    get_filename,
-    generate_monthly_billing_report,
-)
+from coldfront.plugins.qumulo.utils.eib_billing import EIBBilling
 
 
 def construct_allocation_form_data(quota_tb: int, service_rate_category: str):
@@ -115,7 +110,8 @@ class TestBillingReport(TestCase):
         return super().setUp()
 
     def test_header_return_csv(self):
-        header = get_report_header()
+        eib_billing = EIBBilling()
+        header = eib_billing.get_report_header()
         self.assertTrue(re.search("^Submit Internal Service Delivery(,){27}", header))
         self.assertEqual(
             hashlib.md5(header.encode("utf-8")).hexdigest(),
@@ -123,8 +119,9 @@ class TestBillingReport(TestCase):
         )
 
     def test_query_return_sql_statement(self):
+        eib_billing = EIBBilling()
         self.assertTrue(
-            re.search("^\s*SELECT\s*", get_monthly_billing_query_template())
+            re.search("^\s*SELECT\s*", eib_billing.get_monthly_billing_query_template())
         )
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
@@ -246,9 +243,10 @@ class TestBillingReport(TestCase):
             if allocation.resources.first().name == "Storage2":
                 self.assertEqual(allocation.status.name, "Active")
 
-        generate_monthly_billing_report(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+        eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+        eib_billing.generate_monthly_billing_report()
 
-        filename = get_filename()
+        filename = eib_billing.get_filename()
         self.assertFalse(re.search("RIS-%s-storage2-active-billing.csv", filename))
         self.assertTrue(
             re.search("RIS-[A-Za-z]+-storage2-active-billing.csv", filename)
@@ -300,13 +298,14 @@ class TestBillingReport(TestCase):
         self.assertEqual(len(storage2_allocations), len(allocation_attributes))
 
         ingest_quotas_with_daily_usage()
-        generate_monthly_billing_report(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+        eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+        eib_billing.generate_monthly_billing_report()
 
-        filename = get_filename()
+        filename = eib_billing.get_filename()
         with open(filename) as csvreport:
             data = list(csv.reader(csvreport))
 
-        header = get_report_header()
+        header = eib_billing.get_report_header()
         num_lines_header = len(header.splitlines())
         print("Numer of lines of the report header: %s" % num_lines_header)
         self.assertEqual(num_lines_header, 5)
