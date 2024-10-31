@@ -180,8 +180,9 @@ WHERE report.billing_unit > 0;
             with connection.cursor() as cursor:
                 cursor.execute("SELECT version();")
                 row = cursor.fetchone()
-                if re.search("mariadb", row, re.IGNORECASE):
-                    monthly_billing_query.replace("||", "")
+
+            if (re.search("mariadb", row[0], re.IGNORECASE)):
+                monthly_billing_query.replace("||", "")
 
         except Exception as e:
             logger.error("[Warning] Database error: %s", e)
