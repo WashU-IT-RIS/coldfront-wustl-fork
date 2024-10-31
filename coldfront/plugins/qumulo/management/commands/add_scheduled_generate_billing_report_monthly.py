@@ -5,7 +5,7 @@ from django_q.tasks import schedule
 
 from django_q.models import Schedule
 
-from coldfront.plugins.qumulo.utils.eib_billing import generate_monthly_billing_report
+from coldfront.plugins.qumulo.utils.eib_billing import EIBBilling
 
 SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_5_30_AM = (
     arrow.utcnow().replace(day=2, hour=5, minute=30).format(arrow.FORMAT_RFC3339)
@@ -26,4 +26,5 @@ class Command(BaseCommand):
 
 
 def generate_storage2_monthly_billing_report() -> None:
-    generate_monthly_billing_report()
+    eib_billing = EIBBilling()
+    eib_billing.generate_monthly_billing_report()
