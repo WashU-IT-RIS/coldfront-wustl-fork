@@ -85,15 +85,26 @@ class AcesManager(object):
                 "WRITE_EA",
             ],
         },
+    ]
+
+    everyone_ace = [
         {
             "flags": [],
             "type": "ALLOWED",
             "trustee": {"name": "Everyone"},
-            "rights": [
-                "READ",
-            ],
+            "rights": ["READ",],
         },
     ]
+
+    @staticmethod
+    def remove_everyone_aces(aces):
+        cleaned_aces = []
+        for ace in aces:
+            trusteeName = ace.get('trustee', {}).get('name', '')
+            if trusteeName.upper() == 'EVERYONE':
+                continue
+            cleaned_aces.append(ace)
+        return cleaned_aces
 
     @staticmethod
     def get_allocation_aces(rw_groupname: str, ro_groupname: str):

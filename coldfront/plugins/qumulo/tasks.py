@@ -170,7 +170,7 @@ def __validate_results(quota_usages, logger) -> bool:
     return success
 
 
-class ResetAcl(object):
+class ResetAcl:
     qumulo_api = None
     sub_allocations = None
 
