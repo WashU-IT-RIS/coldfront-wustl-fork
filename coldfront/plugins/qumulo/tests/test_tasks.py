@@ -10,6 +10,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     get_mock_quota_data,
     get_mock_quota_base_allocations,
     get_mock_quota_sub_allocations,
+    get_mock_quota_response,
 )
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_group,
@@ -273,8 +274,8 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         self.project = build_data["project"]
         self.user = build_data["user"]
 
-        self.quotas = self.__get_qumulo_quota_data(
-            get_mock_quota_data(self.STORAGE2_PATH)
+        self.mock_quota_response = get_mock_quota_response(
+            get_mock_quota_data(self.STORAGE2_PATH), self.STORAGE2_PATH
         )
 
         self.status_active = AllocationStatusChoiceFactory(name="Active")
@@ -285,9 +286,6 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         for index, (path, value) in enumerate(
             get_mock_quota_data(self.STORAGE2_PATH).items()
         ):
-            if "exclude" in path:
-                continue
-
             form_data = {
                 "storage_filesystem_path": path.rstrip("/"),
                 "storage_export_path": path.rstrip("/"),
@@ -322,22 +320,6 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
         return super().tearDown()
 
-    def __get_qumulo_quota_data(self, quota_data: dict) -> dict:
-        quotas = list(
-            map(
-                lambda quota_key_value: (
-                    {
-                        "id": quota_key_value[1]["id"],
-                        "path": quota_key_value[0],
-                        "limit": quota_key_value[1]["limit"],
-                        "capacity_usage": quota_key_value[1]["usage"],
-                    }
-                ),
-                quota_data.items(),
-            )
-        )
-        return {"quotas": quotas, "paging": {"next": ""}}
-
     def test_qumulo_result_set_page_limit_should_be_set(self) -> None:
         page_limit = qumulo_api.QumuloAPI.get_result_set_page_limit()
         self.assertIsNotNone(page_limit)
@@ -356,9 +338,6 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
     def test_after_allocation_create_usage_is_zero(self) -> None:
         for path in get_mock_quota_data(self.STORAGE2_PATH).keys():
-            if "exclude" in path:
-                continue
-
             allocation_attribute_usage = None
             try:
                 storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
@@ -392,7 +371,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         self, qumulo_api_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
-        qumulo_api.get_all_quotas_with_usage.return_value = self.quotas
+        qumulo_api.get_all_quotas_with_usage.return_value = self.mock_quota_response
         qumulo_api_mock.return_value = qumulo_api
 
         try:
@@ -400,14 +379,12 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         except:
             self.fail("Ingest quotas raised exception")
 
-        base_quotas = self.__get_qumulo_quota_data(
-            get_mock_quota_base_allocations(self.STORAGE2_PATH)
-        )
-        for qumulo_quota in base_quotas["quotas"]:
+        base_quotas = get_mock_quota_base_allocations(self.STORAGE2_PATH)
+        for path, quoata_data in base_quotas.items():
             storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
                 "allocation"
             ).get(
-                value=qumulo_quota["path"].rstrip("/"),
+                value=path.rstrip("/"),
                 allocation_attribute_type=self.storage_filesystem_path_attribute_type,
                 allocation__status=self.status_active,
             )
@@ -422,7 +399,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
                 storage_quota_attribute.allocationattributeusage
             )
 
-            usage = int(qumulo_quota.get("capacity_usage"))
+            usage = int(quoata_data["usage"])
             self.assertEqual(allocation_attribute_usage.value, usage)
             self.assertEqual(allocation_attribute_usage.history.first().value, usage)
             self.assertGreater(allocation_attribute_usage.history.count(), 1)
@@ -432,7 +409,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         self, qumulo_api_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
-        qumulo_api.get_all_quotas_with_usage.return_value = self.quotas
+        qumulo_api.get_all_quotas_with_usage.return_value = self.mock_quota_response
         qumulo_api_mock.return_value = qumulo_api
 
         try:
@@ -440,13 +417,11 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         except:
             self.fail("Ingest quotas raised exception")
 
-        base_quotas = self.__get_qumulo_quota_data(
-            get_mock_quota_sub_allocations(self.STORAGE2_PATH)
-        )
-        for qumulo_quota in base_quotas["quotas"]:
+        sub_quotas = get_mock_quota_sub_allocations(self.STORAGE2_PATH)
+        for path in sub_quotas.keys():
             allocation_attribute_usage = None
             storage_filesystem_path_attribute = AllocationAttribute.objects.get(
-                value=qumulo_quota["path"].rstrip("/"),
+                value=path.rstrip("/"),
                 allocation_attribute_type=self.storage_filesystem_path_attribute_type,
             )
 

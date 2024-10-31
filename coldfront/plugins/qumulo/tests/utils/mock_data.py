@@ -234,11 +234,6 @@ def set_allocation_attributes(
 
 def get_mock_quota_base_allocations(STORAGE2_PATH: str) -> dict:
     return {
-        f"{STORAGE2_PATH}/exlude/": {
-            "id": "111111111",
-            "limit": "20000000000000",
-            "usage": "1",
-        },
         f"{STORAGE2_PATH}/alex.holehouse_test/": {
             "id": "42080003",
             "limit": "38482906972160",
@@ -370,6 +365,31 @@ def get_mock_quota_sub_allocations(STORAGE2_PATH: str) -> dict:
             "usage": "4096",
         },
     }
+
+
+def get_mock_quota_response(quota_data: str, STORAGE2_PATH: str) -> dict:
+    quotas = list(
+        map(
+            lambda quota_key_value: (
+                {
+                    "id": quota_key_value[1]["id"],
+                    "path": quota_key_value[0],
+                    "limit": quota_key_value[1]["limit"],
+                    "capacity_usage": quota_key_value[1]["usage"],
+                }
+            ),
+            quota_data.items(),
+        )
+    )
+    quotas.append(
+        {
+            "path": f"{STORAGE2_PATH}/exlude/",
+            "id": "111111111",
+            "limit": "20000000000000",
+            "capacity_usage": "1",
+        }
+    )
+    return {"quotas": quotas, "paging": {"next": ""}}
 
 
 def get_mock_quota_data(STORAGE2_PATH: str) -> dict:
