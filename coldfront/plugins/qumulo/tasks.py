@@ -94,7 +94,9 @@ def conditionally_update_billing_cycle_type() -> None:
     allocations = Allocation.objects.filter(
         billing__cycle="Prepaid", resources=resource
     )
-    logger.warn(f"Checking {len(allocations)} qumulo allocations")
+    logger.warn(
+        f"Checking {len(allocations)} qumulo allocations conditionally_update_billing_cycle_type"
+    )
 
     for allocation in allocations:
         if allocation.prepaid_expiration == datetime.today().strftime("%Y-%m-%d"):

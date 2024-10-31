@@ -38,5 +38,5 @@ class Command(BaseCommand):
 
 
 def daily_billing_status_check() -> None:
-    logger.warn(f"Checking {len(allocations)} qumulo allocations")
+    logger.warn(f"Calling conditionally_update_billing_cycle_type")
     conditionally_update_billing_cycle_type()
