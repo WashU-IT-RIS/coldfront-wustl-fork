@@ -7,11 +7,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Zeroing all quota usages")
 
-        storage_resource = Resource.objects.get(name="Storage2")
+        # storage_resource = Resource.objects.get(name="Storage2")
         allocations = list(
-            Allocation.objects.filter(
-                resources__contains=storage_resource, status__name="Active"
-            )
+            Allocation.objects.filter(resources__in="Storage2", status__name="Active")
         )
 
         for allocation in allocations:
