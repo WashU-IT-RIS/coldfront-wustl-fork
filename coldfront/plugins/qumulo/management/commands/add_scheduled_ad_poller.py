@@ -6,7 +6,7 @@ from django_q.models import Schedule
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_groups,
     conditionally_update_storage_allocation_statuses,
-    conditionally_update_billing_cycle_type,
+    conditionally_update_billing_cycle_types,
 )
 
 logger = logging.getLogger(__name__)
@@ -39,4 +39,4 @@ def sequential_poll_and_check() -> None:
 
 def daily_billing_status_check() -> None:
     logger.warn(f"Calling conditionally_update_billing_cycle_type")
-    conditionally_update_billing_cycle_type()
+    conditionally_update_billing_cycle_types()
