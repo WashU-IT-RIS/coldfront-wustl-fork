@@ -57,11 +57,11 @@ SELECT
     'ISP0000030' internal_service_provider,
     'USD' currency,
     '%s' document_date,
-    'FY25 ' || '%s' || ' Monthly for ' || report.sponsor memo,
+    ('FY25 ' || '%s' || ' Monthly for ' || report.sponsor) AS memo,
     '1' row_id,
     NULL internal_service_delivery_line_id,
     '1' internal_service_delivery_line_number,
-    '"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.billing_unit || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"' item_description,
+    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.billing_unit || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"') AS item_description,
     'SC510' spend_category,
     '1' quantity,
     'EA' unit_of_measure,
@@ -69,7 +69,7 @@ SELECT
     report.fee extended_amount,
     NULL requester,
     report.delivery_date delivery_date,
-    '"' || report.storage_name || '"' fileset_memo,
+    ('"' || report.storage_name || '"') AS fileset_memo,
     report.cost_center cost_center,
     NULL fund,
     NULL,
@@ -93,7 +93,6 @@ FROM (
         data.billing_unit*data.rate fee
     FROM (
         SELECT
-            DATE(most_recent_haau.recent_modified) usage_date,
             '1' service_id,
             department_number,
             storage_name,
@@ -115,7 +114,7 @@ FROM (
                 WHEN 'consumption' THEN (
                     SELECT MAX(consumption_billing_unit)
                     FROM (
-                        SELECT CAST(most_recent_haau.value AS FLOAT8) /1024/1024/1024/1024 -5 consumption_billing_unit
+                        SELECT CAST(most_recent_usage_haau.value AS FLOAT8) /1024/1024/1024/1024 -5 consumption_billing_unit
                         UNION SELECT 0
                     ) AS positive_billing_unit
                 )
@@ -141,19 +140,22 @@ FROM (
         LEFT JOIN (SELECT aa.allocation_id, aa.value service_rate_category FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='service_rate') AS service_rate_category ON a.id=service_rate_category.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value storage_quota FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='storage_quota') AS storage_quota ON a.id=storage_quota.allocation_id
         JOIN (
-            SELECT allocation_attribute_id,
-                MAX(modified) recent_modified,
-                value
-            FROM allocation_historicalallocationattributeusage
-            GROUP BY allocation_attribute_id, DATE(modified)
-        ) AS most_recent_haau
-            ON storage_quota.id=most_recent_haau.allocation_attribute_id
+            SELECT haau.allocation_attribute_id, value
+            FROM allocation_historicalallocationattributeusage haau
+            JOIN (
+                SELECT allocation_attribute_id, MAX(modified) recent_modified
+                FROM allocation_historicalallocationattributeusage
+                WHERE DATE(modified) = '%s'
+                GROUP BY allocation_attribute_id, DATE(modified)
+            ) AS most_recent_haau
+            ON haau.allocation_attribute_id=most_recent_haau.allocation_attribute_id
+                AND haau.modified=most_recent_haau.recent_modified
+        ) AS most_recent_usage_haau
+            ON storage_quota.id=most_recent_usage_haau.allocation_attribute_id
         JOIN allocation_allocation_resources ar ON ar.allocation_id=a.id
         JOIN resource_resource r ON r.id=ar.resource_id
         WHERE
             r.name = 'Storage2'
-        AND
-          DATE(most_recent_haau.recent_modified) = '%s'
         AND
           astatus.name = 'Active'
     ) AS data
@@ -181,17 +183,18 @@ WHERE report.billing_unit > 0;
                 cursor.execute("SELECT version();")
                 row = cursor.fetchone()
 
-            if (re.search("mariadb", row[0], re.IGNORECASE)):
+            logger.debug(f"[INFO] Database: {row[0]}")
+            if re.search("mariadb", row[0], re.IGNORECASE):
+                monthly_billing_query.replace("('", "CONCAT(")
                 monthly_billing_query.replace("||", "")
+                logger.debug("Monthly billing query: %s", monthly_billing_query)
 
         except Exception as e:
-            logger.error("[Warning] Database error: %s", e)
             with connection.cursor() as cursor:
                 cursor.execute("SELECT sqlite_version();")
                 row = cursor.fetchone()
 
-            print(f"sqlite version: {row}")
-            pass
+            logger.debug(f"[INFO] Database: sqlite version {row[0]}")
 
         try:
             with connection.cursor() as cursor:
