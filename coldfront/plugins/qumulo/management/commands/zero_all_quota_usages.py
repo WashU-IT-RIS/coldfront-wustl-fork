@@ -10,7 +10,7 @@ class Command(BaseCommand):
         storage_resource = Resource.objects.get(name="Storage2")
         allocations = list(
             Allocation.objects.filter(
-                resources__in=storage_resource, status__name="Active"
+                resources__in=[storage_resource], status__name="Active"
             )
         )
 
