@@ -122,6 +122,7 @@ def conditionally_update_billing_cycle_types() -> None:
                     allocation=allocation,
                     value="monthly",
                 )
+                logger.warn(f"{allocation.billing_cycle}")
             else:
                 logger.warn(f"still prepaid")
         else:
