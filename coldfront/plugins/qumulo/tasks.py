@@ -94,9 +94,19 @@ def conditionally_update_billing_cycle_type() -> None:
     resource = Resource.objects.get(name="Storage2")
     allocations = Allocation.objects.filter(resources=resource)
     billing_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
+    prepaid_exp_attribute = AllocationAttributeType.objects.get(
+        name="prepaid_expiration"
+    )
     billing_sub_q = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"), allocation_attribute_type=billing_attribute
     ).values("value")[:1]
+    prepaid_exp_sub_q = AllocationAttribute.objects.filter(
+        allocation=OuterRef("pk"), allocation_attribute_type=prepaid_exp_attribute
+    ).values("value")[:1]
+    allocations = allocations.annotate(
+        billing_cycle=Subquery(billing_sub_q),
+        prepaid_expiration=Subquery(prepaid_exp_sub_q),
+    )
     logger.warn(
         f"Checking {len(allocations)} qumulo allocations conditionally_update_billing_cycle_type"
     )
