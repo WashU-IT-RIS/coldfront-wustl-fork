@@ -13,6 +13,7 @@ from coldfront.core.resource.models import Resource
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from django.db.models import OuterRef, Subquery
 
 from qumulo.lib.request import RequestError
 
@@ -93,6 +94,9 @@ def conditionally_update_billing_cycle_type() -> None:
     resource = Resource.objects.get(name="Storage2")
     allocations = Allocation.objects.filter(resources=resource)
     billing_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
+    billing_sub_q = AllocationAttribute.objects.filter(
+        allocation=OuterRef("pk"), allocation_attribute_type=billing_attribute
+    ).values("value")[:1]
     logger.warn(
         f"Checking {len(allocations)} qumulo allocations conditionally_update_billing_cycle_type"
     )
