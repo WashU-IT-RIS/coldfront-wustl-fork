@@ -107,23 +107,16 @@ def conditionally_update_billing_cycle_types() -> None:
         billing_cycle=Subquery(billing_sub_q),
         prepaid_expiration=Subquery(prepaid_exp_sub_q),
     )
-    logger.warn(
-        f"Checking {len(allocations)} qumulo allocations conditionally_update_billing_cycle_type"
-    )
+    logger.warn(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
 
     for allocation in allocations:
         if allocation.billing_cycle == "prepaid":
             if allocation.prepaid_expiration == datetime.today().strftime(
                 "%Y-%m-%d"
             ) or allocation.prepaid_expiration < datetime.today().strftime("%Y-%m-%d"):
-                logger.warn(f"change this to month")
+                logger.warn(f"Changing {allocation} billing_cycle to monthly")
                 allocation.billing_cycle = "monthly"
                 allocation.save()
-                logger.warn(f"{allocation.billing_cycle}")
-            else:
-                logger.warn(f"still prepaid")
-        else:
-            logger.warn(f"monthly bill cycle")
 
 
 def ingest_quotas_with_daily_usage() -> None:
