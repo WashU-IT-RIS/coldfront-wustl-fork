@@ -185,8 +185,9 @@ WHERE report.billing_unit > 0;
 
             logger.debug(f"[INFO] Database: {row[0]}")
             if re.search("mariadb", row[0], re.IGNORECASE):
-                monthly_billing_query.replace("('", "CONCAT(")
-                monthly_billing_query.replace("||", "")
+                monthly_billing_query = monthly_billing_query.replace(
+                    "('", "CONCAT('"
+                ).replace("||", ",")
                 logger.debug("Monthly billing query: %s", monthly_billing_query)
 
         except Exception as e:
