@@ -380,7 +380,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.fail("Ingest quotas raised exception")
 
         base_quotas = get_mock_quota_base_allocations(self.STORAGE2_PATH)
-        for path, quoata_data in base_quotas.items():
+        for path, quota_data in base_quotas.items():
             storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
                 "allocation"
             ).get(
@@ -399,7 +399,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
                 storage_quota_attribute.allocationattributeusage
             )
 
-            usage = int(quoata_data["usage"])
+            usage = int(quota_data["usage"])
             self.assertEqual(allocation_attribute_usage.value, usage)
             self.assertEqual(allocation_attribute_usage.history.first().value, usage)
             self.assertGreater(allocation_attribute_usage.history.count(), 1)
@@ -436,7 +436,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             )
 
             self.assertEqual(allocation_attribute_usage.value, 0)
-            self.assertEqual(allocation_attribute_usage.history.first().value, 0)
+            self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
     def test_filtering_out_not_active_allocations(
