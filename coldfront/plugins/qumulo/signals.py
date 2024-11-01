@@ -65,7 +65,7 @@ def on_allocation_activate(sender, **kwargs):
         )
         prepaid_until = prepaid_until.date()
     else:
-        prepaid_until = None
+        prepaid_until = datetime.today().strftime("%Y-%m-%d")
 
     AllocationAttribute.objects.get_or_create(
         allocation_attribute_type=allocation_attribute_obj_type,
