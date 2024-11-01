@@ -111,9 +111,11 @@ def conditionally_update_billing_cycle_type() -> None:
         f"Checking {len(allocations)} qumulo allocations conditionally_update_billing_cycle_type"
     )
 
-    # for allocation in allocations:
-    #     if allocation.prepaid_expiration == datetime.today().strftime("%Y-%m-%d"):
-    #         allocation.billing_cycle = "monthly"
+    for allocation in allocations:
+        if allocation.billing_cycle == "prepaid":
+            logger.warn(f"prepaid bill cycle")
+        else:
+            logger.warn(f"monthly bill cycle")
 
 
 def ingest_quotas_with_daily_usage() -> None:
