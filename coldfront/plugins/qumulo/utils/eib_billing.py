@@ -61,12 +61,12 @@ SELECT
     '1' row_id,
     NULL internal_service_delivery_line_id,
     '1' internal_service_delivery_line_number,
-    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.billing_unit || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"') AS item_description,
+    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.billing_amount || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"') AS item_description,
     'SC510' spend_category,
     '1' quantity,
     'EA' unit_of_measure,
-    report.fee unit_cost,
-    report.fee extended_amount,
+    report.billing_amount*report.rate unit_cost,
+    report.billing_amount*report.rate extended_amount,
     NULL requester,
     report.delivery_date delivery_date,
     ('"' || report.storage_name || '"') AS fileset_memo,
@@ -75,7 +75,7 @@ SELECT
     NULL,
     NULL,
     NULL,
-    report.billing_unit usage,
+    report.billing_amount usage_amount,
     report.rate rate,
     report.service_unit unit
 FROM (
@@ -85,12 +85,22 @@ FROM (
         data.storage_name,
         data.service_name,
         data.sponsor,
-        data.billing_unit,
+        CASE service_rate_category
+            WHEN 'consumption' THEN
+                CASE subsidized
+                    WHEN TRUE THEN
+                        CASE (billing_amount_tb - 5) > 0
+                            WHEN TRUE THEN (billing_amount_tb -5)
+                            ELSE 0
+                        END
+                    ELSE billing_amount_tb
+                END
+            ELSE billing_amount_tb
+        END billing_amount,
         data.rate,
         data.service_rate_category,
         data.department_number,
-        data.cost_center,
-        data.billing_unit*data.rate fee
+        data.cost_center
     FROM (
         SELECT
             '1' service_id,
@@ -111,17 +121,11 @@ FROM (
             END rate,
             storage_quota,
             CASE service_rate_category
-                WHEN 'consumption' THEN (
-                    SELECT MAX(consumption_billing_unit)
-                    FROM (
-                        SELECT CAST(most_recent_usage_haau.value AS FLOAT8) /1024/1024/1024/1024 -5 consumption_billing_unit
-                        UNION SELECT 0
-                    ) AS positive_billing_unit
-                )
+                WHEN 'consumption' THEN CAST(storage_usage_of_the_day.storage_usage AS FLOAT8) /1024/1024/1024/1024
                 WHEN 'subscription' THEN CEILING(CAST(storage_quota AS FLOAT8) /100)
                 WHEN 'subscription_500tb' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
                 WHEN 'condo' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
-            END billing_unit,
+            END billing_amount_tb,
             CASE service_rate_category
                 WHEN 'consumption' THEN 'TB'
                 WHEN 'subscription' THEN '100TB'
@@ -140,18 +144,18 @@ FROM (
         LEFT JOIN (SELECT aa.allocation_id, aa.value service_rate_category FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='service_rate') AS service_rate_category ON a.id=service_rate_category.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value storage_quota FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='storage_quota') AS storage_quota ON a.id=storage_quota.allocation_id
         JOIN (
-            SELECT haau.allocation_attribute_id, value
+            SELECT haau.allocation_attribute_id, haau.value storage_usage
             FROM allocation_historicalallocationattributeusage haau
             JOIN (
-                SELECT allocation_attribute_id, MAX(modified) recent_modified
+                SELECT allocation_attribute_id aa_id, MAX(modified) usage_timestamp
                 FROM allocation_historicalallocationattributeusage
                 WHERE DATE(modified) = '%s'
-                GROUP BY allocation_attribute_id, DATE(modified)
-            ) AS most_recent_haau
-            ON haau.allocation_attribute_id=most_recent_haau.allocation_attribute_id
-                AND haau.modified=most_recent_haau.recent_modified
-        ) AS most_recent_usage_haau
-            ON storage_quota.id=most_recent_usage_haau.allocation_attribute_id
+                GROUP BY aa_id, DATE(modified)
+            ) AS aa_id_usage_timestamp
+            ON haau.allocation_attribute_id = aa_id_usage_timestamp.aa_id
+                AND haau.modified = aa_id_usage_timestamp.usage_timestamp
+        ) AS storage_usage_of_the_day 
+            ON storage_quota.id = storage_usage_of_the_day.allocation_attribute_id
         JOIN allocation_allocation_resources ar ON ar.allocation_id=a.id
         JOIN resource_resource r ON r.id=ar.resource_id
         WHERE
@@ -162,7 +166,7 @@ FROM (
     WHERE billing_cycle = 'monthly'
         AND exempt <> TRUE
 ) AS report 
-WHERE report.billing_unit > 0;
+WHERE report.billing_amount > 0;
         """
         return query_monthly_billing
 
@@ -176,7 +180,6 @@ WHERE report.billing_unit > 0;
             self.delivery_date,
             self.usage_date,
         )
-        # logger.debug("Monthly billing query: %s", monthly_billing_query)
 
         try:
             with connection.cursor() as cursor:
@@ -188,7 +191,8 @@ WHERE report.billing_unit > 0;
                 monthly_billing_query = monthly_billing_query.replace(
                     "('", "CONCAT('"
                 ).replace("||", ",")
-                logger.debug("Monthly billing query: %s", monthly_billing_query)
+
+            # logger.debug("Monthly billing query: %s", monthly_billing_query)
 
         except Exception as e:
             with connection.cursor() as cursor:
