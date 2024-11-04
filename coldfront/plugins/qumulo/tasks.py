@@ -120,18 +120,18 @@ def conditionally_update_billing_cycle_types() -> None:
                     allocation=allocation,
                     value="monthly",
                 )
-            billing_sub_q = AllocationAttribute.objects.filter(
-                allocation=OuterRef("pk"),
-                allocation_attribute_type=billing_attribute,
-            ).values("value")[:1]
-            allocations = allocations.annotate(
-                billing_cycle=Subquery(billing_sub_q),
-                prepaid_expiration=Subquery(prepaid_exp_sub_q),
-            )
+        billing_sub_q = AllocationAttribute.objects.filter(
+            allocation=OuterRef("pk"),
+            allocation_attribute_type=billing_attribute,
+        ).values("value")[:1]
+        allocations = allocations.annotate(
+            billing_cycle=Subquery(billing_sub_q),
+            prepaid_expiration=Subquery(prepaid_exp_sub_q),
+        )
 
-            logger.warn(f"{allocation.billing_cycle}")
-            # allocation.billing_cycle = "monthly"
-            allocation.save()
+        logger.warn(f"{allocation.billing_cycle}")
+        # allocation.billing_cycle = "monthly"
+        allocation.save()
 
 
 def ingest_quotas_with_daily_usage() -> None:
