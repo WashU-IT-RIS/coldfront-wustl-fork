@@ -129,9 +129,9 @@ def conditionally_update_billing_cycle_types() -> None:
             prepaid_expiration=Subquery(prepaid_exp_sub_q),
         )
 
-        logger.warn(f"{allocation.billing_cycle}")
         allocation.billing_cycle = "monthly"
         allocation.save()
+        logger.warn(f"{allocation.billing_cycle}")
 
 
 def ingest_quotas_with_daily_usage() -> None:
