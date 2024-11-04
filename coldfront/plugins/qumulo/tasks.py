@@ -7,7 +7,6 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
     AllocationAttributeUsage,
-    AttributeType,
 )
 from coldfront.core.resource.models import Resource
 
@@ -117,9 +116,7 @@ def conditionally_update_billing_cycle_types() -> None:
             ) or allocation.prepaid_expiration < datetime.today().strftime("%Y-%m-%d"):
                 logger.warn(f"Changing {allocation} billing_cycle to monthly")
                 AllocationAttribute.objects.get_or_create(
-                    allocation_attribute_type=AttributeType.objects.get(
-                        name="BillingCycle"
-                    ),
+                    allocation_attribute_type=billing_attribute,
                     allocation=allocation,
                     value="monthly",
                 )
