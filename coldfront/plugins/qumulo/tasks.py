@@ -100,6 +100,7 @@ def conditionally_update_billing_cycle_types() -> None:
     billing_sub_q = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"), allocation_attribute_type=billing_attribute
     ).values("value")[:1]
+    logger.warn(f"{billing_sub_q}")
     prepaid_exp_sub_q = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"), allocation_attribute_type=prepaid_exp_attribute
     ).values("value")[:1]
