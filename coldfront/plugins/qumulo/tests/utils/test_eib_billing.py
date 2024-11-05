@@ -275,6 +275,7 @@ class TestEIBBilling(TestCase):
         print("Whole row: %s" % data[len(data) - 1])
         print("Data length: %s" % len(data))
         # self.assertEqual(billing_amount - 65.0, 0)
+        assert False
 
         os.remove(filename)
 
