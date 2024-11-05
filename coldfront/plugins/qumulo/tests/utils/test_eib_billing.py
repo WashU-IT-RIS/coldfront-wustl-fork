@@ -21,14 +21,16 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 
 from coldfront.plugins.qumulo.utils.eib_billing import EIBBilling
 
+STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
+
 
 def construct_allocation_form_data(quota_tb: int, service_rate_category: str):
     form_data = {
         "storage_name": f"{quota_tb}tb-{service_rate_category}",
         "storage_quota": str(quota_tb),
         "protocols": ["smb"],
-        "storage_filesystem_path": f"/storage2/fs1/{quota_tb}tb-{service_rate_category}",
-        "storage_export_path": f"/storage2/fs1/{quota_tb}tb-{service_rate_category}",
+        "storage_filesystem_path": f"{STORAGE2_PATH}/{quota_tb}tb-{service_rate_category}",
+        "storage_export_path": f"{STORAGE2_PATH}/{quota_tb}tb-{service_rate_category}",
         "rw_users": ["test"],
         "ro_users": ["test1"],
         "storage_ticket": "ITSD-1234",
@@ -83,7 +85,7 @@ def mock_get_quotas() -> str:
     json_id = 100
     for name, quota, usage in mock_get_names_quotas_usages():
         usage_in_json = construct_usage_data_in_json(
-            f"/storage2/fs1/{name}", quota, usage
+            f"{STORAGE2_PATH}/{name}", quota, usage
         )
         usage_in_json[id] = json_id
         usages_in_json.append(usage_in_json)
