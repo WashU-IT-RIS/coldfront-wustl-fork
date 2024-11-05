@@ -547,11 +547,15 @@ class AcesManager(object):
     def normalize_trustee(trustee: dict):
         if 'name' not in trustee:
             return trustee
-        normalized_trustee = {
-            'name': trustee['name'].replace('ACCOUNTS\\', '')
-        }
-        domain = trustee.get('domain', None)
-        if 'domain' is not None:
+        domain = None
+        name = trustee['name'].replace('ACCOUNTS\\', '').lower()
+        if name == 'file owner':
+            name = 'File Owner'
+            domain = 'API_INTERNAL_DOMAIN'
+        else:
+            domain = trustee.get('domain', None)
+        normalized_trustee = {'name': name}
+        if domain is not None:
             normalized_trustee['domain'] = domain
         return normalized_trustee
 
