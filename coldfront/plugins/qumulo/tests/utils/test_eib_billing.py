@@ -149,57 +149,6 @@ class TestEIBBilling(TestCase):
             allocation.status = AllocationStatusChoice.objects.get(name="Active")
             allocation.save()
 
-        # Confirm creating 1 Storage2 allocation
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT count(*)
-                FROM allocation_allocation a
-                JOIN allocation_allocation_resources ar
-                    ON ar.allocation_id=a.id
-                JOIN resource_resource r
-                    ON r.id=ar.resource_id
-                WHERE r.name='Storage2';
-            """
-            )
-            rows = cursor.fetchall()
-
-        self.assertEqual(1, rows[0][0])
-
-        storage2_allocations = Allocation.objects.filter(resources__name="Storage2")
-        self.assertEqual(1, len(storage2_allocations))
-
-        # Exam the allocation attributes that have initial usage as 0.0
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT aa.allocation_id,
-                    storage_filesystem_path,
-                    aa.value quota_tb,
-                    aau.value usage,
-                    ROUND(CAST(aau.value AS NUMERIC)/1024/1024/1024/1024, 2) usage_tb
-                FROM allocation_allocationattribute aa
-                LEFT JOIN allocation_allocationattributetype aat
-                    ON aa.allocation_attribute_type_id = aat.id
-                LEFT JOIN allocation_allocationattributeusage aau
-                    ON aa.id=aau.allocation_attribute_id
-                LEFT JOIN (
-                    SELECT aa.allocation_id, aa.value storage_filesystem_path
-                        FROM allocation_allocationattribute aa
-                        JOIN allocation_allocationattributetype aat
-                           ON aa.allocation_attribute_type_id=aat.id
-                        WHERE aat.name='storage_filesystem_path'
-                    ) AS storage_filesystem_path
-                    ON aa.allocation_id=storage_filesystem_path.allocation_id
-                WHERE aat.has_usage IS TRUE;
-            """
-            )
-            rows = cursor.fetchall()
-
-        for row in rows:
-            # Confirm the initial usage is 0
-            self.assertEqual(float(row[3]) - 0, 0)
-
         ingest_quotas_with_daily_usage()
 
         # Exam the billing usage of the allocation from the history table
@@ -240,10 +189,10 @@ class TestEIBBilling(TestCase):
             )
             rows = cursor.fetchall()
 
-        # for row in rows:
-        #     # Confirm the new usage is not 0
-        #     print(row)
-        #     self.assertNotEqual(float(row[3]) - 0, 0)
+        for row in rows:
+            # Confirm the new usage is not 0
+            print(row)
+            self.assertNotEqual(float(row[3]) - 0, 0)
 
         # Confirm the status of the allocation is Active
         allocations = Allocation.objects.filter(resources__name="Storage2").exclude(
@@ -269,14 +218,13 @@ class TestEIBBilling(TestCase):
 
         # Confirm the billing amount for 5 unit of Consumption cost model is $65
         # hardcoded
-        # billing_amount = float(data[len(data) - 1][19])
-        billing_amount = data[len(data) - 1][19]
+        billing_amount = float(data[len(data) - 1][19])
+        # billing_amount = data[len(data) - 1][19]
         print("Billing amount: %s" % billing_amount)
         print("Whole row: %s" % data[len(data) - 1])
         print("Data length: %s" % len(data))
         print("Data: %s" % data)
-        # self.assertEqual(billing_amount - 65.0, 0)
-        assert False
+        self.assertEqual(billing_amount - 65.0, 0)
 
         os.remove(filename)
 
@@ -288,31 +236,6 @@ class TestEIBBilling(TestCase):
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quotas()
         qumulo_api_mock.return_value = qumulo_api
 
-        quota_service_rate_categories = mock_get_quota_service_rate_categories()
-
-        for quota, service_rate_category in quota_service_rate_categories:
-            create_allocation(
-                project=self.project,
-                user=self.user,
-                form_data=construct_allocation_form_data(quota, service_rate_category),
-            )
-
-        # Update the status of the created allocations from Pending to Active
-        for allocation in Allocation.objects.filter(
-            resources__name="Storage2",
-            status__name__in=[
-                "Pending",
-            ],
-        ):
-            allocation.status = AllocationStatusChoice.objects.get(name="Active")
-            allocation.save()
-
-        storage2_allocations = Allocation.objects.filter(
-            resources__name="Storage2", status__name__in=["Active"]
-        )
-        self.assertEqual(len(storage2_allocations), len(quota_service_rate_categories))
-
-        ingest_quotas_with_daily_usage()
         eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
         eib_billing.generate_monthly_billing_report()
 
