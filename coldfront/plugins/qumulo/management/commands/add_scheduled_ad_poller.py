@@ -24,7 +24,7 @@ class Command(BaseCommand):
         )
         print("Scheduling Prepaid Expiration Date Scanner")
         Schedule.objects.get_or_create(
-            func="coldfront.plugins.qumulo.management.commands.add_scheduled_ad_poller.daily_billing_status_check",
+            func="coldfront.plugins.qumulo.management.commands.add_scheduled_ad_poller.prepaid_expiration_cleanup",
             name="Check Billing Statuses",
             schedule_type=Schedule.DAILY,
             repeats=-1,
@@ -36,6 +36,6 @@ def sequential_poll_and_check() -> None:
     conditionally_update_storage_allocation_statuses()
 
 
-def daily_billing_status_check() -> None:
+def prepaid_expiration_cleanup() -> None:
     logger.warn(f"Calling conditionally_update_billing_cycle_type")
     conditionally_update_billing_cycle_types()
