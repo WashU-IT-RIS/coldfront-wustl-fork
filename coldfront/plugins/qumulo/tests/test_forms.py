@@ -154,6 +154,7 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
             "service_rate": "consumption",
+            "billing_cycle": "monthly",
         }
         valid_form = AllocationForm(data=valid_data, user_id=self.user.id)
         self.assertTrue(valid_form.fields["service_rate"].required)
