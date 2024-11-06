@@ -119,8 +119,6 @@ def conditionally_update_billing_cycle_types() -> None:
                     allocation=allocation, allocation_attribute_type=billing_attribute
                 ).update(value="monthly")
 
-        logger.warn(f"{allocation.billing_cycle}")
-
 
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
