@@ -92,7 +92,7 @@ def conditionally_update_storage_allocation_statuses() -> None:
 
 def conditionally_update_billing_cycle_types() -> None:
     resource = Resource.objects.get(name="Storage2")
-    allocations = Allocation.objects.filter(resources=resource)
+    allocations = Allocation.objects.filter(status__name="Active", resources=resource)
     billing_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
     prepaid_exp_attribute = AllocationAttributeType.objects.get(
         name="prepaid_expiration"
@@ -115,11 +115,9 @@ def conditionally_update_billing_cycle_types() -> None:
                 "%Y-%m-%d"
             ) or allocation.prepaid_expiration < datetime.today().strftime("%Y-%m-%d"):
                 logger.warn(f"Changing {allocation} billing_cycle to monthly")
-                logger.warn(f"{billing_attribute}")
                 AllocationAttribute.objects.filter(
                     allocation=allocation, allocation_attribute_type=billing_attribute
                 ).update(value="monthly")
-                logger.warn(f"{billing_attribute}")
 
         logger.warn(f"{allocation.billing_cycle}")
 
