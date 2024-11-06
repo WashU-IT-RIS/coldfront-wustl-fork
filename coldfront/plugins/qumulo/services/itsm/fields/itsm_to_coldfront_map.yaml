@@ -1,0 +1,328 @@
+itsm_to_coldfront_map:
+  - department_number:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: department_number
+            - value: 
+                type: string
+                transforms: None
+                validates:
+                  - presence: True
+                  - length:
+                      - maximum: 128
+      itsm_value:
+        entity: service_provision
+        attribute: department_number
+        type: string
+        null: True
+  - funding_number:
+      coldfront:
+        - entity: allocation_attribute
+          attributes: 
+            - name: cost_center
+            - value: 
+                type: string
+                transforms: None
+                validates:
+                  - presence: True
+                  - length:
+                      - maximum: 128
+      itsm_value:
+        entity: service_provision
+        attribute: funding_number
+        type: string
+        null: True
+  - billing_contact:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: billing_contact
+            - value:
+                type: string
+                transforms: None
+                validates:
+                  - length:
+                      - maximum: 128
+                      - allow_blank: True
+      itsm_value:
+        entity: service_provision
+        name: billing_contact
+        type: string
+        null: True
+  - technical_contact:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: technical_contact
+            - value:
+                type: string
+                transforms: None
+                validates:
+                  - length:
+                      - maximum: 128
+                      - allow_blank: True
+      itsm_value:
+        entity: service_provision
+        attribute: technical_contact
+        type: string
+        null: True
+  - secure:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: secure
+            - value:
+                type: string
+                transforms: boolean_to_string
+                validates:
+                  - inclusion: [True, False]
+      itsm_value:
+        entity: service_provision
+        attribute: secure
+        type: boolean
+  - service_desk_ticket_number:
+      coldfront:
+        - entity: allocation_attribute
+          attributes: 
+            - name: storage_ticket
+            - value: 
+                type: string
+                transforms: None
+                validates:
+                  - presence: True
+                  - validate_ticket: True
+      itsm_value:
+        entity: service_provision
+        attribute: service_desk_ticket_number
+        type: string
+  - audit:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: audit
+            - value:
+                type: string
+                transforms: truthy_and_falsy_to_boolean_to_string
+                validates:
+                  - inclusion: [True, False, None]
+      itsm_value:
+        entity: service_provision
+        attribute: audit
+        type: string
+        values: ["0", "1", "false", "true", null]
+  - billing_startdate:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: billing_startdate
+            - value: 
+                type: string
+                transforms: date_to_string
+                validates:
+                  - presence: True # Is the conditionally necessary?
+      itsm_value:
+        entity: service_provision
+        attribute: billing_startdate
+        type: date
+        null: True
+  - sponsor_department_number:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: sponsor_department_number
+            - value:
+                type: string
+                transforms: None
+                validates:
+                  - presence: True # is this conditionally necessary?
+                  - length:
+                      - maximum: 128
+      itsm_value:
+        entity: service_provision
+        attribute: sponsor_department_number
+        type: string
+        null: True
+  - fileset_name:
+      coldfront:
+        - entity: allocation_attribute
+          attributes: 
+            - name: fileset_name
+            - value: 
+                type: string
+                transforms: None
+                validates:
+                  - presence: True
+                  - length:
+                      - maximum: 128
+      itsm_value:
+        entity: service_provision
+        attribute: fileset_name
+        type: string
+        null: True # found nulls and found duplicates
+  - fileset_alias:
+      coldfront:
+        - entity: allocation_attribute
+          attributes: 
+            - name: fileset_alias
+            - value: 
+                type: string
+                transforms: None
+                validates:
+                  - presence: True
+                  - length:
+                      - maximum: 128
+      itsm_value:
+        entity: service_provision
+        attribute: fileset_alias
+        type: string
+        null: True # found nulls and found duplicates
+  - exempt:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: exempt
+            - value:
+                type: string
+                transforms: boolean_to_string
+                validates:
+                  - inclusion: [True, False]
+      itsm_value:
+        entity: service_provision
+        attribute: exempt
+        type: boolean
+        null: True
+        defaults_to: False
+  - service_rate_category:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: service_rate_category
+            - value:
+                type: string
+                transforms: None
+                validates:
+                  - inclusion: ["condo", "consumption", "subscription"]     
+      itsm_value:
+        entity: service_provision
+        attribute: service_rate_category
+        type: string
+        values: ["condo", "consumption", "subscription"] # if the status is active
+        null: True
+  - comment:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            name: comment
+            value:
+              type: json
+              transforms: blank_to_none
+              validates:
+                - json: True
+      itsm_value:
+        entity: service_provision
+        attribute: comment
+        type: text
+        null: True
+  - billing_cycle:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: billing_cycle
+            - value:
+                type: emum
+                transforms: None
+                validates:
+                  - presence: True
+                  - length:
+                      - maximum: 128
+                  - inclusion: [monthly, yearly, quarterly, prepaid, fiscal year]
+      itsm_value:
+        entity: service_provision
+        attribute: billing_cycle
+        type:
+          name: billing_cycle
+          labels: [monthly, yearly, quarterly, prepaid, fiscal year]
+        null: True
+  - subsidized:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: subsidized
+            - value:
+                type: string
+                transforms: boolean_to_string
+                validates:
+                  - inclusion: [True, False]
+      itsm_value:
+        entity: service_provision
+        attribute: subsidized
+        type: boolean
+        null: True
+  - quota:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: storage_quota
+            - value:
+                type: string
+                transforms: string_to_integer_parsing_value_and_unit_to_string
+                validates:
+                  - presence: True
+                  - numericallity:
+                    - only_integer: True
+                    - greater_than: 0
+                    - less_than_or_equal_to: 2000
+      itsm_value:
+        entity: service_provision
+        attribute: department_number
+        type: string
+        null: True
+  - allow_nonfaculty:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: allow_nonfaculty
+            - value:
+                type: string
+                transforms: boolean_to_string
+                validates:
+                  - inclusion: [True, False] # should NULL default to False?
+        - entity: allocation_project
+          attributes:
+            - allow_nonfaculty:
+                  type: string
+                  transforms: boolean_to_string
+                  validates:
+                    - inclusion: [True, False] # should NULL default to False?
+      itsm_value:
+        entity: service_provision
+        attribute: department_number
+        type: boolean
+        null: True
+  - sla:
+      coldfront:
+        - entity: allocation_attribute
+          attributes:
+            - name: sla
+            - value:
+                transforms: None
+                validates:
+                  - length:
+                      - maximum: 128
+                      - allow_blank: True
+      itsm_value:
+        entity: service_provision
+        attribute: sla
+        type: string
+  - id: None
+  - name: None
+  - department_name: None
+  - sponsor: None
+  - creation_timestamp: None
+  - service_id: None
+  - status: None
+  - acl_group_members: None
+  - who: None
+  - parent_id: None
+  - is_condo_group: None
