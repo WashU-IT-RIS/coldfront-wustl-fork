@@ -26,6 +26,8 @@ class AllocationFormTests(TestCase):
         build_data = build_models()
         self.patcher = patch("coldfront.plugins.qumulo.validators.QumuloAPI")
         self.mock_qumulo_api = self.patcher.start()
+
+        self.old_storage2_path = os.environ.get("STORAGE2_PATH")
         os.environ["STORAGE2_PATH"] = "/path/to"
 
         self.user = build_data["user"]
@@ -37,6 +39,8 @@ class AllocationFormTests(TestCase):
 
     def tearDown(self):
         self.patcher.stop()
+
+        os.environ["STORAGE2_PATH"] = self.old_storage2_path
         return super().tearDown()
 
     def _setupPathExistsMock(self):
