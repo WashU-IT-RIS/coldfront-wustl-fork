@@ -99,8 +99,8 @@ class TestSignals(TestCase):
             "Can't create allocation: Some attributes are missing or invalid"
         )
 
-    def test_allocation_activates_calculates_prepaid_expiration(self):
-        return True
+    # def test_allocation_activates_calculates_prepaid_expiration(self):
+    #     return True
 
     def test_allocation_change_approved_updates_allocation(
         self,
