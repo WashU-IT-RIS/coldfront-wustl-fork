@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from unittest.mock import patch, MagicMock
+from datetime import datetime
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
@@ -11,7 +12,9 @@ from coldfront.core.allocation.signals import (
     allocation_disable,
     allocation_change_approved,
 )
-
+from coldfront.core.allocation.models import (
+    AllocationAttribute,
+)
 from django.core.management import call_command
 
 
@@ -99,8 +102,17 @@ class TestSignals(TestCase):
             "Can't create allocation: Some attributes are missing or invalid"
         )
 
-    # def test_allocation_activates_calculates_prepaid_expiration(self):
-    #     return True
+    def test_allocation_activates_calculates_prepaid_expiration(
+        self,
+        mock_ACL_ActiveDirectoryApi: MagicMock,
+        mock_QumuloAPI: MagicMock,
+    ):
+        qumulo_instance = mock_QumuloAPI.return_value
+        allocation_activate.send(
+            sender=self.__class__, allocation_pk=self.storage_allocation.pk
+        )
+        prepaid_exp = AllocationAttribute.objects.get(name="prepaid_expiration")
+        self.assertEqual(prepaid_exp, datetime.today().strftime("%Y-%m-%d"))
 
     def test_allocation_change_approved_updates_allocation(
         self,
