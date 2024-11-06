@@ -120,9 +120,6 @@ def conditionally_update_billing_cycle_types() -> None:
                     allocation=allocation, allocation_attribute_type=billing_attribute
                 ).update(value="monthly")
                 logger.warn(f"{billing_attribute}")
-                # allocation.billing_cycle = "monthly"
-                AllocationAttribute.save()
-                allocation.save()
 
         logger.warn(f"{allocation.billing_cycle}")
 
