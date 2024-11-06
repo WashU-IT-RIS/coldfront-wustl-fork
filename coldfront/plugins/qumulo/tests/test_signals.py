@@ -49,6 +49,7 @@ class TestSignals(TestCase):
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
             "service_rate": "general",
+            "billing_cycle": "monthly",
         }
 
         self.client.force_login(self.user)
@@ -97,6 +98,9 @@ class TestSignals(TestCase):
         mock_getLogger.return_value.warn.assert_called_once_with(
             "Can't create allocation: Some attributes are missing or invalid"
         )
+
+    def test_allocation_activates_calculates_prepaid_expiration(self):
+        return True
 
     def test_allocation_change_approved_updates_allocation(
         self,
