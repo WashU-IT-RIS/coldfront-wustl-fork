@@ -154,7 +154,7 @@ FROM (
             ) AS aa_id_usage_timestamp
             ON haau.allocation_attribute_id = aa_id_usage_timestamp.aa_id
                 AND haau.modified = aa_id_usage_timestamp.usage_timestamp
-        ) AS storage_usage_of_the_day 
+        ) AS storage_usage_of_the_day
             ON storage_quota.id = storage_usage_of_the_day.allocation_attribute_id
         JOIN allocation_allocation_resources ar ON ar.allocation_id=a.id
         JOIN resource_resource r ON r.id=ar.resource_id

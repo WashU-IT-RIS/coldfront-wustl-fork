@@ -96,6 +96,24 @@ def mock_get_quotas() -> str:
     }
 
 
+def mock_get_quota() -> str:
+    name = "15tb-consumption"
+    quota = "15000000000000"
+    usage = "10995116277760"
+    usage_in_json = [
+        {
+            "id": "101",
+            "path": f"{STORAGE2_PATH}/{name}/",
+            "limit": f"{quota}",
+            "capacity_usage": f"{usage}",
+        }
+    ]
+
+    return {
+        "quotas": usage_in_json,
+    }
+
+
 class TestEIBBilling(TestCase):
     def setUp(self) -> None:
         self.client = Client()
@@ -132,7 +150,7 @@ class TestEIBBilling(TestCase):
         self, qumulo_api_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
-        qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quotas()
+        qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quota()
         qumulo_api_mock.return_value = qumulo_api
 
         create_allocation(
@@ -202,6 +220,22 @@ class TestEIBBilling(TestCase):
             # Confirm the initial usage is 0
             self.assertEqual(float(row[3]) - 0, 0)
 
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM allocation_allocationattribute;")
+            rows = cursor.fetchall()
+
+        for row in rows:
+            print(row)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM allocation_historicalallocationattributeusage;"
+            )
+            rows = cursor.fetchall()
+
+        for row in rows:
+            print(row)
+
         ingest_quotas_with_daily_usage()
 
         # Exam the billing usage of the allocation from the history table
@@ -213,20 +247,24 @@ class TestEIBBilling(TestCase):
                     aa.value quota,
                     aau.value now_usage,
                     ROUND(CAST(aau.value AS NUMERIC) /1024/1024/1024/1024, 2) now_usage_tb,
-                    ROUND(CAST(most_recent_haau.value AS NUMERIC) /1024/1024/1024/1024, 2) history_usage_tb,
+                    ROUND(CAST(storage_usage_of_the_day.storage_usage AS NUMERIC) /1024/1024/1024/1024, 2) history_usage_tb,
                     aa.created,
-                    most_recent_haau.recent_modified history_timestamp
+                    storage_usage_of_the_day.usage_timestamp history_timestamp
                 FROM allocation_allocationattributeusage aau
                 JOIN allocation_allocationattribute aa
                     ON aa.id = aau.allocation_attribute_id
                 JOIN (
-                    SELECT allocation_attribute_id,
-                        MAX(modified) recent_modified,
-                        value
-                    FROM allocation_historicalallocationattributeusage
-                    GROUP BY allocation_attribute_id, DATE(modified)
-                    ) AS most_recent_haau
-                    ON aau.allocation_attribute_id = most_recent_haau.allocation_attribute_id
+                    SELECT haau.allocation_attribute_id, haau.value storage_usage, haau.modified usage_timestamp
+                    FROM allocation_historicalallocationattributeusage haau
+                    JOIN (
+                        SELECT allocation_attribute_id aa_id, MAX(modified) usage_timestamp
+                        FROM allocation_historicalallocationattributeusage
+                        GROUP BY aa_id, DATE(modified)
+                    ) AS aa_id_usage_timestamp
+                        ON haau.allocation_attribute_id = aa_id_usage_timestamp.aa_id
+                            AND haau.modified = aa_id_usage_timestamp.usage_timestamp
+                ) AS storage_usage_of_the_day
+                    ON aau.allocation_attribute_id = storage_usage_of_the_day.allocation_attribute_id
                 JOIN allocation_allocationattributetype aat
                     ON aat.id = aa.allocation_attribute_type_id
                 JOIN (
@@ -246,6 +284,15 @@ class TestEIBBilling(TestCase):
             # Confirm the new usage is not 0
             print(row)
             self.assertNotEqual(float(row[3]) - 0, 0)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM allocation_historicalallocationattributeusage;"
+            )
+            rows = cursor.fetchall()
+
+        for row in rows:
+            print(row)
 
         # Confirm the status of the allocation is Active
         allocations = Allocation.objects.filter(resources__name="Storage2").exclude(
