@@ -116,10 +116,12 @@ def conditionally_update_billing_cycle_types() -> None:
             ) or allocation.prepaid_expiration < datetime.today().strftime("%Y-%m-%d"):
                 logger.warn(f"Changing {allocation} billing_cycle to monthly")
                 logger.warn(f"{billing_attribute}")
-                billing_attribute.value = "monthly"
+                AllocationAttribute.objects.filter(
+                    allocation=allocation, allocation_attribute_type=billing_attribute
+                ).update(value="monthly")
                 logger.warn(f"{billing_attribute}")
-                allocation.billing_cycle = "monthly"
-                billing_attribute.save()
+                # allocation.billing_cycle = "monthly"
+                AllocationAttribute.save()
                 allocation.save()
 
         logger.warn(f"{allocation.billing_cycle}")
