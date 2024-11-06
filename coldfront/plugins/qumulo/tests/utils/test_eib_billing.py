@@ -220,22 +220,6 @@ class TestEIBBilling(TestCase):
             # Confirm the initial usage is 0
             self.assertEqual(float(row[3]) - 0, 0)
 
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM allocation_allocationattribute;")
-            rows = cursor.fetchall()
-
-        for row in rows:
-            print(row)
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT * FROM allocation_historicalallocationattributeusage;"
-            )
-            rows = cursor.fetchall()
-
-        for row in rows:
-            print(row)
-
         ingest_quotas_with_daily_usage()
 
         # Exam the billing usage of the allocation from the history table
@@ -284,15 +268,6 @@ class TestEIBBilling(TestCase):
             # Confirm the new usage is not 0
             print(row)
             self.assertNotEqual(float(row[3]) - 0, 0)
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT * FROM allocation_historicalallocationattributeusage;"
-            )
-            rows = cursor.fetchall()
-
-        for row in rows:
-            print(row)
 
         # Confirm the status of the allocation is Active
         allocations = Allocation.objects.filter(resources__name="Storage2").exclude(

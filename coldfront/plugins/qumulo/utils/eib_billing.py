@@ -192,8 +192,6 @@ WHERE report.billing_amount > 0;
                     "('", "CONCAT('"
                 ).replace("||", ",")
 
-            # logger.debug("Monthly billing query: %s", monthly_billing_query)
-
         except Exception as e:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT sqlite_version();")
