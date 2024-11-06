@@ -186,8 +186,10 @@ class TestEIBBilling(TestCase):
 
         self.assertEqual(1, rows[0][0])
 
-        storage2_allocations = Allocation.objects.filter(resources__name="Storage2")
-        self.assertEqual(1, len(storage2_allocations))
+        num_storage2_allocations = len(
+            Allocation.objects.filter(resources__name="Storage2")
+        )
+        self.assertEqual(1, num_storage2_allocations)
 
         # Exam the allocation attributes that have initial usage as 0.0
         with connection.cursor() as cursor:
@@ -299,7 +301,7 @@ class TestEIBBilling(TestCase):
         os.remove(filename)
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
-    def test_create_allocations_ingest_usages_generate_billing_report(
+    def test_create_multiple_allocations_ingest_usages_generate_billing_report(
         self, qumulo_api_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
