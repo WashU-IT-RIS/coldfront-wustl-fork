@@ -54,7 +54,8 @@ class TestSignals(TestCase):
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
             "service_rate": "general",
-            "billing_cycle": "monthly",
+            "billing_cycle": "prepaid",
+            "prepaid_time": 6,
         }
 
         self.prepaid_form_data = {
