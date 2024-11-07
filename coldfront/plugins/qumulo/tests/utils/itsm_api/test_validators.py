@@ -2,11 +2,12 @@ from django.test import TestCase, Client
 
 from unittest.mock import patch, MagicMock
 
-from coldfront.plugins.qumulo.services.itsm.validators.allocation_attributes import (
+from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     numericallity,
     presence_of,
     length_of,
-    inclusion_of
+    inclusion_of,
+    validate_ticket,
 )
 
 
@@ -14,6 +15,23 @@ class TestValidators(TestCase):
 
     def setUp(self) -> None:
         return super().setUp()
+
+    def test_validate_ticket(self):
+        self.assertTrue(validate_ticket("ITSD-2222"))
+        self.assertTrue(validate_ticket("itsd-2222"))
+        self.assertTrue(validate_ticket("2222"))
+        self.assertTrue(validate_ticket(2222))
+
+        exception_message = (
+            'Service desk ticket "ITSD" must have format: ITSD-12345 or 12345'
+        )
+        self.assertRaises(Exception, validate_ticket, "ITSD", msg=exception_message)
+        self.assertRaises(
+            Exception, validate_ticket, "ITDEV-2222", msg=exception_message
+        )
+        self.assertRaises(
+            Exception, validate_ticket, "itsd2222", msg=exception_message
+        )
 
     def test_numericallity(self) -> None:
         conditions = {
@@ -85,8 +103,6 @@ class TestValidators(TestCase):
 
         self.assertFalse(inclusion_of(2, accpeted_values))
         self.assertFalse(inclusion_of("2", accpeted_values))
-
-
 
 
 """
