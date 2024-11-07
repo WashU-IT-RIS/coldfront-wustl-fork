@@ -285,7 +285,6 @@ class AclAllocations:
             acl["aces"] = AcesManager.filter_duplicates(aces)
             qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
 
-    # 20240909 This function is a "working stub."
     # 20240910: It has been updated to return "standard" access aces for parent
     # ACL groups on a sub-allocation so those aces can be added to those for
     # the sub-allocation ACL groups.
@@ -300,6 +299,7 @@ class AclAllocations:
         ro_group = AclAllocations.get_allocation_rwro_group_name(
             access_allocations, "ro"
         )
+
         # 2.) return ACL "aces" for parent groups
         return AcesManager.get_allocation_aces(rw_group, ro_group)
 

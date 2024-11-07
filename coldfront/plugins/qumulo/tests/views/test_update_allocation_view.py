@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.test import Client, RequestFactory, TestCase
 from unittest.mock import patch, call, MagicMock
 
-from coldfront.core.allocation.models import Allocation, AllocationUser
+from coldfront.core.allocation.models import AllocationUser
 
 from coldfront.plugins.qumulo.forms import UpdateAllocationForm
 from coldfront.plugins.qumulo.hooks import acl_reset_complete_hook
@@ -20,7 +20,6 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationChangeRequest,
     AllocationChangeStatusChoice,
-    AllocationLinkage,
 )
 
 
@@ -500,7 +499,7 @@ class UpdateAllocationViewTests(TestCase):
             view = UpdateAllocationView(form=form, user_id=self.user.id)
             view.setup(request, allocation_id=1)
             view.success_id = 1
-            # /Users/brennanmulligan/repos/consolidate/coldfront-wustl-fork/coldfront/plugins/qumulo/utils/acl_allocations.py
+
             with patch(
                 ("coldfront.plugins.qumulo.views.update_allocation_view." "async_task")
             ) as mock_async_task, patch(

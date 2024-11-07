@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 
 from typing import Optional
 
@@ -29,8 +29,8 @@ from pathlib import PurePath
 
 class AllocationView(LoginRequiredMixin, FormView):
     form_class = AllocationForm
-    new_allocation = None
     template_name = "allocation.html"
+    new_allocation = None
     success_id = None
 
     def get_form_kwargs(self):

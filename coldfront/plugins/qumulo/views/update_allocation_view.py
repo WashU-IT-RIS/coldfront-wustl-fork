@@ -18,7 +18,7 @@ from coldfront.core.allocation.models import (
     AllocationUser,
 )
 from coldfront.core.user.models import User
-from coldfront.core.utils.mail import send_email
+
 from coldfront.plugins.qumulo.forms import UpdateAllocationForm
 from coldfront.plugins.qumulo.hooks import acl_reset_complete_hook
 from coldfront.plugins.qumulo.tasks import reset_allocation_acls
@@ -87,6 +87,15 @@ class UpdateAllocationView(AllocationView):
 
         kwargs["initial"] = form_data
         return kwargs
+
+    def form_valid(
+        self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
+    ):
+        if "reset_acls" in self.request.POST:
+            self._reset_acls()
+        else:
+            self._updated_fields_handler(form, parent_allocation)
+        return super(AllocationView, self).form_valid(form=form)
 
     def _acl_reset_message(self):
         name = Allocation.objects.get(
@@ -171,15 +180,6 @@ class UpdateAllocationView(AllocationView):
 
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
-
-    def form_valid(
-        self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
-    ):
-        if "reset_acls" in self.request.POST:
-            self._reset_acls()
-        else:
-            self._updated_fields_handler(form, parent_allocation)
-        return super(AllocationView, self).form_valid(form=form)
 
     @staticmethod
     def _handle_attribute_change(

@@ -529,7 +529,7 @@ class AcesManager(object):
                     cleaned_aces[index] = cleaned_ace
                     create_new_ace = False
                     break
-                if create_new_ace is True:
+                if create_new_ace:
                     cleaned_aces.append(ace)
             else:
                 cleaned_aces.append(ace)
