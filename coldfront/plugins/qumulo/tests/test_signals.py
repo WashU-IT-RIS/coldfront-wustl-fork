@@ -161,6 +161,14 @@ class TestSignals(TestCase):
             sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
         )
 
+        qumulo_instance.create_allocation.assert_called_once_with(
+            protocols=["nfs"],
+            fs_path=mock_get_attribute("storage_filesystem_path"),
+            export_path=mock_get_attribute("storage_export_path"),
+            name=mock_get_attribute("storage_name"),
+            limit_in_bytes=mock_get_attribute("storage_quota") * (2**40),
+        )
+
         allocation_attribute_obj_type = AllocationAttributeType.objects.get(
             name="prepaid_expiration"
         )
