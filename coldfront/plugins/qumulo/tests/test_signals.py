@@ -70,8 +70,7 @@ class TestSignals(TestCase):
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
             "service_rate": "general",
-            "billing_cycle": "prepaid",
-            "prepaid_time": 6,
+            "billing_cycle": "monthly",
         }
 
         self.client.force_login(self.user)
