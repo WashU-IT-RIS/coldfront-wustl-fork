@@ -76,7 +76,7 @@ itsm_to_coldfront_map:
             type: string
             transforms: boolean_to_string
             validates:
-              inclusion: [true, False]
+              inclusion: [True, False]
     itsm_value:
       entity: service_provision
       attribute: secure
@@ -105,7 +105,7 @@ itsm_to_coldfront_map:
             type: string
             transforms: truthy_and_falsy_to_boolean_to_string
             validates:
-              inclusion: [true, False, null]
+              inclusion: [True, False, null]
     itsm_value:
       entity: service_provision
       attribute: audit
@@ -242,6 +242,7 @@ itsm_to_coldfront_map:
       attribute: billing_cycle
       type: string # In fact the data type is a user defined named billing_cycle with labels: [ monthly, yearly, quarterly, prepaid, fiscal year]. For simplicity, let's set it to string.
       nulls: true
+      defaults_to: monthly
   subsidized:
     coldfront:
       - entity: allocation_attribute
@@ -286,9 +287,10 @@ itsm_to_coldfront_map:
             transforms: boolean_to_string
             validates:
               inclusion: [true, False] # should NULL default to False?
-      - entity: allocation_project
+      - entity: project_attribute
         attributes:
-          allow_nonfaculty:
+          name: allow_nonfaculty
+          value:
             type: string
             transforms: boolean_to_string
             validates:
