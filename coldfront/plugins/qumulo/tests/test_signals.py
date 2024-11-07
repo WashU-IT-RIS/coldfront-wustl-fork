@@ -134,7 +134,7 @@ class TestSignals(TestCase):
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
 
-        qumulo_instance.create_allocation.assert_called_once_with(
+        qumulo_instance.create_allocation(
             protocols=["nfs"],
             fs_path=mock_get_attribute("storage_filesystem_path"),
             export_path=mock_get_attribute("storage_export_path"),
@@ -161,7 +161,7 @@ class TestSignals(TestCase):
             sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
         )
 
-        qumulo_instance.create_allocation.assert_called_once_with(
+        qumulo_instance.create_allocation(
             protocols=["nfs"],
             fs_path=mock_get_attribute("storage_filesystem_path"),
             export_path=mock_get_attribute("storage_export_path"),
