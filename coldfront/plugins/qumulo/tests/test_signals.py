@@ -113,8 +113,11 @@ class TestSignals(TestCase):
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
         print(self)
-        prepaid_exp = AllocationAttributeType.objects.get(
-            name="prepaid_expiration",
+        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+            name="prepaid_expiration"
+        )
+        prepaid_exp = AllocationAttribute.objects.get(
+            allocation_attribute_type=allocation_attribute_obj_type,
             allocation=self.storage_allocation,
         )
         print(prepaid_exp)
