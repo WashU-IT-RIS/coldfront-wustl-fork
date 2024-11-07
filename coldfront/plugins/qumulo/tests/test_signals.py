@@ -112,7 +112,8 @@ class TestSignals(TestCase):
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
         prepaid_exp = AllocationAttribute.objects.get(
-            allocation_attribute_type="prepaid_expiration"
+            allocation_attribute_type="prepaid_expiration",
+            allocation=self.storage_allocation,
         )
         self.assertEqual(prepaid_exp, datetime.today().strftime("%Y-%m-%d"))
 
