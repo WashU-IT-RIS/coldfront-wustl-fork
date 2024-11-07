@@ -111,10 +111,12 @@ class TestSignals(TestCase):
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
+        print(self)
         prepaid_exp = AllocationAttribute.objects.get(
             allocation_attribute_type="prepaid_expiration",
             allocation=self.storage_allocation,
         )
+        print(prepaid_exp)
         self.assertEqual(prepaid_exp, datetime.today().strftime("%Y-%m-%d"))
 
     def test_allocation_change_approved_updates_allocation(
