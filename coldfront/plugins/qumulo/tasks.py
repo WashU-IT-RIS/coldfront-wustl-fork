@@ -94,30 +94,35 @@ def conditionally_update_storage_allocation_statuses() -> None:
         conditionally_update_storage_allocation_status(allocation)
 
 
+# TODO: refactor the following methods to a service class
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
-    quota_usages = __get_quota_usages_from_qumulo(logger)
-    __set_daily_quota_usages(quota_usages, logger)
-    __validate_results(quota_usages, logger)
-
-
-def __get_quota_usages_from_qumulo(logger):
     qumulo_api = QumuloAPI()
-    quota_usages = qumulo_api.get_all_quotas_with_usage()
-    return quota_usages
+    quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
+    base_allocation_quota_usages = list(
+        filter(
+            lambda quota_usage: AclAllocations.is_base_allocation(quota_usage["path"]),
+            quota_usages,
+        )
+    )
+
+    __set_daily_quota_usages(base_allocation_quota_usages, logger)
+    __validate_results(base_allocation_quota_usages, logger)
 
 
-def __set_daily_quota_usages(all_quotas, logger) -> None:
+def __set_daily_quota_usages(quotas, logger) -> None:
     # Iterate and populate allocation_attribute_usage records
     storage_filesystem_path_attribute_type = AllocationAttributeType.objects.get(
         name="storage_filesystem_path"
     )
-    for quota in all_quotas["quotas"]:
+    active_status = AllocationStatusChoice.objects.get(name="Active")
+
+    for quota in quotas:
         path = quota.get("path")
 
         allocation = __get_allocation_by_attribute(
-            storage_filesystem_path_attribute_type, path
+            storage_filesystem_path_attribute_type, path, active_status
         )
         if allocation is None:
             if path[-1] != "/":
@@ -126,7 +131,7 @@ def __set_daily_quota_usages(all_quotas, logger) -> None:
             value = path[:-1]
             logger.warn(f"Attempting to find allocation without the trailing slash...")
             allocation = __get_allocation_by_attribute(
-                storage_filesystem_path_attribute_type, value
+                storage_filesystem_path_attribute_type, value, active_status
             )
             if allocation is None:
                 continue
@@ -134,10 +139,12 @@ def __set_daily_quota_usages(all_quotas, logger) -> None:
         allocation.set_usage("storage_quota", quota.get("capacity_usage"))
 
 
-def __get_allocation_by_attribute(attribute_type, value):
+def __get_allocation_by_attribute(attribute_type, value, for_status):
     try:
-        attribute = AllocationAttribute.objects.get(
-            value=value, allocation_attribute_type=attribute_type
+        attribute = AllocationAttribute.objects.select_related("allocation").get(
+            value=value,
+            allocation_attribute_type=attribute_type,
+            allocation__status=for_status,
         )
     except AllocationAttribute.DoesNotExist:
         logger.warn(f"Allocation record for {value} path was not found")
@@ -156,16 +163,17 @@ def __validate_results(quota_usages, logger) -> bool:
     daily_usage_ingested = AllocationAttributeUsage.objects.filter(
         modified__year=year, modified__month=month, modified__day=day
     ).count()
-    usage_pulled_from_qumulo = len(quota_usages["quotas"])
-
-    logger.info("Usages ingested for today: ", daily_usage_ingested)
-    logger.info("Usages pulled from QUMULO: ", usage_pulled_from_qumulo)
+    usage_pulled_from_qumulo = len(quota_usages)
 
     success = usage_pulled_from_qumulo == daily_usage_ingested
     if success:
         logger.warn("Successful ingestion of quota daily usage.")
     else:
-        logger.warn("Unsuccessful ingestion of quota daily usage. Check the results.")
+        logger.warn(
+            "Unsuccessful ingestion of quota daily usage. Not all the QUMULO usage data was stored in Coldfront."
+        )
+        logger.warn(f"Usages pulled from QUMULO: {usage_pulled_from_qumulo}")
+        logger.warn(f"Usages ingested for today: {daily_usage_ingested}")
 
     return success
 

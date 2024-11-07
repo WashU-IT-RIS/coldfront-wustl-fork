@@ -1,4 +1,3 @@
-from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from typing import Optional
 
 from coldfront.core.allocation.models import (
@@ -13,8 +12,9 @@ from coldfront.core.allocation.models import (
     User,
 )
 
-from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
+from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 
 from ldap3.core.exceptions import LDAPException
 
@@ -25,6 +25,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
+
 
 class AclAllocations:
     def __init__(self, project_pk):
@@ -145,6 +146,14 @@ class AclAllocations:
         return list(access_allocations)
 
     @staticmethod
+    def is_base_allocation(path: str):
+        STORAGE2_PATH = os.environ.get("STORAGE2_PATH").rstrip("/")
+
+        purePath = PurePath(path)
+
+        return purePath.match(f"{STORAGE2_PATH}/*/")
+
+    @staticmethod
     def remove_acl_access(allocation: Allocation):
         qumulo_api = QumuloAPI()
         acl_allocations = AclAllocations.get_access_allocations(allocation)
@@ -197,17 +206,15 @@ class AclAllocations:
         # data not sane if len is not 1 or 0
         if len(allocation_linkage) == 1:
             for sub_allocation in allocation_linkage[0].children.all():
-                fs_path = sub_allocation.get_attribute('storage_filesystem_path')
+                fs_path = sub_allocation.get_attribute("storage_filesystem_path")
                 access_allocations = AclAllocations.get_access_allocations(
                     sub_allocation
                 )
                 rw_groupname = AclAllocations.get_allocation_rwro_group_name(
-                    access_allocations,
-                    'rw'
+                    access_allocations, "rw"
                 )
                 ro_groupname = AclAllocations.get_allocation_rwro_group_name(
-                    access_allocations,
-                    'ro'
+                    access_allocations, "ro"
                 )
                 AclAllocations.set_traverse_acl(
                     fs_path=fs_path,
@@ -216,11 +223,7 @@ class AclAllocations:
                     qumulo_api=qumulo_api,
                     is_base_allocation=False,
                 )
-        return AclAllocations.set_or_reset_allocation_acls(
-            allocation,
-            qumulo_api,
-            True
-        )
+        return AclAllocations.set_or_reset_allocation_acls(allocation, qumulo_api, True)
 
     @staticmethod
     def set_allocation_acls(
@@ -228,28 +231,22 @@ class AclAllocations:
         qumulo_api: QumuloAPI,
     ):
         return AclAllocations.set_or_reset_allocation_acls(
-            allocation,
-            qumulo_api,
-            False
+            allocation, qumulo_api, False
         )
 
     @staticmethod
     def set_or_reset_allocation_acls(
-        allocation: Allocation,
-        qumulo_api: QumuloAPI,
-        reset: bool
+        allocation: Allocation, qumulo_api: QumuloAPI, reset: bool
     ):
         fs_path = allocation.get_attribute("storage_filesystem_path")
         is_base_allocation = QumuloAPI.is_allocation_root_path(fs_path)
 
         access_allocations = AclAllocations.get_access_allocations(allocation)
         rw_groupname = AclAllocations.get_allocation_rwro_group_name(
-            access_allocations,
-            'rw'
+            access_allocations, "rw"
         )
         ro_groupname = AclAllocations.get_allocation_rwro_group_name(
-            access_allocations,
-            'ro'
+            access_allocations, "ro"
         )
 
         AclAllocations.set_traverse_acl(
@@ -261,34 +258,31 @@ class AclAllocations:
         )
 
         acl = qumulo_api.rc.fs.get_acl_v2(fs_path)
-        aces = copy.deepcopy(acl['aces'])
+        aces = copy.deepcopy(acl["aces"])
 
         if is_base_allocation:
             aces.extend(AcesManager.default_copy())
             aces.extend(AcesManager.everyone_ace)
-            acl['aces'] = AcesManager.filter_duplicates(aces)
+            acl["aces"] = AcesManager.filter_duplicates(aces)
             qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
-            aces.extend(
-                AcesManager.get_allocation_aces(rw_groupname, ro_groupname)
-            )
-            acl['aces'] = AcesManager.filter_duplicates(
+            aces.extend(AcesManager.get_allocation_aces(rw_groupname, ro_groupname))
+            acl["aces"] = AcesManager.filter_duplicates(
                 AcesManager.remove_everyone_aces(aces)
             )
-            qumulo_api.rc.fs.set_acl_v2(acl=acl, path=f'{fs_path}/Active')
+            qumulo_api.rc.fs.set_acl_v2(acl=acl, path=f"{fs_path}/Active")
         else:
             for extension in [
                 AcesManager.default_copy(),
-                AcesManager.get_allocation_aces(rw_groupname, ro_groupname)
+                AcesManager.get_allocation_aces(rw_groupname, ro_groupname),
             ]:
                 aces.extend(extension)
             if reset:
                 aces.extend(
                     AclAllocations.get_sub_allocation_parent_aces(
-                        allocation,
-                        qumulo_api
+                        allocation, qumulo_api
                     )
                 )
-            acl['aces'] = AcesManager.filter_duplicates(aces)
+            acl["aces"] = AcesManager.filter_duplicates(aces)
             qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
 
     # 20240909 This function is a "working stub."
@@ -296,20 +290,15 @@ class AclAllocations:
     # ACL groups on a sub-allocation so those aces can be added to those for
     # the sub-allocation ACL groups.
     @staticmethod
-    def get_sub_allocation_parent_aces(
-        allocation: Allocation,
-        qumulo_api: QumuloAPI
-    ):
+    def get_sub_allocation_parent_aces(allocation: Allocation, qumulo_api: QumuloAPI):
         # 1.) use linkage to get parent and parent groups
         parent = AllocationLinkage.objects.get(children=allocation).parent
         access_allocations = AclAllocations.get_access_allocations(parent)
         rw_group = AclAllocations.get_allocation_rwro_group_name(
-            access_allocations,
-            'rw'
+            access_allocations, "rw"
         )
         ro_group = AclAllocations.get_allocation_rwro_group_name(
-            access_allocations,
-            'ro'
+            access_allocations, "ro"
         )
         # 2.) return ACL "aces" for parent groups
         return AcesManager.get_allocation_aces(rw_group, ro_group)
@@ -325,25 +314,18 @@ class AclAllocations:
         if is_base_allocation:
             fs_path = f"{fs_path}/Active"
 
-        path_parents = list(
-            map(
-                lambda parent: str(parent),
-                PurePath(fs_path).parents
-            )
-        )
-        storage_env_path = (
-            f'{os.environ.get("STORAGE2_PATH", "").rstrip(" /")}/'
-        )
+        path_parents = list(map(lambda parent: str(parent), PurePath(fs_path).parents))
+        storage_env_path = f'{os.environ.get("STORAGE2_PATH", "").rstrip(" /")}/'
 
         for path in path_parents:
             if path.startswith(f"{storage_env_path}"):
                 traverse_acl = qumulo_api.rc.fs.get_acl_v2(path)
-                aces = copy.deepcopy(traverse_acl['aces'])
+                aces = copy.deepcopy(traverse_acl["aces"])
                 aces.extend(
                     AcesManager.get_traverse_aces(
                         rw_groupname, ro_groupname, is_base_allocation
                     )
                 )
 
-                traverse_acl['aces'] = AcesManager.filter_duplicates(aces)
+                traverse_acl["aces"] = AcesManager.filter_duplicates(aces)
                 qumulo_api.rc.fs.set_acl_v2(acl=traverse_acl, path=path)
