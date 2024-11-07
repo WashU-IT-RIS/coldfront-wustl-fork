@@ -29,6 +29,7 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 
 logger = logging.getLogger(__name__)
 
+
 class UpdateAllocationView(AllocationView):
     form_class = UpdateAllocationForm
     template_name = "update_allocation.html"
@@ -36,8 +37,8 @@ class UpdateAllocationView(AllocationView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_title'] = 'Update Allocation'
-        context['allocation_has_children'] = self._allocation_linkage_exists()
+        context["form_title"] = "Update Allocation"
+        context["allocation_has_children"] = self._allocation_linkage_exists()
         allocation_id = self.kwargs.get("allocation_id")
         allocation = Allocation.objects.get(pk=allocation_id)
         alloc_status = allocation.status.name
@@ -88,27 +89,23 @@ class UpdateAllocationView(AllocationView):
         return kwargs
 
     def _acl_reset_message(self):
-        name  = Allocation \
-                    .objects \
-                    .get(pk=self.kwargs.get("allocation_id")) \
-                    .get_attribute(name='storage_name')
+        name = Allocation.objects.get(
+            pk=self.kwargs.get("allocation_id")
+        ).get_attribute(name="storage_name")
         return (
-            f'ACL reset initiated for {name}.  '
-            'An e-mail notification will be sent when the task completes.'
+            f"ACL reset initiated for {name}.  "
+            "An e-mail notification will be sent when the task completes."
         )
 
     def _allocation_linkage_exists(self):
         has_linkage = True
         try:
             AllocationLinkage.objects.get(
-                parent=Allocation.objects.get(
-                    pk=self.kwargs.get("allocation_id")
-                )
+                parent=Allocation.objects.get(pk=self.kwargs.get("allocation_id"))
             )
         except AllocationLinkage.DoesNotExist:
             has_linkage = False
         return has_linkage
-
 
     def _reset_acls(self):
         # bmulligan (20240903): "retry" and "timeout" are intended to be
@@ -120,24 +117,14 @@ class UpdateAllocationView(AllocationView):
             reset_allocation_acls,
             User.objects.get(id=self.request.user.id).email,
             Allocation.objects.get(pk=self.kwargs.get("allocation_id")),
-            True if self.request.POST.get('reset_sub_acls') == 'on' else False,
+            True if self.request.POST.get("reset_sub_acls") == "on" else False,
             hook=acl_reset_complete_hook,
-            q_options={
-                'retry': 90000,
-                'timeout': 86400
-            }
+            q_options={"retry": 90000, "timeout": 86400},
         )
-        messages.add_message(
-            self.request,
-            messages.SUCCESS,
-            self._acl_reset_message()
-        )
-
+        messages.add_message(self.request, messages.SUCCESS, self._acl_reset_message())
 
     def _updated_fields_handler(
-        self,
-        form: UpdateAllocationForm,
-        parent_allocation: Optional[Allocation] = None
+        self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
     ):
         form_data = form.cleaned_data
 
@@ -186,11 +173,9 @@ class UpdateAllocationView(AllocationView):
         self.success_id = str(allocation.id)
 
     def form_valid(
-        self,
-        form: UpdateAllocationForm,
-        parent_allocation: Optional[Allocation] = None
+        self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
     ):
-        if 'reset_acls' in self.request.POST:
+        if "reset_acls" in self.request.POST:
             self._reset_acls()
         else:
             self._updated_fields_handler(form, parent_allocation)

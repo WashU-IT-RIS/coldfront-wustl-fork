@@ -1,6 +1,7 @@
 import hashlib
 import json
 
+
 class AcesManager(object):
     @staticmethod
     def get_base_acl():
@@ -92,7 +93,9 @@ class AcesManager(object):
             "flags": [],
             "type": "ALLOWED",
             "trustee": {"name": "Everyone"},
-            "rights": ["READ",],
+            "rights": [
+                "READ",
+            ],
         },
     ]
 
@@ -100,8 +103,8 @@ class AcesManager(object):
     def remove_everyone_aces(aces):
         cleaned_aces = []
         for ace in aces:
-            trusteeName = ace.get('trustee', {}).get('name', '')
-            if trusteeName.upper() == 'EVERYONE':
+            trusteeName = ace.get("trustee", {}).get("name", "")
+            if trusteeName.upper() == "EVERYONE":
                 continue
             cleaned_aces.append(ace)
         return cleaned_aces
@@ -309,17 +312,15 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "INHERITED"
-                ],
+                "flags": ["INHERITED"],
                 "trustee": {
                     "domain": "ACTIVE_DIRECTORY",
-                    "name": "ACCOUNTS\\RIS-IT-ADMIN"
+                    "name": "ACCOUNTS\\RIS-IT-ADMIN",
                 },
                 "rights": [
                     "READ",
@@ -331,18 +332,13 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "INHERITED"
-                ],
-                "trustee": {
-                    "domain": "ACTIVE_DIRECTORY",
-                    "name": rw_groupname
-                },
+                "flags": ["INHERITED"],
+                "trustee": {"domain": "ACTIVE_DIRECTORY", "name": rw_groupname},
                 "rights": [
                     "READ",
                     "READ_EA",
@@ -353,26 +349,15 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "INHERITED"
-                ],
-                "trustee": {
-                    "domain": "ACTIVE_DIRECTORY",
-                    "name": ro_groupname
-                },
-                "rights": [
-                    "READ",
-                    "READ_EA",
-                    "READ_ATTR",
-                    "READ_ACL",
-                    "SYNCHRONIZE"
-                ]
-            }
+                "flags": ["INHERITED"],
+                "trustee": {"domain": "ACTIVE_DIRECTORY", "name": ro_groupname},
+                "rights": ["READ", "READ_EA", "READ_ATTR", "READ_ACL", "SYNCHRONIZE"],
+            },
         ]
 
     # The aces returned here are "defaults" and reflect the settings for a
@@ -381,9 +366,7 @@ class AcesManager(object):
     # upon directory creation.
 
     @staticmethod
-    def get_allocation_existing_directory_aces(
-            rw_groupname: str, ro_groupname: str
-    ):
+    def get_allocation_existing_directory_aces(rw_groupname: str, ro_groupname: str):
         return [
             {
                 "type": "ALLOWED",
@@ -400,18 +383,15 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "CONTAINER_INHERIT",
-                    "INHERITED"
-                ],
+                "flags": ["CONTAINER_INHERIT", "INHERITED"],
                 "trustee": {
                     "domain": "ACTIVE_DIRECTORY",
-                    "name": "ACCOUNTS\\RIS-IT-ADMIN"
+                    "name": "ACCOUNTS\\RIS-IT-ADMIN",
                 },
                 "rights": [
                     "READ",
@@ -424,19 +404,15 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "OBJECT_INHERIT",
-                    "INHERIT_ONLY",
-                    "INHERITED"
-                ],
+                "flags": ["OBJECT_INHERIT", "INHERIT_ONLY", "INHERITED"],
                 "trustee": {
                     "domain": "ACTIVE_DIRECTORY",
-                    "name": "ACCOUNTS\\RIS-IT-ADMIN"
+                    "name": "ACCOUNTS\\RIS-IT-ADMIN",
                 },
                 "rights": [
                     "READ",
@@ -448,19 +424,13 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "CONTAINER_INHERIT",
-                    "INHERITED"
-                ],
-                "trustee": {
-                    "domain": "ACTIVE_DIRECTORY",
-                    "name": rw_groupname
-                },
+                "flags": ["CONTAINER_INHERIT", "INHERITED"],
+                "trustee": {"domain": "ACTIVE_DIRECTORY", "name": rw_groupname},
                 "rights": [
                     "READ",
                     "READ_EA",
@@ -472,20 +442,13 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "OBJECT_INHERIT",
-                    "INHERIT_ONLY",
-                    "INHERITED"
-                ],
-                "trustee": {
-                    "domain": "ACTIVE_DIRECTORY",
-                    "name": rw_groupname
-                },
+                "flags": ["OBJECT_INHERIT", "INHERIT_ONLY", "INHERITED"],
+                "trustee": {"domain": "ACTIVE_DIRECTORY", "name": rw_groupname},
                 "rights": [
                     "READ",
                     "READ_EA",
@@ -496,15 +459,12 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "CONTAINER_INHERIT",
-                    "INHERITED"
-                ],
+                "flags": ["CONTAINER_INHERIT", "INHERITED"],
                 "trustee": {
                     "domain": "ACTIVE_DIRECTORY",
                     "name": ro_groupname,
@@ -515,28 +475,15 @@ class AcesManager(object):
                     "READ_ATTR",
                     "READ_ACL",
                     "EXECUTE",
-                    "SYNCHRONIZE"
-                ]
+                    "SYNCHRONIZE",
+                ],
             },
             {
                 "type": "ALLOWED",
-                "flags": [
-                    "OBJECT_INHERIT",
-                    "INHERIT_ONLY",
-                    "INHERITED"
-                ],
-                "trustee": {
-                    "domain": "ACTIVE_DIRECTORY",
-                    "name": ro_groupname
-                },
-                "rights": [
-                    "READ",
-                    "READ_EA",
-                    "READ_ATTR",
-                    "READ_ACL",
-                    "SYNCHRONIZE"
-                ]
-            }
+                "flags": ["OBJECT_INHERIT", "INHERIT_ONLY", "INHERITED"],
+                "trustee": {"domain": "ACTIVE_DIRECTORY", "name": ro_groupname},
+                "rights": ["READ", "READ_EA", "READ_ATTR", "READ_ACL", "SYNCHRONIZE"],
+            },
         ]
 
     @staticmethod
@@ -545,18 +492,18 @@ class AcesManager(object):
 
     @staticmethod
     def normalize_trustee(trustee: dict):
-        if 'name' not in trustee:
+        if "name" not in trustee:
             return trustee
         domain = None
-        name = trustee['name'].replace('ACCOUNTS\\', '').lower()
-        if name == 'file owner':
-            name = 'File Owner'
-            domain = 'API_INTERNAL_DOMAIN'
+        name = trustee["name"].replace("ACCOUNTS\\", "").lower()
+        if name == "file owner":
+            name = "File Owner"
+            domain = "API_INTERNAL_DOMAIN"
         else:
-            domain = trustee.get('domain', None)
-        normalized_trustee = {'name': name}
+            domain = trustee.get("domain", None)
+        normalized_trustee = {"name": name}
         if domain is not None:
-            normalized_trustee['domain'] = domain
+            normalized_trustee["domain"] = domain
         return normalized_trustee
 
     @staticmethod
@@ -564,10 +511,8 @@ class AcesManager(object):
         trustee_hashes = set([])
         cleaned_aces = []
         for ace in aces:
-            normalized_trustee = AcesManager.normalize_trustee(
-                ace.get("trustee", {})
-            )
-            ace['trustee'] = normalized_trustee
+            normalized_trustee = AcesManager.normalize_trustee(ace.get("trustee", {}))
+            ace["trustee"] = normalized_trustee
             trustee_hash = AcesManager.sha256(normalized_trustee)
             if trustee_hash in trustee_hashes:
                 create_new_ace = True
