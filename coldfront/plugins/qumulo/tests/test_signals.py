@@ -14,6 +14,7 @@ from coldfront.core.allocation.signals import (
 )
 from coldfront.core.allocation.models import (
     AllocationAttribute,
+    AllocationAttributeType,
 )
 from django.core.management import call_command
 
@@ -112,8 +113,8 @@ class TestSignals(TestCase):
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
         print(self)
-        prepaid_exp = AllocationAttribute.objects.get(
-            allocation_attribute_type="prepaid_expiration",
+        prepaid_exp = AllocationAttributeType.objects.get(
+            name="prepaid_expiration",
             allocation=self.storage_allocation,
         )
         print(prepaid_exp)
