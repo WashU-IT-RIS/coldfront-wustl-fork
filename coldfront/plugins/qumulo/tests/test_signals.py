@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from unittest.mock import patch, MagicMock
-from datetime import datetime
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
@@ -56,10 +57,30 @@ class TestSignals(TestCase):
             "billing_cycle": "monthly",
         }
 
+        self.prepaid_form_data = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "general",
+            "billing_cycle": "prepaid",
+            "prepaid_time": 6,
+        }
+
         self.client.force_login(self.user)
 
         self.storage_allocation = create_allocation(
             self.project, self.user, self.form_data
+        )
+
+        self.prepaid_storage_allocation = create_allocation(
+            self.project, self.user, self.prepaid_form_data
         )
 
     def test_allocation_activate_creates_allocation(
@@ -103,7 +124,7 @@ class TestSignals(TestCase):
             "Can't create allocation: Some attributes are missing or invalid"
         )
 
-    def test_allocation_activates_calculates_prepaid_expiration(
+    def test_allocation_activates_calculates_prepaid_expiration_monthly(
         self,
         mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
@@ -122,6 +143,28 @@ class TestSignals(TestCase):
         )
 
         self.assertEqual(prepaid_exp.value, datetime.today().strftime("%Y-%m-%d"))
+
+    def test_allocation_activates_calculates_prepaid_expiration_prepaid(
+        self,
+        mock_ACL_ActiveDirectoryApi: MagicMock,
+        mock_QumuloAPI: MagicMock,
+    ):
+        qumulo_instance = mock_QumuloAPI.return_value
+        allocation_activate.send(
+            sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
+        )
+
+        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+            name="prepaid_expiration"
+        )
+        prepaid_exp = AllocationAttribute.objects.get(
+            allocation_attribute_type=allocation_attribute_obj_type,
+            allocation=self.prepaid_storage_allocation,
+        )
+
+        correct_prepaid = date.today() + relativedelta(months=+6)
+
+        self.assertEqual(prepaid_exp.value, correct_prepaid.strftime("%Y-%m-%d"))
 
     def test_allocation_change_approved_updates_allocation(
         self,
