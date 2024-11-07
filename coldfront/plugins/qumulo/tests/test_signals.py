@@ -80,7 +80,7 @@ class TestSignals(TestCase):
         )
 
         self.prepaid_storage_allocation = create_allocation(
-            self.project, self.user, self.prepaid_form_data
+            project=self.project, user=self.user, form_data=self.prepaid_form_data
         )
 
     def test_allocation_activate_creates_allocation(
@@ -134,13 +134,6 @@ class TestSignals(TestCase):
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
 
-        qumulo_instance.create_allocation(
-            protocols=["nfs"],
-            fs_path=mock_get_attribute("storage_filesystem_path"),
-            export_path=mock_get_attribute("storage_export_path"),
-            name=mock_get_attribute("storage_name"),
-            limit_in_bytes=mock_get_attribute("storage_quota") * (2**40),
-        )
         allocation_attribute_obj_type = AllocationAttributeType.objects.get(
             name="prepaid_expiration"
         )
@@ -159,14 +152,6 @@ class TestSignals(TestCase):
         qumulo_instance = mock_QumuloAPI.return_value
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
-        )
-
-        qumulo_instance.create_allocation(
-            protocols=["nfs"],
-            fs_path=mock_get_attribute("storage_filesystem_path"),
-            export_path=mock_get_attribute("storage_export_path"),
-            name=mock_get_attribute("storage_name"),
-            limit_in_bytes=mock_get_attribute("storage_quota") * (2**40),
         )
 
         allocation_attribute_obj_type = AllocationAttributeType.objects.get(

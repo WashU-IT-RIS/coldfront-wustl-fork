@@ -263,6 +263,11 @@ class TestStorageAllocationStatuses(TestCase):
             )
 
 
+class TestBillingCycleTypeUpdates(TestCase):
+    def setUp(self) -> None:
+        True
+
+
 class TestIngestQuotasWithDailyUsages(TestCase):
     def setUp(self) -> None:
         self.original_storage_path = os.environ.get("STORAGE2_PATH")
