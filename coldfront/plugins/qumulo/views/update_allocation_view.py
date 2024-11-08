@@ -101,10 +101,11 @@ class UpdateAllocationView(AllocationView):
         name = Allocation.objects.get(
             pk=self.kwargs.get("allocation_id")
         ).get_attribute(name="storage_name")
-        return (
-            f"ACL reset initiated for {name}.  "
-            "An e-mail notification will be sent when the task completes."
-        )
+        if self.request.POST.get("reset_sub_acls"):
+            message = f"ACL reset initiated for {name} and its sub-allocations."
+        else:
+            message = f"ACL reset initiated for {name}."
+        return message
 
     def _allocation_linkage_exists(self):
         has_linkage = True
