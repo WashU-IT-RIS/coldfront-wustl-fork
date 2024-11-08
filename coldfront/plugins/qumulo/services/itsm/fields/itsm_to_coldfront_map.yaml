@@ -4,27 +4,30 @@ itsm_to_coldfront_map:
       - entity: user
         attributes: # AD should pull the attributes for personal info such as first, last, and email.
           - name: username
-            type: string
-            transforms: null
-            validates:
-              presence: true
-              length:
-                maximum: 128
-              ad_record_exist: true
+            value:
+              type: string
+              transforms: null
+              validates:
+                presence: true
+                length:
+                  maximum: 128
+                ad_record_exist: true
       - entity: project
         attributes:
           - name: name
-            type: string
-            transforms: null
-            validates:
-              presence: true
-              length:
-                maximum: 128
+            value:
+              type: string
+              transforms: null
+              validates:
+                presence: true
+                length:
+                  maximum: 128
           - name: pi
-            type: int
-            foreign_key: User.objects.get(username)
-            validates:
-              presence: true
+            value:
+              type: int
+              foreign_key: User.objects.get(username)
+              validates:
+                presence: true
     itsm_value:
       entity: service_provision
       attribute: sponsor
@@ -35,27 +38,30 @@ itsm_to_coldfront_map:
         aggregate_create: True
         attributes: # AD should pull the attributes for personal info such as first, last, and email.
           - name: username
-            type: string
-            transforms: acl_group_members_to_aggregate_create_users
-            validates:
-              presence: true
-              length:
-                maximum: 128
-              ad_record_exist: true
+            value:
+              type: string
+              transforms: acl_group_members_to_aggregate_create_users
+              validates:
+                presence: true
+                length:
+                  maximum: 128
+                ad_record_exist: true
       - entity: project
         attributes:
           - name: name
-            type: string
-            transforms: null
-            validates:
-              presence: true
-              length:
-                maximum: 128
+            value:
+              type: string
+              transforms: null
+              validates:
+                presence: true
+                length:
+                  maximum: 128
           - name: pi
-            type: int
-            foreign_key: User.objects.get(username)
-            validates:
-              presence: true
+            value:
+              type: int
+              foreign_key: User.objects.get(username)
+              validates:
+                presence: true
     itsm_value:
       entity: service_provision
       attribute: sponsor
@@ -64,14 +70,16 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: department_number
-          - value:
-            type: string
-            transforms: null
-            validates:
-              presence: true
-              length:
-                maximum: 128
+          - name: name
+            value: department_number
+          - name: value
+            value:
+              type: string
+              transforms: null
+              validates:
+                presence: true
+                length:
+                  maximum: 128
     itsm_value:
       entity: service_provision
       attribute: department_number
@@ -81,8 +89,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: cost_center
-          - value:
+          - name: name
+            value: cost_center
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -98,8 +108,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: billing_contact
-          - value:
+          - name: name
+            value: billing_contact
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -115,8 +127,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: technical_contact
-          - value:
+          - name: name
+            value: technical_contact
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -132,8 +146,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: secure
-          - value:
+          - name: name
+            value: secure
+          - name: value
+            value:
               type: Yes/No
               transforms: boolean_to_yes_no
               validates:
@@ -146,8 +162,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: storage_ticket
-          - value:
+          - name: name
+            value: storage_ticket
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -161,8 +179,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: audit
-          - value:
+          - name: name
+            value: audit
+          - name: value
+            value:
               type: Yes/No
               transforms: truthy_and_falsy_to_boolean_to_yes_no
               validates:
@@ -176,8 +196,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: billing_startdate
-          - value:
+          - name: name
+            value: billing_startdate
+          - name: value
+            value:
               type: Date
               transforms: date_to_Date
               validates:
@@ -191,8 +213,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: sponsor_department_number
-          - value:
+          - name: name
+            value: sponsor_department_number
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -208,8 +232,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: fileset_name
-          - value:
+          - name: name
+            value: fileset_name
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -218,8 +244,10 @@ itsm_to_coldfront_map:
                   maximum: 128
       - entity: allocation_attribute
         attributes:
-          - name: storage_filesystem_path
-          - value:
+          - name: name
+            value: storage_filesystem_path
+          - name: value
+            value:
               type: string
               transforms: fileset_name_to_storage_filesystem_path
               validates:
@@ -229,8 +257,10 @@ itsm_to_coldfront_map:
                   maximum: 128
       - entity: allocation_attribute
         attributes:
-          - name: storage_export_path
-          - value:
+          - name: name
+            value: storage_export_path
+          - name: value
+            value:
               type: string
               transforms: fileset_name_to_storage_export_path
               validates:
@@ -240,8 +270,10 @@ itsm_to_coldfront_map:
                   maximum: 128
       - entity: allocation_attribute
         attributes:
-          - name: storage_name
-          - value:
+          - name: name
+            value: storage_name
+          - name: value
+            value:
               type: string
               transforms: fileset_name_to_storage_name
               validates:
@@ -257,8 +289,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: fileset_alias
-          - value:
+          - name: name
+            value: fileset_alias
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -274,8 +308,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: exempt
-          - value:
+          - name: name
+            value: exempt
+          - name: value
+            value:
               type: Yes/No
               transforms: boolean_to_yes_no
               validates:
@@ -290,8 +326,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: service_rate_category
-          - value:
+          - name: name
+            value: service_rate_category
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -306,8 +344,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: comment
-          - value:
+          - name: name
+            value: comment
+          - name: value
+            value:
               type: Attribute Expanded Text
               transforms: none
               validates:
@@ -315,8 +355,10 @@ itsm_to_coldfront_map:
                   allow_blank: true
       - entity: allocation_attribute
         attributes:
-          - name: storage_protocols
-          - value:
+          - name: name
+            value: storage_protocols
+          - name: value
+            value:
               type: string
               transforms: comment_to_protocols
               validates:
@@ -324,7 +366,7 @@ itsm_to_coldfront_map:
                 length:
                   maximum: 128
                 inclusion: ["smb", "nfs"]
-              defaults_to: smb # why?
+                defaults_to: smb # why?
     itsm_value:
       entity: service_provision
       attribute: comment
@@ -334,8 +376,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: billing_cycle
-          - value:
+          - name: name
+            value: billing_cycle
+          - name: value
+            value:
               type: string
               transforms: null
               validates:
@@ -353,8 +397,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: subsidized
-          - value:
+          - name: name
+            value: subsidized
+          - name: value
+            value:
               type: Yes/No
               transforms: boolean_to_yes_no
               validates:
@@ -368,8 +414,10 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: storage_quota
-          - value:
+          - name: name
+            value: storage_quota
+          - name: value
+            value:
               type: Int
               transforms: string_to_integer_parsing_value_and_unit_to_Int
               validates:
@@ -387,16 +435,20 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: allow_nonfaculty
-          - value:
+          - name: name
+            value: allow_nonfaculty
+          - name: value
+            value:
               type: Yes/No
               transforms: boolean_to_yes_no
               validates:
                 inclusion: [true, false] # should NULL default to false?
       - entity: project_attribute
         attributes:
-          - name: allow_nonfaculty
-          - value:
+          - name: name
+            value: allow_nonfaculty
+          - name: value
+            value:
               type: Yes/No
               transforms: boolean_to_yes_no
               validates:
@@ -410,8 +462,11 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: sla
-          - value:
+          - name: name
+            value: sla
+          - name: value
+            value:
+              type: string
               transforms: null
               validates:
                 length:
