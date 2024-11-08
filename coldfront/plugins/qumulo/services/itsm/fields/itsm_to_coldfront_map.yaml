@@ -1,4 +1,65 @@
 itsm_to_coldfront_map:
+  sponsor:
+    coldfront:
+      - entity: user
+        attributes: # AD should pull the attributes for personal info such as first, last, and email.
+          username: 
+            type: string
+            transforms: null
+            validates:
+              presence: true
+              length:
+                maximum: 128
+              ad_record_exist: true
+      - entity: project
+        attributes:
+          name:
+            type: string
+            transforms: null
+            validates:
+              presence: true
+              length:
+                maximum: 128
+          pi:
+            type: int
+            foreign_key: User.objects.get(username)
+            validates:
+              presence: true
+    itsm_value:
+      entity: service_provision
+      attribute: sponsor
+      type: string
+  acl_group_members:
+    coldfront:
+      - entity: user
+        aggregate_create: True
+        attributes: # AD should pull the attributes for personal info such as first, last, and email.
+          username: 
+            type: string
+            transforms: acl_group_members_to_aggregate_create_users
+            validates:
+              presence: true
+              length:
+                maximum: 128
+              ad_record_exist: true
+      - entity: project
+        attributes:
+          name:
+            type: string
+            transforms: null
+            validates:
+              presence: true
+              length:
+                maximum: 128
+          pi:
+            type: int
+            foreign_key: User.objects.get(username)
+            validates:
+              presence: true
+    itsm_value:
+      entity: service_provision
+      attribute: sponsor
+      type: string
   department_number:
     coldfront:
       - entity: allocation_attribute
@@ -73,10 +134,10 @@ itsm_to_coldfront_map:
         attributes:
           name: secure
           value:
-            type: string
-            transforms: boolean_to_string
+            type: Yes/No
+            transforms: boolean_to_yes_no
             validates:
-              inclusion: [True, False]
+              inclusion: [true, false]
     itsm_value:
       entity: service_provision
       attribute: secure
@@ -102,10 +163,10 @@ itsm_to_coldfront_map:
         attributes:
           name: audit
           value:
-            type: string
-            transforms: truthy_and_falsy_to_boolean_to_string
+            type: Yes/No
+            transforms: truthy_and_falsy_to_boolean_to_yes_no
             validates:
-              inclusion: [True, False, null]
+              inclusion: [true, false, null]
     itsm_value:
       entity: service_provision
       attribute: audit
@@ -117,8 +178,8 @@ itsm_to_coldfront_map:
         attributes:
           name: billing_startdate
           value:
-            type: string
-            transforms: date_to_string
+            type: Date
+            transforms: date_to_Date
             validates:
               presence: true # Is the conditionally necessary?
     itsm_value:
@@ -155,6 +216,38 @@ itsm_to_coldfront_map:
               presence: true
               length:
                 maximum: 128
+      - entity: allocation_attribute
+        attributes:
+          name: storage_filesystem_path
+          value:
+            type: string
+            transforms: fileset_name_to_storage_filesystem_path
+            validates:
+              presence: true
+              uniqueness: true
+              length:
+                maximum: 128
+      - entity: allocation_attribute
+        attributes:
+          name: storage_export_path
+          value:
+            type: string
+            transforms: fileset_name_to_storage_export_path
+            validates:
+              presence: true
+              uniqueness: true
+              length:
+                maximum: 128
+      - entity: allocation_attribute
+        attributes:
+          name: storage_name
+          value:
+            type: string
+            transforms: fileset_name_to_storage_name
+            validates:
+              presence: true
+              length:
+                maximum: 128
     itsm_value:
       entity: service_provision
       attribute: fileset_name
@@ -183,16 +276,16 @@ itsm_to_coldfront_map:
         attributes:
           name: exempt
           value:
-            type: string
-            transforms: boolean_to_string
+            type: Yes/No
+            transforms: boolean_to_yes_no
             validates:
-              inclusion: [true, False]
+              inclusion: [true, false]
     itsm_value:
       entity: service_provision
       attribute: exempt
       type: boolean
-      nulls: true
-      defaults_to: False
+      nulls: true # Most likely, the default value was added after some records had been created
+      defaults_to: false
   service_rate_category:
     coldfront:
       - entity: allocation_attribute
@@ -215,10 +308,23 @@ itsm_to_coldfront_map:
         attributes:
           attribute: comment
           value:
-            type: json
-            transforms: blank_to_none
+            type: Attribute Expanded Text
+            transforms: none
             validates:
-              - json: true
+              json:
+                allow_blank: true
+      - entity: allocation_attribute
+        attributes:
+          attribute: storage_protocols
+          value:
+            type: string
+            transforms: comment_to_protocols
+            validates:
+              presence: true
+              length:
+                maximum: 128
+              inclusion: ['smb', 'nfs']
+            defaults_to: smb # why?
     itsm_value:
       entity: service_provision
       attribute: comment
@@ -230,29 +336,29 @@ itsm_to_coldfront_map:
         attributes:
           name: billing_cycle
           value:
-            type: emum
+            type: string
             transforms: null
             validates:
               presence: true
               length:
                 maximum: 128
               inclusion: [monthly, yearly, quarterly, prepaid, fiscal year]
+              defaults_to: monthly
     itsm_value:
       entity: service_provision
       attribute: billing_cycle
       type: string # In fact the data type is a user defined named billing_cycle with labels: [ monthly, yearly, quarterly, prepaid, fiscal year]. For simplicity, let's set it to string.
       nulls: true
-      defaults_to: monthly
   subsidized:
     coldfront:
       - entity: allocation_attribute
         attributes:
           name: subsidized
           value:
-            type: string
-            transforms: boolean_to_string
+            type: Yes/No
+            transforms: boolean_to_yes_no
             validates:
-              inclusion: [true, False]
+              inclusion: [true, false]
     itsm_value:
       entity: service_provision
       attribute: subsidized
@@ -264,8 +370,8 @@ itsm_to_coldfront_map:
         attributes:
           name: storage_quota
           value:
-            type: string
-            transforms: string_to_integer_parsing_value_and_unit_to_string
+            type: Int
+            transforms: string_to_integer_parsing_value_and_unit_to_Int
             validates:
               presence: true
               numericallity:
@@ -283,18 +389,18 @@ itsm_to_coldfront_map:
         attributes:
           name: allow_nonfaculty
           value:
-            type: string
-            transforms: boolean_to_string
+            type: Yes/No
+            transforms: boolean_to_yes_no
             validates:
-              inclusion: [true, False] # should NULL default to False?
+              inclusion: [true, false] # should NULL default to false?
       - entity: project_attribute
         attributes:
           name: allow_nonfaculty
           value:
-            type: string
-            transforms: boolean_to_string
+            type: Yes/No
+            transforms: boolean_to_yes_no
             validates:
-              inclusion: [true, False] # should NULL default to False?
+              inclusion: [true, false] # should NULL default to false?
     itsm_value:
       entity: service_provision
       attribute: department_number
@@ -318,11 +424,9 @@ itsm_to_coldfront_map:
   id: null
   name: null
   department_name: null
-  sponsor: null
   creation_timestamp: null
   service_id: null
   status: null
-  acl_group_members: null
   who: null
   parent_id: null
   is_condo_group: null
