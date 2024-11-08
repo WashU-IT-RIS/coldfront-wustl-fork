@@ -2,6 +2,7 @@
 
 from coldfront.plugins.qumulo.services.itsm.fields.field import Field 
 
+# DEPERECATED: 
 class StorageQuota(Field):
 
     name_coldfront = "storage_quota"

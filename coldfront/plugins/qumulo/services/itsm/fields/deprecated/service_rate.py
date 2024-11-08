@@ -3,6 +3,7 @@ from coldfront.plugins.qumulo.services.itsm.fields.field import Field
 
 from coldfront.plugins.qumulo.constants import STORAGE_SERVICE_RATES
 
+# DEPERECATED: 
 class ServiceRate(Field):
 
     name_coldfront = "service_rate"

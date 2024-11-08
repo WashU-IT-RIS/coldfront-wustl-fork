@@ -2,6 +2,7 @@ import re
 
 from coldfront.plugins.qumulo.services.itsm.fields.field import Field 
 
+# DEPERECATED: 
 class StorageTicket(Field):
 
     name_coldfront = "storage_ticket"

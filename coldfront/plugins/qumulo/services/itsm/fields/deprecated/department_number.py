@@ -1,5 +1,6 @@
 from coldfront.plugins.qumulo.services.itsm.fields.field import Field 
 
+# DEPERECATED: 
 class DepartmentNumber(Field):
 
     name_coldfront = "department_number"
