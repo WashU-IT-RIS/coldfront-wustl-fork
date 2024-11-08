@@ -47,6 +47,7 @@ def on_allocation_activate(sender, **kwargs):
 
     fs_path = allocation_obj.get_attribute(name="storage_filesystem_path")
     export_path = allocation_obj.get_attribute(name="storage_export_path")
+    begin_date = allocation_obj.get_attribute(name="start_date")
     protocols = json.loads(allocation_obj.get_attribute(name="storage_protocols"))
     name = allocation_obj.get_attribute(name="storage_name")
     limit_in_bytes = allocation_obj.get_attribute(name="storage_quota") * (2**40)
@@ -56,7 +57,6 @@ def on_allocation_activate(sender, **kwargs):
     )
     if bill_cycle == "prepaid":
         prepaid_months = allocation_obj.get_attribute(name="prepaid_time")
-        begin_date = datetime(allocation_obj.start_date)
         prepaid_until = datetime(
             begin_date.year + (begin_date.month + prepaid_months - 1) // 12,
             (begin_date.month + prepaid_months - 1) % 12 + 1,

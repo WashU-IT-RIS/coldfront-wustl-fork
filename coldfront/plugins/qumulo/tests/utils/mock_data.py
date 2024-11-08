@@ -104,7 +104,6 @@ def create_allocation(
         project=project,
         justification="",
         quantity=1,
-        start_date=date.today,
         status=AllocationStatusChoice.objects.get(name="Pending"),
     )
 
