@@ -24,6 +24,8 @@ from django.core.management import call_command
 
 from typing import Optional
 
+from datetime import date
+
 import os
 
 default_form_data = {
@@ -102,6 +104,7 @@ def create_allocation(
         project=project,
         justification="",
         quantity=1,
+        start_date=date.today,
         status=AllocationStatusChoice.objects.get(name="Pending"),
     )
 
