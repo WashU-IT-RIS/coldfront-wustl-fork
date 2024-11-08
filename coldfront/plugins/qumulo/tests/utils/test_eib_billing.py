@@ -23,6 +23,40 @@ from coldfront.plugins.qumulo.utils.eib_billing import EIBBilling
 
 STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
 
+REPORT_COLUMNS = [
+    "fields",
+    "spreadsheet_key",
+    "add_only",
+    "auto_complete",
+    "internal_service_delivery_id",
+    "submit",
+    "company",
+    "internal_service_provider",
+    "currency",
+    "document_date",
+    "memo",
+    "row_id",
+    "internal_service_delivery_line_id",
+    "internal_service_delivery_line_number",
+    "item_description",
+    "spend_category",
+    "quantity",
+    "unit_of_measure",
+    "unit_cost",
+    "extended_amount",
+    "requester",
+    "delivery_date",
+    "memo_filesets",
+    "cost_center",
+    "fund",
+    "spacer_1",
+    "spacer_2",
+    "spacer_3",
+    "usage",
+    "rate",
+    "unit",
+]
+
 
 def construct_allocation_form_data(quota_tb: int, service_rate_category: str):
     form_data = {
@@ -288,7 +322,9 @@ class TestEIBBilling(TestCase):
 
         # Confirm the billing amount for 5 unit of Consumption cost model is $65
         # hardcoded
-        billing_amount = float(data[len(data) - 1][19])
+        billing_amount = float(
+            data[len(data) - 1][REPORT_COLUMNS.index("extended_amount")]
+        )
         self.assertEqual(billing_amount - 65.0, 0)
 
         os.remove(filename)
@@ -331,12 +367,19 @@ class TestEIBBilling(TestCase):
         print("Numer of lines of the report header: %s" % num_lines_header)
         self.assertEqual(num_lines_header, 5)
 
-        row = 1
+        billing_entries = []
         for index in range(num_lines_header, len(data)):
-            row_num = data[index][1]
-            self.assertEqual(str(row), row_num)
-            billing_amount = data[index][19].replace('"', "")
-            fileset_memo = data[index][22].replace('"', "")
+            billing_entries.append(data[index])
+
+        for index in range(0, len(billing_entries)):
+            row_num = billing_entries[index][REPORT_COLUMNS.index("spreadsheet_key")]
+            self.assertEqual(str(index + 1), row_num)
+            billing_amount = billing_entries[index][
+                REPORT_COLUMNS.index("extended_amount")
+            ].replace('"', "")
+            fileset_memo = billing_entries[index][
+                REPORT_COLUMNS.index("memo_filesets")
+            ].replace('"', "")
 
             # Confirm the billing amounts of each test cases
             # hardcoded
@@ -359,6 +402,5 @@ class TestEIBBilling(TestCase):
             else:
                 print(fileset_memo, billing_amount)
                 self.assertFalse(True)
-            row += 1
 
         os.remove(filename)
