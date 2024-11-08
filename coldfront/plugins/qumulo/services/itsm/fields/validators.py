@@ -35,7 +35,7 @@ def numericallity(value: int, conditions: dict):
     return True
 
 
-def presence_of(value, presence:bool):
+def presence(value, presence:bool):
      if presence:
         if value is None:
             return False
@@ -44,7 +44,7 @@ def presence_of(value, presence:bool):
      return True
 
 
-def length_of(value, conditions):
+def length(value, conditions):
     allow_blank = conditions.get("allow_blank")
     if allow_blank:
         if not bool(value):
@@ -58,7 +58,7 @@ def length_of(value, conditions):
         return True
     return False
 
-def inclusion_of(value, accepted_values):
+def inclusion(value, accepted_values):
     return value in accepted_values
 
 def validate_json(value, conditions={}):
