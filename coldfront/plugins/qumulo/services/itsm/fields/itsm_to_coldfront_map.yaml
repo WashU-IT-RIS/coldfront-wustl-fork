@@ -25,6 +25,7 @@ itsm_to_coldfront_map:
           - name: pi
             value:
               type: int
+              transforms: null
               foreign_key: User.objects.get(username)
               validates:
                 presence: true
@@ -59,6 +60,7 @@ itsm_to_coldfront_map:
           - name: pi
             value:
               type: int
+              transforms: null
               foreign_key: User.objects.get(username)
               validates:
                 presence: true
