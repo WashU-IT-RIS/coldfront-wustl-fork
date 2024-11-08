@@ -80,7 +80,7 @@ def mock_get_names_quotas_usages():
     return names_quotas_usages
 
 
-def mock_get_quotas() -> str:
+def mock_get_multiple_quotas() -> str:
     usages_in_json = []
     json_id = 100
     for name, quota, usage in mock_get_names_quotas_usages():
@@ -153,21 +153,14 @@ class TestEIBBilling(TestCase):
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quota()
         qumulo_api_mock.return_value = qumulo_api
 
-        create_allocation(
+        allocation = create_allocation(
             project=self.project,
             user=self.user,
             form_data=construct_allocation_form_data(15, "consumption"),
         )
 
-        # Update the status of the created allocations from Pending to Active
-        for allocation in Allocation.objects.filter(
-            resources__name="Storage2",
-            status__name__in=[
-                "Pending",
-            ],
-        ):
-            allocation.status = AllocationStatusChoice.objects.get(name="Active")
-            allocation.save()
+        allocation.status = AllocationStatusChoice.objects.get(name="Active")
+        allocation.save()
 
         # Confirm creating 1 Storage2 allocation
         with connection.cursor() as cursor:
@@ -305,25 +298,18 @@ class TestEIBBilling(TestCase):
         self, qumulo_api_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
-        qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quotas()
+        qumulo_api.get_all_quotas_with_usage.return_value = mock_get_multiple_quotas()
         qumulo_api_mock.return_value = qumulo_api
 
         quota_service_rate_categories = mock_get_quota_service_rate_categories()
 
         for quota, service_rate_category in quota_service_rate_categories:
-            create_allocation(
+            allocation = create_allocation(
                 project=self.project,
                 user=self.user,
                 form_data=construct_allocation_form_data(quota, service_rate_category),
             )
 
-        # Update the status of the created allocations from Pending to Active
-        for allocation in Allocation.objects.filter(
-            resources__name="Storage2",
-            status__name__in=[
-                "Pending",
-            ],
-        ):
             allocation.status = AllocationStatusChoice.objects.get(name="Active")
             allocation.save()
 
