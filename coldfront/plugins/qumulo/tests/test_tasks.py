@@ -265,6 +265,34 @@ class TestStorageAllocationStatuses(TestCase):
 
 class TestBillingCycleTypeUpdates(TestCase):
     def setUp(self) -> None:
+        self.client = Client()
+        build_data = build_models()
+
+        self.project = build_data["project"]
+        self.user = build_data["user"]
+        self.form_data = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "general",
+            "billing_cycle": "prepaid",
+            "prepaid_time": 6,
+        }
+
+    def prepaid_past_prepaid_exp(self) -> None:
+        True
+
+    def prepaid_not_past_prepaid_exp(self) -> None:
+        True
+
+    def monthly_no_change(self) -> None:
         True
 
 
