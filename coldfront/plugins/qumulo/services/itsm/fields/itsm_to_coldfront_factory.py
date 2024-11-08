@@ -10,15 +10,17 @@ with open(
     field_items = {key: value for key, value in field_map.items() if value is not None}
     itsm_attributes = field_items.keys()
 
+
 class ItsmToColdfrontFactory:
 
     @staticmethod
-    def get_fields():
+    def get_fields(itsm_allocation):
         fields = []
         for item in field_items.values():
-            itsm_value = item["itsm_value"]
+            itsm_value_field = item["itsm_value"]
             for coldfront_definitions in item["coldfront"]:
-                fields.append(Field(coldfront_definitions, itsm_value))
+                value = itsm_allocation.get(itsm_value_field["attribute"])
+                fields.append(Field(coldfront_definitions, itsm_value_field, value))
         return fields
 
 """

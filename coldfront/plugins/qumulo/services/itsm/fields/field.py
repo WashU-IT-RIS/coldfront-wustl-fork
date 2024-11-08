@@ -1,10 +1,34 @@
 class Field:
-    def __init__(self, coldfront_definitions, itsm_values):
+    def __init__(self, coldfront_definitions, itsm_value_field, value):
         self.coldfront_definitions = coldfront_definitions
-        self.itsm_values = itsm_values
-        self.entity = coldfront_definitions['entity']
+        self.itsm_value_field = itsm_value_field
+        self._coldfront_entity = coldfront_definitions["entity"]
+        self._coldfront_attributes = coldfront_definitions["attributes"]
+        self._value = value
 
- 
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def entity(self):
+        return self._coldfront_entity
+
+    @property
+    def attributes(self):
+        return self._coldfront_attributes
+
+    def validate():
+        # run the value field validator
+        pass
+
+    def is_valid() -> bool:
+        return True
+
+    # TODO: get the coldfront entities
+    # TODO: call value validator
+    # TODO: call transformators
+
     """
     @property
     def itsm_name(self):

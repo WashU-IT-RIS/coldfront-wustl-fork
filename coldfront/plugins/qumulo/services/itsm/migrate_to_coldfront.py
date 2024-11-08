@@ -1,49 +1,51 @@
 from coldfront.plugins.qumulo.services.itsm.itsm_client import ItsmClient
 from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_factory import (
-    coldfront_field_map,
-    validator_map,
-    Field,
+    ItsmToColdfrontFactory
 )
 
 class MigrateToColdfront:
 
+    def find_by_fileset_alias(self, fileset_alias):
+        itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
+        self.__execute(fileset_alias, itsm_result)
+
     def find_by_fileset_name(self, fileset_name):
-        itsm_result = self.get_itsm_allocation(fileset_name)
+        itsm_result = self.__get_itsm_allocation_by_fileset_name(fileset_name)
+        self.__execute(fileset_name, itsm_result)
 
-        self.validate_result_set(itsm_result)
-
+    def __execute(self, fileset_key, itsm_result):
+        self.__validate_result_set(fileset_key, itsm_result)
         itsm_allocation = itsm_result[0]
+        fields = ItsmToColdfrontFactory.get_fields(itsm_allocation)
+        # for testing 
+        for field in fields: print(field.value); print(field.entity); print(field.attributes)
+        print("-------------------")
+        #TODO validate each field value
+        #TODO create records in coldfront
 
-        fields = self.create_fields(itsm_allocation)
-
-        valid = self.validate_coldfront_allocation_preprosesing(fields)
-
-        if not valid:
-            raise Exception(f"ITSM allocation rejected. Fileset_name: {fileset_name} ")
-
-        self.create_coldfront_allocation(fields)
-
-    def get_itsm_allocation(self, fileset_name):
+    def __get_itsm_allocation_by_fileset_name(self, fileset_name):
         itsm_client = ItsmClient()
-        itsm_allocation = itsm_client.get_fs1_allocation(fileset_name)
+        itsm_allocation = itsm_client.get_fs1_allocation_by_fileset_name(fileset_name)
         return itsm_allocation
 
-    def get_mapper(self):
-        return coldfront_field_map
+    def __get_itsm_allocation_by_fileset_alias(self, fileset_alias):
+        itsm_client = ItsmClient()
+        itsm_allocation = itsm_client.get_fs1_allocation_by_fileset_alias(fileset_alias)
+        return itsm_allocation
 
-    def validate_result_set(self, fileset_name, itsm_result) -> bool:
+    def __validate_result_set(self, fileset_key, itsm_result) -> bool:
         how_many = len(itsm_result)
         # ITSM does not return a respond code of 404 when the service provision record is not found.
         # Instead, it return an empty array.
         if how_many == 0:
-            raise Exception(f"ITSM allocation was not found for fileset_name \"{fileset_name}\"")
+            raise Exception(f"ITSM allocation was not found for \"{fileset_key}\"")
 
         if how_many > 1:
-            raise Exception(f"Multiple ({how_many} total) ITSM allocations were found for {fileset_name}")
+            raise Exception(f"Multiple ({how_many} total) ITSM allocations were found for {fileset_key}")
 
         return True
 
-
+"""
     def create_fields(self, itsm_allocation)-> dict:
         mapper = self.get_mapper()
         fields = {}
@@ -87,9 +89,7 @@ class MigrateToColdfront:
 
         print(form_data)
 
-
-
-"""        form_data = {
+        form_data = {
             "storage_filesystem_path": path.rstrip("/"),
             "storage_export_path": path.rstrip("/"),
             "storage_name": self.fileset_name,
@@ -106,21 +106,11 @@ class MigrateToColdfront:
         #    project=self.project, user=self.user, form_data=form_data
         #)
 
-
-def main() -> None:
-    MigrateToColdfront("jin810_active")
-    MigrateToColdfront("non_found")
-    MigrateToColdfront()
-
-
-if __name__ == "__main__":
-    main()
 """
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import MigrateToColdfront
-jin = MigrateToColdfront("jin810_active")
-jin.execute()
+migrator = MigrateToColdfront()
+migrator.find_by_fileset_name("jin810_active")
 
-ina = MigrateToColdfront("ina.amarillo_active")
 ina.execute()
 
 not_found = MigrateToColdfront("non_found")
