@@ -200,6 +200,7 @@ def set_allocation_attributes(
         "storage_ticket",
         "technical_contact",
         "billing_contact",
+        "billing_cycle",
     ]
 
     for allocation_attribute_name in allocation_attribute_names:
