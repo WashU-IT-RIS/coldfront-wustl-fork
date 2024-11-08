@@ -8,13 +8,33 @@ from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     length_of,
     inclusion_of,
     validate_ticket,
+    validate_json
 )
-
 
 class TestValidators(TestCase):
 
     def setUp(self) -> None:
         return super().setUp()
+
+    def test_validate_json(self):
+        wellformed = """
+        {"afm_cache_enable":true,"dir_projects":{"brc_regulome":{"ro":null,"rw":["mgi-svc-bga-admin","mgi-svc-bga-run"]},"bga1641":{"ro":null,"rw":["mgi-svc-bga-admin","mgi-svc-bga-run","jwalker"]}},"_jenkins":"https://systems-ci.gsc.wustl.edu/job/storage1_allocation/2483"}
+        """
+        self.assertTrue(validate_json(wellformed))
+
+        empty = "{}"
+        self.assertTrue(validate_json(empty))
+
+        malformed = """
+        {"afm_cache_enable":bad}
+        """
+        self.assertFalse(validate_json(malformed))
+
+        conditions = {"allow_blank": True}
+        blank = ""
+        self.assertTrue(validate_json(blank, conditions))
+        self.assertTrue(validate_json(None, conditions))
+
 
     def test_validate_ticket(self):
         self.assertTrue(validate_ticket("ITSD-2222"))
@@ -29,9 +49,7 @@ class TestValidators(TestCase):
         self.assertRaises(
             Exception, validate_ticket, "ITDEV-2222", msg=exception_message
         )
-        self.assertRaises(
-            Exception, validate_ticket, "itsd2222", msg=exception_message
-        )
+        self.assertRaises(Exception, validate_ticket, "itsd2222", msg=exception_message)
 
     def test_numericallity(self) -> None:
         conditions = {
@@ -73,15 +91,23 @@ class TestValidators(TestCase):
 
     def test_length_of(self):
         conditions = {"allow_blank": True, "maximum": 128}
-        # value = ""
-        # self.assertTrue(length_of(value, conditions))
-        # value = None
-        # self.assertTrue(length_of(value, conditions))
+        value = ""
+        self.assertTrue(length_of(value, conditions))
+        value = None
+        self.assertTrue(length_of(value, conditions))
+        value = "0123456789" * 12 # 120 chars
+        self.assertTrue(length_of(value, conditions))
+        value = "0123456789" * 13 # 130 chars
+        self.assertFalse(length_of(value, conditions))
 
         conditions = {"maximum": 128}
         value = ""
         self.assertFalse(length_of(value, conditions))
         value = None
+        self.assertFalse(length_of(value, conditions))
+        value = "0123456789" * 12
+        self.assertTrue(length_of(value, conditions))
+        value = "0123456789" * 13
         self.assertFalse(length_of(value, conditions))
 
     def test_inclusion_of(self):
@@ -106,6 +132,6 @@ class TestValidators(TestCase):
 
 
 """
-from coldfront.plugins.qumulo.services.itsm.validators.allocation_attributes import numericallity
+from coldfront.plugins.qumulo.services.itsm.fields.validators import numericallity
 coldfront/plugins/qumulo/tests/utils.itsm_api.test_validators
 """

@@ -1,5 +1,4 @@
-import re
-
+import re, json
 
 # This is copy from coldfront/plugins/qumulo/validators.py
 # loading the validator from Django causes an exception due to app requirements.
@@ -54,10 +53,21 @@ def length_of(value, conditions):
     if not bool(value):
         return False
 
-    maximum_length = allow_blank = conditions.get("maximum")
+    maximum_length = conditions.get("maximum")
     if len(value) <= maximum_length:
         return True
     return False
 
 def inclusion_of(value, accepted_values):
     return value in accepted_values
+
+def validate_json(value, conditions={}):
+    if conditions.get("allow_blank"):
+        if value in [None, ""]:
+            return True
+
+    try:
+        bool(json.loads(value))
+    except:
+        return False
+    return True
