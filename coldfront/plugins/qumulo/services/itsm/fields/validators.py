@@ -34,7 +34,6 @@ def numericallity(value: int, conditions: dict):
             return False
     return True
 
-
 def presence(value, presence:bool):
      if presence:
         if value is None:

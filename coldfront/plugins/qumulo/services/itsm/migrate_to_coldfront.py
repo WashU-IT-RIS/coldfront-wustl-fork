@@ -1,5 +1,5 @@
 from coldfront.plugins.qumulo.services.itsm.itsm_client import ItsmClient
-from coldfront.plugins.qumulo.services.itsm.fields.allocation_fields_factory import (
+from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_factory import (
     coldfront_field_map,
     validator_map,
     Field,
@@ -7,11 +7,8 @@ from coldfront.plugins.qumulo.services.itsm.fields.allocation_fields_factory imp
 
 class MigrateToColdfront:
 
-    def __init__(self, fileset_name):
-        self.fileset_name = fileset_name
-
-    def execute(self):
-        itsm_result = self.get_itsm_allocation()
+    def find_by_fileset_name(self, fileset_name):
+        itsm_result = self.get_itsm_allocation(fileset_name)
 
         self.validate_result_set(itsm_result)
 
@@ -22,26 +19,27 @@ class MigrateToColdfront:
         valid = self.validate_coldfront_allocation_preprosesing(fields)
 
         if not valid:
-            raise Exception(f"ITSM allocation rejected. Fileset_name: {self.fileset_name} ")
+            raise Exception(f"ITSM allocation rejected. Fileset_name: {fileset_name} ")
 
         self.create_coldfront_allocation(fields)
 
-    def get_itsm_allocation(self):
+    def get_itsm_allocation(self, fileset_name):
         itsm_client = ItsmClient()
-        itsm_allocation = itsm_client.get_fs1_allocation(self.fileset_name)
+        itsm_allocation = itsm_client.get_fs1_allocation(fileset_name)
         return itsm_allocation
 
     def get_mapper(self):
         return coldfront_field_map
 
-    def validate_result_set(self, itsm_result) -> bool:
+    def validate_result_set(self, fileset_name, itsm_result) -> bool:
         how_many = len(itsm_result)
+        # ITSM does not return a respond code of 404 when the service provision record is not found.
+        # Instead, it return an empty array.
         if how_many == 0:
-            # Is there a NotFoundExcaption
-            raise Exception(f"ITSM allocation was not found for fileset_name \"{self.fileset_name}\"")
+            raise Exception(f"ITSM allocation was not found for fileset_name \"{fileset_name}\"")
 
         if how_many > 1:
-            raise Exception(f"Multiple ({how_many} total) ITSM allocations were found for {self.fileset_name}")
+            raise Exception(f"Multiple ({how_many} total) ITSM allocations were found for {fileset_name}")
 
         return True
 

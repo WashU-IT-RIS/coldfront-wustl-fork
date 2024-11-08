@@ -3,7 +3,7 @@ import requests
 
 from dotenv import load_dotenv
 
-from coldfront.plugins.qumulo.services.itsm.fields.allocation_fields_factory import (
+from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_factory import (
     itsm_attributes,
 )
 

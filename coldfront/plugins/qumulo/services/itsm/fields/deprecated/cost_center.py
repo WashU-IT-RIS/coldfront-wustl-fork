@@ -1,4 +1,4 @@
-from coldfront.plugins.qumulo.services.itsm.fields.field import Field 
+from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field 
 
 # DEPERECATED: 
 class CostCenter(Field):
