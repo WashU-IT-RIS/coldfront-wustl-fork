@@ -129,6 +129,10 @@ class TestValidators(TestCase):
         self.assertFalse(inclusion(2, accpeted_values))
         self.assertFalse(inclusion("2", accpeted_values))
 
+def test_ad_record_exist(value):
+    #TODO how?
+    pass
+
 
 """
 from coldfront.plugins.qumulo.services.itsm.fields.validators import numericallity
