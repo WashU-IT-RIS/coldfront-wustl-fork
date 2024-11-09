@@ -3,7 +3,7 @@ import yaml
 from coldfront.plugins.qumulo.services.itsm.fields.field import Field
 
 with open(
-    "coldfront/plugins/qumulo/services/itsm/fields/itsm_to_coldfront_map.yaml", "r"
+    "coldfront/plugins/qumulo/static/itsm_to_coldfront_map.yaml", "r"
 ) as file:
     itsm_to_coldfront_map = yaml.safe_load(file)
     field_map = itsm_to_coldfront_map["itsm_to_coldfront_map"]
