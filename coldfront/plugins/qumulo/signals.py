@@ -64,7 +64,7 @@ def on_allocation_activate(sender, **kwargs):
             begin_date.day,
         )
         prepaid_until = begin_date + relativedelta(months=prepaid_months)
-        prepaid_until = prepaid_until.date()
+        prepaid_until = prepaid_until
     else:
         prepaid_until = datetime.today().strftime("%Y-%m-%d")
 
