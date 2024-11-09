@@ -3,6 +3,7 @@ from django.dispatch import receiver
 import logging
 import json
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -57,11 +58,12 @@ def on_allocation_activate(sender, **kwargs):
     )
     if bill_cycle == "prepaid":
         prepaid_months = allocation_obj.get_attribute(name="prepaid_time")
-        prepaid_until = datetime(
-            begin_date.year + (begin_date.month + prepaid_months - 1) // 12,
-            (begin_date.month + prepaid_months - 1) % 12 + 1,
-            begin_date.day,
-        )
+        # prepaid_until = datetime(
+        #     begin_date.year + (begin_date.month + prepaid_months - 1) // 12,
+        #     (begin_date.month + prepaid_months - 1) % 12 + 1,
+        #     begin_date.day,
+        # )
+        prepaid_until = begin_date + relativedelta(months=prepaid_months)
         prepaid_until = prepaid_until.date()
     else:
         prepaid_until = datetime.today().strftime("%Y-%m-%d")
