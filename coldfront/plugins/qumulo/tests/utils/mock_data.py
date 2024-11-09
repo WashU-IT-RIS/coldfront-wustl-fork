@@ -105,6 +105,7 @@ def create_allocation(
         justification="",
         quantity=1,
         status=AllocationStatusChoice.objects.get(name="Pending"),
+        start_date=date.today(),
     )
 
     active_status = AllocationUserStatusChoice.objects.get(name="Active")
