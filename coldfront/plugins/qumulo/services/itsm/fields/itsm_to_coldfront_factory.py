@@ -1,14 +1,14 @@
 import yaml
 
 from coldfront.plugins.qumulo.services.itsm.fields.field import Field
-from coldfront.config.env import ENV, PROJECT_ROOT
+
+# jprew - TODO - need to figure out how to properly provide a yaml file
+ROOT_LOC = "/opt/venv/lib/python3.9/site-packages/coldfront/plugins/qumulo/static"
 
 
-STATIC_ROOT = ENV.str("STATIC_ROOT", default=PROJECT_ROOT("static_root"))
-print(f"STATIC_ROOT: {STATIC_ROOT}")
-# jprew - TODO
+# jprew - TODO - fix the below
 with open(
-    f"{STATIC_ROOT}/coldfront/plugins/qumulo/static/itsm_to_coldfront_map.yaml", "r"
+    f"{ROOT_LOC}/itsm_to_coldfront_map.yaml", "r"
 ) as file:
     itsm_to_coldfront_map = yaml.safe_load(file)
     field_map = itsm_to_coldfront_map["itsm_to_coldfront_map"]
