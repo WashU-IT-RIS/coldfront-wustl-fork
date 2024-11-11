@@ -317,15 +317,9 @@ class TestBillingCycleTypeUpdates(TestCase):
         return super().setUp()
 
     def all_allocations_checked(self) -> None:
-        prepaid_not_exp_allocation = create_allocation(
-            self.project, self.user, self.prepaid_form_data_not_exp
-        )
-        monthly_allocation = create_allocation(
-            self.project, self.user, self.monthly_form_data
-        )
-        prepaid_exp_allocation = create_allocation(
-            self.project, self.user, self.prepaid_form_data_exp
-        )
+        create_allocation(self.project, self.user, self.prepaid_form_data_not_exp)
+        create_allocation(self.project, self.user, self.monthly_form_data)
+        create_allocation(self.project, self.user, self.prepaid_form_data_exp)
         with patch(
             "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
         ) as conditionally_update_billing_cycle_types:
@@ -335,21 +329,39 @@ class TestBillingCycleTypeUpdates(TestCase):
 
     def prepaid_past_prepaid_exp(self) -> None:
         create_allocation(self.project, self.user, self.prepaid_form_data_exp)
-        prepaid_exp_attribute = AllocationAttributeType.objects.get(
-            name="prepaid_expiration"
+        billing_cycle_attribute = AllocationAttributeType.objects.get(
+            name="billing_cycle"
         )
         with patch(
             "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
         ) as conditionally_update_billing_cycle_types:
             conditionally_update_billing_cycle_types()
 
-            self.assertEqual(prepaid_exp_attribute, "monthly")
+            self.assertEqual(billing_cycle_attribute, "monthly")
 
     def prepaid_not_past_prepaid_exp(self) -> None:
-        True
+        create_allocation(self.project, self.user, self.prepaid_form_data_not_exp)
+        billing_cycle_attribute = AllocationAttributeType.objects.get(
+            name="billing_cycle"
+        )
+        with patch(
+            "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
+        ) as conditionally_update_billing_cycle_types:
+            conditionally_update_billing_cycle_types()
+
+            self.assertEqual(billing_cycle_attribute, "prepaid")
 
     def monthly_no_change(self) -> None:
-        True
+        create_allocation(self.project, self.user, self.monthly_form_data)
+        billing_cycle_attribute = AllocationAttributeType.objects.get(
+            name="billing_cycle"
+        )
+        with patch(
+            "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
+        ) as conditionally_update_billing_cycle_types:
+            conditionally_update_billing_cycle_types()
+
+            self.assertEqual(billing_cycle_attribute, "monthly")
 
 
 class TestIngestQuotasWithDailyUsages(TestCase):
