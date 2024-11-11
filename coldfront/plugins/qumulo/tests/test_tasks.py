@@ -270,7 +270,7 @@ class TestBillingCycleTypeUpdates(TestCase):
 
         self.project = build_data["project"]
         self.user = build_data["user"]
-        self.form_data = {
+        self.prepaid_form_data_not_exp = {
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
             "storage_ticket": "ITSD-54321",
@@ -284,6 +284,35 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "general",
             "billing_cycle": "prepaid",
             "prepaid_time": 6,
+        }
+        self.monthly_form_data = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "general",
+            "billing_cycle": "monthly",
+        }
+        self.prepaid_form_data_exp = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "general",
+            "billing_cycle": "prepaid",
+            "prepaid_time": 0,
         }
 
     def prepaid_past_prepaid_exp(self) -> None:
