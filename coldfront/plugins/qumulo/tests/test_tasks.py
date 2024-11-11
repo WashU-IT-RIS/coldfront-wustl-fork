@@ -315,8 +315,25 @@ class TestBillingCycleTypeUpdates(TestCase):
             "prepaid_time": 0,
         }
 
+        prepaid_not_exp_allocation = create_allocation(
+            self.project, self.user, self.prepaid_form_data_not_exp
+        )
+        monthly_allocation = create_allocation(
+            self.project, self.user, self.monthly_form_data
+        )
+        prepaid_exp_allocation = create_allocation(
+            self.project, self.user, self.prepaid_form_data_exp
+        )
+
     def prepaid_past_prepaid_exp(self) -> None:
-        True
+        with patch(
+            "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
+        ) as conditionally_update_storage_allocation_status_mock:
+            conditionally_update_storage_allocation_statuses()
+
+            self.assertEqual(
+                conditionally_update_storage_allocation_status_mock.call_count, 3
+            )
 
     def prepaid_not_past_prepaid_exp(self) -> None:
         True
