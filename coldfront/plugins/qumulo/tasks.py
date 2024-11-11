@@ -1,8 +1,9 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django_q.tasks import async_task
+
+import json
 import logging
-import os
 
 from coldfront.config.env import ENV
 from coldfront.core.allocation.models import (
@@ -11,11 +12,13 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
     AllocationAttributeUsage,
+    AllocationLinkage,
 )
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
 
+from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
@@ -24,6 +27,7 @@ from qumulo.lib.request import RequestError
 
 import time
 from datetime import datetime
+
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -96,12 +100,21 @@ def conditionally_update_storage_allocation_statuses() -> None:
         conditionally_update_storage_allocation_status(allocation)
 
 
+# TODO: refactor the following methods to a service class
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
-    quota_usages = __get_quota_usages_from_qumulo(logger)
-    __set_daily_quota_usages(quota_usages, logger)
-    __validate_results(quota_usages, logger)
+    qumulo_api = QumuloAPI()
+    quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
+    base_allocation_quota_usages = list(
+        filter(
+            lambda quota_usage: AclAllocations.is_base_allocation(quota_usage["path"]),
+            quota_usages,
+        )
+    )
+
+    __set_daily_quota_usages(base_allocation_quota_usages, logger)
+    __validate_results(base_allocation_quota_usages, logger)
 
 
 def addUsersToADGroup(
@@ -211,22 +224,18 @@ def __send_invalid_users_email(acl_allocation: Allocation, bad_keys: list[str]) 
     )
 
 
-def __get_quota_usages_from_qumulo(logger):
-    qumulo_api = QumuloAPI()
-    quota_usages = qumulo_api.get_all_quotas_with_usage()
-    return quota_usages
-
-
-def __set_daily_quota_usages(all_quotas, logger) -> None:
+def __set_daily_quota_usages(quotas, logger) -> None:
     # Iterate and populate allocation_attribute_usage records
     storage_filesystem_path_attribute_type = AllocationAttributeType.objects.get(
         name="storage_filesystem_path"
     )
-    for quota in all_quotas["quotas"]:
+    active_status = AllocationStatusChoice.objects.get(name="Active")
+
+    for quota in quotas:
         path = quota.get("path")
 
         allocation = __get_allocation_by_attribute(
-            storage_filesystem_path_attribute_type, path
+            storage_filesystem_path_attribute_type, path, active_status
         )
         if allocation is None:
             if path[-1] != "/":
@@ -235,7 +244,7 @@ def __set_daily_quota_usages(all_quotas, logger) -> None:
             value = path[:-1]
             logger.warn(f"Attempting to find allocation without the trailing slash...")
             allocation = __get_allocation_by_attribute(
-                storage_filesystem_path_attribute_type, value
+                storage_filesystem_path_attribute_type, value, active_status
             )
             if allocation is None:
                 continue
@@ -243,10 +252,12 @@ def __set_daily_quota_usages(all_quotas, logger) -> None:
         allocation.set_usage("storage_quota", quota.get("capacity_usage"))
 
 
-def __get_allocation_by_attribute(attribute_type, value):
+def __get_allocation_by_attribute(attribute_type, value, for_status):
     try:
-        attribute = AllocationAttribute.objects.get(
-            value=value, allocation_attribute_type=attribute_type
+        attribute = AllocationAttribute.objects.select_related("allocation").get(
+            value=value,
+            allocation_attribute_type=attribute_type,
+            allocation__status=for_status,
         )
     except AllocationAttribute.DoesNotExist:
         logger.warn(f"Allocation record for {value} path was not found")
@@ -265,15 +276,169 @@ def __validate_results(quota_usages, logger) -> bool:
     daily_usage_ingested = AllocationAttributeUsage.objects.filter(
         modified__year=year, modified__month=month, modified__day=day
     ).count()
-    usage_pulled_from_qumulo = len(quota_usages["quotas"])
-
-    logger.info("Usages ingested for today: ", daily_usage_ingested)
-    logger.info("Usages pulled from QUMULO: ", usage_pulled_from_qumulo)
+    usage_pulled_from_qumulo = len(quota_usages)
 
     success = usage_pulled_from_qumulo == daily_usage_ingested
     if success:
         logger.warn("Successful ingestion of quota daily usage.")
     else:
-        logger.warn("Unsuccessful ingestion of quota daily usage. Check the results.")
+        logger.warn(
+            "Unsuccessful ingestion of quota daily usage. Not all the QUMULO usage data was stored in Coldfront."
+        )
+        logger.warn(f"Usages pulled from QUMULO: {usage_pulled_from_qumulo}")
+        logger.warn(f"Usages ingested for today: {daily_usage_ingested}")
 
     return success
+
+
+class ResetAcl:
+    qumulo_api = None
+    sub_allocations = None
+
+    def __init__(self, allocation: Allocation):
+        self.allocation = allocation
+        self.debug = ENV.bool("DEBUG", default=False)
+        self.fs_path = allocation.get_attribute(name="storage_filesystem_path")
+        self.is_allocation_root = QumuloAPI.is_allocation_root_path(self.fs_path)
+        access_allocations = AclAllocations.get_access_allocations(allocation)
+        self.rw_group = AclAllocations.get_allocation_rwro_group_name(
+            access_allocations, "rw"
+        )
+        self.ro_group = AclAllocations.get_allocation_rwro_group_name(
+            access_allocations, "ro"
+        )
+        self.reset_exclude_paths = []
+
+        if self.is_allocation_root:
+            self.sub_allocations = []
+            links = None
+            try:
+                links = AllocationLinkage.objects.get(parent=allocation)
+            except AllocationLinkage.DoesNotExist:
+                pass
+            if links is not None:
+                for child in links.children.all():
+                    self.reset_exclude_paths.append(
+                        child.get_attribute(name="storage_filesystem_path").rstrip("/")
+                    )
+                    self.sub_allocations.append(child)
+        else:
+            self._setup_qumulo_api()
+            self.parent_aces = AclAllocations.get_sub_allocation_parent_aces(
+                allocation, self.qumulo_api
+            )
+
+    def __log_acl(self, msg):
+        global logger
+        if not self.debug:
+            return None
+        logger.warn(msg)
+
+    def __log_acl_reset(self, path):
+        self.__log_acl(f'Resetting "directory content" ACLs for path: {path}')
+
+    # bmulligan 20241004: we use this to make ad-hoc connections to qumulo as
+    # the API client gets used throughout this class.  this technique was
+    # developed because the framework was complaining that certain sub-classes
+    # or dependent objects (SSL-related) "couldn't be pickled"
+    def _setup_qumulo_api(self):
+        if self.qumulo_api is None:
+            self.qumulo_api = QumuloAPI()
+
+    def _set_directory_content_acls(self, contents):
+        self._setup_qumulo_api()
+        for item in contents:
+            item_path = item.get("path", None)
+            item_type = item.get("type", None)
+
+            if None in [item_path, item_type]:
+                msg_data = {"path": item_path, "type": item_type}
+                raise BadDirectoryEntry(
+                    f"Improper null value found in: {json.dumps(msg_data)}"
+                )
+
+            acl = AcesManager.get_base_acl()
+            if item_type == "FS_FILE_TYPE_FILE":
+                acl["aces"] = AcesManager.get_allocation_existing_file_aces(
+                    self.rw_group, self.ro_group
+                )
+            elif item_type == "FS_FILE_TYPE_DIRECTORY":
+                acl["aces"] = AcesManager.get_allocation_existing_directory_aces(
+                    self.rw_group, self.ro_group
+                )
+                if not self.is_allocation_root:
+                    acl["aces"].extend(self.parent_aces)
+
+            self.qumulo_api.rc.fs.set_acl_v2(path=item_path, acl=acl)
+
+            if item_type == "FS_FILE_TYPE_DIRECTORY":
+                self._set_directory_content_acls(
+                    self._get_directory_contents(item_path, True)
+                )
+
+    def _get_directory_contents(self, path, skip_filter=False):
+        def filter_helper(item):
+            return_value = True
+            for path in self.reset_exclude_paths:
+                if item["path"].startswith(path):
+                    return_value = False
+                    break
+            return return_value
+
+        self._setup_qumulo_api()
+        enumerated_directory = list(
+            self.qumulo_api.rc.fs.enumerate_entire_directory(path=path)
+        )
+        for entry in enumerated_directory:
+            entry.update(
+                (
+                    (k, entry["path"].rstrip("/"))
+                    for k, v in entry.items()
+                    if k == "path"
+                )
+            )
+        directory_contents = sorted(
+            enumerated_directory, key=lambda entry: entry["path"]
+        )
+        if skip_filter:
+            return directory_contents
+        return list(filter(filter_helper, directory_contents))
+
+    def run_allocation_acl_reset(self):
+        self._setup_qumulo_api()
+        fs_path = self.fs_path
+        acl = AcesManager.get_base_acl()
+
+        # 1.) Clear aces from exisitng ACLs
+        if self.is_allocation_root:
+            initial_walk_path = f"{fs_path}/Active"
+            for path in [fs_path, initial_walk_path]:
+                self.qumulo_api.rc.fs.set_acl_v2(path=path, acl=acl)
+        else:
+            initial_walk_path = fs_path
+            self.qumulo_api.rc.fs.set_acl_v2(path=fs_path, acl=acl)
+
+        # 2.) Run logic to set default ACLs on allocation directories
+        AclAllocations.reset_allocation_acls(self.allocation, self.qumulo_api)
+
+        # 3.) Walk the directory tree setting default file and directory ACLs
+        self.__log_acl(f"Starting ACL reset walk with path: {initial_walk_path}")
+        self._set_directory_content_acls(
+            self._get_directory_contents(initial_walk_path)
+        )
+        self.__log_acl(f"...{initial_walk_path} ACL reset directory walk complete")
+
+
+def reset_allocation_acls(
+    user_email: str, allocation: Allocation, reset_subs: bool = False
+):
+    ra_object = ResetAcl(allocation)
+    ra_object.run_allocation_acl_reset()
+    if reset_subs:
+        for sub in ra_object.sub_allocations:
+            sub_ra_object = ResetAcl(sub)
+            sub_ra_object.run_allocation_acl_reset()
+
+
+class BadDirectoryEntry(Exception):
+    pass

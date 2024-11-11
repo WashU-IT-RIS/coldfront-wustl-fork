@@ -35,6 +35,7 @@ class AllocationView(LoginRequiredMixin, FormView):
     form_class = AllocationForm
     template_name = "allocation.html"
     new_allocation = None
+    success_id = None
 
     def get_form_kwargs(self):
         kwargs = super(AllocationView, self).get_form_kwargs()
@@ -73,11 +74,12 @@ class AllocationView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
     def get_success_url(self):
-
-        return reverse(
-            "qumulo:updateAllocation",
-            kwargs={"allocation_id": self.success_id},
-        )
+        if self.success_id is not None:
+            return reverse(
+                "qumulo:updateAllocation",
+                kwargs={"allocation_id": self.success_id},
+            )
+        return super().get_success_url()
 
     @staticmethod
     def _handle_sub_allocation_scoping(

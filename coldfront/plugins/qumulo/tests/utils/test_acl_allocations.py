@@ -148,8 +148,11 @@ class TestAclAllocations(TestCase):
         form_data["storage_filesystem_path"] = f"{os.environ.get('STORAGE2_PATH')}/foo"
 
         group_name_base = f"storage-{form_data['storage_name']}"
-        expected_aces = AcesManager.get_allocation_aces(
-            f"{group_name_base}-rw", f"{group_name_base}-ro"
+        expected_aces = AcesManager.default_copy()
+        expected_aces.extend(
+            AcesManager.get_allocation_aces(
+                f"{group_name_base}-rw", f"{group_name_base}-ro"
+            )
         )
 
         allocation = create_allocation(self.project, self.user, form_data)
@@ -161,7 +164,7 @@ class TestAclAllocations(TestCase):
         ) as mock_set_traverse_acl:
             AclAllocations.set_allocation_acls(allocation, mock_qumulo_api)
 
-            mock_set_acl_v2.assert_called_once()
+            self.assertEqual(mock_set_acl_v2.call_count, 2)
             call_args = mock_set_acl_v2.call_args
 
             self.assertEqual(
@@ -204,7 +207,7 @@ class TestAclAllocations(TestCase):
         ) as mock_set_traverse_acl:
             AclAllocations.set_allocation_acls(allocation, mock_qumulo_api)
 
-            mock_set_acl_v2.assert_called_once()
+            self.assertEqual(mock_set_acl_v2.call_count, 2)
             call_args = mock_set_acl_v2.call_args
 
             self.assertEqual(
@@ -234,7 +237,7 @@ class TestAclAllocations(TestCase):
         ) as mock_set_traverse_acl:
             AclAllocations.set_allocation_acls(allocation, mock_qumulo_api)
 
-            mock_set_acl_v2.assert_called_once()
+            self.assertEqual(mock_set_acl_v2.call_count, 2)
 
             group_name_base = f"storage-{form_data['storage_name']}"
             mock_set_traverse_acl.assert_called_once_with(
@@ -259,8 +262,11 @@ class TestAclAllocations(TestCase):
 
         group_name_base = f"storage-{form_data['storage_name']}"
 
-        expected_aces = AcesManager.get_allocation_aces(
-            f"{group_name_base}-rw", f"{group_name_base}-ro"
+        expected_aces = AcesManager.default_copy()
+        expected_aces.extend(
+            AcesManager.get_allocation_aces(
+                f"{group_name_base}-rw", f"{group_name_base}-ro"
+            )
         )
 
         allocation = create_allocation(self.project, self.user, form_data)
@@ -444,3 +450,27 @@ class TestAclAllocations(TestCase):
             call_args_list[1].kwargs["acl"], expected_acl, ignore_order=True
         )
         self.assertFalse(diff)
+
+    def test_is_base_allocation_confirms_base_allocation(self):
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo"
+        self.assertTrue(AclAllocations.is_base_allocation(path), path)
+
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/"
+        self.assertTrue(AclAllocations.is_base_allocation(path), path)
+
+    def test_is_base_allocation_rejects_sub_allocation(self):
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/Active/bar"
+        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+
+    def test_is_base_allocation_rejects_gibberish_allocations(self):
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/Active"
+        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+
+        path = "/foo"
+        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+
+        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/bar/Active"
+        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+
+        path = f"{os.environ.get('STORAGE2_PATH').strip('/')}/foo"
+        self.assertFalse(AclAllocations.is_base_allocation(path), path)
