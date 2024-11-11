@@ -128,6 +128,7 @@ class TestSignals(TestCase):
             "Can't create allocation: Some attributes are missing or invalid"
         )
 
+    @patch("coldfront.plugins.qumulo.signals.async_task")
     def test_allocation_activates_calculates_prepaid_expiration_monthly(
         self,
         mock_ACL_ActiveDirectoryApi: MagicMock,
@@ -148,6 +149,7 @@ class TestSignals(TestCase):
 
         self.assertEqual(prepaid_exp.value, datetime.today().strftime("%Y-%m-%d"))
 
+    @patch("coldfront.plugins.qumulo.signals.async_task")
     def test_allocation_activates_calculates_prepaid_expiration_prepaid(
         self,
         mock_ACL_ActiveDirectoryApi: MagicMock,
