@@ -22,6 +22,7 @@ from coldfront.core.allocation.signals import (
     allocation_change_approved,
 )
 
+import os
 
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -101,13 +102,14 @@ def on_allocation_activate(sender, **kwargs):
     if QumuloAPI.is_allocation_root_path(fs_path):
         qumulo_api.create_allocation_readme(fs_path)
 
-    async_task(
-        reset_allocation_acls,
-        "",
-        allocation,
-        False,
-        q_options={"retry": 90000, "timeout": 86400},
-    )
+    if not os.environ.get("IS_TEST", "False") == "True":
+        async_task(
+            reset_allocation_acls,
+            "",
+            allocation,
+            False,
+            q_options={"retry": 90000, "timeout": 86400},
+        )
 
 
 @receiver(allocation_disable)

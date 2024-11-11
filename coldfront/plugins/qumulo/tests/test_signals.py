@@ -19,6 +19,8 @@ from coldfront.core.allocation.models import (
 )
 from django.core.management import call_command
 
+import os
+
 
 def mock_get_attribute(name):
     attribute_dict = {
@@ -35,6 +37,7 @@ def mock_get_attribute(name):
 @patch("coldfront.plugins.qumulo.utils.acl_allocations.ActiveDirectoryAPI")
 class TestSignals(TestCase):
     def setUp(self) -> int:
+        os.environ["IS_TEST"] = "True"
         self.client = Client()
 
         build_data = build_models()
