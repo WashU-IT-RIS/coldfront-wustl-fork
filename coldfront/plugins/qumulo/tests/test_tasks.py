@@ -346,7 +346,6 @@ class TestBillingCycleTypeUpdates(TestCase):
             conditionally_update_billing_cycle_types()
 
             self.assertEqual(prepaid_exp_attribute, "monthly")
-        True
 
     def prepaid_not_past_prepaid_exp(self) -> None:
         True
