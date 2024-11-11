@@ -334,9 +334,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             self.assertEqual(conditionally_update_billing_cycle_types.call_count, 3)
 
     def prepaid_past_prepaid_exp(self) -> None:
-        prepaid_exp_allocation = create_allocation(
-            self.project, self.user, self.prepaid_form_data_exp
-        )
+        create_allocation(self.project, self.user, self.prepaid_form_data_exp)
         prepaid_exp_attribute = AllocationAttributeType.objects.get(
             name="prepaid_expiration"
         )
