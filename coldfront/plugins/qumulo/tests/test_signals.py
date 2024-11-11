@@ -130,6 +130,8 @@ class TestSignals(TestCase):
 
     def test_allocation_activates_calculates_prepaid_expiration_monthly(
         self,
+        mock_ACL_ActiveDirectoryApi: MagicMock,
+        mock_QumuloAPI: MagicMock,
     ):
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
@@ -147,6 +149,8 @@ class TestSignals(TestCase):
 
     def test_allocation_activates_calculates_prepaid_expiration_prepaid(
         self,
+        mock_ACL_ActiveDirectoryApi: MagicMock,
+        mock_QumuloAPI: MagicMock,
     ):
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
