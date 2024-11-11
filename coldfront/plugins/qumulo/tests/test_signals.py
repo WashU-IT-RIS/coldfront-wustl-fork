@@ -83,8 +83,10 @@ class TestSignals(TestCase):
             project=self.project, user=self.user, form_data=self.prepaid_form_data
         )
 
+    @patch("coldfront.plugins.qumulo.signals.async_task")
     def test_allocation_activate_creates_allocation(
         self,
+        mock_async_task: MagicMock,
         mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
     ):
@@ -104,8 +106,10 @@ class TestSignals(TestCase):
         )
 
     @patch("coldfront.plugins.qumulo.signals.logging.getLogger")
+    @patch("coldfront.plugins.qumulo.signals.async_task")
     def test_allocation_activate_handles_missing_attribute_error(
         self,
+        mock_async_task: MagicMock,
         mock_getLogger: MagicMock,
         mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,

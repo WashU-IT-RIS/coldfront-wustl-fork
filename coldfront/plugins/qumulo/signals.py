@@ -1,4 +1,5 @@
 from django.dispatch import receiver
+from django_q.tasks import async_task
 
 import logging
 import json
@@ -7,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
+from coldfront.plugins.qumulo.tasks import reset_allocation_acls
 
 
 from coldfront.core.allocation.models import (
@@ -44,7 +46,7 @@ def on_allocation_activate(sender, **kwargs):
     logger = logging.getLogger(__name__)
     qumulo_api = QumuloAPI()
 
-    allocation_obj = Allocation.objects.get(pk=kwargs["allocation_pk"])
+    allocation = Allocation.objects.get(pk=kwargs["allocation_pk"])
 
     fs_path = allocation_obj.get_attribute(name="storage_filesystem_path")
     export_path = allocation_obj.get_attribute(name="storage_export_path")
@@ -73,6 +75,11 @@ def on_allocation_activate(sender, **kwargs):
         allocation=allocation_obj,
         value=prepaid_until,
     )
+    fs_path = allocation.get_attribute(name="storage_filesystem_path")
+    export_path = allocation.get_attribute(name="storage_export_path")
+    protocols = json.loads(allocation.get_attribute(name="storage_protocols"))
+    name = allocation.get_attribute(name="storage_name")
+    limit_in_bytes = allocation.get_attribute(name="storage_quota") * (2**40)
 
     try:
         # Create allocation
@@ -89,10 +96,18 @@ def on_allocation_activate(sender, **kwargs):
     except ValueError:
         logger.warn("Can't create allocation: Some attributes are missing or invalid")
 
-    AclAllocations.set_allocation_acls(allocation_obj, qumulo_api)
+    AclAllocations.set_allocation_acls(allocation, qumulo_api)
 
     if QumuloAPI.is_allocation_root_path(fs_path):
         qumulo_api.create_allocation_readme(fs_path)
+
+    async_task(
+        reset_allocation_acls,
+        "",
+        allocation,
+        False,
+        q_options={"retry": 90000, "timeout": 86400},
+    )
 
 
 @receiver(allocation_disable)
