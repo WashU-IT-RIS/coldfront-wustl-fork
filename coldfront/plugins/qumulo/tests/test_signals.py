@@ -132,6 +132,7 @@ class TestSignals(TestCase):
         self,
         mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
+        mock_async_task: MagicMock,
     ):
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
@@ -151,6 +152,7 @@ class TestSignals(TestCase):
         self,
         mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
+        mock_async_task: MagicMock,
     ):
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
