@@ -17,7 +17,7 @@ class ItsmClient:
         port = os.environ.get("ITSM_PORT") or "3000"
 
         itsm_fields = ",".join(itsm_attributes)
-        self.url = f"{protocol}://{host}:{port}/v2/rest/attr/info/service_provision?attribute={itsm_fields}"
+        self.url = f"{protocol}://{host}:{port}/rest/attr/info/service_provision?attribute={itsm_fields}"
 
     def get_fs1_allocation_by_fileset_name(self, fileset_name) -> str:
         return self.__get_fs1_allocation_by("fileset_name", fileset_name)
