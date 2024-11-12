@@ -137,16 +137,11 @@ def addUsersToADGroup(
     wustlkey = wustlkeys[0]
 
     user = None
-    success = False
     try:
         user = active_directory_api.get_user(wustlkey)
-        success = True
+        good_keys.append({"wustlkey": wustlkey, "dn": user["dn"]})
     except ValueError:
         bad_keys.append(wustlkey)
-        success = False
-
-    if success:
-        good_keys.append({"wustlkey": wustlkey, "dn": user["dn"]})
 
     async_task(addUsersToADGroup, wustlkeys[1:], acl_allocation, bad_keys, good_keys)
 
@@ -163,6 +158,7 @@ def __ad_users_and_handle_errors(
     if len(good_keys) > 0:
         user_dns = [user["dn"] for user in good_keys]
         try:
+            logger.warning(f"Adding users to AD group: {user_dns} {group_name}")
             active_directory_api.add_user_dns_to_ad_group(user_dns, group_name)
         except Exception as e:
             logger.error(f"Error adding users to AD group: {e}")
