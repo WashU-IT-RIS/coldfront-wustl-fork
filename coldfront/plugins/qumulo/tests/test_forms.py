@@ -26,6 +26,8 @@ class AllocationFormTests(TestCase):
         build_data = build_models()
         self.patcher = patch("coldfront.plugins.qumulo.validators.QumuloAPI")
         self.mock_qumulo_api = self.patcher.start()
+
+        self.old_storage2_path = os.environ.get("STORAGE2_PATH")
         os.environ["STORAGE2_PATH"] = "/path/to"
 
         self.user = build_data["user"]
@@ -37,6 +39,8 @@ class AllocationFormTests(TestCase):
 
     def tearDown(self):
         self.patcher.stop()
+
+        os.environ["STORAGE2_PATH"] = self.old_storage2_path
         return super().tearDown()
 
     def _setupPathExistsMock(self):
@@ -58,6 +62,7 @@ class AllocationFormTests(TestCase):
             "ro_users": ["test"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -77,6 +82,7 @@ class AllocationFormTests(TestCase):
             "ro_users": ["test"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
@@ -95,6 +101,7 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -115,11 +122,31 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.fields["storage_ticket"].required)
         self.assertFalse(form.is_valid())
+
+    def test_billing_cycle_required(self, mock_active_directory_api: MagicMock):
+        invalid_data = {
+            "project_pk": self.project1.id,
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "not_a_rate",
+        }
+        invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
+        self.assertTrue(invalid_form.fields["billing_cycle"].required)
+        self.assertFalse(invalid_form.is_valid())
 
     def test_service_rate_valid_options(self, mock_active_directory_api: MagicMock):
         invalid_data = {
@@ -134,6 +161,7 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "not_a_rate",
             "billing_cycle": "monthly",
         }
@@ -153,6 +181,7 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -173,6 +202,7 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -193,6 +223,7 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "technical_contact": "captain.crunch",
             "billing_cycle": "monthly",
@@ -214,6 +245,7 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -234,6 +266,7 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_contact": "captain.crunch",
             "billing_cycle": "monthly",
@@ -284,6 +317,7 @@ class AllocationFormProjectChoiceTests(TestCase):
             "ro_users": ["test"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
         }
         self.form_a = AllocationForm(data=self.data_a, user_id=self.user_a.id)
@@ -300,6 +334,7 @@ class AllocationFormProjectChoiceTests(TestCase):
             "ro_users": ["test"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
         }
         self.form_b = AllocationForm(data=self.data_b, user_id=self.user_b.id)
