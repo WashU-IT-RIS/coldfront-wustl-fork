@@ -10,7 +10,8 @@ class Command(BaseCommand):
         itsm_client = ItsmClient()
         import pdb
         pdb.set_trace()
-        # itsm_client.get_fs1_allocation_by_fileset_name("jin810_active")
+        result = itsm_client.get_fs1_allocation_by_fileset_name("jin810_active")
+        pdb.set_trace()
         # itsm_client.get_fs1_allocation_by_fileset_name("not_going_to_be_found")
         # itsm_client.get_fs1_allocation_by_fileset_name()
         # itsm_client.get_fs1_allocation_by_fileset_alias("halllab")
