@@ -158,7 +158,6 @@ def __ad_users_and_handle_errors(
     if len(good_keys) > 0:
         user_dns = [user["dn"] for user in good_keys]
         try:
-            logger.warning(f"Adding users to AD group: {user_dns} {group_name}")
             active_directory_api.add_user_dns_to_ad_group(user_dns, group_name)
         except Exception as e:
             logger.error(f"Error adding users to AD group: {e}")
