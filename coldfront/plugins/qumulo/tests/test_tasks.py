@@ -188,6 +188,7 @@ class TestUpdateStorageAllocationPendingStatus(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "general",
         }
 
@@ -244,6 +245,7 @@ class TestStorageAllocationStatuses(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "general",
         }
 
@@ -789,6 +791,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
                 "storage_ticket": f"ITSD-{index}",
                 "cost_center": "Uncle Pennybags",
                 "department_number": "Time Travel Services",
+                "billing_cycle": "monthly",
                 "service_rate": "general",
             }
 
@@ -966,6 +969,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             "storage_ticket": f"ITSD-{index}",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "general",
         }
 
