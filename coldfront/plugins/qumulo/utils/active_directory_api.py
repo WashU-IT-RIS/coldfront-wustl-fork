@@ -72,7 +72,7 @@ class ActiveDirectoryAPI:
 
         logging.warning(f"Adding {user_dns} to {group_dn}")
 
-        ad_add_members_to_groups(self.conn, [user_dns], group_dn)
+        ad_add_members_to_groups(self.conn, user_dns, group_dn)
 
     def add_user_to_ad_group(self, wustlkey: str, group_name: str):
         group_dn = self.get_group_dn(group_name)
