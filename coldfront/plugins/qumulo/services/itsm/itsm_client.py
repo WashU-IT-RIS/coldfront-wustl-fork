@@ -15,9 +15,10 @@ class ItsmClient:
         protocol = os.environ.get("ITSM_PROTOCOL") or "http"
         host = os.environ.get("ITSM_HOST") or "localhost"
         port = os.environ.get("ITSM_PORT") or "3000"
+        end_point = os.environ.get("ITSM_SERVICE_PROVISION_ENDPOINT") or "/rest/attr/info/service_provision"
 
         itsm_fields = ",".join(itsm_attributes)
-        self.url = f"{protocol}://{host}:{port}/rest/attr/info/service_provision?attribute={itsm_fields}"
+        self.url = f"{protocol}://{host}:{port}{end_point}?attribute={itsm_fields}"
 
     def get_fs1_allocation_by_fileset_name(self, fileset_name) -> str:
         return self.__get_fs1_allocation_by("fileset_name", fileset_name)
