@@ -1,10 +1,17 @@
-import yaml
+import os, yaml
+
+from dotenv import load_dotenv
 
 from coldfront.plugins.qumulo.services.itsm.fields.field import Field
 
-with open(
-    "coldfront/plugins/qumulo/services/itsm/fields/itsm_to_coldfront_map.yaml", "r"
-) as file:
+load_dotenv(override=True)
+
+
+ITSM_TO_COLDFRONT_MAP_PATH = os.environ.get("ITSM_TO_COLDFRONT_MAP_PATH") or (
+    "coldfront/plugins/qumulo/static/migration_mappings/itsm_to_coldfront_map.yaml"
+)
+
+with open(ITSM_TO_COLDFRONT_MAP_PATH, "r") as file:
     itsm_to_coldfront_map = yaml.safe_load(file)
     field_map = itsm_to_coldfront_map["itsm_to_coldfront_map"]
     field_items = {key: value for key, value in field_map.items() if value is not None}
@@ -22,6 +29,7 @@ class ItsmToColdfrontFactory:
                 value = itsm_allocation.get(itsm_value_field["attribute"])
                 fields.append(Field(coldfront_definitions, itsm_value_field, value))
         return fields
+
 
 """
 with open(
