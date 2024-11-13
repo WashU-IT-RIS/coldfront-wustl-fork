@@ -1,7 +1,8 @@
 from coldfront.plugins.qumulo.services.itsm.itsm_client import ItsmClient
 from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_factory import (
-    ItsmToColdfrontFactory
+    ItsmToColdfrontFactory,
 )
+
 
 class MigrateToColdfront:
 
@@ -17,11 +18,14 @@ class MigrateToColdfront:
         self.__validate_result_set(fileset_key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFactory.get_fields(itsm_allocation)
-        # for testing 
-        for field in fields: print(field.value); print(field.entity); print(field.attributes)
+        # for testing
+        for field in fields:
+            print(field.value)
+            print(field.entity)
+            print(field.attributes)
         print("-------------------")
-        #TODO validate each field value
-        #TODO create records in coldfront
+        # TODO validate each field value
+        # TODO create records in coldfront
 
     def __get_itsm_allocation_by_fileset_name(self, fileset_name):
         itsm_client = ItsmClient()
@@ -38,12 +42,15 @@ class MigrateToColdfront:
         # ITSM does not return a respond code of 404 when the service provision record is not found.
         # Instead, it return an empty array.
         if how_many == 0:
-            raise Exception(f"ITSM allocation was not found for \"{fileset_key}\"")
+            raise Exception(f'ITSM allocation was not found for "{fileset_key}"')
 
         if how_many > 1:
-            raise Exception(f"Multiple ({how_many} total) ITSM allocations were found for {fileset_key}")
+            raise Exception(
+                f"Multiple ({how_many} total) ITSM allocations were found for {fileset_key}"
+            )
 
         return True
+
 
 """
     def create_fields(self, itsm_allocation)-> dict:
@@ -102,17 +109,17 @@ class MigrateToColdfront:
             "department_number": "Time Travel Services",
             "service_rate": "general",
         } """
-        #allocation = create_allocation(
-        #    project=self.project, user=self.user, form_data=form_data
-        #)
+# allocation = create_allocation(
+#    project=self.project, user=self.user, form_data=form_data
+# )
 
 """
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import MigrateToColdfront
 migrator = MigrateToColdfront()
 migrator.find_by_fileset_name("jin810_active")
 
-ina.execute()
+not_found = MigrateToColdfront()
+migrator.find_by_fileset_name("not_found")
 
-not_found = MigrateToColdfront("non_found")
-not_found.execute()
+curl -k -s --user "$user:$pass" --cookie-jar /tmp/test-cookie "https://itsm.ris.wustl.edu:8443/v2/rest/attr/info/service_provision?attribute=id,service_id,name,sponsor,department_number,department_name,funding_number,billing_contact,technical_contact,secure,service_desk_ticket_number,audit,creation_timestamp,billing_startdate,status,sponsor_department_number,fileset_name,fileset_alias,exempt,service_rate_category,comment,billing_cycle,subsidized,quota,allow_nonfaculty,acl_group_members,who,parent_id,is_condo_group,sla"
 """

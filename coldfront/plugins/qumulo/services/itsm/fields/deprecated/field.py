@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class Field(ABC):
     def __init__(self, value):
         self.__value = value

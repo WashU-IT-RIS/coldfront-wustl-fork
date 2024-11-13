@@ -1,16 +1,16 @@
-
-from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field 
+from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field
 
 from coldfront.plugins.qumulo.constants import STORAGE_SERVICE_RATES
 
-# DEPERECATED: 
+
+# DEPERECATED:
 class ServiceRate(Field):
 
     name_coldfront = "service_rate"
     name_itsm = "service_rate_category"
 
     def __init__(self, value):
-        super().__init__(value)    
+        super().__init__(value)
 
     def is_valid(self):
         # verify ITSM options

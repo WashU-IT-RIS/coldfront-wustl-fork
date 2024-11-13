@@ -1,13 +1,14 @@
-from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field 
+from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field
 
-# DEPERECATED: 
+
+# DEPERECATED:
 class DepartmentNumber(Field):
 
     name_coldfront = "department_number"
     name_itsm = "department_number"
 
     def __init__(self, value):
-        super().__init__(value)    
+        super().__init__(value)
 
     def is_valid(self):
         return len(self.value) < 128

@@ -1,25 +1,24 @@
+from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field
 
 
-from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field 
-
-# DEPERECATED: 
+# DEPERECATED:
 class StorageQuota(Field):
 
     name_coldfront = "storage_quota"
     name_itsm = "quota"
 
     def __init__(self, value):
-        super().__init__(value)    
+        super().__init__(value)
 
     def is_valid(self):
         return self.value > 0 and self.value <= 2000
 
     def tranformator(self):
         value = int(self.raw_value[:-1])
-        if self.raw_value[-1] == 'T':
+        if self.raw_value[-1] == "T":
             return value
 
-        return value/100
+        return value / 100
 
 
 """

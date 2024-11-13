@@ -3,7 +3,7 @@ import os
 STORAGE_ROOT = os.environ.get("STORAGE2_PATH").strip("/")
 
 
-def fileset_name_to_storage_filesystem_path(fileset_name_or_alias)-> str:
+def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # In ITSM, fileset_names are mapped into name
     # Examples
     # bisiademuyiwa_active --> /storage2/fs1/bisiademuyiwa
@@ -14,7 +14,7 @@ def fileset_name_to_storage_filesystem_path(fileset_name_or_alias)-> str:
     return storage_filesystem_path
 
 
-def fileset_name_to_storage_export_path(fileset_name_or_alias)-> str:
+def fileset_name_to_storage_export_path(fileset_name_or_alias) -> str:
     # TODO I cannot figure out from the code how to populate this.
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
     export_path = f"/{STORAGE_ROOT}/{fileset_name_seed}"
@@ -22,7 +22,7 @@ def fileset_name_to_storage_export_path(fileset_name_or_alias)-> str:
     return export_path
 
 
-def comment_to_protocols(value: dict)-> list:
+def comment_to_protocols(value: dict) -> list:
     return ["smb"]
 
 
@@ -37,20 +37,20 @@ def comment_to_protocols(value: dict)-> list:
 """
 
 
-def fileset_name_to_storage_name(value)-> str:
+def fileset_name_to_storage_name(value) -> str:
     # Examples: fileset_name= "jiaoy_active" --> "jiaoy"
     # fileset_name= "gc6159" --> "gc6159"
     return value.split("_active")[0]
 
 
-def acl_group_members_to_aggregate_create_users(value)-> str:
+def acl_group_members_to_aggregate_create_users(value) -> str:
     # Example: "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing".split(",")
     # return ['akronzer', 'derek.harford', 'd.ken', 'ehogue', 'jiaoy', 'perezm', 'xuebing']
     # from this array, create a user from every element in the array
     return value.split(",")
 
 
-def string_parsing_quota_and_unit_to_integer(value)-> int:
+def string_parsing_quota_and_unit_to_integer(value) -> int:
     # all values in ITSM are kept in TB (T) and some in GB (G).
     if value[-1] == "T":
         return int(value[:-1])
@@ -59,9 +59,9 @@ def string_parsing_quota_and_unit_to_integer(value)-> int:
         return int(value[:-1]) / 100
 
     raise Exception(
-        f"The quota \"{value}\" is not valid.
-        The unit is not T (for TB) or G (for GB), or the unit is missing."
+        f'The quota "{value}" is not valid. The unit is not T (for TB) or G (for GB), or the unit is missing.'
     )
+
 
 # service_provision.audit values: ["0", "1", "false", "true", null]
 def boolean_to_yes_no(value, default_value=None):

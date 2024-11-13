@@ -1,8 +1,9 @@
 import re
 
-from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field 
+from coldfront.plugins.qumulo.services.itsm.fields.deprecated.field import Field
 
-# DEPERECATED: 
+
+# DEPERECATED:
 class StorageTicket(Field):
 
     name_coldfront = "storage_ticket"
@@ -18,7 +19,7 @@ class StorageTicket(Field):
         if re.match("ITSD-\d+$", ticket, re.IGNORECASE):
             return True
         raise Exception(
-            f"Service desk ticket \"{ticket}\" must have format: ITSD-12345 or 12345",
+            f'Service desk ticket "{ticket}" must have format: ITSD-12345 or 12345',
         )
 
 
