@@ -421,7 +421,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Int
-              transforms: string_to_integer_parsing_value_and_unit_to_Int
+              transforms: string_parsing_quota_and_unit_to_integer
               validates:
                 presence: true
                 numericallity:

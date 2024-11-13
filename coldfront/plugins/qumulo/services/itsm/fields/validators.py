@@ -1,5 +1,6 @@
 import re, json
 
+
 # This is copy from coldfront/plugins/qumulo/validators.py
 # loading the validator from Django causes an exception due to app requirements.
 # TODO: Investigate
@@ -34,13 +35,14 @@ def numericallity(value: int, conditions: dict):
             return False
     return True
 
-def presence(value, presence:bool):
-     if presence:
+
+def presence(value, presence: bool):
+    if presence:
         if value is None:
             return False
         if isinstance(value, str):
             return bool(value)
-     return True
+    return True
 
 
 def length(value, conditions):
@@ -57,8 +59,10 @@ def length(value, conditions):
         return True
     return False
 
+
 def inclusion(value, accepted_values):
     return value in accepted_values
+
 
 def validate_json(value, conditions={}):
     if conditions.get("allow_blank"):
