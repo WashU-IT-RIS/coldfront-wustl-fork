@@ -160,6 +160,7 @@ itsm_to_coldfront_map:
       entity: service_provision
       attribute: secure
       type: boolean
+      defaults_to: false
   service_desk_ticket_number:
     coldfront:
       - entity: allocation_attribute
@@ -342,6 +343,7 @@ itsm_to_coldfront_map:
       type: string
       values: ["condo", "consumption", "subscription"] # if the status is active
       nulls: true
+      defaults_to: subscription
   comment:
     coldfront:
       - entity: allocation_attribute
@@ -351,9 +353,9 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Attribute Expanded Text
-              transforms: none
+              transforms: null
               validates:
-                json:
+                validate_json:
                   allow_blank: true
       - entity: allocation_attribute
         attributes:
@@ -368,12 +370,12 @@ itsm_to_coldfront_map:
                 length:
                   maximum: 128
                 inclusion: ["smb", "nfs"]
-                defaults_to: smb # why?
     itsm_value:
       entity: service_provision
       attribute: comment
       type: text
       nulls: true
+      defaults_to: smb # why?
   billing_cycle:
     coldfront:
       - entity: allocation_attribute
@@ -389,12 +391,12 @@ itsm_to_coldfront_map:
                 length:
                   maximum: 128
                 inclusion: [monthly, yearly, quarterly, prepaid, fiscal year]
-                defaults_to: monthly
     itsm_value:
       entity: service_provision
       attribute: billing_cycle
       type: string # In fact the data type is a user defined named billing_cycle with labels: [ monthly, yearly, quarterly, prepaid, fiscal year]. For simplicity, let's set it to string.
       nulls: true
+      defaults_to: monthly
   subsidized:
     coldfront:
       - entity: allocation_attribute
@@ -412,6 +414,7 @@ itsm_to_coldfront_map:
       attribute: subsidized
       type: boolean
       nulls: true
+      defaults_to: false
   quota:
     coldfront:
       - entity: allocation_attribute
@@ -442,7 +445,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: boolean_to_yes_no
+              transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false] # should NULL default to false?
       - entity: project_attribute
@@ -452,7 +455,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: boolean_to_yes_no
+              transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false] # should NULL default to false?
     itsm_value:
@@ -460,6 +463,7 @@ itsm_to_coldfront_map:
       attribute: allow_nonfaculty
       type: boolean
       nulls: true
+      defaults_to: false
   sla:
     coldfront:
       - entity: allocation_attribute
