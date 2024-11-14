@@ -62,20 +62,3 @@ class ItsmClient:
 
         session.auth = (self.user, self.password)
         return
-
-
-""" 
-# For manual testing
-
-from coldfront.plugins.qumulo.services.itsm.itsm_client import ItsmClient
-
-itsm_client = ItsmClient()
-itsm_client.get_fs1_allocation_by_fileset_name("jin810_active")
-itsm_client.get_fs1_allocation_by_fileset_name("not_going_to_be_found") # returns []
-itsm_client.get_fs1_allocation_by_fileset_name(None) # returns []
-itsm_client.get_fs1_allocation_by_fileset_name() # TypeError: get_fs1_allocation_by_fileset_name() missing 1 required positional argument: 'fileset_name'
-itsm_client.get_fs1_allocation_by_fileset_alias("halllab")
-itsm_client.get_fs1_allocation_by_fileset_alias("not_going_to_be_found") # returns []
-itsm_client.get_fs1_allocation_by_fileset_alias(None) # returns []
-itsm_client.get_fs1_allocation_by_fileset_alias() # TypeError: get_fs1_allocation_by_fileset_alias() missing 1 required positional argument: 'fileset_alias'
-"""
