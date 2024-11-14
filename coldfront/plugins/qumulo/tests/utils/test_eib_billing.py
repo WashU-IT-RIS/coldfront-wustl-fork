@@ -12,10 +12,7 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationStatusChoice,
     AllocationAttributeType,
-<<<<<<< HEAD
     AllocationLinkage,
-=======
->>>>>>> main
 )
 from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
@@ -80,7 +77,6 @@ def construct_allocation_form_data(quota_tb: int, service_rate_category: str):
     return form_data
 
 
-<<<<<<< HEAD
 def construct_suballocation_form_data(quota_tb: int, parent_allocation: Allocation):
     form_data = {
         "parent_allocation_name": parent_allocation.get_attribute("storage_name"),
@@ -100,8 +96,6 @@ def construct_suballocation_form_data(quota_tb: int, parent_allocation: Allocati
     return form_data
 
 
-=======
->>>>>>> main
 def construct_usage_data_in_json(filesystem_path: str, quota: str, usage: str):
     quota_in_json = {
         "id": "100",
@@ -160,19 +154,15 @@ def mock_get_quota() -> str:
     name = "15tb-consumption"
     quota = "15000000000000"
     usage = "10995116277760"
-<<<<<<< HEAD
     suballocation_name = "5tb-suballocation"
     suballocation_quota = "5000000000000"
     suballocation_usage = "5497558138880"
-=======
->>>>>>> main
     usage_in_json = [
         {
             "id": "101",
             "path": f"{STORAGE2_PATH}/{name}/",
             "limit": f"{quota}",
             "capacity_usage": f"{usage}",
-<<<<<<< HEAD
         },
         {
             "id": "102",
@@ -180,9 +170,6 @@ def mock_get_quota() -> str:
             "limit": f"{suballocation_quota}",
             "capacity_usage": f"{suballocation_usage}",
         },
-=======
-        }
->>>>>>> main
     ]
 
     return {
@@ -413,7 +400,6 @@ class TestEIBBilling(TestCase):
         for index in range(num_lines_header, len(data)):
             billing_entries.append(data[index])
 
-<<<<<<< HEAD
         row_num_index = REPORT_COLUMNS.index("spreadsheet_key")
         billing_amount_index = REPORT_COLUMNS.index("extended_amount")
         fileset_memo_index = REPORT_COLUMNS.index("memo_filesets")
@@ -424,17 +410,6 @@ class TestEIBBilling(TestCase):
                 '"', ""
             )
             fileset_memo = billing_entries[index][fileset_memo_index].replace('"', "")
-=======
-        for index in range(0, len(billing_entries)):
-            row_num = billing_entries[index][REPORT_COLUMNS.index("spreadsheet_key")]
-            self.assertEqual(str(index + 1), row_num)
-            billing_amount = billing_entries[index][
-                REPORT_COLUMNS.index("extended_amount")
-            ].replace('"', "")
-            fileset_memo = billing_entries[index][
-                REPORT_COLUMNS.index("memo_filesets")
-            ].replace('"', "")
->>>>>>> main
 
             # Confirm the billing amounts of each test cases
             # hardcoded
@@ -459,7 +434,6 @@ class TestEIBBilling(TestCase):
                 self.assertFalse(True)
 
         os.remove(filename)
-<<<<<<< HEAD
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
     def test_create_a_suballocation_ingest_usage_and_generate_billing_report(
@@ -551,5 +525,3 @@ class TestEIBBilling(TestCase):
                 self.assertFalse(True)
 
         os.remove(filename)
-=======
->>>>>>> main
