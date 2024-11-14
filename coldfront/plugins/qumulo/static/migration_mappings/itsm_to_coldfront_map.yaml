@@ -153,7 +153,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: boolean_to_yes_no
+              transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false]
     itsm_value:
@@ -186,7 +186,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: truthy_and_falsy_to_boolean_to_yes_no
+              transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false, null]
     itsm_value:
@@ -203,9 +203,9 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Date
-              transforms: date_to_Date
+              transforms: null
               validates:
-                presence: true # Is the conditionally necessary?
+                presence: true # Is the conditionally necessary? Not all allocations have a billing_startdate.
     itsm_value:
       entity: service_provision
       attribute: billing_startdate
@@ -315,7 +315,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: boolean_to_yes_no
+              transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false]
     itsm_value:
@@ -404,7 +404,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: boolean_to_yes_no
+              transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false]
     itsm_value:
@@ -442,7 +442,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: boolean_to_yes_no
+              transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false] # should NULL default to false?
       - entity: project_attribute
@@ -452,7 +452,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: boolean_to_yes_no
+              transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false] # should NULL default to false?
     itsm_value:

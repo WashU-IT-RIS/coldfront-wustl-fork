@@ -1,6 +1,8 @@
-import os
+import math, os
 
-STORAGE_ROOT = os.environ.get("STORAGE2_PATH").strip("/")
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
 
 
 def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
@@ -9,7 +11,7 @@ def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # bisiademuyiwa_active --> /storage2/fs1/bisiademuyiwa
     # gc6159 --> /storage2/fs1/gc6159
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    storage_filesystem_path = f"/{STORAGE_ROOT}/{fileset_name_seed}"
+    storage_filesystem_path = f"/{__get_storage2_base_path()}/{fileset_name_seed}"
 
     return storage_filesystem_path
 
@@ -17,7 +19,7 @@ def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
 def fileset_name_to_storage_export_path(fileset_name_or_alias) -> str:
     # TODO I cannot figure out from the code how to populate this.
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    export_path = f"/{STORAGE_ROOT}/{fileset_name_seed}"
+    export_path = f"/{__get_storage2_base_path()}/{fileset_name_seed}"
 
     return export_path
 
@@ -50,30 +52,39 @@ def acl_group_members_to_aggregate_create_users(value) -> str:
     return value.split(",")
 
 
-def string_parsing_quota_and_unit_to_integer(value) -> int:
+def string_parsing_quota_and_unit_to_integer(value: str) -> int:
+    if value is None:
+        raise
+
     # all values in ITSM are kept in TB (T) and some in GB (G).
     if value[-1] == "T":
         return int(value[:-1])
 
     if value[-1] == "G":
-        return int(value[:-1]) / 100
+        return int(math.ceil(int(value[:-1]) / 1000))
 
     raise Exception(
-        f'The quota "{value}" is not valid. The unit is not T (for TB) or G (for GB), or the unit is missing.'
+        f'The quota "{value}" is not valid. The unit is not T (for TB) or G (for GB), or the it is missing.'
     )
 
 
 # service_provision.audit values: ["0", "1", "false", "true", null]
-def boolean_to_yes_no(value, default_value=None):
+def truthy_or_falsy_to_boolean(value, default_value=None):
     if value is None:
         return default_value
 
     # coerce a boolean value
-    if value.lower() == "true":
-        return True
+    if isinstance(value, str):
+        if value.lower() == "true":
+            return True
 
-    if value.lower() == "false":
-        return False
+        if value.lower() == "false":
+            return False
 
     # throws ValueError: invalid literal for int() with base 10: value
     return bool(int(value))
+
+
+def __get_storage2_base_path():
+    STORAGE2_BASE_PATH = os.environ.get("STORAGE2_PATH").strip("/")
+    return STORAGE2_BASE_PATH
