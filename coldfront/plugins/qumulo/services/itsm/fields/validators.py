@@ -3,17 +3,20 @@ import re, json
 
 # This is copy from coldfront/plugins/qumulo/validators.py
 # loading the validator from Django causes an exception due to app requirements.
-# TODO: Investigate
-def validate_ticket(ticket: str):
+def validate_ticket(ticket: str, validate: bool = True):
+    if not validate:
+        return True
+
     if isinstance(ticket, int):
         return True
+
     if re.match("\d+$", ticket):
         return True
+
     if re.match("ITSD-\d+$", ticket, re.IGNORECASE):
         return True
-    raise Exception(
-        f'Service desk ticket "{ticket}" must have format: ITSD-12345 or 12345',
-    )
+
+    return False
 
 
 def numericallity(value: int, conditions: dict):
@@ -36,7 +39,7 @@ def numericallity(value: int, conditions: dict):
     return True
 
 
-def presence(value, presence: bool):
+def presence(value, presence: bool = True):
     if presence:
         if value is None:
             return False
@@ -73,4 +76,18 @@ def validate_json(value, conditions={}):
         bool(json.loads(value))
     except:
         return False
+    return True
+
+# TODO
+def ad_record_exist(value, validate: bool = True):
+    if not validate:
+        return True
+
+    return True
+
+# TODO
+def uniqueness(value, validate: bool = True):
+    if not validate:
+        return True
+
     return True

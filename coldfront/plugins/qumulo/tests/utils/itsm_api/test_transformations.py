@@ -14,7 +14,9 @@ from coldfront.plugins.qumulo.services.itsm.fields.transformers import (
     truthy_or_falsy_to_boolean,
 )
 
-
+"""
+python manage.py test coldfront.plugins.qumulo.tests.utils.itsm_api.test_transformations
+"""
 class TestValidators(TestCase):
 
     def setUp(self) -> None:

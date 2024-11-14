@@ -11,6 +11,9 @@ from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     validate_json,
 )
 
+"""
+python manage.py test coldfront.plugins.qumulo.tests.utils.itsm_api.test_validators
+"""
 class TestValidators(TestCase):
 
     def setUp(self) -> None:
@@ -35,21 +38,17 @@ class TestValidators(TestCase):
         self.assertTrue(validate_json(blank, conditions))
         self.assertTrue(validate_json(None, conditions))
 
-
     def test_validate_ticket(self):
         self.assertTrue(validate_ticket("ITSD-2222"))
         self.assertTrue(validate_ticket("itsd-2222"))
         self.assertTrue(validate_ticket("2222"))
         self.assertTrue(validate_ticket(2222))
 
-        exception_message = (
-            'Service desk ticket "ITSD" must have format: ITSD-12345 or 12345'
-        )
-        self.assertRaises(Exception, validate_ticket, "ITSD", msg=exception_message)
-        self.assertRaises(
-            Exception, validate_ticket, "ITDEV-2222", msg=exception_message
-        )
-        self.assertRaises(Exception, validate_ticket, "itsd2222", msg=exception_message)
+        validate = False
+        self.assertTrue(validate_ticket("", validate))
+
+        self.assertFalse(validate_ticket("ITSD"))
+        self.assertFalse(validate_ticket("ITSD2222"))
 
     def test_numericallity(self) -> None:
         conditions = {
@@ -94,9 +93,9 @@ class TestValidators(TestCase):
         self.assertTrue(length(value, conditions))
         value = None
         self.assertTrue(length(value, conditions))
-        value = "0123456789" * 12 # 120 chars
+        value = "0123456789" * 12  # 120 chars
         self.assertTrue(length(value, conditions))
-        value = "0123456789" * 13 # 130 chars
+        value = "0123456789" * 13  # 130 chars
         self.assertFalse(length(value, conditions))
 
         conditions = {"maximum": 128}
@@ -130,13 +129,5 @@ class TestValidators(TestCase):
         self.assertFalse(inclusion("2", accpeted_values))
 
     def test_ad_record_exist(self):
-        #TODO how?
+        # TODO how?
         pass
-
-
-"""
-python manage.py test coldfront.plugins.qumulo.tests.utils.itsm_api.test_validators
-
-from coldfront.plugins.qumulo.services.itsm.fields.validators import numericallity
-coldfront/plugins/qumulo/tests/utils.itsm_api.test_validators
-"""
