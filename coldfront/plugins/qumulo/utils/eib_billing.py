@@ -162,10 +162,13 @@ FROM (
             r.name = 'Storage2'
         AND
           astatus.name = 'Active'
+<<<<<<< HEAD
         AND
           a.id NOT IN (
             SELECT allocation_id FROM allocation_allocationlinkage_children
         )
+=======
+>>>>>>> main
     ) AS data
     WHERE billing_cycle = 'monthly'
         AND exempt <> TRUE
