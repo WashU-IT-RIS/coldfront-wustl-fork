@@ -15,12 +15,6 @@ Update Alocation
     <div class="form-group mb-5">
         <label for="allocation_acl_reset">Reset Allocation ACLs</label>
         <div class="d-flex justify-content-end">
-            {% if allocation_has_children %}
-            <label for="reset_acl_children" class="mr-2 mb-0 pt-2">
-                Include sub-allocations
-            </label>
-            <input class="mr-2 lr-2" type="checkbox" name="reset_sub_acls" />
-            {% endif %}
             <button
                 name="reset_acls"
                 type="submit"
