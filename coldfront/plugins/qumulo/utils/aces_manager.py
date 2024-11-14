@@ -187,6 +187,46 @@ class AcesManager(object):
         ]
 
     @staticmethod
+    def get_allocation_file_aces(rw_groupname: str, ro_groupname: str):
+        return [
+            {
+                "flags": [],
+                "type": "ALLOWED",
+                "trustee": {
+                    "name": rw_groupname,
+                    "domain": "ACTIVE_DIRECTORY",
+                },
+                "rights": [
+                    "READ",
+                    "SYNCHRONIZE",
+                    "READ_ACL",
+                    "READ_ATTR",
+                    "READ_EA",
+                    "ADD_FILE",
+                    "ADD_SUBDIR",
+                    "DELETE_CHILD",
+                    "WRITE_ATTR",
+                    "WRITE_EA",
+                ],
+            },
+            {
+                "flags": [],
+                "type": "ALLOWED",
+                "trustee": {
+                    "name": ro_groupname,
+                    "domain": "ACTIVE_DIRECTORY",
+                },
+                "rights": [
+                    "READ",
+                    "SYNCHRONIZE",
+                    "READ_ACL",
+                    "READ_ATTR",
+                    "READ_EA",
+                ],
+            },
+        ]
+
+    @staticmethod
     def get_traverse_aces(
         rw_groupname: str, ro_groupname: str, is_base_allocation: bool
     ):
@@ -312,6 +352,10 @@ class AcesManager(object):
                     "MODIFY",
                     "EXTEND",
                     "DELETE_CHILD",
+                    # "WRITE_OWNER",
+                    "CHANGE_OWNER",
+                    # jprew - NOTE: CHANGE_OWNER MIGHT HAVE ODD CONSEQUENCES
+                    # double check this
                     "SYNCHRONIZE",
                 ],
             },
