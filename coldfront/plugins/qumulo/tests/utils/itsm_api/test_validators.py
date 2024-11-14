@@ -8,7 +8,7 @@ from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     length,
     inclusion,
     validate_ticket,
-    validate_json
+    validate_json,
 )
 
 class TestValidators(TestCase):
@@ -129,12 +129,14 @@ class TestValidators(TestCase):
         self.assertFalse(inclusion(2, accpeted_values))
         self.assertFalse(inclusion("2", accpeted_values))
 
-def test_ad_record_exist(value):
-    #TODO how?
-    pass
+    def test_ad_record_exist(self):
+        #TODO how?
+        pass
 
 
 """
+python manage.py test coldfront.plugins.qumulo.tests.utils.itsm_api.test_validators
+
 from coldfront.plugins.qumulo.services.itsm.fields.validators import numericallity
 coldfront/plugins/qumulo/tests/utils.itsm_api.test_validators
 """
