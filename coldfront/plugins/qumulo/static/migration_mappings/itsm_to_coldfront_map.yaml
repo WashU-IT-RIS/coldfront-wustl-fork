@@ -430,7 +430,7 @@ itsm_to_coldfront_map:
                   less_than_or_equal_to: 2000
     itsm_value:
       entity: service_provision
-      attribute: department_number
+      attribute: quota
       type: string
       nulls: true
   allow_nonfaculty:
@@ -442,7 +442,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: truthy_or_falsy_to_boolean
+              transforms: boolean_to_yes_no
               validates:
                 inclusion: [true, false] # should NULL default to false?
       - entity: project_attribute
@@ -452,12 +452,12 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: truthy_or_falsy_to_boolean
+              transforms: boolean_to_yes_no
               validates:
                 inclusion: [true, false] # should NULL default to false?
     itsm_value:
       entity: service_provision
-      attribute: department_number
+      attribute: allow_nonfaculty
       type: boolean
       nulls: true
   sla:
