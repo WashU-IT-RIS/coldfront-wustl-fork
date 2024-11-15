@@ -64,6 +64,27 @@ class Field:
     def is_valid(self) -> bool:
         return self.validate()
 
+    # Special getters
+    def get_username(self):
+        if self.entity != "user":
+            return None
+
+        username = None
+        for attribute in self.attributes:
+            if attribute["name"] == "username":
+                username = self.value
+        return username
+
+    def get_sponsor(self):
+        if self.entity != "project":
+            return None
+
+        sponsor = None
+        for attribute in self.attributes:
+            if attribute["name"] == "name":
+                sponsor = self.value
+        return sponsor
+
     # TODO: create coldfront entities
 
     """

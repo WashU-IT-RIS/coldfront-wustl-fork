@@ -72,7 +72,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: department_number
           - name: value
             value:
@@ -91,7 +91,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: cost_center
           - name: value
             value:
@@ -110,7 +110,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: billing_contact
           - name: value
             value:
@@ -129,7 +129,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: technical_contact
           - name: value
             value:
@@ -148,7 +148,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: secure
           - name: value
             value:
@@ -165,7 +165,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: storage_ticket
           - name: value
             value:
@@ -182,7 +182,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: audit
           - name: value
             value:
@@ -199,7 +199,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: billing_startdate
           - name: value
             value:
@@ -216,7 +216,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: sponsor_department_number
           - name: value
             value:
@@ -235,7 +235,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: fileset_name
           - name: value
             value:
@@ -247,7 +247,7 @@ itsm_to_coldfront_map:
                   maximum: 128
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: storage_filesystem_path
           - name: value
             value:
@@ -263,7 +263,7 @@ itsm_to_coldfront_map:
                   maximum: 128
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: storage_export_path
           - name: value
             value:
@@ -279,7 +279,7 @@ itsm_to_coldfront_map:
                   maximum: 128
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: storage_name
           - name: value
             value:
@@ -298,7 +298,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: fileset_alias
           - name: value
             value:
@@ -317,7 +317,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: exempt
           - name: value
             value:
@@ -335,7 +335,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: service_rate_category
           - name: value
             value:
@@ -354,7 +354,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: comment
           - name: value
             value:
@@ -365,7 +365,7 @@ itsm_to_coldfront_map:
                   allow_blank: true
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: storage_protocols
           - name: value
             value:
@@ -386,7 +386,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: billing_cycle
           - name: value
             value:
@@ -407,7 +407,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: subsidized
           - name: value
             value:
@@ -425,7 +425,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: storage_quota
           - name: value
             value:
@@ -446,7 +446,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: allow_nonfaculty
           - name: value
             value:
@@ -474,7 +474,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_attribute
         attributes:
-          - name: name
+          - name: allocation_attribute_type__name
             value: sla
           - name: value
             value:

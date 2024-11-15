@@ -8,11 +8,16 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
 
+from coldfront.core.test_helpers.factories import field_of_science_provider
 
-class TestItsmClient(TestCase):
+from faker import Faker
+
+
+class TestMigrationToColdfront(TestCase):
 
     def setUp(self) -> None:
         self.migrate = MigrateToColdfront()
+        field_of_science_provider.add_element("Other")
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name(self):
