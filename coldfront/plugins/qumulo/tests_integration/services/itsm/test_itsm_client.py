@@ -12,11 +12,17 @@ class TestItsmClient(TestCase):
     def setUp(self) -> None:
         self.itsm_client = ItsmClient()
 
-    @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
     @tag("integration")
     def test_itsm_client_when_service_provision_is_found_by_fileset_name(self):
         itsm_client = self.itsm_client
-        service_provision = itsm_client.get_fs1_allocation_by_fileset_name("jin810_active")
+        empty_list = []
+        fileset_name = "jin810_active"
+        data = itsm_client.get_fs1_allocation_by_fileset_name(fileset_name)
+        self.assertIsNot(data, empty_list)
+        service_provision = data[0]
+        self.assertIsInstance(service_provision, dict)
+        self.assertIn("fileset_name", service_provision.keys())
+        self.assertIn(fileset_name, service_provision.values())
         
 
     @tag("integration")
@@ -37,8 +43,13 @@ class TestItsmClient(TestCase):
     def test_itsm_client_when_service_provision_is_found_by_fileset_alias(self):
         itsm_client = self.itsm_client
         empty_list = []
-        service_provision = itsm_client.get_fs1_allocation_by_fileset_alias("halllab")
-        self.assertIsNot(service_provision, empty_list)
+        fileset_alias = "halllab"
+        data = itsm_client.get_fs1_allocation_by_fileset_alias(fileset_alias)
+        self.assertIsNot(data, empty_list)
+        service_provision = data[0]
+        self.assertIsInstance(service_provision, dict)
+        self.assertIn("fileset_alias", service_provision.keys())
+        self.assertIn(fileset_alias, service_provision.values())
         
 
     @tag("integration")
