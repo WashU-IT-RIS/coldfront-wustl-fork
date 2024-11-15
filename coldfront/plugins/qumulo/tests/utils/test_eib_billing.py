@@ -518,10 +518,6 @@ class TestEIBBilling(TestCase):
             fileset_memo = billing_entries[index][fileset_memo_index].replace('"', "")
 
             # Confirm no billing entry for the sub allocation
-            if fileset_memo == "100tb-subscription":
-                self.assertTrue(True)
-            else:
-                print(fileset_memo, billing_amount)
-                self.assertFalse(True)
+            self.assertEqual(fileset_memo, "100tb-subscription")
 
         os.remove(filename)
