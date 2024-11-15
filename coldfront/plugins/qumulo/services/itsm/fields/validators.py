@@ -78,14 +78,16 @@ def validate_json(value, conditions={}):
         return False
     return True
 
-# TODO
+
+# TODO check if the user exists
 def ad_record_exist(value, validate: bool = True):
     if not validate:
         return True
 
     return True
 
-# TODO
+
+# TODO check if the allocation exists for instance
 def uniqueness(value, validate: bool = True):
     if not validate:
         return True

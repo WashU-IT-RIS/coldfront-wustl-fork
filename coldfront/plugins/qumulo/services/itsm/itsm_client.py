@@ -34,9 +34,8 @@ class ItsmClient:
     #### PRIVATE METHODS ####
     def __get_fs1_allocation_by(self, fileset_key, fileset_value) -> str:
         filtered_url = self.__get_filtered_url(fileset_key, fileset_value)
-        session = requests.Session()
-        self.__set_session_authentication(session)
-        self.__set_session_headers(session)
+        session = self.__get_session()
+
         response = session.get(filtered_url)
         response.raise_for_status()
 
@@ -47,6 +46,12 @@ class ItsmClient:
     def __get_filtered_url(self, fileset_key, fileset_value) -> str:
         filters = f'filter={{"{fileset_key}":"{fileset_value}"}}'
         return f"{self.url}&{filters}"
+
+    def __get_session(self):
+        session = requests.Session()
+        self.__set_session_authentication(session)
+        self.__set_session_headers(session)
+        return session
 
     def __set_session_headers(self, session) -> None:
         headers = {"content-type": "application/json"}

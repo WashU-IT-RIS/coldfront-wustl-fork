@@ -26,6 +26,8 @@ class ItsmToColdfrontFieldsFactory:
         for item in field_items.values():
             itsm_value_field = item["itsm_value"]
             for coldfront_definitions in item["coldfront"]:
-                value = itsm_allocation.get(itsm_value_field["attribute"])
-                fields.append(Field(coldfront_definitions, itsm_value_field, value))
+                value_attribute = itsm_allocation.get(itsm_value_field["attribute"])
+                fields.append(
+                    Field(coldfront_definitions, itsm_value_field, value_attribute)
+                )
         return fields
