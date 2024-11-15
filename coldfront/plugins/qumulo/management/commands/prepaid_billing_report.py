@@ -4,7 +4,7 @@ from django_q.tasks import schedule
 
 from django_q.models import Schedule
 
-from coldfront.plugins.qumulo.utils.eib_billing import EIBBilling
+from coldfront.plugins.qumulo.utils.eib_billing import PrepaidBilling
 
 
 class Command(BaseCommand):
@@ -19,5 +19,5 @@ class Command(BaseCommand):
 
 
 def generate_prepaid_billing_report() -> None:
-    eib_billing = EIBBilling()
-    eib_billing.generate_prepaid_billing_report()
+    prepaid_billing = PrepaidBilling()
+    prepaid_billing.generate_prepaid_billing_report()
