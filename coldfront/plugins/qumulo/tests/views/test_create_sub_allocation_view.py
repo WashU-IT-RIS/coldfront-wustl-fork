@@ -20,7 +20,7 @@ from coldfront.core.allocation.models import (
 from coldfront.plugins.qumulo.forms import CreateSubAllocationForm
 
 
-@patch("coldfront.plugins.qumulo.views.allocation_view.AclAllocations")
+@patch("coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations")
 @patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
 class AllocationViewTests(TestCase):
     def setUp(self):
