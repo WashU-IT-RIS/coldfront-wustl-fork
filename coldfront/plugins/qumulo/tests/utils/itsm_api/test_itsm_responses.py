@@ -2,9 +2,7 @@ import json
 
 from django.test import TestCase
 
-from coldfront.core.allocation.models import (
-    AllocationAttribute,
-)
+from unittest import skip
 
 
 class TestImportDataFromItsm(TestCase):
@@ -18,9 +16,10 @@ class TestImportDataFromItsm(TestCase):
             "mock_itsm_response_body_service_provision_not_found.json", "r"
         ) as file:
             return json.load(file)
-
+    @skip("Test incomplete")
     def test_service_provision_found(self) -> None:
-        response_body = self.test_service_provision_found()
+        response_body = self.mock_itsm_response_body()
 
+    @skip("Test incomplete")
     def test_service_provision_not_found(self) -> None:
-        response_body = self.test_service_provision_not_found()
+        response_body = self.mock_itsm_response_body_not_found()
