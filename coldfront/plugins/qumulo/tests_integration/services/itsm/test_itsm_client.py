@@ -22,7 +22,7 @@ class TestItsmClient(TestCase):
         service_provision = data[0]
         self.assertIsInstance(service_provision, dict)
         self.assertIn("fileset_name", service_provision.keys())
-        self.assertIn(fileset_name, service_provision.values())
+        self.assertEqual(fileset_name, service_provision.get("fileset_name"))
         
 
     @tag("integration")
@@ -49,7 +49,7 @@ class TestItsmClient(TestCase):
         service_provision = data[0]
         self.assertIsInstance(service_provision, dict)
         self.assertIn("fileset_alias", service_provision.keys())
-        self.assertIn(fileset_alias, service_provision.values())
+        self.assertEqual(fileset_alias, service_provision.get("fileset_alias"))
         
 
     @tag("integration")
