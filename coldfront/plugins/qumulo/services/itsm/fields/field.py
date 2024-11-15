@@ -18,11 +18,10 @@ class Field:
     def attributes(self):
         return self._coldfront_attributes
 
-    def validate():
-        # run the value field validator
+    def validate(self):
         pass
 
-    def is_valid() -> bool:
+    def is_valid(self) -> bool:
         return True
 
     # TODO: get the coldfront entities
