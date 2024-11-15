@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from coldfront.core.allocation.models import Allocation
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
-from coldfront.plugins.qumulo.views.allocation_view import AllocationView
+from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 
 
 @patch("coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations")
@@ -38,7 +38,7 @@ class AllocationViewTests(TestCase):
         mock_AclAllocations: MagicMock,
         mock_ActiveDirectoryAPI: MagicMock,
     ):
-        AllocationView.create_new_allocation(self.form_data, self.user)
+        AllocationService.create_new_allocation(self.form_data, self.user)
 
         # verifying that a new Allocation object was created
         self.assertEqual(Allocation.objects.count(), 3)
@@ -54,6 +54,6 @@ class AllocationViewTests(TestCase):
         mock_AclAllocations: MagicMock,
         mock_ActiveDirectoryAPI: MagicMock,
     ):
-        AllocationView.create_new_allocation(self.form_data, self.user)
+        AllocationService.create_new_allocation(self.form_data, self.user)
         allocation = Allocation.objects.first()
         self.assertEqual(allocation.status.name, "Pending")

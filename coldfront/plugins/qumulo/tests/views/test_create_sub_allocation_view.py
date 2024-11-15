@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from coldfront.core.allocation.models import Allocation
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
-from coldfront.plugins.qumulo.views.allocation_view import AllocationView
+from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 from coldfront.plugins.qumulo.views.create_sub_allocation_view import (
     CreateSubAllocationView,
 )
@@ -67,7 +67,7 @@ class AllocationViewTests(TestCase):
         mock_AclAllocations: MagicMock,
         mock_ActiveDirectoryAPI: MagicMock,
     ):
-        parent_result = AllocationView.create_new_allocation(
+        parent_result = AllocationService.create_new_allocation(
             self.parent_form_data, self.user
         )
 
