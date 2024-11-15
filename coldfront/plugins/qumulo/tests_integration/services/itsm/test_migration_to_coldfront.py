@@ -17,10 +17,21 @@ class TestItsmClient(TestCase):
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name(self):
         self.migrate.by_fileset_name("jin810_active")
-        self.migrate.by_fileset_name("not_going_to_be_found")
+        fileset_key = "not_going_to_be_found"
+        self.assertRaises(
+            Exception,
+            self.migrate.by_fileset_name,
+            fileset_key,
+            msg=(f'ITSM allocation was not found for "{fileset_key}"'),
+        )
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_alias(self):
-        itsm_client = self.itsm_client
         self.migrate.by_fileset_alias("jin810_active")
-        self.migrate.by_fileset_alias("not_going_to_be_found")
+        fileset_key = "not_going_to_be_found"
+        self.assertRaises(
+            Exception,
+            self.migrate.by_fileset_alias,
+            fileset_key,
+            msg=(f'ITSM allocation was not found for "{fileset_key}"'),
+        )
