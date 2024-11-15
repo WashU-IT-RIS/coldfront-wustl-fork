@@ -1,3 +1,9 @@
+from icecream import ic
+
+import coldfront.plugins.qumulo.services.itsm.fields.transformers as value_transformers
+import coldfront.plugins.qumulo.services.itsm.fields.validators as value_validators
+
+
 class Field:
     def __init__(self, coldfront_definitions, itsm_value_field, value):
         self.coldfront_definitions = coldfront_definitions
@@ -5,6 +11,9 @@ class Field:
         self._coldfront_entity = coldfront_definitions["entity"]
         self._coldfront_attributes = coldfront_definitions["attributes"]
         self._value = value
+        # ic(coldfront_definitions)
+        # ic(itsm_value_field)
+        # ic(value)
 
     @property
     def value(self):
@@ -19,14 +28,43 @@ class Field:
         return self._coldfront_attributes
 
     def validate(self):
-        pass
+        valid = True
+        for attribute in self._coldfront_attributes:
+            value = attribute["value"]
+            name = attribute["name"]
+            ic(name)
+            if isinstance(value, dict):
+                transforms = value["transforms"]
+
+                to_be_validated = self._value or self.__get_default_value()
+                if transforms is not None:
+                    transforms_function = getattr(
+                        value_transformers,
+                        transforms,
+                    )
+                    to_be_validated = transforms_function(to_be_validated)
+
+                for validator, conditions in value["validates"].items():
+                    validator_function = getattr(
+                        value_validators,
+                        validator,
+                    )
+                    valid = valid and validator_function(to_be_validated, conditions)
+                    ic(to_be_validated)
+
+            valid = valid and value is not None
+            ic(value)
+        ic(valid)
+        print("----------")
+        return valid
+
+    def __get_default_value(self):
+        return self.itsm_value_field.get("defaults_to")
 
     def is_valid(self) -> bool:
-        return True
+        return self.validate()
 
-    # TODO: get the coldfront entities
-    # TODO: call value validator
-    # TODO: call transformators
+    # TODO: create coldfront entities
 
     """
     @property

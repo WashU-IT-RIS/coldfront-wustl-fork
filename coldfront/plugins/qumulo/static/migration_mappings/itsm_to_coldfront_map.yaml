@@ -255,7 +255,10 @@ itsm_to_coldfront_map:
               transforms: fileset_name_to_storage_filesystem_path
               validates:
                 presence: true
-                uniqueness: true
+                uniqueness:
+                  entity: AllocationAttribute
+                  entity_attribute: allocation_attribute_type__name
+                  attribute_name_value: storage_name
                 length:
                   maximum: 128
       - entity: allocation_attribute
@@ -268,7 +271,10 @@ itsm_to_coldfront_map:
               transforms: fileset_name_to_storage_export_path
               validates:
                 presence: true
-                uniqueness: true
+                uniqueness:
+                  entity: AllocationAttribute
+                  entity_attribute: allocation_attribute_type__name
+                  attribute_name_value: storage_name
                 length:
                   maximum: 128
       - entity: allocation_attribute

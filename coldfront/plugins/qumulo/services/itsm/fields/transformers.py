@@ -24,9 +24,9 @@ def fileset_name_to_storage_export_path(fileset_name_or_alias) -> str:
     return export_path
 
 
+# TODO what are the protocols for the allocations created from ITSM?
 def comment_to_protocols(value: dict) -> list:
     return ["smb"]
-
 
 """
     # I was under the impression that nfs was the default; however,
@@ -54,7 +54,9 @@ def acl_group_members_to_aggregate_create_users(value) -> str:
 
 def string_parsing_quota_and_unit_to_integer(value: str) -> int:
     if value is None:
-        raise
+        raise Exception(
+            f'The quota is null (None).'
+        )
 
     # all values in ITSM are kept in TB (T) and some in GB (G).
     if value[-1] == "T":

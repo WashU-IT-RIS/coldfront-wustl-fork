@@ -24,24 +24,7 @@ class MigrateToColdfront:
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
 
         for field in fields:
-            for attribute in field.attributes:
-                value = attribute["value"]
-                if isinstance(value, dict):
-                    transforms = value["transforms"]
-                    to_be_validated = field.value
-                    if transforms is not None:
-                        transforms_function = getattr(
-                            coldfront.plugins.qumulo.services.itsm.fields.transformers,
-                            transforms,
-                        )
-                        to_be_validated = transforms_function(field.value)
-
-                    for validator, conditions in value["validates"].items():
-                        validator_function = getattr(
-                            coldfront.plugins.qumulo.services.itsm.fields.validators,
-                            validator,
-                        )
-                        valid = validator_function(to_be_validated, conditions)
+            field.validate()
 
         # TODO create records in coldfront
 

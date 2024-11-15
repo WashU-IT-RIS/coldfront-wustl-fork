@@ -9,11 +9,14 @@ from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     inclusion,
     validate_ticket,
     validate_json,
+    uniqueness,
 )
 
 """
 python manage.py test coldfront.plugins.qumulo.tests.utils.itsm_api.test_validators
 """
+
+
 class TestValidators(TestCase):
 
     def setUp(self) -> None:
@@ -109,25 +112,42 @@ class TestValidators(TestCase):
         self.assertFalse(length(value, conditions))
 
     def test_inclusion(self):
-        accpeted_values = ["monthly", "yearly", "quarterly", "prepaid", "fiscal year"]
-        self.assertTrue(inclusion("quarterly", accpeted_values))
-        self.assertFalse(inclusion(None, accpeted_values))
-        self.assertFalse(inclusion(True, accpeted_values))
-        self.assertFalse(inclusion(1, accpeted_values))
-        self.assertFalse(inclusion("Rube Goldberg", accpeted_values))
+        accepted_values = ["monthly", "yearly", "quarterly", "prepaid", "fiscal year"]
+        self.assertTrue(inclusion("quarterly", accepted_values))
 
-        accpeted_values = [True, False, "0", "1", None]
-        self.assertTrue(inclusion("0", accpeted_values))
-        self.assertTrue(inclusion("1", accpeted_values))
-        self.assertTrue(inclusion(0, accpeted_values))
-        self.assertTrue(inclusion(1, accpeted_values))
-        self.assertTrue(inclusion(False, accpeted_values))
-        self.assertTrue(inclusion(True, accpeted_values))
-        self.assertTrue(inclusion(None, accpeted_values))
+        self.assertFalse(inclusion(None, accepted_values))
+        self.assertFalse(inclusion(True, accepted_values))
+        self.assertFalse(inclusion(1, accepted_values))
+        self.assertFalse(inclusion("Rube Goldberg", accepted_values))
 
-        self.assertFalse(inclusion(2, accpeted_values))
-        self.assertFalse(inclusion("2", accpeted_values))
+        accepted_values = [True, False, "0", "1", None]
+        self.assertTrue(inclusion("0", accepted_values))
+        self.assertTrue(inclusion("1", accepted_values))
+        self.assertTrue(inclusion(0, accepted_values))
+        self.assertTrue(inclusion(1, accepted_values))
+        self.assertTrue(inclusion(False, accepted_values))
+        self.assertTrue(inclusion(True, accepted_values))
+        self.assertTrue(inclusion(None, accepted_values))
+
+        self.assertFalse(inclusion(2, accepted_values))
+        self.assertFalse(inclusion("2", accepted_values))
+
+        accepted_values = ["smb", "nfs"]
+        self.assertTrue(inclusion("smb", accepted_values))
+        self.assertTrue(inclusion(["smb"], accepted_values))
+        self.assertFalse(inclusion(["smb", "exoteric_protocol"], accepted_values))
 
     def test_ad_record_exist(self):
         # TODO how?
         pass
+
+    def test_uniqueness(self):
+        conditions = {
+            "entity": "AllocationAttribute",
+            "entity_attribute": "allocation_attribute_type__name",
+            "attribute_name_value": "storage_name",
+        }
+        self.assertTrue(uniqueness("i_do_not_exist", conditions))
+
+        # TODO setup create an allocation named "i_exist"
+        # TODO self.assertFalse(uniqueness("i_exist", conditions))

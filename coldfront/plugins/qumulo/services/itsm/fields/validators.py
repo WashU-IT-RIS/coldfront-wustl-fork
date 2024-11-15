@@ -1,5 +1,7 @@
 import re, json
 
+import coldfront.core.allocation.models as coldfront_models
+
 
 # This is copy from coldfront/plugins/qumulo/validators.py
 # loading the validator from Django causes an exception due to app requirements.
@@ -64,6 +66,10 @@ def length(value, conditions):
 
 
 def inclusion(value, accepted_values):
+    if isinstance(value, list):
+        value_list = value
+        return all(element in accepted_values for element in value_list)
+
     return value in accepted_values
 
 
@@ -87,9 +93,19 @@ def ad_record_exist(value, validate: bool = True):
     return True
 
 
-# TODO check if the allocation exists for instance
-def uniqueness(value, validate: bool = True):
-    if not validate:
-        return True
+# This is a simple uniqueness validator that finds if a record exists for a
+# given entity (table), attribute (field), and value.
+# Note that the field is hardcoded to allocation_attribute_type__name
+def uniqueness(value, conditions):
 
-    return True
+    # SELECT "allocation_allocationattribute"."id", "allocation_allocationattribute"."created", "allocation_allocationattribute"."modified", "allocation_allocationattribute"."allocation_attribute_type_id", "allocation_allocationattribute"."allocation_id", "allocation_allocationattribute"."value" FROM "allocation_allocationattribute" INNER JOIN "allocation_allocationattributetype" ON ("allocation_allocationattribute"."allocation_attribute_type_id" = "allocation_allocationattributetype"."id") WHERE ("allocation_allocationattributetype"."name" = storage_name AND "allocation_allocationattribute"."value" = /storage2-dev/jin810)
+    exists = (
+        getattr(coldfront_models, conditions["entity"])
+        .objects.filter(
+            allocation_attribute_type__name=conditions["attribute_name_value"],
+            value=value,
+        )
+        .exists()
+    )
+
+    return not exists
