@@ -10,11 +10,19 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
 
 class MigrateToColdfront:
 
+    def by_fileset_alias(self, fileset_alias):
+        itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
+        self.__execute(fileset_alias, itsm_result)
+
+    def by_fileset_name(self, fileset_name):
+        itsm_result = self.__get_itsm_allocation_by_fileset_name(fileset_name)
+        self.__execute(fileset_name, itsm_result)
+
     def __execute(self, fileset_key, itsm_result):
         self.__validate_result_set(fileset_key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
-        # for testing
+
         for field in fields:
             for attribute in field.attributes:
                 value = attribute["value"]
@@ -36,14 +44,6 @@ class MigrateToColdfront:
                         valid = validator_function(to_be_validated, conditions)
 
         # TODO create records in coldfront
-
-    def find_by_fileset_alias(self, fileset_alias):
-        itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
-        self.__execute(fileset_alias, itsm_result)
-
-    def find_by_fileset_name(self, fileset_name):
-        itsm_result = self.__get_itsm_allocation_by_fileset_name(fileset_name)
-        self.__execute(fileset_name, itsm_result)
 
     def __get_itsm_allocation_by_fileset_name(self, fileset_name):
         itsm_client = ItsmClient()
