@@ -12,11 +12,11 @@ load_dotenv(override=True)
 
 class ItsmClient:
     def __init__(self):
-        self.user = os.environ.get("ITSM_USER")
-        self.password = os.environ.get("ITSM_PASSWORD")  # get it from secrets
+        self.user = os.environ.get("ITSM_SERVICE_USER")
+        self.password = os.environ.get("ITSM_SERVICE_PASSWORD")  # get it from secrets
         protocol = os.environ.get("ITSM_PROTOCOL")
         host = os.environ.get("ITSM_HOST")
-        port = os.environ.get("ITSM_PORT")
+        port = os.environ.get("ITSM_REST_API_PORT")
         endpoint_path = os.environ.get("ITSM_SERVICE_PROVISION_ENDPOINT")
 
         # TODO is there a way to get the name of the environment such as prod, qa, or localhost?
