@@ -7,7 +7,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 
 
-@patch("coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations")
+@patch("coldfront.plugins.qumulo.services.allocation_service.AclAllocations")
 @patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
 class AllocationViewTests(TestCase):
     def setUp(self):

@@ -17,10 +17,11 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
 )
 
+# TODO why isn't the CreateSubAllocationForm used?
 from coldfront.plugins.qumulo.forms import CreateSubAllocationForm
 
 
-@patch("coldfront.plugins.qumulo.utils.acl_allocations.AclAllocations")
+@patch("coldfront.plugins.qumulo.services.allocation_service.AclAllocations")
 @patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
 class AllocationViewTests(TestCase):
     def setUp(self):
