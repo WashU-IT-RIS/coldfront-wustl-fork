@@ -221,7 +221,7 @@ class UpdateAllocationViewTests(TestCase):
         new_rw_users: list = form_data["rw_users"].copy() + extra_users
 
         with patch(
-            "ccoldfront.plugins.qumulo.views.update_allocation_view.AclAllocations.add_user_to_access_allocation",
+            "coldfront.plugins.qumulo.views.update_allocation_view.AclAllocations.add_user_to_access_allocation",
         ) as mock_add_user_to_access_allocation:
             UpdateAllocationView.set_access_users(
                 "rw", new_rw_users, storage_allocation
