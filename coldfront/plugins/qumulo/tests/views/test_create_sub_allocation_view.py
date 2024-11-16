@@ -81,7 +81,7 @@ class AllocationViewTests(TestCase):
         self.assertEqual(AllocationLinkage.objects.count(), 0)
 
         # create a sub-allocation
-        sub_result = CreateSubAllocationView.create_new_allocation(
+        sub_result = AllocationService.create_new_allocation(
             self.sub_form_data, self.user, parent_allocation=parent_result["allocation"]
         )
 
