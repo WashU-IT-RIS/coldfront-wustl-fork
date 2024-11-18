@@ -40,6 +40,8 @@ class AllocationViewTests(TestCase):
     def test_create_new_allocation_create_allocation(
         self,
         mock_AclAllocations: MagicMock,
+        mock_ActiveDirectoryValidator: MagicMock,
+        mock_async_task: MagicMock,
         mock_ActiveDirectoryAPI: MagicMock,
     ):
         AllocationService.create_new_allocation(self.form_data, self.user)
@@ -73,6 +75,8 @@ class AllocationViewTests(TestCase):
     def test_new_allocation_status_is_pending(
         self,
         mock_AclAllocations: MagicMock,
+        mock_ActiveDirectoryValidator: MagicMock,
+        mock_async_task: MagicMock,
         mock_ActiveDirectoryAPI: MagicMock,
     ):
         AllocationService.create_new_allocation(self.form_data, self.user)
