@@ -1,9 +1,5 @@
-import coldfront.plugins.qumulo.services.itsm.fields.transformers
-import coldfront.plugins.qumulo.services.itsm.fields.validators
-
+from icecream import ic
 from coldfront.core.field_of_science.models import FieldOfScience
-
-from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 
@@ -46,12 +42,16 @@ class MigrateToColdfront:
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
 
-        error_massages = []
+        error_massages = {}
         for field in fields:
-            error_massages.append(field.validate())
+            validation_messages = field.validate()
+            if validation_messages:
+                error_massages[field.itsm_attribute_name] = validation_messages
 
-        # if any(error_massages):
-        #    return error_massages
+        if error_massages:
+            ic(error_massages)
+            raise Exception("Validation errors", error_massages)
+
         pi_user = self.__create_user(fields)
         project = self.__create_project(pi_user)  # refactor method
         self.__create_project_user(project, pi_user)  # refactor method

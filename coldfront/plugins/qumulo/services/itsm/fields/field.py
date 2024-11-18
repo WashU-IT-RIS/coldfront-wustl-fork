@@ -7,7 +7,7 @@ import coldfront.plugins.qumulo.services.itsm.fields.validators as value_validat
 class Field:
     def __init__(self, coldfront_definitions, itsm_value_field, value):
         self.coldfront_definitions = coldfront_definitions
-        self.itsm_value_field = itsm_value_field
+        self._itsm_value_field = itsm_value_field
         self._coldfront_entity = coldfront_definitions["entity"]
         self._coldfront_attributes = coldfront_definitions["attributes"]
         self._value = value
@@ -28,8 +28,12 @@ class Field:
     def entity_item(self):
         return {self.attributes[0].get("name"): self.value}
 
+    @property
+    def itsm_attribute_name(self):
+        return self._itsm_value_field["attribute"]
+
     def validate(self):
-        valid = True
+        valid = []
         for attribute in self._coldfront_attributes:
             value = attribute["value"]
             name = attribute["name"]
@@ -50,16 +54,17 @@ class Field:
                         value_validators,
                         validator,
                     )
-                    valid = valid and validator_function(to_be_validated, conditions)
+                    validation_message = validator_function(to_be_validated, conditions)
+                    if validation_message:
+                        valid.append(validation_message)
                     ic(to_be_validated)
 
-            valid = valid and value is not None
             ic(value)
         ic(valid)
         return valid
 
     def __get_default_value(self):
-        return self.itsm_value_field.get("defaults_to")
+        return self._itsm_value_field.get("defaults_to")
 
     def is_valid(self) -> bool:
         return self.validate()

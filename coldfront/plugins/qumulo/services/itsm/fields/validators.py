@@ -7,90 +7,100 @@ import coldfront.core.allocation.models as coldfront_models
 # loading the validator from Django causes an exception due to app requirements.
 def validate_ticket(ticket: str, validate: bool = True):
     if not validate:
-        return True
+        return
 
     if isinstance(ticket, int):
-        return True
+        return
 
     if re.match("\d+$", ticket):
-        return True
+        return
 
     if re.match("ITSD-\d+$", ticket, re.IGNORECASE):
-        return True
+        return
 
-    return False
+    return f"{ticket} is not in the format ITSD-22331 or 22331"
 
 
 def numericallity(value: int, conditions: dict):
     if value is None:
-        return False
+        return f"{value} is not a number"
+
     an_integer = conditions.get("only_integer")
     if an_integer is True:
         if not isinstance(value, int):
-            return False
+            return f"{value} is not an integer"
+
     minimum = conditions.get("greater_than")
     if minimum is not None:
         greater_than_minimum = value > minimum
         if not greater_than_minimum:
-            return False
+            return f"must be greater than {minimum}"
+
     maximum = conditions.get("less_than_or_equal_to")
     if maximum is not None:
         less_than_or_equal_to = value <= maximum
         if not less_than_or_equal_to:
-            return False
-    return True
+            return f"must be less than or equals to {maximum}"
+
+    return
 
 
 def presence(value, presence: bool = True):
     if presence:
         if value is None:
-            return False
+            return "must be specified"
+
         if isinstance(value, str):
-            return bool(value)
-    return True
+            if not bool(value):
+                return "must not be blank"
+    return
 
 
 def length(value, conditions):
     allow_blank = conditions.get("allow_blank")
     if allow_blank:
         if not bool(value):
-            return True
+            return
 
     if not bool(value):
-        return False
+        return "must not be blank"
 
     maximum_length = conditions.get("maximum")
     if len(value) <= maximum_length:
-        return True
-    return False
+        return
+    return f"exceeds the limit of {maximum_length}: {value}"
 
 
 def inclusion(value, accepted_values):
     if isinstance(value, list):
         value_list = value
-        return all(element in accepted_values for element in value_list)
+        if all(element in accepted_values for element in value_list):
+            return
 
-    return value in accepted_values
+    if value in accepted_values:
+        return
+
+    return f"{value} is not amongst {accepted_values}"
 
 
 def validate_json(value, conditions={}):
     if conditions.get("allow_blank"):
         if value in [None, ""]:
-            return True
+            return
 
     try:
         bool(json.loads(value))
     except:
-        return False
-    return True
+        return "is not a valid JSON"
+    return
 
 
 # TODO check if the user exists
 def ad_record_exist(value, validate: bool = True):
     if not validate:
-        return True
+        return
 
-    return True
+    return
 
 
 # This is a simple uniqueness validator that finds if a record exists for a
@@ -108,4 +118,7 @@ def uniqueness(value, conditions):
         .exists()
     )
 
-    return not exists
+    if exists:
+        return f"{value} is not unique"
+
+    return

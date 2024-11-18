@@ -70,23 +70,22 @@ class TestMigrationToColdfront(TestCase):
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name(self):
-        self.migrate.by_fileset_name("jin810_active")
-        # fileset_key = "not_going_to_be_found"
-        # self.assertRaises(
-        #     Exception,
-        #     self.migrate.by_fileset_name,
-        #     fileset_key,
-        #     msg=(f'ITSM allocation was not found for "{fileset_key}"'),
-        # )
+        self.migrate.by_fileset_name("xuan.zhang_active")
+        fileset_key = "not_going_to_be_found"
+        self.assertRaises(
+            Exception,
+            self.migrate.by_fileset_name,
+            fileset_key,
+            msg=(f'ITSM allocation was not found for "{fileset_key}"'),
+        )
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_alias(self):
-        # self.migrate.by_fileset_alias("jin810_active")
-        # fileset_key = "not_going_to_be_found"
-        # self.assertRaises(
-        #    Exception,
-        #    self.migrate.by_fileset_alias,
-        #    fileset_key,
-        #   msg=(f'ITSM allocation was not found for "{fileset_key}"'),
-        # )
-        pass
+        self.migrate.by_fileset_alias("jin810_active")
+        fileset_key = "not_going_to_be_found"
+        self.assertRaises(
+           Exception,
+           self.migrate.by_fileset_alias,
+           fileset_key,
+          msg=(f'ITSM allocation was not found for "{fileset_key}"'),
+        )
