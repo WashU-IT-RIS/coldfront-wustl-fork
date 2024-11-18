@@ -18,7 +18,7 @@ def validate_ticket(ticket: str, validate: bool = True):
     if re.match("ITSD-\d+$", ticket, re.IGNORECASE):
         return
 
-    return f"{ticket} is not in the format ITSD-22331 or 22331"
+    return f"{ticket} is not in the format ITSD-12345 or 12345"
 
 
 def numericallity(value: int, conditions: dict):

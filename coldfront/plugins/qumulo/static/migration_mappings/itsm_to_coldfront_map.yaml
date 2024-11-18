@@ -235,6 +235,7 @@ itsm_to_coldfront_map:
       attribute: sponsor_department_number
       type: string
       nulls: true
+      defaults_to: ""
   fileset_name:
     coldfront:
       - entity: allocation_attribute
@@ -455,7 +456,7 @@ itsm_to_coldfront_map:
       - entity: allocation_attribute
         attributes:
           - name: allocation_attribute_type__name
-            value: sla
+            value: sla_name
           - name: value
             value:
               type: string
@@ -468,6 +469,7 @@ itsm_to_coldfront_map:
       entity: service_provision
       attribute: sla
       type: string
+      defaults_to: ''
   id: null
   name: null
   department_name: null

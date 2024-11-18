@@ -18,8 +18,6 @@ from coldfront.core.project.models import (
     ProjectUserStatusChoice,
 )
 
-from django.shortcuts import get_object_or_404
-
 from coldfront.plugins.qumulo.services.itsm.itsm_client import ItsmClient
 
 from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_factory import (
