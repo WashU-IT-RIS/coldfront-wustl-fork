@@ -23,7 +23,7 @@ billOptions.addEventListener("change", handlePrepaidTimeInput);
 
 if (billOptions.value !== "prepaid") {
   document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
-  document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
+  // document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
 }
 
 let confirmed = false;
@@ -76,12 +76,12 @@ function handlePrepaidTimeInput(event) {
   if (bill_cycle_value !== "prepaid") {
     prepaid_time.style.visibility = "hidden";
     prepaid_time.value = "";
-    prepaid_billing_date.visibility = "hidden";
-    prepaid_billing_date.value = "";
+    // prepaid_billing_date.visibility = "hidden";
+    // prepaid_billing_date.value = "";
   } else {
     prepaid_time.style.visibility = "visible";
     prepaid_time.value = "";
-    prepaid_billing_date.visibility = "visible";
-    prepaid_billing_date.value = "";
+    // prepaid_billing_date.visibility = "visible";
+    // prepaid_billing_date.value = "";
   }
 }
