@@ -75,7 +75,7 @@ class AllocationForm(forms.Form):
         label="Prepaid Time",
         required=False,
     )
-    prepaid_billing_date = forms.IntegerField(
+    prepaid_billing_date = forms.DateField(
         help_text="Start Date Date of Prepaid Billing",
         label="Prepaid Billing Start Date",
         required=False,
