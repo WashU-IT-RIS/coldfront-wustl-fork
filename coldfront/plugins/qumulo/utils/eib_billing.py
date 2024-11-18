@@ -4,6 +4,12 @@ import re
 from datetime import datetime, timedelta
 from django.db import connection
 
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationAttributeType,
+)
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 logger.addHandler(logging.StreamHandler())
@@ -228,7 +234,9 @@ WHERE report.billing_amount > 0;
 
 
 class PrepaidBilling:
-    def __init__(self, usage_date=datetime.today().replace(day=1).strftime(YYYY_MM_DD)):
+    def __init__(
+        self, usage_date=datetime.today().replace(day=1).strftime(YYYY_MM_DD), **kwargs
+    ):
         self.usage_date = usage_date
 
         # The first day of the service month
@@ -236,6 +244,11 @@ class PrepaidBilling:
             (datetime.strptime(self.usage_date, YYYY_MM_DD).replace(day=1))
             .replace(day=1)
             .strftime(YYYY_MM_DD)
+        )
+        # The prepaid expiration date
+        allocation = Allocation.objects.get(pk=kwargs["allocation_pk"])
+        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+            name="prepaid_expiration"
         )
         # The service month for billing
         self.billing_month = datetime.strptime(self.delivery_date, YYYY_MM_DD).strftime(
