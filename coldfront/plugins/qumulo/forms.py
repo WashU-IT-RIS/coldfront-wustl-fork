@@ -75,6 +75,11 @@ class AllocationForm(forms.Form):
         label="Prepaid Time",
         required=False,
     )
+    prepaid_billing_date = forms.IntegerField(
+        help_text="Start Date Date of Prepaid Billing",
+        label="Prepaid Billing Start Date",
+        required=False,
+    )
     service_rate = forms.ChoiceField(
         help_text="Service rate option for the Storage2 allocation",
         label="Service Rate",
