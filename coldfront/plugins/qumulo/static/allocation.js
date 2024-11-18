@@ -23,7 +23,7 @@ billOptions.addEventListener("change", handlePrepaidTimeInput);
 
 if (billOptions.value !== "prepaid") {
   document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
-  //document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
+  document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
 }
 
 let confirmed = false;
