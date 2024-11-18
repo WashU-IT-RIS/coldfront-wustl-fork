@@ -27,8 +27,13 @@ submitButton.addEventListener("click", (event) => {
           /*
            * bmulligan (20241114): we are now using the document title to
            * determine whether we are on the "Create Allocation" form.
+           *
+           * NOTE: we're using id_project_pk to determine whether we are
+           * on a parent or sub-allocation creation page
           */
           if( document.title.trim() !== 'Create Allocation' )
+            return false;
+          else if( document.getElementById("div_id_project_pk") === null )
             return false;
 
           return !smb.checked && !confirmed;
