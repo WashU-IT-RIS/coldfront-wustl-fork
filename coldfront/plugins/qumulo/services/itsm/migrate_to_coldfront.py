@@ -9,13 +9,8 @@ from coldfront.plugins.qumulo.services.allocation_service import AllocationServi
 
 from coldfront.core.allocation.models import (
     Project,
-    Allocation,
     AllocationAttribute,
     AllocationAttributeType,
-    AllocationStatusChoice,
-    AllocationUserStatusChoice,
-    AllocationUser,
-    Resource,
     User,
 )
 
@@ -58,11 +53,10 @@ class MigrateToColdfront:
         # if any(error_massages):
         #    return error_massages
         pi_user = self.__create_user(fields)
-        project = self.__create_project(fields, pi_user)  # refactor method
-        breakpoint()
-        project_user = self.__create_project_user(project, pi_user)  # refactor method
-        allocation = self.__create_allocation(fields, project)
-        allocation_attributes = self.__create_allocation_attributes(fields, allocation)
+        project = self.__create_project(pi_user)  # refactor method
+        self.__create_project_user(project, pi_user)  # refactor method
+        allocation = self.__create_allocation(fields, project, pi_user)
+        self.__create_allocation_attributes(fields, allocation)
         return
 
     def __get_itsm_allocation_by_fileset_name(self, fileset_name):
@@ -93,16 +87,13 @@ class MigrateToColdfront:
         username = self.__get_username(fields)
         user = User.objects.create(
             username=username,
-            password="WHAT IS THIS",
             email=f"{username}@wustl.edu",
         )
         return user
 
-    def __create_project(self, fields, pi_user):
-        # pi is the sponsor
-        sponsor = self.__get_sponsor(fields)
-        description = f"project for {sponsor}"
-        title = sponsor
+    def __create_project(self, pi_user):
+        description = f"project for {pi_user.username}"
+        title = pi_user.username
         field_of_science = FieldOfScience.objects.get(description="Other")
         new_status = ProjectStatusChoice.objects.get(name="New")
 
@@ -129,30 +120,32 @@ class MigrateToColdfront:
         )
         return project_user
 
-    def __create_allocation(self, allocation_data, project, pi_user):
-        project_pk = project.id
-        allocation_data.update("project_pk", project_pk)
-        allocation_data.update("storage_filesystem_path", project_pk)
-        allocation_data.update("storage_export_path", project_pk)
-        allocation_data.update("storage_ticket", project_pk)
-        allocation_data.update("storage_quota", project_pk)
-        allocation_data.update("rw_users", project_pk)
-        allocation_data.update("ro_users", None)
-        allocation_data.update("cost_center", cost_center)
-        allocation_data.update("department_number", department_number)
-        allocation_data.update("service_rate", service_rate)
+    def __create_allocation(self, fields, project, pi_user):
+        attributes_for_allocation = filter(
+            lambda field: field.entity == "allocation", fields
+        )
 
-        allocation = AllocationService.create_new_allocation(allocation_data, pi_user)
-        return allocation
+        allocation_data = {}
+        allocation_data["project_pk"] = project.id
+        allocation_data["ro_users"] = []
+        for field in list(attributes_for_allocation):
+            allocation_data.update(field.entity_item)
+
+        service_result = AllocationService.create_new_allocation(
+            allocation_data, pi_user
+        )
+        return service_result["allocation"]
 
     def __create_allocation_attributes(self, fields, allocation):
-        for field in fields:
-            if field.entity != "allocation_attribute":
-                continue
-
+        allocation_attributes = filter(
+            lambda field: field.entity == "allocation_attribute"
+            and field.value is not None,
+            fields,
+        )
+        for field in list(allocation_attributes):
             for attribute in field.attributes:
                 if (
-                    attribute["name"] == "name"
+                    attribute["name"] == "allocation_attribute_type__name"
                 ):  # TODO should be AllocationAttributeType
                     allocation_attribute_type = AllocationAttributeType.objects.get(
                         name=attribute["value"]
@@ -170,11 +163,3 @@ class MigrateToColdfront:
             if username is not None:
                 break
         return username
-
-    def __get_sponsor(self, fields):
-        sponsor = None
-        for field in fields:
-            sponsor = field.get_sponsor()
-            if sponsor is not None:
-                break
-        return sponsor

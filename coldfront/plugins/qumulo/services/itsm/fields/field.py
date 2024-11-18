@@ -11,13 +11,10 @@ class Field:
         self._coldfront_entity = coldfront_definitions["entity"]
         self._coldfront_attributes = coldfront_definitions["attributes"]
         self._value = value
-        # ic(coldfront_definitions)
-        # ic(itsm_value_field)
-        # ic(value)
 
     @property
     def value(self):
-        return self._value
+        return self.__transform_value()
 
     @property
     def entity(self):
@@ -26,6 +23,10 @@ class Field:
     @property
     def attributes(self):
         return self._coldfront_attributes
+
+    @property
+    def entity_item(self):
+        return {self.attributes[0].get("name"): self.value}
 
     def validate(self):
         valid = True
@@ -55,7 +56,6 @@ class Field:
             valid = valid and value is not None
             ic(value)
         ic(valid)
-        print("----------")
         return valid
 
     def __get_default_value(self):
@@ -63,6 +63,21 @@ class Field:
 
     def is_valid(self) -> bool:
         return self.validate()
+
+    def __transform_value(self):
+        for attribute in self._coldfront_attributes:
+            attribute_value = attribute["value"]
+            if isinstance(attribute_value, dict):
+                transforms = attribute_value["transforms"]
+
+                to_be_transformed = self._value or self.__get_default_value()
+                if transforms is not None:
+                    transform_function = getattr(
+                        value_transformers,
+                        transforms,
+                    )
+                    to_be_transformed = transform_function(to_be_transformed)
+                return to_be_transformed
 
     # Special getters
     def get_username(self):
@@ -74,16 +89,6 @@ class Field:
             if attribute["name"] == "username":
                 username = self.value
         return username
-
-    def get_sponsor(self):
-        if self.entity != "project":
-            return None
-
-        sponsor = None
-        for attribute in self.attributes:
-            if attribute["name"] == "name":
-                sponsor = self.value
-        return sponsor
 
     # TODO: create coldfront entities
 

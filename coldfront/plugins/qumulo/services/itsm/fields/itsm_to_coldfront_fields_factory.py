@@ -21,7 +21,7 @@ with open(ITSM_TO_COLDFRONT_MAP_PATH, "r") as file:
 class ItsmToColdfrontFieldsFactory:
 
     @staticmethod
-    def get_fields(itsm_allocation):
+    def get_fields(itsm_allocation) -> list:
         fields = []
         for item in field_items.values():
             itsm_value_field = item["itsm_value"]
