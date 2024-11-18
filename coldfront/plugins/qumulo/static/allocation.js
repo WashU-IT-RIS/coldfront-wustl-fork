@@ -21,12 +21,9 @@ if (!nfsCheckBox.checked) {
 const billOptions = document.getElementById("id_billing_cycle");
 billOptions.addEventListener("change", handlePrepaidTimeInput);
 
-if (billOptions.value === "prepaid") {
-  document.getElementById("div_id_service_rate") = "subscription";
-
-}
 if (billOptions.value !== "prepaid") {
   document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
+  document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
 }
 
 let confirmed = false;
