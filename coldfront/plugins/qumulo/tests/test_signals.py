@@ -126,8 +126,10 @@ class TestSignals(TestCase):
         )
 
     @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.signals.async_task")
     def test_allocation_activates_calculates_prepaid_expiration_monthly(
         self,
+        mock_async_task: MagicMock,
         mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
     ):
@@ -146,8 +148,10 @@ class TestSignals(TestCase):
         self.assertEqual(prepaid_exp.value, datetime.today().strftime("%Y-%m-%d"))
 
     @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.signals.async_task")
     def test_allocation_activates_calculates_prepaid_expiration_prepaid(
         self,
+        mock_async_task: MagicMock,
         mock_ACL_ActiveDirectoryApi: MagicMock,
         mock_QumuloAPI: MagicMock,
     ):
