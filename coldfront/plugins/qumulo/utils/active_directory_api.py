@@ -65,10 +65,10 @@ class ActiveDirectoryAPI:
             attributes={"sAMAccountName": group_name},
         )
 
-    def add_user_dns_to_ad_group(self, user_dns: list[str], group_name: str):
+    def add_members_to_ad_group(self, member_dns: list[str], group_name: str):
         group_dn = self.get_group_dn(group_name)
 
-        ad_add_members_to_groups(self.conn, user_dns, group_dn)
+        ad_add_members_to_groups(self.conn, member_dns, group_dn)
 
     def add_user_to_ad_group(self, wustlkey: str, group_name: str):
         group_dn = self.get_group_dn(group_name)
@@ -78,7 +78,7 @@ class ActiveDirectoryAPI:
 
         ad_add_members_to_groups(self.conn, user_dn, group_dn)
 
-    def get_group_dn(self, group_name: str) -> str:
+    def get_group(self, group_name: str) -> str:
         groups_OU = os.environ.get("AD_GROUPS_OU")
         self.conn.search(
             groups_OU, f"(&(objectclass=group)(sAMAccountName={group_name}))"
@@ -87,7 +87,10 @@ class ActiveDirectoryAPI:
         if not self.conn.response:
             raise ValueError("Invalid group_name")
 
-        return self.conn.response[0]["dn"]
+        return self.conn.response[0]
+
+    def get_group_dn(self, group_name: str) -> str:
+        return self.get_group(group_name)["dn"]
 
     def delete_ad_group(self, group_name: str):
         group_dn = self.get_group_dn(group_name)
