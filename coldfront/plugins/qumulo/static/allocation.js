@@ -21,9 +21,9 @@ if (!nfsCheckBox.checked) {
 const billOptions = document.getElementById("id_billing_cycle");
 billOptions.addEventListener("change", handlePrepaidCycleSelection);
 
-if (billOptions.value !== "prepaid") {
-  document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
-  document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
+if (billOptions.value === "prepaid") {
+  document.getElementById("div_id_prepaid_time").style.visibility = "visible";
+  document.getElementById("div_id_prepaid_billing_date").style.visibility = "visible";
 }
 
 
