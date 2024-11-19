@@ -13,14 +13,11 @@ from coldfront.core.allocation.signals import (
     allocation_disable,
     allocation_change_approved,
 )
-<<<<<<< HEAD
 from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
 )
 from django.core.management import call_command
-=======
->>>>>>> main
 
 
 def mock_get_attribute(name):
