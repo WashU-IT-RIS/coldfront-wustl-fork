@@ -26,8 +26,6 @@ if (billOptions.value !== "prepaid") {
 billOptions.addEventListener("change", handlePrepaidCycleSelection);
 
 
-
-
 let confirmed = false;
 
 const submitButton = document.getElementById("allocation_form_submit");
