@@ -93,11 +93,11 @@ function handlePrepaidCycleSelection(event) {
     prepaid_time.style.visibility = "visible";
     prepaid_time.value = "";
   }
-  handlePrepaidBillingDateDisplay(event);
+  handlePrepaidBillingDateDisplay();
 }
 
-function handlePrepaidBillingDateDisplay(event){
-  const bill_cycle_value = event.target.value;
+function handlePrepaidBillingDateDisplay(){
+  const bill_cycle_value = document.getElementById("id_billing_cycle").value;
   const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
 
   if (bill_cycle_value !== "prepaid") {
