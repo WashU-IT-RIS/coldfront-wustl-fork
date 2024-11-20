@@ -138,11 +138,11 @@ def addUsersToADGroup(
 
     try:
         user = active_directory_api.get_user(wustlkey)
-        good_keys.append({"wustlkey": wustlkey, "dn": user["dn"], "type": "user"})
+        good_keys.append({"wustlkey": wustlkey, "dn": user["dn"]})
     except ValueError:
         try:
             group = active_directory_api.get_group(wustlkey)
-            good_keys.append({"wustlkey": wustlkey, "dn": group["dn"], "type": "group"})
+            good_keys.append({"wustlkey": wustlkey, "dn": group["dn"]})
         except ValueError:
             bad_keys.append(wustlkey)
 
@@ -168,12 +168,9 @@ def __ad_members_and_handle_errors(
             return
 
         for member in good_keys:
-            if member["type"] == "user":
-                AclAllocations.add_user_to_access_allocation(
-                    member["wustlkey"], acl_allocation
-                )
-            if member["type"] == "group":
-                print("foo")
+            AclAllocations.add_user_to_access_allocation(
+                member["wustlkey"], acl_allocation
+            )
     if len(bad_keys) > 0:
         __send_invalid_users_email(acl_allocation, bad_keys)
     return
