@@ -98,7 +98,7 @@ function handlePrepaidCycleSelection(event) {
 
 function handlePrepaidBillingDateDisplay(){
   const bill_cycle_value = document.getElementById("id_billing_cycle").value;
-  const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
+  const prepaid_billing_date = document.getElementById("id_prepaid_billing_date");
   console.log("handlePrepaidBillingDateDisplay");
 
   if (bill_cycle_value !== "prepaid") {
