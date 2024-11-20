@@ -19,12 +19,13 @@ if (!nfsCheckBox.checked) {
 }
 
 const billOptions = document.getElementById("id_billing_cycle");
-billOptions.addEventListener("change", handlePrepaidCycleSelection);
-
 if (billOptions.value !== "prepaid") {
   document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
   document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
 }
+billOptions.addEventListener("change", handlePrepaidCycleSelection);
+
+
 
 
 let confirmed = false;
