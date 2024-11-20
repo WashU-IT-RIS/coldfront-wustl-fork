@@ -19,11 +19,11 @@ if (!nfsCheckBox.checked) {
 }
 
 const billOptions = document.getElementById("id_billing_cycle");
-billOptions.addEventListener("change", handlePrepaidCycleSelection);
+billOptions.addEventListener("change", handlePrepaidCycleSelection, handlePrepaidBillingDateDisplay);
 
-if (billOptions.value === "prepaid") {
-  document.getElementById("div_id_prepaid_time").style.visibility = "visible";
-  document.getElementById("div_id_prepaid_billing_date").style.visibility = "visible";
+if (billOptions.value !== "prepaid") {
+  document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
+  document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
 }
 
 
@@ -85,16 +85,24 @@ function handleExportPathInput(event) {
 function handlePrepaidCycleSelection(event) {
   const bill_cycle_value = event.target.value;
   const prepaid_time = document.getElementById("div_id_prepaid_time");
-  const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
 
   if (bill_cycle_value !== "prepaid") {
     prepaid_time.style.visibility = "hidden";
     prepaid_time.value = "";
-    prepaid_billing_date.visibility = "hidden";
-    prepaid_billing_date.value = "";
   } else {
     prepaid_time.style.visibility = "visible";
     prepaid_time.value = "";
+  }
+}
+
+function handlePrepaidBillingDateDisplay(event){
+  const bill_cycle_value = event.target.value;
+  const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
+
+  if (bill_cycle_value !== "prepaid") {
+    prepaid_billing_date.visibility = "hidden";
+    prepaid_billing_date.value = "";
+  } else {
     prepaid_billing_date.visibility = "visible";
     prepaid_billing_date.value = "";
   }
