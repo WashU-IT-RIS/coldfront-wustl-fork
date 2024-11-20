@@ -1,6 +1,4 @@
-from django.test import TestCase, Client
-
-from unittest.mock import patch, MagicMock
+from django.test import TestCase
 
 from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     numericallity,
@@ -13,7 +11,7 @@ from coldfront.plugins.qumulo.services.itsm.fields.validators import (
 )
 
 """
-python manage.py test coldfront.plugins.qumulo.tests.utils.itsm_api.test_validators
+python manage.py test coldfront.plugins.qumulo.tests.services.itsm.test_validators
 """
 
 
@@ -51,11 +49,11 @@ class TestValidators(TestCase):
         self.assertIsNone(validate_ticket("", validate))
 
         self.assertEqual(
-            validate_ticket("ITSD"), "ITSD is not in the format ITSD-22331 or 22331"
+            validate_ticket("ITSD"), "ITSD is not in the format ITSD-12345 or 12345"
         )
         self.assertEqual(
             validate_ticket("ITSD2222"),
-            "ITSD2222 is not in the format ITSD-22331 or 22331",
+            "ITSD2222 is not in the format ITSD-12345 or 12345",
         )
 
     def test_numericallity(self) -> None:
