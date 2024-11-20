@@ -11,6 +11,7 @@ COPY . .
 
 RUN python3 ./manage.py initial_setup
 RUN python3 ./manage.py load_test_data
+COPY storage2-dev-localhost.pem /etc/ssl/certs/storage2-dev-localhost.pem
 
 ENV DEBUG=True
 
