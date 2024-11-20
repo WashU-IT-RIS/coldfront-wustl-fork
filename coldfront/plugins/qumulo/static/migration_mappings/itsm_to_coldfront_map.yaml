@@ -435,16 +435,6 @@ itsm_to_coldfront_map:
               transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false] # should NULL default to false?
-      - entity: project_attribute
-        attributes:
-          - name: proj_attr_type
-            value: allow_nonfaculty
-          - name: value
-            value:
-              type: Yes/No
-              transforms: truthy_or_falsy_to_boolean
-              validates:
-                inclusion: [true, false] # should NULL default to false?
     itsm_value:
       entity: service_provision
       attribute: allow_nonfaculty
