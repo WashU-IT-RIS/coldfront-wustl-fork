@@ -19,7 +19,7 @@ if (!nfsCheckBox.checked) {
 }
 
 const billOptions = document.getElementById("id_billing_cycle");
-billOptions.addEventListener("change", handlePrepaidCycleSelection, handlePrepaidBillingDateDisplay);
+billOptions.addEventListener("change", handlePrepaidCycleSelection);
 
 if (billOptions.value !== "prepaid") {
   document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
@@ -93,6 +93,7 @@ function handlePrepaidCycleSelection(event) {
     prepaid_time.style.visibility = "visible";
     prepaid_time.value = "";
   }
+  handlePrepaidBillingDateDisplay(event);
 }
 
 function handlePrepaidBillingDateDisplay(event){
