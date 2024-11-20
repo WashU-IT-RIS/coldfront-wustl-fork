@@ -104,10 +104,10 @@ function handlePrepaidBillingDateDisplay(){
   if (bill_cycle_value !== "prepaid") {
     prepaid_billing_date.visibility = "hidden";
     prepaid_billing_date.value = "";
-    console.log(bill_cycle_value)
+    console.log("not prepaid")
   } else {
     prepaid_billing_date.visibility = "visible";
     prepaid_billing_date.value = "";
-    console.log(bill_cycle_value)
+    console.log("prepaid")
   }
 }
