@@ -14,9 +14,8 @@ class Command(BaseCommand):
         print("Updating Qumulo Project Attributes")
         # updating required project attributes for all projects
 
-        # for sponsor department number use "unknown"
-        # can be updated manually later if necessary
-        self._migrate_project_attribute("sponsor_department_number", "unknown")
+        # for sponsor_department_number, use ""
+        self._migrate_project_attribute("sponsor_department_number", "")
         self._migrate_project_attribute("is_condo_group", "No")
 
     def _migrate_project_attribute(self, attribute_name, default_value):
