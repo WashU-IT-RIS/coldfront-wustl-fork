@@ -13,9 +13,11 @@ from coldfront.core.test_helpers.factories import (
     AllocationStatusChoiceFactory,
     AllocationUserStatusChoiceFactory,
     FieldOfScienceFactory,
+    ProjectAttributeTypeFactory,
     ProjectStatusChoiceFactory,
     ProjectUserRoleChoiceFactory,
     ProjectUserStatusChoiceFactory,
+    PAttributeTypeFactory,
     ResourceFactory,
 )
 
@@ -63,6 +65,16 @@ class TestMigrationToColdfront(TestCase):
         ]
         for allocation_attribute_name in allocation_attribute_names:
             AllocationAttributeTypeFactory(name=allocation_attribute_name)
+
+        project_attribute_names = [
+            "is_condo_group",
+            "sponsor_department_number",
+        ]
+        for project_attribute_name in project_attribute_names:
+            ProjectAttributeTypeFactory(
+                name=project_attribute_name,
+                attribute_type=PAttributeTypeFactory(name="Text"),
+            )
 
         ResourceFactory(name="Storage2")
         ResourceFactory(name="rw")
