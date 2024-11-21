@@ -1,0 +1,26 @@
+{% extends "common/base.html" %} 
+{% load crispy_forms_tags %}
+{% load common_tags %}
+{% load static %}
+
+{% block title %}
+Trigger Migrations
+{% endblock %}
+
+{% block content %}
+<div>
+  <form method="post" id="trigger_migrations_form">
+    {% csrf_token %}
+    {{ form | crispy }}
+    {{ status_allocation }}
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-primary mr-2" id="allocation_form_submit">Submit</button>
+      <button type="reset" class="btn btn-primary">Reset</button>
+    </div>
+  </form>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+{{ form.media }}
+{% endblock javascript%}
