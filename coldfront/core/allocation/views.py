@@ -2302,5 +2302,17 @@ class AllocationChangeDeleteAttributeView(
 
 
 class TriggerMigrationsView(LoginRequiredMixin, View):
-    form_class = TriggerMigrationsForm
-    template_name = "trigger-migrations.html"
+
+    def displayForm(request):
+        if request.method == "POST":
+            trigger_migration_form = TriggerMigrationsForm(request.POST)
+        if trigger_migration_form.is_valid():
+            fileset_alias = trigger_migration_form.cleaned_data["fileset_alias"]
+            fileset_name = trigger_migration_form.cleaned_data["fileset_name"]
+        else:
+            trigger_migration_form = TriggerMigrationsForm()
+        return render(
+            request,
+            "trigger-migrations.html",
+            {"trigger_migration_form": trigger_migration_form},
+        )
