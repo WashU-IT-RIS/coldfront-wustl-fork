@@ -218,9 +218,9 @@ itsm_to_coldfront_map:
       nulls: true
   sponsor_department_number:
     coldfront:
-      - entity: allocation_attribute
+      - entity: project_attribute
         attributes:
-          - name: allocation_attribute_type__name
+          - name: proj_attr_type
             value: sponsor_department_number
           - name: value
             value:
@@ -235,7 +235,7 @@ itsm_to_coldfront_map:
       attribute: sponsor_department_number
       type: string
       nulls: true
-      defaults_to: ""
+      defaults_to: ''
   fileset_name:
     coldfront:
       - entity: allocation_attribute
@@ -352,7 +352,7 @@ itsm_to_coldfront_map:
       - entity: allocation_attribute
         attributes:
           - name: allocation_attribute_type__name
-            value: comment
+            value: itsm_comment
           - name: value
             value:
               type: Attribute Expanded Text
@@ -435,16 +435,6 @@ itsm_to_coldfront_map:
               transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: [true, false] # should NULL default to false?
-      - entity: project_attribute
-        attributes:
-          - name: name
-            value: allow_nonfaculty
-          - name: value
-            value:
-              type: Yes/No
-              transforms: truthy_or_falsy_to_boolean
-              validates:
-                inclusion: [true, false] # should NULL default to false?
     itsm_value:
       entity: service_provision
       attribute: allow_nonfaculty
@@ -470,6 +460,23 @@ itsm_to_coldfront_map:
       attribute: sla
       type: string
       defaults_to: ''
+  is_condo_group:
+    coldfront:
+      - entity: project_attribute
+        attributes:
+          - name: proj_attr_type
+            value: is_condo_group
+          - name: value
+            value:
+              type: Yes/No
+              transforms: truthy_or_falsy_to_boolean
+              validates:
+                inclusion: [true, false] # should NULL default to false?
+    itsm_value:
+      entity: service_provision
+      attribute: is_condo_group
+      type: boolean
+      defaults_to: false
   id: null
   name: null
   department_name: null
@@ -478,4 +485,3 @@ itsm_to_coldfront_map:
   status: null
   who: null
   parent_id: null
-  is_condo_group: null

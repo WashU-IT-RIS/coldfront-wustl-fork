@@ -12,6 +12,8 @@ from coldfront.core.allocation.models import (
 
 from coldfront.core.project.models import (
     Project,
+    ProjectAttribute,
+    ProjectAttributeType,
     ProjectStatusChoice,
     ProjectUser,
     ProjectUserRoleChoice,
@@ -36,23 +38,24 @@ class MigrateToColdfront:
         self.__execute(fileset_name, itsm_result)
 
     def __execute(self, fileset_key, itsm_result):
-        self.__validate_result_set(fileset_key, itsm_result)
+        self.__validate_itsm_result_set(fileset_key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
 
-        error_massages = {}
+        field_error_massages = {}
         for field in fields:
             validation_messages = field.validate()
             if validation_messages:
-                error_massages[field.itsm_attribute_name] = validation_messages
+                field_error_massages[field.itsm_attribute_name] = validation_messages
 
-        if error_massages:
-            ic(error_massages)
-            raise Exception("Validation errors", error_massages)
+        if field_error_massages:
+            ic(field_error_massages)
+            raise Exception("Validation error messages: ", field_error_massages)
 
         pi_user = self.__create_user(fields)
-        project = self.__create_project(pi_user)  # refactor method
-        self.__create_project_user(project, pi_user)  # refactor method
+        project = self.__create_project(pi_user)
+        self.__create_project_user(project, pi_user)
+        self.__create_project_attributes(fields, project)
         allocation = self.__create_allocation(fields, project, pi_user)
         self.__create_allocation_attributes(fields, allocation)
         return
@@ -67,7 +70,7 @@ class MigrateToColdfront:
         itsm_allocation = itsm_client.get_fs1_allocation_by_fileset_alias(fileset_alias)
         return itsm_allocation
 
-    def __validate_result_set(self, fileset_key, itsm_result) -> bool:
+    def __validate_itsm_result_set(self, fileset_key, itsm_result) -> bool:
         how_many = len(itsm_result)
         # ITSM does not return a respond code of 404 when the service provision record is not found.
         # Instead, it returns an empty array.
@@ -117,6 +120,24 @@ class MigrateToColdfront:
             status=user_status,
         )
         return project_user
+
+    def __create_project_attributes(self, fields, project):
+        project_attributes = filter(
+            lambda field: field.entity == "project_attribute"
+            and field.value is not None,
+            fields,
+        )
+        for field in list(project_attributes):
+            for attribute in field.attributes:
+                if attribute["name"] == "proj_attr_type":
+                    project_attribute_type = ProjectAttributeType.objects.get(
+                        name=attribute["value"]
+                    )
+                    ProjectAttribute.objects.get_or_create(
+                        proj_attr_type=project_attribute_type,
+                        project=project,
+                        value=field.value,
+                    )
 
     def __create_allocation(self, fields, project, pi_user):
         attributes_for_allocation = filter(

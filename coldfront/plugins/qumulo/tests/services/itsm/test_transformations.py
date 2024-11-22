@@ -15,7 +15,7 @@ from coldfront.plugins.qumulo.services.itsm.fields.transformers import (
 )
 
 """
-python manage.py test coldfront.plugins.qumulo.tests.utils.itsm_api.test_transformations
+python manage.py test coldfront.plugins.qumulo.tests.services.itsm.test_transformations
 """
 
 

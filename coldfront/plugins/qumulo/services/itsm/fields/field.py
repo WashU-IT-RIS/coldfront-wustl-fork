@@ -33,7 +33,7 @@ class Field:
         return self._itsm_value_field["attribute"]
 
     def validate(self):
-        valid = []
+        error_messages = []
         for attribute in self._coldfront_attributes:
             value = attribute["value"]
             name = attribute["name"]
@@ -56,18 +56,18 @@ class Field:
                     )
                     validation_message = validator_function(to_be_validated, conditions)
                     if validation_message:
-                        valid.append(validation_message)
+                        error_messages.append(validation_message)
                     ic(to_be_validated)
 
             ic(value)
-        ic(valid)
-        return valid
+        ic(error_messages)
+        return error_messages
 
     def __get_default_value(self):
         return self._itsm_value_field.get("defaults_to")
 
     def is_valid(self) -> bool:
-        return self.validate()
+        return bool(self.validate())
 
     def __transform_value(self):
         for attribute in self._coldfront_attributes:
@@ -75,14 +75,14 @@ class Field:
             if isinstance(attribute_value, dict):
                 transforms = attribute_value["transforms"]
 
-                to_be_transformed = self._value or self.__get_default_value()
+                value = self._value or self.__get_default_value()
                 if transforms is not None:
                     transform_function = getattr(
                         value_transformers,
                         transforms,
                     )
-                    to_be_transformed = transform_function(to_be_transformed)
-                return to_be_transformed
+                    value = transform_function(value)
+                return value
 
     # Special getters
     def get_username(self):
@@ -94,56 +94,3 @@ class Field:
             if attribute["name"] == "username":
                 username = self.value
         return username
-
-    # TODO: create coldfront entities
-
-    """
-    @property
-    def itsm_name(self):
-        return self.name_itsm
-
-    @property
-    def coldfront_name(self):
-        return self.name_coldfront
-    
-    @property
-    def coldfront_entity(self):
-        return self.coldfront_entity
-
-    def get_value(self):
-        if self.transformator is None:
-            self.validator is None or self.validator(self.value)
-            return self.value
-
-        transformed_value = self.transformator(self.value)
-        self.validator is None or self.validator(transformed_value)
-        return transformed_value
-
-    def get_coldfront_allocation_item(self):
-        return {self.name_coldfront: self.value}
-
-    @property
-    def raw_value(self):
-        return self.value
-
-    def set_transformator(self, transformator):
-        self.transformator = transformator
-
-    def set_validator(self, validator):
-        self.validator = validator
-
-    def is_valid(self):
-        if self.transformator is None:
-            try:
-                self.validator is None or self.validator(self.value)
-            except:
-                return False
-            return True
-
-        transformed_value = self.transformator(self.value)
-        try:
-            self.validator is None or self.validator(transformed_value)
-        except:
-            return False
-        return True
-    """

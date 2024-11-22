@@ -1,6 +1,10 @@
-from django.test import TestCase, Client
+from django.test import TestCase
 
-from unittest.mock import patch, MagicMock
+from coldfront.core.allocation.models import AllocationAttribute
+from coldfront.core.test_helpers.factories import (
+    AllocationAttributeFactory,
+    AllocationAttributeTypeFactory,
+)
 
 from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     numericallity,
@@ -12,8 +16,9 @@ from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     uniqueness,
 )
 
+
 """
-python manage.py test coldfront.plugins.qumulo.tests.utils.itsm_api.test_validators
+python manage.py test coldfront.plugins.qumulo.tests.services.itsm.test_validators
 """
 
 
@@ -175,6 +180,13 @@ class TestValidators(TestCase):
         pass
 
     def test_uniqueness(self):
+        allocation_attribute_type = AllocationAttributeTypeFactory(name="storage_name")
+        value_to_be_compared = "i_exist"
+        AllocationAttributeFactory(
+            value=value_to_be_compared,
+            allocation_attribute_type=allocation_attribute_type,
+        )
+
         conditions = {
             "entity": "AllocationAttribute",
             "entity_attribute": "allocation_attribute_type__name",
@@ -182,5 +194,7 @@ class TestValidators(TestCase):
         }
         self.assertIsNone(uniqueness("i_do_not_exist", conditions))
 
-        # TODO setup create an allocation named "i_exist"
-        # TODO self.assertFalse(uniqueness("i_exist", conditions))
+        self.assertEqual(
+            uniqueness(value_to_be_compared, conditions),
+            f"{value_to_be_compared} is not unique",
+        )
