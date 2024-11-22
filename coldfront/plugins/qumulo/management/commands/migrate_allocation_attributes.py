@@ -15,13 +15,9 @@ class Command(BaseCommand):
 
         self._migrate_allocation_attribute("secure", "No")
         self._migrate_allocation_attribute("audit", "No")
-        self._migrate_allocation_attribute("fileset_name", "Created in Storage2")
-        self._migrate_allocation_attribute("fileset_alias", "Created in Storage2")
         self._migrate_allocation_attribute("exempt", "No")
-        self._migrate_allocation_attribute("itsm_comment", "{}")
         self._migrate_allocation_attribute("subsidized", "No")
         self._migrate_allocation_attribute("billing_cycle", "monthly")
-        self._migrate_allocation_attribute("sla_name", "")
 
     def _migrate_allocation_attribute(self, attribute_name, default_value):
         attribute_type = AllocationAttributeType.objects.get(name=attribute_name)
