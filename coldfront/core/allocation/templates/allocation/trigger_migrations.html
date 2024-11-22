@@ -9,9 +9,9 @@ Trigger Migrations
 
 {% block content %}
 <div>
-  <form method="post" id="trigger_migrations_form">
+  <form method="POST">
     {% csrf_token %}
-    {{ form | crispy }}
+    {{ trigger_migration_form | crispy }}
     <div class="d-flex justify-content-end">
       <!-- <button type="submit" class="btn btn-primary mr-2" id="allocation_form_submit">Submit</button> -->
     </div>
