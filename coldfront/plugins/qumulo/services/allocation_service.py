@@ -205,6 +205,24 @@ class AllocationService:
                     value=value,
                 )
 
+        # handle allocations with built-in defaults differently
+        # (since they're not sourced from form_data)
+
+        allocation_defaults = {
+            "secure": "No",
+            "audit": "No",
+            "exempt": "No",
+            "subsidized": "No",
+        }
+
+        for attr, value in allocation_defaults.items():
+            attribute_type = AllocationAttributeType.objects.get(name=attr)
+            AllocationAttribute.objects.get_or_create(
+                allocation_attribute_type=attribute_type,
+                allocation=allocation,
+                value=value,
+            )
+
     @staticmethod
     def __handle_sub_allocation_scoping(
         sub_allocation_name: str, parent_allocation_name: str

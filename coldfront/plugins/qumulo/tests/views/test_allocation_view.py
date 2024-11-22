@@ -1,7 +1,11 @@
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttributeType,
+    AllocationAttribute,
+)
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
@@ -48,6 +52,23 @@ class AllocationViewTests(TestCase):
 
         # verifying that Allocation attributes were set correctly
         self.assertEqual(allocation.project, self.project)
+
+        # verify that the allocation has the right default attributes
+        allocation_defaults = {
+            "secure": "No",
+            "audit": "No",
+            "exempt": "No",
+            "subsidized": "No",
+        }
+        for attr, value in allocation_defaults.items():
+            attribute_type = AllocationAttributeType.objects.get(name=attr)
+            num_attrs = len(
+                AllocationAttribute.objects.filter(
+                    allocation_attribute_type=attribute_type,
+                    allocation=allocation,
+                )
+            )
+            self.assertEqual(num_attrs, 1)
 
     def test_new_allocation_status_is_pending(
         self,
