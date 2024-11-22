@@ -13,7 +13,12 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.forms import formset_factory
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponseBadRequest
+from django.http import (
+    HttpResponseRedirect,
+    JsonResponse,
+    HttpResponseBadRequest,
+    HttpResponse,
+)
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils.html import format_html, mark_safe
@@ -2304,15 +2309,16 @@ class AllocationChangeDeleteAttributeView(
 class TriggerMigrationsView(LoginRequiredMixin, View):
 
     def displayForm(request):
-        if request.method == "POST":
-            trigger_migration_form = TriggerMigrationsForm(request.POST)
-        if trigger_migration_form.is_valid():
-            fileset_alias = trigger_migration_form.cleaned_data["fileset_alias"]
-            fileset_name = trigger_migration_form.cleaned_data["fileset_name"]
-        else:
-            trigger_migration_form = TriggerMigrationsForm()
-        return render(
-            request,
-            "trigger-migrations.html",
-            {"trigger_migration_form": trigger_migration_form},
-        )
+        # if request.method == "POST":
+        #     trigger_migration_form = TriggerMigrationsForm(request.POST)
+        # if trigger_migration_form.is_valid():
+        #     fileset_alias = trigger_migration_form.cleaned_data["fileset_alias"]
+        #     fileset_name = trigger_migration_form.cleaned_data["fileset_name"]
+        # else:
+        #     trigger_migration_form = TriggerMigrationsForm()
+        # return render(
+        #     request,
+        #     "trigger-migrations.html",
+        #     {"trigger_migration_form": trigger_migration_form},
+        # )
+        return HttpResponse("this page is connected correctly!")
