@@ -51,11 +51,11 @@ class TestValidators(TestCase):
         self.assertIsNone(validate_ticket("", validate))
 
         self.assertEqual(
-            validate_ticket("ITSD"), "ITSD is not in the format ITSD-22331 or 22331"
+            validate_ticket("ITSD"), "ITSD is not in the format ITSD-12345 or 12345"
         )
         self.assertEqual(
             validate_ticket("ITSD2222"),
-            "ITSD2222 is not in the format ITSD-22331 or 22331",
+            "ITSD2222 is not in the format ITSD-12345 or 12345",
         )
 
     def test_numericallity(self) -> None:
