@@ -30,7 +30,9 @@ class Command(BaseCommand):
         all_storage_2_allocations = all_storage_2_allocations.annotate(
             **{attribute_name: Subquery(attribute_sub_q)}
         )
-
+        import pdb
+        pdb.set_trace()
+        return
         for allocation in all_storage_2_allocations:
             if getattr(allocation, attribute_name, None) is None:
                 AllocationAttribute.objects.create(
