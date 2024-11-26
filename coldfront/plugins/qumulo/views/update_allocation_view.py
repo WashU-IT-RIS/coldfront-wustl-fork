@@ -1,8 +1,11 @@
+from django.contrib import messages
 from django.urls import reverse_lazy
+from django_q.tasks import async_task
 
 from typing import Union, Optional
 
 import json
+import logging
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -11,21 +14,32 @@ from coldfront.core.allocation.models import (
     AllocationAttributeChangeRequest,
     AllocationChangeRequest,
     AllocationChangeStatusChoice,
+    AllocationLinkage,
     AllocationUser,
 )
+
+from coldfront.core.user.models import User
+
 from coldfront.plugins.qumulo.forms import UpdateAllocationForm
+from coldfront.plugins.qumulo.hooks import acl_reset_complete_hook
+from coldfront.plugins.qumulo.tasks import addUsersToADGroup, reset_allocation_acls
 from coldfront.plugins.qumulo.views.allocation_view import AllocationView
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 
+logger = logging.getLogger(__name__)
+
+
 class UpdateAllocationView(AllocationView):
     form_class = UpdateAllocationForm
-    template_name = "allocation.html"
+    template_name = "update_allocation.html"
     success_url = reverse_lazy("home")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["form_title"] = "Update Allocation"
+        context["allocation_has_children"] = self._allocation_linkage_exists()
         allocation_id = self.kwargs.get("allocation_id")
         allocation = Allocation.objects.get(pk=allocation_id)
         alloc_status = allocation.status.name
@@ -78,6 +92,51 @@ class UpdateAllocationView(AllocationView):
     def form_valid(
         self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
     ):
+        if "reset_acls" in self.request.POST:
+            self._reset_acls()
+        else:
+            self._updated_fields_handler(form, parent_allocation)
+        return super(AllocationView, self).form_valid(form=form)
+
+    def _acl_reset_message(self):
+        name = Allocation.objects.get(
+            pk=self.kwargs.get("allocation_id")
+        ).get_attribute(name="storage_name")
+        if self.request.POST.get("reset_sub_acls"):
+            message = f"ACL reset initiated for {name} and its sub-allocations."
+        else:
+            message = f"ACL reset initiated for {name}."
+        return message
+
+    def _allocation_linkage_exists(self):
+        has_linkage = True
+        try:
+            AllocationLinkage.objects.get(
+                parent=Allocation.objects.get(pk=self.kwargs.get("allocation_id"))
+            )
+        except AllocationLinkage.DoesNotExist:
+            has_linkage = False
+        return has_linkage
+
+    def _reset_acls(self):
+        # bmulligan (20240903): "retry" and "timeout" are intended to be
+        # arbitrarily high values.  It would be good if the application could
+        # know or learn what they should be.  Testing has shown that the DEV
+        # infrastructure can process a directory tree of about 90,500 items in
+        # 62 minutes.
+        task_id = async_task(
+            reset_allocation_acls,
+            User.objects.get(id=self.request.user.id).email,
+            Allocation.objects.get(pk=self.kwargs.get("allocation_id")),
+            True if self.request.POST.get("reset_sub_acls") == "on" else False,
+            hook=acl_reset_complete_hook,
+            q_options={"retry": 90000, "timeout": 86400},
+        )
+        messages.add_message(self.request, messages.SUCCESS, self._acl_reset_message())
+
+    def _updated_fields_handler(
+        self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
+    ):
         form_data = form.cleaned_data
 
         allocation = Allocation.objects.get(pk=self.kwargs.get("allocation_id"))
@@ -120,11 +179,9 @@ class UpdateAllocationView(AllocationView):
         for key in access_keys:
             access_users = form_data[key + "_users"]
             self.set_access_users(key, access_users, allocation)
-        
+
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
-
-        return super(AllocationView, self).form_valid(form=form)
 
     @staticmethod
     def _handle_attribute_change(
@@ -164,22 +221,16 @@ class UpdateAllocationView(AllocationView):
             allocation_user.user.username for allocation_user in allocation_users
         ]
 
-        for access_user in access_users:
-            if access_user not in allocation_usernames:
-                AclAllocations.add_user_to_access_allocation(
-                    access_user, access_allocation
-                )
-                active_directory_api.add_user_to_ad_group(
-                    access_user, access_allocation.get_attribute("storage_acl_name")
-                )
+        users_to_add = list(set(access_users) - set(allocation_usernames))
+        async_task(addUsersToADGroup, users_to_add, access_allocation)
 
-        for allocation_username in allocation_usernames:
-            if allocation_username not in access_users:
-                allocation_users.get(user__username=allocation_username).delete()
-                active_directory_api.remove_user_from_group(
-                    allocation_username,
-                    access_allocation.get_attribute("storage_acl_name"),
-                )
+        users_to_remove = set(allocation_usernames) - set(access_users)
+        for allocation_username in users_to_remove:
+            allocation_users.get(user__username=allocation_username).delete()
+            active_directory_api.remove_user_from_group(
+                allocation_username,
+                access_allocation.get_attribute("storage_acl_name"),
+            )
 
     def get_allocation_attribute(self, allocation_attributes: list, attribute_key: str):
         for allocation_attribute in allocation_attributes:
