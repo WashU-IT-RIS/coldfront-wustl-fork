@@ -1,6 +1,7 @@
+from unittest import async_case
 from django.shortcuts import get_object_or_404
 
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import json
 import os
@@ -17,7 +18,9 @@ from coldfront.core.allocation.models import (
     AllocationUser,
 )
 
+from coldfront.plugins.qumulo.tasks import addUsersToADGroup
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
+from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 
 class AllocationService:
@@ -25,49 +28,56 @@ class AllocationService:
     # This is the entry point and the only public method for this service
     @staticmethod
     def create_new_allocation(
-        form_data, user, parent_allocation: Optional[Allocation] = None
-    ):
-        if parent_allocation:
-            form_data["storage_name"] = (
-                AllocationService.__handle_sub_allocation_scoping(
+            form_data: Dict[str, Any], user, parent_allocation: Optional[Allocation] = None
+        ):
+            if parent_allocation:
+                form_data["storage_name"] = AllocationService._handle_sub_allocation_scoping(
                     form_data["storage_name"],
                     parent_allocation.get_attribute(name="storage_name"),
                 )
+
+            project_pk = form_data.get("project_pk")
+            project = get_object_or_404(Project, pk=project_pk)
+
+            allocation = Allocation.objects.create(
+                project=project,
+                justification="",
+                quantity=1,
+                status=AllocationStatusChoice.objects.get(name="Pending"),
             )
 
-        project_pk = form_data.get("project_pk")
-        project = get_object_or_404(Project, pk=project_pk)
-
-        allocation = Allocation.objects.create(
-            project=project,
-            justification="",
-            quantity=1,
-            status=AllocationStatusChoice.objects.get(name="Pending"),
-        )
-
-        active_status = AllocationUserStatusChoice.objects.get(name="Active")
-        AllocationUser.objects.create(
-            allocation=allocation, user=user, status=active_status
-        )
-
-        resource = Resource.objects.get(name="Storage2")
-        allocation.resources.add(resource)
-
-        AllocationService.__set_allocation_attributes(
-            form_data, allocation, parent_allocation
-        )
-
-        access_allocations = AllocationService.__create_access_privileges(
-            form_data, project, allocation
-        )
-
-        for access_allocation in access_allocations:
-            access_users = AllocationUser.objects.filter(allocation=access_allocation)
-            AclAllocations.create_ad_group_and_add_users(
-                access_users, access_allocation
+            active_status = AllocationUserStatusChoice.objects.get(name="Active")
+            AllocationUser.objects.create(
+                allocation=allocation, user=user, status=active_status
             )
 
-        return {"allocation": allocation, "access_allocations": access_allocations}
+            resource = Resource.objects.get(name="Storage2")
+            allocation.resources.add(resource)
+
+            AllocationService.__set_allocation_attributes(
+                form_data, allocation, parent_allocation
+            )
+
+            access_allocations = AllocationService.__create_access_privileges(
+                form_data, project, allocation
+            )
+
+            active_directory_api = ActiveDirectoryAPI()
+            for access_allocation in access_allocations:
+                access_users = list(
+                    AllocationUser.objects.filter(allocation=access_allocation)
+                )
+
+                resource = access_allocation.resources.first()
+                form_key = f"{resource.name.lower()}_users"
+                access_users = form_data[form_key]
+
+                active_directory_api.create_ad_group(
+                    group_name=access_allocation.get_attribute(name="storage_acl_name")
+                )
+                async_case(addUsersToADGroup, access_users, access_allocation)
+
+            return {"allocation": allocation, "access_allocations": access_allocations}
 
     @staticmethod
     def __create_access_privileges(
