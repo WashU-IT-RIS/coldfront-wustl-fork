@@ -31,7 +31,7 @@ class AllocationService:
             form_data: Dict[str, Any], user, parent_allocation: Optional[Allocation] = None
         ):
             if parent_allocation:
-                form_data["storage_name"] = AllocationService._handle_sub_allocation_scoping(
+                form_data["storage_name"] = AllocationService.__handle_sub_allocation_scoping(
                     form_data["storage_name"],
                     parent_allocation.get_attribute(name="storage_name"),
                 )

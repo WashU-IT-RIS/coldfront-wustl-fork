@@ -67,25 +67,3 @@ class AllocationView(LoginRequiredMixin, FormView):
                 kwargs={"allocation_id": self.success_id},
             )
         return super().get_success_url()
-
-    @staticmethod
-    def _handle_sub_allocation_scoping(
-        sub_allocation_name: str, parent_allocation_name: str
-    ):
-        """
-        NOTE:
-          if sub_allocation_name is same as parent, or is completely different, then
-          prepend parent name to sub name
-          if sub-allocation name provided already *has* parent name prepended (but is not identical to parent name)
-          use it directly
-        EXAMPLE:
-          parent: foo + sub: bar => foo-bar
-          parent: foo + sub: foo => foo-foo
-          parent: foo + sub: foo-blah => foo-blah
-        """
-        if (
-            sub_allocation_name.startswith(parent_allocation_name)
-            and sub_allocation_name != parent_allocation_name
-        ):
-            return sub_allocation_name
-        return f"{parent_allocation_name}-{sub_allocation_name}"
