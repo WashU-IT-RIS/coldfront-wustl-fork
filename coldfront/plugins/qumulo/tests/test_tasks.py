@@ -278,8 +278,8 @@ class TestStorageAllocationStatuses(TestCase):
             )
 
 
-#@patch("coldfront.plugins.qumulo.views.allocation_view.async_task")
-#@patch("coldfront.plugins.qumulo.views.allocation_view.ActiveDirectoryAPI")
+@patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
+@patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
 @patch("coldfront.plugins.qumulo.tasks.async_task")
 @patch("coldfront.plugins.qumulo.tasks.ActiveDirectoryAPI")
 class TestAddUsersToADGroup(TestCase):
@@ -314,8 +314,8 @@ class TestAddUsersToADGroup(TestCase):
 
     def test_function_ends_on_empty_list(
         self,
-        #mock_active_directory_api: MagicMock,
-        #mock_async_task: MagicMock,
+        mock_active_directory_api: MagicMock,
+        mock_async_task: MagicMock,
         mock_allocation_view_AD: MagicMock,
         mock_allocation_view_async_task: MagicMock,
     ):
@@ -338,8 +338,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
     ):
         active_directory_instance = MagicMock()
         mock_active_directory_api.return_value = active_directory_instance
@@ -362,8 +362,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
     ):
         wustlkeys = ["foo", "bar"]
         self.form_data["rw_users"] = wustlkeys
@@ -401,8 +401,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
     ):
         active_directory_instance = MagicMock()
         active_directory_instance.get_user.side_effect = ValueError("Invalid wustlkey")
@@ -430,8 +430,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
     ):
         mock_user_response = {
             "dn": "user_dn",
@@ -469,8 +469,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_send_email_template: MagicMock,
         mock_active_directory_api: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
         mock_async_task,
     ):
         wustlkeys = ["foo", "bar"]
@@ -500,8 +500,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
     ):
         active_directory_instance = MagicMock()
         active_directory_instance.get_user.side_effect = ValueError("Invalid wustlkey")
@@ -525,8 +525,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
     ):
         mock_async_task.side_effect = lambda *args: args[0](*args[1:])
 
@@ -562,8 +562,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
     ):
         active_directory_instance = MagicMock()
         mock_active_directory_api.return_value = active_directory_instance
@@ -593,8 +593,8 @@ class TestAddUsersToADGroup(TestCase):
         mock_send_email_template: MagicMock,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
     ):
         active_directory_instance = MagicMock()
         active_directory_instance.add_user_dns_to_ad_group.side_effect = (
@@ -636,8 +636,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_send_email_template: MagicMock,
         mock_active_directory_api: MagicMock,
-        #mock_allocation_view_AD: MagicMock,
-        #mock_allocation_view_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
         mock_async_task,
     ):
         wustlkeys = ["foo", "bar"]

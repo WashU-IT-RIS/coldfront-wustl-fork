@@ -1,5 +1,6 @@
-from unittest import async_case
 from django.shortcuts import get_object_or_404
+
+from django_q.tasks import async_task
 
 from typing import Any, Dict, Optional
 
@@ -75,7 +76,7 @@ class AllocationService:
                 active_directory_api.create_ad_group(
                     group_name=access_allocation.get_attribute(name="storage_acl_name")
                 )
-                async_case(addUsersToADGroup, access_users, access_allocation)
+                async_task(addUsersToADGroup, access_users, access_allocation)
 
             return {"allocation": allocation, "access_allocations": access_allocations}
 
