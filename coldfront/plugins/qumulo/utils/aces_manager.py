@@ -210,6 +210,7 @@ class AcesManager(object):
                     "DELETE_CHILD",
                     "WRITE_ATTR",
                     "WRITE_EA",
+                    "EXECUTE",
                 ],
             },
             {
