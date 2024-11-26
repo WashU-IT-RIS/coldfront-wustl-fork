@@ -67,8 +67,6 @@ class AllocationView(LoginRequiredMixin, FormView):
                 kwargs={"allocation_id": self.success_id},
             )
         return super().get_success_url()
-<<<<<<< HEAD
-=======
 
     @staticmethod
     def _handle_sub_allocation_scoping(
@@ -277,4 +275,3 @@ class AllocationView(LoginRequiredMixin, FormView):
                     allocation=allocation,
                     value=value,
                 )
->>>>>>> 59b22f3c (Bug/itdev 35234 ldap timeout (#22))
