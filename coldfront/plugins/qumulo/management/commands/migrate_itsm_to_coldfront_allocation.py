@@ -9,25 +9,19 @@ from icecream import ic
 
 class Command(BaseCommand):
 
+    def add_arguments(self, parser):
+        parser.add_argument("fileset", type=str, help='The fileset_name or fileset_alias')
+        parser.add_argument('-a', '--alias', type=str, help='Queries by fielset_alias', )
+
+
     def handle(self, *args, **options):
-
-        ic(args)
-        ic(options)
-
-        fileset_name = None
-        fileset_alias = None
-        for key, value in options.items():
-            if key == "fileset_name":
-                fileset_name = value
-            if key == "fileset_alias":
-                fileset_alias = value
+        fileset = options['fileset']
+        find_by_alias = options['alias']
 
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
-        result = None
-        if fileset_name:
-            result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset_name)
-
-        if fileset_alias:
-            result = migrate_from_itsm_to_coldfront.by_fileset_alias(fileset_alias)
+        if find_by_alias:
+            result = migrate_from_itsm_to_coldfront.by_fileset_alias(fileset)
+        else:
+            result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset)
 
         ic(result)
