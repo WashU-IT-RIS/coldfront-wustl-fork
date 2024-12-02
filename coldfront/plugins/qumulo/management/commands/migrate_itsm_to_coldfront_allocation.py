@@ -11,12 +11,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("fileset", type=str, help='The fileset_name or fileset_alias')
-        parser.add_argument('-a', '--alias', type=str, help='Queries by fielset_alias', )
+        parser.add_argument('--fileset_alias', type=str, help='Queries by fielset_alias', )
 
 
     def handle(self, *args, **options):
         fileset = options['fileset']
-        find_by_alias = options['alias']
+        find_by_alias = options['fileset_alias']
 
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
         if find_by_alias:
