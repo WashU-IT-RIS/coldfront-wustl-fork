@@ -36,7 +36,7 @@ class ItsmClient:
         filtered_url = self.__get_filtered_url(fileset_key, fileset_value)
         session = self.__get_session()
 
-        response = session.get(filtered_url, verify=False)
+        response = session.get(filtered_url)
         response.raise_for_status()
 
         data = response.json().get("data")
