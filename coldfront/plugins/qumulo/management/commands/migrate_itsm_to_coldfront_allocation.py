@@ -1,3 +1,5 @@
+from icecream import ic
+
 from django.core.management.base import BaseCommand
 
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
@@ -16,7 +18,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         fileset = options['fileset']
+        ic(fileset)
         find_by_alias = options['fileset_alias']
+        ic(find_by_alias)
 
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
         if find_by_alias:

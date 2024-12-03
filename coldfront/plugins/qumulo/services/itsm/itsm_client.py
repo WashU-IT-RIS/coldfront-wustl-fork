@@ -35,7 +35,6 @@ class ItsmClient:
     def __get_fs1_allocation_by(self, fileset_key, fileset_value) -> str:
         filtered_url = self.__get_filtered_url(fileset_key, fileset_value)
         session = self.__get_session()
-
         response = session.get(filtered_url)
         response.raise_for_status()
 
@@ -49,21 +48,23 @@ class ItsmClient:
 
     def __get_session(self):
         session = requests.Session()
-        self.__set_session_authentication(session)
-        self.__set_session_headers(session)
+        session.verify = self.__get_verify_certificate()
+        session.auth = self.__get_session_authentication()
+        session.headers = self.__get_session_headers()
         return session
 
-    def __set_session_headers(self, session) -> None:
+    def __get_session_headers(self) -> None:
         headers = {"content-type": "application/json"}
         if self.is_itsm_localhost:
             headers["x-remote-user"] = self.user
 
-        session.headers = headers
-        return
+        return headers
 
-    def __set_session_authentication(self, session) -> None:
+    def __get_session_authentication(self) -> None:
         if self.is_itsm_localhost:
             return
 
-        session.auth = (self.user, self.password)
-        return
+        return (self.user, self.password)
+    
+    def __get_verify_certificate(self):
+        return os.environ.get("RIS_CHAIN_CERTIFICATE") or True
