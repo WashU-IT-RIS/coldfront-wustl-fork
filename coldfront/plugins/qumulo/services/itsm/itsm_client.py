@@ -35,7 +35,7 @@ class ItsmClient:
     def __get_fs1_allocation_by(self, fileset_key, fileset_value) -> str:
         filtered_url = self.__get_filtered_url(fileset_key, fileset_value)
         session = self.__get_session()
-        response = session.get(filtered_url)
+        response = session.get(filtered_url, verify = self.__get_verify_certificate())
         response.raise_for_status()
 
         data = response.json().get("data")
@@ -48,7 +48,6 @@ class ItsmClient:
 
     def __get_session(self):
         session = requests.Session()
-        session.verify = self.__get_verify_certificate()
         session.auth = self.__get_session_authentication()
         session.headers = self.__get_session_headers()
         return session
