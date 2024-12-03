@@ -73,18 +73,6 @@ itsm_to_coldfront_map:
       nulls: true
   funding_number:
     coldfront:
-      - entity: allocation_attribute
-        attributes:
-          - name: allocation_attribute_type__name
-            value: funding_number
-          - name: value
-            value:
-              type: string
-              transforms: null
-              validates:
-                presence: true
-                length:
-                  maximum: 128
       - entity: allocation
         attributes:
           - name: cost_center
