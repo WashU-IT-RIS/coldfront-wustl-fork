@@ -166,6 +166,8 @@ class MigrateToColdfront:
                 if (
                     attribute["name"] == "allocation_attribute_type__name"
                 ):  # TODO should be AllocationAttributeType
+                    ic("getting AllocationAttributeType")
+                    ic(attribute)
                     allocation_attribute_type = AllocationAttributeType.objects.get(
                         name=attribute["value"]
                     )
