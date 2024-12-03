@@ -37,3 +37,12 @@ class Command(BaseCommand):
             is_unique=False,
             is_changeable=True,
         )
+
+        ProjectAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Yes/No"),
+            name="allow_nonfaculty",
+            is_required=True,
+            is_private=False,
+            is_unique=False,
+            is_changeable=True,
+        )

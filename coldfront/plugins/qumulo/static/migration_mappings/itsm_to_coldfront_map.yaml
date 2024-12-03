@@ -425,9 +425,9 @@ itsm_to_coldfront_map:
       nulls: true
   allow_nonfaculty:
     coldfront:
-      - entity: allocation_attribute
+      - entity: project_attribute
         attributes:
-          - name: allocation_attribute_type__name
+          - name: proj_attr_type
             value: allow_nonfaculty
           - name: value
             value:
