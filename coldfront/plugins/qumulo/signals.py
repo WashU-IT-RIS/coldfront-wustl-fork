@@ -60,15 +60,15 @@ def on_allocation_activate(sender, **kwargs):
     prepaid_billing_start = allocation.get_attribute(name="prepaid_billing_date")
     if bill_cycle == "prepaid":
         prepaid_months = allocation.get_attribute(name="prepaid_time")
-        # prepaid_until = datetime(
-        #     prepaid_billing_start.year
-        #     + (prepaid_billing_start.month + prepaid_months - 1) // 12,
-        #     (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
-        #     prepaid_billing_start.day,
-        # )
-        prepaid_until = datetime(prepaid_billing_start) + relativedelta(
-            months=prepaid_months
+        prepaid_until = datetime(
+            prepaid_billing_start.year
+            + (prepaid_billing_start.month + prepaid_months - 1) // 12,
+            (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
+            prepaid_billing_start.day,
         )
+        # prepaid_until = datetime(prepaid_billing_start) + relativedelta(
+        #     months=prepaid_months
+        # )
     else:
         prepaid_until = datetime.today().strftime("%Y-%m-%d")
 
