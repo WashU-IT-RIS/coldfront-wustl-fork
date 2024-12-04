@@ -108,15 +108,23 @@ def conditionally_update_billing_cycle_types() -> None:
     prepaid_exp_attribute = AllocationAttributeType.objects.get(
         name="prepaid_expiration"
     )
+    prepaid_billing_start_attribute = AllocationAttributeType.objects.get(
+        name="prepaid_billing_date"
+    )
     billing_sub_q = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"), allocation_attribute_type=billing_attribute
     ).values("value")[:1]
     prepaid_exp_sub_q = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"), allocation_attribute_type=prepaid_exp_attribute
     ).values("value")[:1]
+    prepaid_billing_date_sub_q = AllocationAttribute.objects.filter(
+        allocation=OuterRef("pk"),
+        allocation_attribute_type=prepaid_billing_start_attribute,
+    ).values("value")[:1]
     allocations = allocations.annotate(
         billing_cycle=Subquery(billing_sub_q),
         prepaid_expiration=Subquery(prepaid_exp_sub_q),
+        prepaid_billing_start=Subquery(prepaid_billing_date_sub_q),
     )
     logger.warn(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
 
@@ -129,6 +137,14 @@ def conditionally_update_billing_cycle_types() -> None:
                 AllocationAttribute.objects.filter(
                     allocation=allocation, allocation_attribute_type=billing_attribute
                 ).update(value="monthly")
+        elif allocation.billing_cycle == "monthly":
+            if allocation.prepaid_billing_start == datetime.today().strftime(
+                "%Y-%m-%d"
+            ):
+                logger.warn(f"Changing {allocation} billing_cycle to prepaid")
+                AllocationAttribute.objects.filter(
+                    allocation=allocation, allocation_attribute_type=billing_attribute
+                ).update(value="prepaid")
 
 
 # TODO: refactor the following methods to a service class
