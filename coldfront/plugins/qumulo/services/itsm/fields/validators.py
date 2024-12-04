@@ -105,8 +105,8 @@ def ad_record_exist(value, validate: bool = True):
 
 # This is a simple uniqueness validator that finds if a record exists for a
 # given entity (table), attribute (field), and value.
-# Note that the field is hardcoded to allocation_attribute_type__name since I need to 
-# figure out how to pass the entity_attribute from the conditions['entity_attribute'] to the filter. 
+# Note that the field is hardcoded to allocation_attribute_type__name since I need to
+# figure out how to pass the entity_attribute from the conditions['entity_attribute'] to the filter.
 # This seemed promissing to no avail: exec(f"{conditions['entity_attribute']}")
 def uniqueness(value, conditions):
 

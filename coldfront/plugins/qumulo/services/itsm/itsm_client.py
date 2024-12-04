@@ -13,7 +13,7 @@ load_dotenv(override=True)
 class ItsmClient:
     def __init__(self):
         self.user = os.environ.get("ITSM_SERVICE_USER")
-        self.password = os.environ.get("ITSM_SERVICE_PASSWORD")  # get it from secrets
+        self.password = os.environ.get("ITSM_SERVICE_PASSWORD")
         protocol = os.environ.get("ITSM_PROTOCOL")
         host = os.environ.get("ITSM_HOST")
         port = os.environ.get("ITSM_REST_API_PORT")
@@ -35,7 +35,7 @@ class ItsmClient:
     def __get_fs1_allocation_by(self, fileset_key, fileset_value) -> str:
         filtered_url = self.__get_filtered_url(fileset_key, fileset_value)
         session = self.__get_session()
-        response = session.get(filtered_url, verify = self.__get_verify_certificate())
+        response = session.get(filtered_url, verify=self.__get_verify_certificate())
         response.raise_for_status()
 
         data = response.json().get("data")
@@ -64,6 +64,6 @@ class ItsmClient:
             return
 
         return (self.user, self.password)
-    
+
     def __get_verify_certificate(self):
         return os.environ.get("RIS_CHAIN_CERTIFICATE") or True

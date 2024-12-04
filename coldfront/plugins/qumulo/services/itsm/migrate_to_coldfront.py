@@ -31,13 +31,16 @@ class MigrateToColdfront:
 
     def by_fileset_alias(self, fileset_alias):
         itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
-        self.__execute(fileset_alias, itsm_result)
+        result = self.__create_by(fileset_alias, itsm_result)
+        ic(result)
 
     def by_fileset_name(self, fileset_name):
         itsm_result = self.__get_itsm_allocation_by_fileset_name(fileset_name)
-        self.__execute(fileset_name, itsm_result)
+        result = self.__create_by(fileset_name, itsm_result)
+        ic(result)
 
-    def __execute(self, fileset_key, itsm_result):
+    # Private Methods
+    def __create_by(self, fileset_key, itsm_result):
         self.__validate_itsm_result_set(fileset_key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
@@ -49,7 +52,6 @@ class MigrateToColdfront:
                 field_error_massages[field.itsm_attribute_name] = validation_messages
 
         if field_error_massages:
-            ic(field_error_massages)
             raise Exception("Validation error messages: ", field_error_massages)
 
         pi_user = self.__create_user(fields)
@@ -58,7 +60,11 @@ class MigrateToColdfront:
         self.__create_project_attributes(fields, project)
         allocation = self.__create_allocation(fields, project, pi_user)
         self.__create_allocation_attributes(fields, allocation)
-        return
+        return {
+            "allocation_id": allocation.id,
+            "project_id": project.id,
+            "pi_user_id": pi_user.id,
+        }
 
     def __get_itsm_allocation_by_fileset_name(self, fileset_name):
         itsm_client = ItsmClient()
@@ -166,8 +172,6 @@ class MigrateToColdfront:
                 if (
                     attribute["name"] == "allocation_attribute_type__name"
                 ):  # TODO should be AllocationAttributeType
-                    ic("getting AllocationAttributeType")
-                    ic(attribute)
                     allocation_attribute_type = AllocationAttributeType.objects.get(
                         name=attribute["value"]
                     )
