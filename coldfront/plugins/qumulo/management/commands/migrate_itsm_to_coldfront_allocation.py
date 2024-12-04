@@ -12,14 +12,19 @@ from icecream import ic
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument("fileset", type=str, help='The fileset_name or fileset_alias')
-        parser.add_argument('--fileset_alias', type=str, help='Queries by fielset_alias', )
-
+        parser.add_argument(
+            "fileset", type=str, help="The fileset_name or fileset_alias"
+        )
+        parser.add_argument(
+            "--fileset_alias",
+            action="store_true",
+            help="Queries by fileset_alias instead of by fileset_name",
+        )
 
     def handle(self, *args, **options):
-        fileset = options['fileset']
+        fileset = options["fileset"]
         ic(fileset)
-        find_by_alias = options['fileset_alias']
+        find_by_alias = options["fileset_alias"]
         ic(find_by_alias)
 
         migrate_from_itsm_to_coldfront = MigrateToColdfront()

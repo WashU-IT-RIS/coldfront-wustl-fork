@@ -1,4 +1,3 @@
-from icecream import ic
 from coldfront.core.field_of_science.models import FieldOfScience
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
@@ -32,12 +31,12 @@ class MigrateToColdfront:
     def by_fileset_alias(self, fileset_alias):
         itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
         result = self.__create_by(fileset_alias, itsm_result)
-        ic(result)
+        return result
 
     def by_fileset_name(self, fileset_name):
         itsm_result = self.__get_itsm_allocation_by_fileset_name(fileset_name)
         result = self.__create_by(fileset_name, itsm_result)
-        ic(result)
+        return result
 
     # Private Methods
     def __create_by(self, fileset_key, itsm_result):
