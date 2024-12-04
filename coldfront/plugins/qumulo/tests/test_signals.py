@@ -70,7 +70,7 @@ class TestSignals(TestCase):
             "service_rate": "general",
             "billing_cycle": "prepaid",
             "prepaid_time": 6,
-            "prepaid_billing_date": str(2024 - 11 - 1),
+            "prepaid_billing_date": "11/01/2024",
         }
 
         self.client.force_login(self.user)
