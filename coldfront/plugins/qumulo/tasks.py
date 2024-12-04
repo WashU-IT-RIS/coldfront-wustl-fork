@@ -142,6 +142,7 @@ def conditionally_update_billing_cycle_types() -> None:
                 "%Y-%m-%d"
             ):
                 logger.warn(f"Changing {allocation} billing_cycle to prepaid")
+                logger.warn(f" {allocation.prepaid_billing_start} ")
                 AllocationAttribute.objects.filter(
                     allocation=allocation, allocation_attribute_type=billing_attribute
                 ).update(value="prepaid")
