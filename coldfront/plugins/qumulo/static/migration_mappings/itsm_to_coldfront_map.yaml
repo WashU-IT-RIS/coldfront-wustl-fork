@@ -249,7 +249,7 @@ itsm_to_coldfront_map:
                 uniqueness:
                   entity: AllocationAttribute
                   entity_attribute: allocation_attribute_type__name
-                  attribute_name_value: storage_name
+                  attribute_name_value: storage_filesystem_path
                 length:
                   maximum: 128
       - entity: allocation
@@ -263,7 +263,7 @@ itsm_to_coldfront_map:
                 uniqueness:
                   entity: AllocationAttribute
                   entity_attribute: allocation_attribute_type__name
-                  attribute_name_value: storage_name
+                  attribute_name_value: storage_export_path
                 length:
                   maximum: 128
       - entity: allocation
