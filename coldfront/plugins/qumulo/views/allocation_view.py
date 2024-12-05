@@ -29,6 +29,7 @@ from coldfront.plugins.qumulo.tasks import addUsersToADGroup
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 from pathlib import PurePath
+from datetime import datetime
 
 
 class AllocationView(LoginRequiredMixin, FormView):
@@ -49,6 +50,8 @@ class AllocationView(LoginRequiredMixin, FormView):
         user = self.request.user
         storage_filesystem_path = form_data.get("storage_filesystem_path")
         is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
+        billing_cycle = form_data.get("billing_cycle")
+        prepaid_billing_date = form_data.get("prepaid_billing_date")
         if is_absolute_path:
             absolute_path = storage_filesystem_path
         else:
@@ -65,6 +68,8 @@ class AllocationView(LoginRequiredMixin, FormView):
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
         validate_filesystem_path_unique(absolute_path)
+        if billing_cycle == "prepaid" and prepaid_billing_date > datetime.today():
+            form_data.prepaid_billing_date = "monthly"
 
         self.new_allocation = AllocationView.create_new_allocation(
             form_data, user, parent_allocation
