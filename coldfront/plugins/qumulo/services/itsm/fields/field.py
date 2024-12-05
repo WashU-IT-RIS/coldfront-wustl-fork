@@ -1,6 +1,8 @@
 import coldfront.plugins.qumulo.services.itsm.fields.transformers as value_transformers
 import coldfront.plugins.qumulo.services.itsm.fields.validators as value_validators
 
+from icecream import ic
+
 
 class Field:
     def __init__(self, coldfront_definitions, itsm_value_field, value):
@@ -52,6 +54,7 @@ class Field:
                     )
                     validation_message = validator_function(to_be_validated, conditions)
                     if validation_message:
+                        ic(validation_message)
                         error_messages.append(validation_message)
         return error_messages
 
