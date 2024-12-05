@@ -14,8 +14,7 @@ class TestMigrateToColdfront(TestCase):
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name_found(self):
-        pass
-        #self.migrate.by_fileset_name("ysjun_active")
+        self.migrate.by_fileset_name("ysjun_active")
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name_not_found(self):

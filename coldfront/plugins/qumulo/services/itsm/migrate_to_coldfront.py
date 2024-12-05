@@ -1,3 +1,4 @@
+from icecream import ic
 from coldfront.core.field_of_science.models import FieldOfScience
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
@@ -170,10 +171,13 @@ class MigrateToColdfront:
             for attribute in field.attributes:
                 if (
                     attribute["name"] == "allocation_attribute_type__name"
-                ):  # TODO should be AllocationAttributeType
+                ):
                     allocation_attribute_type = AllocationAttributeType.objects.get(
                         name=attribute["value"]
                     )
+                    ic(allocation_attribute_type)
+                    ic(attribute)
+                    ic(field.value)
                     AllocationAttribute.objects.get_or_create(
                         allocation_attribute_type=allocation_attribute_type,
                         allocation=allocation,
