@@ -43,7 +43,7 @@ class ItsmClient:
         return data
 
     def __get_filtered_url(self, fileset_key, fileset_value) -> str:
-        filters = f'filter={{"{fileset_key}":"{fileset_value}"}}'
+        filters = f'filter={{"{fileset_key}":"{fileset_value}","status":"active"}}'
         return f"{self.url}&{filters}"
 
     def __get_session(self):

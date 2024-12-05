@@ -46,7 +46,7 @@ class TestItsmClient(TestCase):
     def test_itsm_client_when_service_provision_is_found_by_fileset_alias(self):
         itsm_client = self.itsm_client
         empty_list = []
-        fileset_alias = "halllab"
+        fileset_alias = "wexler_active"
         data = itsm_client.get_fs1_allocation_by_fileset_alias(fileset_alias)
         self.assertIsNot(data, empty_list)
         service_provision = data[0]
