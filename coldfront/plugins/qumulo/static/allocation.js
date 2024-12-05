@@ -84,8 +84,9 @@ function handleExportPathInput(event) {
 function handlePrepaidCycleSelection(event) {
   const bill_cycle_value = event.target.value;
   const prepaid_time = document.getElementById("div_id_prepaid_time");
+  const prepaid_time_value = prepaid_time.value;
 
-  if (bill_cycle_value !== "prepaid") {
+  if (bill_cycle_value !== "prepaid" && prepaid_time_value === None) {
     prepaid_time.style.visibility = "hidden";
     prepaid_time.value = "";
   } else {
@@ -98,15 +99,13 @@ function handlePrepaidCycleSelection(event) {
 function handlePrepaidBillingDateDisplay(){
   const bill_cycle_value = document.getElementById("id_billing_cycle").value;
   const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
-  console.log("handlePrepaidBillingDateDisplay");
+  const prepaid_billing_date_value = prepaid_billing_date.value
 
-  if (bill_cycle_value !== "prepaid") {
+  if (bill_cycle_value !== "prepaid" && prepaid_billing_date_value === None) {
     prepaid_billing_date.style.visibility = "hidden";
     prepaid_billing_date.value = "";
-    console.log("not prepaid")
   } else {
     prepaid_billing_date.style.visibility = "visible";
     prepaid_billing_date.value = "";
-    console.log("prepaid")
   }
 }
