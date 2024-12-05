@@ -54,8 +54,8 @@ class Field:
                     )
                     validation_message = validator_function(to_be_validated, conditions)
                     if validation_message:
-                        ic(validation_message)
                         error_messages.append(validation_message)
+
         return error_messages
 
     def __get_default_value(self):
