@@ -123,6 +123,6 @@ def uniqueness(value, conditions):
     )
     ic(exists)
     if exists:
-        return f"{value} is not unique"
+        return f"{value} is not unique for {conditions["attribute_name_value"]}"
 
     return
