@@ -11,7 +11,7 @@ def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # bisiademuyiwa_active --> /storage2/fs1/bisiademuyiwa
     # gc6159 --> /storage2/fs1/gc6159
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    storage_filesystem_path = f"/{__get_storage2_base_path()}/{fileset_name_seed}"
+    storage_filesystem_path = f"{__get_storage2_base_path()}/{fileset_name_seed}"
 
     return storage_filesystem_path
 
@@ -19,7 +19,7 @@ def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
 def fileset_name_to_storage_export_path(fileset_name_or_alias) -> str:
     # TODO I cannot figure out from the code how to populate this.
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    export_path = f"/{__get_storage2_base_path()}/{fileset_name_seed}"
+    export_path = f"{__get_storage2_base_path()}/{fileset_name_seed}"
 
     return export_path
 
@@ -87,5 +87,4 @@ def truthy_or_falsy_to_boolean(value, default_value=None):
 
 
 def __get_storage2_base_path():
-    STORAGE2_BASE_PATH = os.environ.get("STORAGE2_PATH").strip("/")
-    return STORAGE2_BASE_PATH
+    return os.environ.get("STORAGE2_PATH")
