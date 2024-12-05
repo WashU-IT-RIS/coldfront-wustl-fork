@@ -167,21 +167,17 @@ class MigrateToColdfront:
             and field.value is not None,
             fields,
         )
+
         for field in list(allocation_attributes):
             for attribute in field.attributes:
-                if (
-                    attribute["name"] == "allocation_attribute_type__name"
-                ):
+                if attribute["name"] == "allocation_attribute_type__name":
                     allocation_attribute_type = AllocationAttributeType.objects.get(
                         name=attribute["value"]
                     )
-                    ic(allocation_attribute_type)
-                    ic(attribute)
-                    ic(field.value)
-                    AllocationAttribute.objects.get_or_create(
+                    AllocationAttribute.objects.update_or_create(
                         allocation_attribute_type=allocation_attribute_type,
                         allocation=allocation,
-                        value=field.value,
+                        defaults={"value": field.value},
                     )
 
     def __get_username(self, fields):

@@ -49,7 +49,7 @@ class TestMigrateToColdfront(TestCase):
         project_attributes = ProjectAttribute.objects.filter(
             project=result["project_id"]
         )
-        self.assertEqual(len(allocation_attributes), 25)
+        self.assertEqual(len(allocation_attributes), 21)
         self.assertEqual(len(project_attributes), 3)
         self.assertEqual(allocation.id, result["allocation_id"])
         self.assertEqual(allocation.project, project)
