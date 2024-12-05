@@ -1,4 +1,3 @@
-from icecream import ic
 from coldfront.core.field_of_science.models import FieldOfScience
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
