@@ -84,11 +84,11 @@ class MigrateToColdfront:
         # ITSM does not return a respond code of 404 when the service provision record is not found.
         # Instead, it returns an empty array.
         if how_many == 0:
-            raise Exception(f'ITSM allocation was not found for "{fileset_key}"')
+            raise Exception(f"ITSM active allocation was not found for {fileset_key}")
 
         if how_many > 1:
             raise Exception(
-                f"Multiple ({how_many} total) ITSM allocations were found for {fileset_key}"
+                f"Multiple ({how_many} total) ITSM active allocations were found for {fileset_key}"
             )
 
         return True

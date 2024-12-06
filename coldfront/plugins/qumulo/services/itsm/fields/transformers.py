@@ -45,17 +45,19 @@ def fileset_name_to_storage_name(value) -> str:
     # fileset_name= "gc6159" --> "gc6159"
     return value.split("_active")[0]
 
-
+# Example: "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing".split(",")
+# return ['akronzer', 'derek.harford', 'd.ken', 'ehogue', 'jiaoy', 'perezm', 'xuebing']
+# from this array, create a user from every element in the array
 def acl_group_members_to_aggregate_create_users(value) -> str:
-    # Example: "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing".split(",")
-    # return ['akronzer', 'derek.harford', 'd.ken', 'ehogue', 'jiaoy', 'perezm', 'xuebing']
-    # from this array, create a user from every element in the array
+    if value is None:
+        return
+
     return value.split(",")
 
 
 def string_parsing_quota_and_unit_to_integer(value: str) -> int:
     if value is None:
-        raise Exception(f"The quota is null (None).")
+        return
 
     # all values in ITSM are kept in TB (T) and some in GB (G).
     if value[-1] == "T":
@@ -64,9 +66,7 @@ def string_parsing_quota_and_unit_to_integer(value: str) -> int:
     if value[-1] == "G":
         return int(math.ceil(int(value[:-1]) / 1000))
 
-    raise Exception(
-        f'The quota "{value}" is not valid. The unit is not T (for TB) or G (for GB), or the it is missing.'
-    )
+    return
 
 
 # service_provision.audit values: ["0", "1", "false", "true", null]
