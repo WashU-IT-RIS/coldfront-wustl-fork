@@ -8,6 +8,6 @@ PROTOCOL_OPTIONS = [("nfs", "NFS"), ("smb", "SMB")]
 
 BILLING_CYCLE_OPTIONS = [
     ("monthly", "Monthly"),
-    ("prepaid", "Prepayment"),
+    ("prepaid", "Prepaid"),
     ("yearly", "Yearly"),
 ]

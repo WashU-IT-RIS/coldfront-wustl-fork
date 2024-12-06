@@ -3,13 +3,19 @@ from django_q.tasks import async_task
 
 import logging
 import json
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.tasks import reset_allocation_acls
 
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationAttributeType,
+)
 from coldfront.core.allocation.signals import (
     allocation_activate,
     allocation_disable,
@@ -42,6 +48,34 @@ def on_allocation_activate(sender, **kwargs):
 
     allocation = Allocation.objects.get(pk=kwargs["allocation_pk"])
 
+    fs_path = allocation.get_attribute(name="storage_filesystem_path")
+    export_path = allocation.get_attribute(name="storage_export_path")
+    protocols = json.loads(allocation.get_attribute(name="storage_protocols"))
+    name = allocation.get_attribute(name="storage_name")
+    limit_in_bytes = allocation.get_attribute(name="storage_quota") * (2**40)
+    bill_cycle = allocation.get_attribute(name="billing_cycle")
+    allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+        name="prepaid_expiration"
+    )
+    prepaid_billing_start = allocation.get_attribute(name="prepaid_billing_date")
+    if bill_cycle == "prepaid":
+        prepaid_months = allocation.get_attribute(name="prepaid_time")
+        prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
+        prepaid_until = datetime(
+            prepaid_billing_start.year
+            + (prepaid_billing_start.month + prepaid_months - 1) // 12,
+            (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
+            prepaid_billing_start.day,
+        )
+
+    else:
+        prepaid_until = datetime.today().strftime("%Y-%m-%d")
+
+    AllocationAttribute.objects.get_or_create(
+        allocation_attribute_type=allocation_attribute_obj_type,
+        allocation=allocation,
+        value=prepaid_until,
+    )
     fs_path = allocation.get_attribute(name="storage_filesystem_path")
     export_path = allocation.get_attribute(name="storage_export_path")
     protocols = json.loads(allocation.get_attribute(name="storage_protocols"))

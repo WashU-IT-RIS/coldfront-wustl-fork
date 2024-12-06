@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", prepaidDisplayOptions);
 const protocols = Array.from(
   document.querySelectorAll(
     "#div_id_protocols div div.form-check input.form-check-input",
@@ -17,6 +18,14 @@ if (!nfsCheckBox.checked) {
   document.getElementById("div_id_storage_export_path").style.visibility =
     "hidden";
 }
+
+const billOptions = document.getElementById("id_billing_cycle");
+if (billOptions.value !== "prepaid") {
+  document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
+  document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
+}
+billOptions.addEventListener("change", handlePrepaidCycleSelection);
+
 
 let confirmed = false;
 
@@ -70,5 +79,51 @@ function handleExportPathInput(event) {
     document.getElementById("div_id_storage_export_path").style.visibility =
       "hidden";
     document.getElementById("id_storage_export_path").value = "";
+  }
+}
+
+function handlePrepaidCycleSelection(event) {
+  const bill_cycle_value = event.target.value;
+  const prepaid_time = document.getElementById("div_id_prepaid_time");
+  const prepaid_time_value = document.getElementById("id_prepaid_time").value;
+
+  if (bill_cycle_value !== "prepaid" && prepaid_time_value === "") {
+    prepaid_time.style.visibility = "hidden";
+    prepaid_time.value = "";
+  } else {
+    prepaid_time.style.visibility = "visible";
+    prepaid_time.value = "";
+  }
+  handlePrepaidBillingDateDisplay();
+}
+
+function handlePrepaidBillingDateDisplay(){
+  const bill_cycle_value = document.getElementById("id_billing_cycle").value;
+  const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
+  const prepaid_billing_date_value = document.getElementById("id_prepaid_billing_date").value;
+
+  if (bill_cycle_value !== "prepaid" && prepaid_billing_date_value === "") {
+    prepaid_billing_date.style.visibility = "hidden";
+    prepaid_billing_date.value = "";
+  } else {
+    prepaid_billing_date.style.visibility = "visible";
+    prepaid_billing_date.value = "";
+  }
+}
+
+function prepaidDisplayOptions(){
+  const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
+  const prepaid_time = document.getElementById("div_id_prepaid_time");
+
+  const bill_cycle_value = document.getElementById("id_billing_cycle").value;
+  const prepaid_time_value = document.getElementById("id_prepaid_time").value;
+  const prepaid_billing_date_value = document.getElementById("id_prepaid_billing_date").value;
+
+  if (prepaid_time_value !== "" && prepaid_billing_date_value !== "" && bill_cycle_value !== "prepaid") {
+    prepaid_billing_date.style.visibility = "visible";
+    prepaid_time.style.visibility = "visible";
+  } else {
+    prepaid_billing_date.style.visibility = "hidden";
+    prepaid_time.style.visibility = "hidden";
   }
 }
