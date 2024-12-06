@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", prepaidDisplayOptions);
 const protocols = Array.from(
   document.querySelectorAll(
     "#div_id_protocols div div.form-check input.form-check-input",
@@ -107,5 +108,22 @@ function handlePrepaidBillingDateDisplay(){
   } else {
     prepaid_billing_date.style.visibility = "visible";
     prepaid_billing_date.value = "";
+  }
+}
+
+function prepaidDisplayOptions(){
+  const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
+  const prepaid_time = document.getElementById("div_id_prepaid_time");
+
+  const bill_cycle_value = document.getElementById("id_billing_cycle").value;
+  const prepaid_time_value = document.getElementById("id_prepaid_time").value;
+  const prepaid_billing_date_value = document.getElementById("id_prepaid_billing_date").value;
+
+  if (prepaid_time_value === "" && prepaid_billing_date_value === "" && bill_cycle_value !== "prepaid") {
+    prepaid_billing_date.style.visibility = "visible";
+    prepaid_time.style.visibility = "visible";
+  } else {
+    prepaid_billing_date.style.visibility = "hidden";
+    prepaid_time.style.visibility = "hidden";
   }
 }
