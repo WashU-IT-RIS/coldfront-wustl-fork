@@ -15,7 +15,6 @@ from coldfront.plugins.qumulo.views.create_sub_allocation_view import (
     CreateSubAllocationView,
 )
 
-
 from coldfront.core.allocation.models import (
     AllocationLinkage,
     AllocationAttributeType,
@@ -26,10 +25,10 @@ from coldfront.core.allocation.models import (
 from coldfront.plugins.qumulo.forms import CreateSubAllocationForm
 
 
-@patch("coldfront.plugins.qumulo.services.allocation_service.AclAllocations")
 @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
 @patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
 @patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
+@patch("coldfront.plugins.qumulo.services.allocation_service.AclAllocations")
 class AllocationViewTests(TestCase):
     def setUp(self):
         build_data = build_models()
@@ -72,10 +71,10 @@ class AllocationViewTests(TestCase):
 
     def test_create_sub_allocation(
         self,
-        mock_AclAllocationsI: MagicMock,
+        mock_AclAllocations: MagicMock,
+        mock_ActiveDirectoryAPI_validator: MagicMock,
         mock_ActiveDirectoryAPI: MagicMock,
         mock_async_task: MagicMock,
-        mock_AclAllocations: MagicMock,
     ):
         parent_result = AllocationService.create_new_allocation(
             self.parent_form_data, self.user

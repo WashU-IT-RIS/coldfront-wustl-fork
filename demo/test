@@ -1,0 +1,25 @@
+export sub=2011
+export LSF_DOCKER_NETWORK=host 
+export LSF_DOCKER_IPC=host 
+export LSF_DOCKER_ENTRYPOINT=/bin/sh 
+export LSF_DOCKER_PRESERVE_ENVIRONMENT=false 
+export TEMPLATEFLOW_HOME=/storage1/fs1/bphilip/Active/templateflow 
+bsub 
+-n 16 
+-R 'rusage[mem=256GB]' 
+-G compute-bphilip 
+-q general 
+-oo /home/bphilip/sub-${sub}_log-$(date +%y%0m%0d).txt 
+-a 'docker(nipreps/fmriprep:24.1.1)' 
+fmriprep /storage1/fs1/bphilip/Active/10_Connectivity/raw_data/ /storage1/fs1/bphilip/Active/10_Connectivity/derivatives/fmriprep/ participant 
+-w /storage1/fs1/bphilip/Active/10_Connectivity/tempFMP 
+--fs-license-file /storage1/fs1/bphilip/Active/FS_license.txt 
+--fd-spike-threshold $(grep 
+-Eo '[0-9\.]+' /storage1/fs1/bphilip/Active/10_Connectivity/raw_data/sub-${sub}/regressors/sub-${sub}_fdthreshold.txt) 
+--ignore slicetiming 
+--no-submm-recon 
+--participant_label ${sub} 
+--output-spaces MNI152NLin6Asym:res-1 MNI152NLin6Asym:res-2 MNI152NLin2009cSym:res-2
+
+LSF_DOCKER_NETWORK=host LSF_DOCKER_IPC=host LSF_DOCKER_ENTRYPOINT=/bin/sh LSF_DOCKER_PRESERVE_ENVIRONMENT=false TEMPLATEFLOW_HOME=/storage1/fs1/bphilip/Active/templateflow 
+bsub -n 16 -R 'rusage[mem=256GB]' -G compute-ris -q general -oo /home/a.santiago/sub-${sub}_log-$(date +%y%0m%0d).txt -a 'docker(nipreps/fmriprep:24.1.1)' fmriprep /storage1/fs1/bphilip/Active/10_Connectivity/raw_data/ /storage1/fs1/bphilip/Active/10_Connectivity/derivatives/fmriprep/ participant -w /storage1/fs1/bphilip/Active/10_Connectivity/tempFMP --fs-license-file /storage1/fs1/bphilip/Active/FS_license.txt --fd-spike-threshold $(grep -Eo '[0-9\.]+' /storage1/fs1/bphilip/Active/10_Connectivity/raw_data/sub-${sub}/regressors/sub-${sub}_fdthreshold.txt) --ignore slicetiming --no-submm-recon --participant_label ${sub} --output-spaces MNI152NLin6Asym:res-1 MNI152NLin6Asym:res-2 MNI152NLin2009cSym:res-2
