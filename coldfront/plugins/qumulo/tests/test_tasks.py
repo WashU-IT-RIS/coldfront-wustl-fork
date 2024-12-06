@@ -7,6 +7,7 @@ from django.utils import timezone
 from unittest import skip
 from unittest.mock import patch, MagicMock
 
+from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
@@ -277,8 +278,8 @@ class TestStorageAllocationStatuses(TestCase):
             )
 
 
-@patch("coldfront.plugins.qumulo.views.allocation_view.async_task")
-@patch("coldfront.plugins.qumulo.views.allocation_view.ActiveDirectoryAPI")
+@patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
+@patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
 @patch("coldfront.plugins.qumulo.tasks.async_task")
 @patch("coldfront.plugins.qumulo.tasks.ActiveDirectoryAPI")
 class TestAddUsersToADGroup(TestCase):
@@ -307,7 +308,7 @@ class TestAddUsersToADGroup(TestCase):
 
         self.client.force_login(self.user)
 
-        self.create_allocation = AllocationView.create_new_allocation
+        self.create_allocation = AllocationService.create_new_allocation
 
         return super().setUp()
 

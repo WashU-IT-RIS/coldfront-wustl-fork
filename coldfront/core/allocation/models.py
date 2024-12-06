@@ -1,5 +1,6 @@
 import datetime
 import importlib
+import json
 import logging
 from ast import literal_eval
 from enum import Enum
@@ -17,6 +18,10 @@ from coldfront.core.project.models import Project, ProjectPermission
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import import_from_settings
 import coldfront.core.attribute_expansion as attribute_expansion
+
+from coldfront.core.utils.validate import AttributeValidator, AllocationAttributeValidator
+
+from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 
 logger = logging.getLogger(__name__)
 
@@ -452,7 +457,7 @@ class AllocationAttribute(TimeStampedModel):
     allocation_attribute_type = models.ForeignKey(
         AllocationAttributeType, on_delete=models.CASCADE)
     allocation = models.ForeignKey(Allocation, on_delete=models.CASCADE)
-    value = models.CharField(max_length=128)
+    value = models.CharField(max_length=8192)
     history = HistoricalRecords()
 
     def save(self, *args, **kwargs):
@@ -470,23 +475,30 @@ class AllocationAttribute(TimeStampedModel):
             raise ValidationError("'{}' attribute already exists for this allocation.".format(
                 self.allocation_attribute_type))
 
-        expected_value_type = self.allocation_attribute_type.attribute_type.name.strip()
+        expected_attr_type = self.allocation_attribute_type.attribute_type.name.strip()
 
-        if expected_value_type == "Int" and not isinstance(literal_eval(self.value), int):
-            raise ValidationError(
-                'Invalid Value "%s" for "%s". Value must be an integer.' % (self.value, self.allocation_attribute_type.name))
-        elif expected_value_type == "Float" and not (isinstance(literal_eval(self.value), float) or isinstance(literal_eval(self.value), int)):
-            raise ValidationError(
-                'Invalid Value "%s" for "%s". Value must be a float.' % (self.value, self.allocation_attribute_type.name))
-        elif expected_value_type == "Yes/No" and self.value not in ["Yes", "No"]:
-            raise ValidationError(
-                'Invalid Value "%s" for "%s". Allowed inputs are "Yes" or "No".' % (self.value, self.allocation_attribute_type.name))
-        elif expected_value_type == "Date":
-            try:
-                datetime.datetime.strptime(self.value.strip(), "%Y-%m-%d")
-            except ValueError:
-                raise ValidationError(
-                    'Invalid Value "%s" for "%s". Date must be in format YYYY-MM-DD' % (self.value, self.allocation_attribute_type.name))
+        expected_alloc_attr_type = self.allocation_attribute_type.name.strip()
+
+        # AttributeType-level validators
+        attr_validator = AttributeValidator(self.value)
+
+        if expected_attr_type == "Int":
+            attr_validator.validate_int()
+        elif expected_attr_type == "Float":
+            attr_validator.validate_float()
+        elif expected_attr_type == "Yes/No":
+            attr_validator.validate_yes_no()
+        elif expected_attr_type == "Date":
+            attr_validator.validate_date()
+        elif expected_attr_type == "JSON":
+            attr_validator.validate_json()
+        
+        # AllocationAttributeType-level validators
+        alloc_validator = AllocationAttributeValidator(self.value)
+
+        if expected_alloc_attr_type == "billing_cycle":
+            alloc_validator.validate_billing_cycle()
+
 
     def __str__(self):
         return '%s' % (self.allocation_attribute_type.name)
