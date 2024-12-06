@@ -119,7 +119,7 @@ function prepaidDisplayOptions(){
   const prepaid_time_value = document.getElementById("id_prepaid_time").value;
   const prepaid_billing_date_value = document.getElementById("id_prepaid_billing_date").value;
 
-  if (prepaid_time_value === "" && prepaid_billing_date_value === "" && bill_cycle_value !== "prepaid") {
+  if (prepaid_time_value !== "" && prepaid_billing_date_value !== "" && bill_cycle_value !== "prepaid") {
     prepaid_billing_date.style.visibility = "visible";
     prepaid_time.style.visibility = "visible";
   } else {
