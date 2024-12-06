@@ -48,13 +48,11 @@ class MigrateToColdfront:
         for field in fields:
             validation_messages = field.validate()
             if validation_messages:
-                if field.itsm_attribute_name in field_error_massages:
-                    field_error_massages[field.itsm_attribute_name].append(
-                        validation_messages
-                    )
-                    continue
+                if not field.itsm_attribute_name in field_error_massages:
+                    field_error_massages[field.itsm_attribute_name] = []
 
-                field_error_massages[field.itsm_attribute_name] = validation_messages
+                field_error_massages[field.itsm_attribute_name] += validation_messages
+
 
         if field_error_massages:
             raise Exception("Validation error messages: ", field_error_massages)
