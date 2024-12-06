@@ -56,7 +56,7 @@ class TestSignals(TestCase):
             "billing_cycle": "monthly",
         }
 
-        self.prepaid_form_data = {
+        self.prepaid_form_data_past = {
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
             "storage_ticket": "ITSD-54321",
@@ -79,8 +79,8 @@ class TestSignals(TestCase):
             self.project, self.user, self.form_data
         )
 
-        self.prepaid_storage_allocation = create_allocation(
-            project=self.project, user=self.user, form_data=self.prepaid_form_data
+        self.prepaid_storage_allocation_past = create_allocation(
+            project=self.project, user=self.user, form_data=self.prepaid_form_data_past
         )
 
     @patch("coldfront.plugins.qumulo.signals.async_task")
@@ -148,29 +148,29 @@ class TestSignals(TestCase):
 
         self.assertEqual(prepaid_exp.value, datetime.today().strftime("%Y-%m-%d"))
 
-    # @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
-    # @patch("coldfront.plugins.qumulo.signals.async_task")
-    # def test_allocation_activates_calculates_prepaid_expiration_prepaid(
-    #     self,
-    #     mock_async_task: MagicMock,
-    #     mock_ACL_ActiveDirectoryApi: MagicMock,
-    #     mock_QumuloAPI: MagicMock,
-    # ):
-    #     allocation_activate.send(
-    #         sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
-    #     )
+    @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.signals.async_task")
+    def test_allocation_activates_calculates_prepaid_expiration_prepaid_past(
+        self,
+        mock_async_task: MagicMock,
+        mock_ACL_ActiveDirectoryApi: MagicMock,
+        mock_QumuloAPI: MagicMock,
+    ):
+        allocation_activate.send(
+            sender=self.__class__, allocation_pk=self.prepaid_storage_allocation_past.pk
+        )
 
-    #     allocation_attribute_obj_type = AllocationAttributeType.objects.get(
-    #         name="prepaid_expiration"
-    #     )
-    #     prepaid_exp = AllocationAttribute.objects.get(
-    #         allocation_attribute_type=allocation_attribute_obj_type,
-    #         allocation=self.prepaid_storage_allocation,
-    #     )
+        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+            name="prepaid_expiration"
+        )
+        prepaid_exp = AllocationAttribute.objects.get(
+            allocation_attribute_type=allocation_attribute_obj_type,
+            allocation=self.prepaid_storage_allocation,
+        )
 
-    #     correct_prepaid = date.today() + relativedelta(months=+6)
+        correct_prepaid = date.today() + relativedelta(months=+6)
 
-    #     self.assertEqual(prepaid_exp.value, correct_prepaid.strftime("%Y-%m-%d"))
+        self.assertEqual(prepaid_exp.value, correct_prepaid.strftime("%Y-%m-%d"))
 
     def test_allocation_change_approved_updates_allocation(
         self,
