@@ -48,10 +48,13 @@ class MigrateToColdfront:
         for field in fields:
             validation_messages = field.validate()
             if validation_messages:
-                if not bool(field_error_massages.get(field.itsm_attribute_name)):
-                    field_error_massages[field.itsm_attribute_name] = []
+                if field.itsm_attribute_name in field_error_massages:
+                    field_error_massages[field.itsm_attribute_name].append(
+                        validation_messages
+                    )
+                    continue
 
-                field_error_massages[field.itsm_attribute_name].append(validation_messages)
+                field_error_massages[field.itsm_attribute_name] = validation_messages
 
         if field_error_massages:
             raise Exception("Validation error messages: ", field_error_massages)
@@ -149,7 +152,7 @@ class MigrateToColdfront:
 
     def __create_allocation(self, fields, project, pi_user):
         attributes_for_allocation = filter(
-            lambda field: field.entity == "allocation", fields
+            lambda field: field.entity == "allocation_form", fields
         )
 
         allocation_data = {}

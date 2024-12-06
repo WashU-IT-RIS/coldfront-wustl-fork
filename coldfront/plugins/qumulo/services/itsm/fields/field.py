@@ -1,3 +1,4 @@
+from typing import Any
 import coldfront.plugins.qumulo.services.itsm.fields.transformers as value_transformers
 import coldfront.plugins.qumulo.services.itsm.fields.validators as value_validators
 
@@ -13,26 +14,26 @@ class Field:
         self._value = value
 
     @property
-    def value(self):
+    def value(self) -> Any:
         return self.__transform_value()
 
     @property
-    def entity(self):
+    def entity(self) -> str:
         return self._coldfront_entity
 
     @property
-    def attributes(self):
+    def attributes(self) -> str:
         return self._coldfront_attributes
 
     @property
-    def entity_item(self):
+    def entity_item(self) -> str:
         return {self.attributes[0].get("name"): self.value}
 
     @property
-    def itsm_attribute_name(self):
+    def itsm_attribute_name(self) -> str:
         return self._itsm_value_field["attribute"]
 
-    def validate(self):
+    def validate(self) -> list[str]:
         error_messages = []
         for attribute in self._coldfront_attributes:
             value = attribute["value"]
@@ -58,13 +59,13 @@ class Field:
 
         return error_messages
 
-    def __get_default_value(self):
+    def __get_default_value(self) -> Any:
         return self._itsm_value_field.get("defaults_to")
 
     def is_valid(self) -> bool:
         return bool(self.validate())
 
-    def __transform_value(self):
+    def __transform_value(self) -> Any:
         for attribute in self._coldfront_attributes:
             attribute_value = attribute["value"]
             if isinstance(attribute_value, dict):
@@ -80,7 +81,7 @@ class Field:
                 return value
 
     # Special getters
-    def get_username(self):
+    def get_username(self) -> str:
         if self.entity != "user":
             return None
 

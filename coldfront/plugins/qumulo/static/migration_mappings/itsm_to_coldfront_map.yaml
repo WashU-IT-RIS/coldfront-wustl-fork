@@ -27,7 +27,7 @@ itsm_to_coldfront_map:
       type: string
   acl_group_members:
     coldfront:
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: rw_users
             value:
@@ -56,7 +56,7 @@ itsm_to_coldfront_map:
                 presence: true
                 length:
                   maximum: 128
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: department_number
             value:
@@ -73,7 +73,7 @@ itsm_to_coldfront_map:
       nulls: true
   funding_number:
     coldfront:
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: cost_center
             value:
@@ -156,7 +156,7 @@ itsm_to_coldfront_map:
               validates:
                 presence: true
                 validate_ticket: true
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: service_desk_ticket_number
             value:
@@ -238,7 +238,7 @@ itsm_to_coldfront_map:
                 presence: true
                 length:
                   maximum: 128
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: storage_filesystem_path
             value:
@@ -252,7 +252,7 @@ itsm_to_coldfront_map:
                   attribute_name_value: storage_filesystem_path
                 length:
                   maximum: 128
-      - entity: allocation
+      - entity: allocation_form
         attributes:          
           - name: storage_export_path
             value: 
@@ -266,7 +266,7 @@ itsm_to_coldfront_map:
                   attribute_name_value: storage_export_path
                 length:
                   maximum: 128
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: storage_name
             value:
@@ -320,7 +320,7 @@ itsm_to_coldfront_map:
       defaults_to: false
   service_rate_category:
     coldfront:
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: service_rate
             value:
@@ -394,7 +394,7 @@ itsm_to_coldfront_map:
       defaults_to: false
   quota:
     coldfront:
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: storage_quota
             value:
