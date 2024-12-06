@@ -57,7 +57,10 @@ def on_allocation_activate(sender, **kwargs):
     allocation_attribute_obj_type = AllocationAttributeType.objects.get(
         name="prepaid_expiration"
     )
-    prepaid_billing_start = allocation.get_attribute(name="prepaid_billing_date")
+    # prepaid_billing_start = allocation.get_attribute(name="prepaid_billing_date")
+    prepaid_billing_start = AllocationAttributeType.objects.get(
+        name="prepaid_billing_date", allocation=allocation
+    )
     if bill_cycle == "prepaid":
         prepaid_months = allocation.get_attribute(name="prepaid_time")
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
