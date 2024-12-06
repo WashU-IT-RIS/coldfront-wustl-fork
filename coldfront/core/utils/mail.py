@@ -37,10 +37,10 @@ def send_email(subject, body, sender, receiver_list, cc=[]):
     """Helper function for sending emails"""
 
     # TEMPORARY: only sends emails to app-eng while we get a picture of the email system
-    original_recipients = receiver_list.copy()
-    body = f"Original Recipients: {original_recipients}\n\n{body}"
+    body = f"Original Recipients: {receiver_list}\n\nCC'dL {cc}\n\n{body}"
 
     receiver_list = ["ris-appeng@gowustl.onmicrosoft.com"]
+    cc = []
     # END TEMPORARY
 
     if not EMAIL_ENABLED:
