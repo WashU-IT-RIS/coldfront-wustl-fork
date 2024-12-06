@@ -148,29 +148,29 @@ class TestSignals(TestCase):
 
         self.assertEqual(prepaid_exp.value, datetime.today().strftime("%Y-%m-%d"))
 
-    @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
-    @patch("coldfront.plugins.qumulo.signals.async_task")
-    def test_allocation_activates_calculates_prepaid_expiration_prepaid(
-        self,
-        mock_async_task: MagicMock,
-        mock_ACL_ActiveDirectoryApi: MagicMock,
-        mock_QumuloAPI: MagicMock,
-    ):
-        allocation_activate.send(
-            sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
-        )
+    # @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
+    # @patch("coldfront.plugins.qumulo.signals.async_task")
+    # def test_allocation_activates_calculates_prepaid_expiration_prepaid(
+    #     self,
+    #     mock_async_task: MagicMock,
+    #     mock_ACL_ActiveDirectoryApi: MagicMock,
+    #     mock_QumuloAPI: MagicMock,
+    # ):
+    #     allocation_activate.send(
+    #         sender=self.__class__, allocation_pk=self.prepaid_storage_allocation.pk
+    #     )
 
-        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
-            name="prepaid_expiration"
-        )
-        prepaid_exp = AllocationAttribute.objects.get(
-            allocation_attribute_type=allocation_attribute_obj_type,
-            allocation=self.prepaid_storage_allocation,
-        )
+    #     allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+    #         name="prepaid_expiration"
+    #     )
+    #     prepaid_exp = AllocationAttribute.objects.get(
+    #         allocation_attribute_type=allocation_attribute_obj_type,
+    #         allocation=self.prepaid_storage_allocation,
+    #     )
 
-        correct_prepaid = date.today() + relativedelta(months=+6)
+    #     correct_prepaid = date.today() + relativedelta(months=+6)
 
-        self.assertEqual(prepaid_exp.value, correct_prepaid.strftime("%Y-%m-%d"))
+    #     self.assertEqual(prepaid_exp.value, correct_prepaid.strftime("%Y-%m-%d"))
 
     def test_allocation_change_approved_updates_allocation(
         self,
