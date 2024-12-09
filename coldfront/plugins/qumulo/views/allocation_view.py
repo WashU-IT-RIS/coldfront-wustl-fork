@@ -1,11 +1,8 @@
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import FormView
 from django.urls import reverse
 
-from django_q.tasks import async_task
-
-from typing import Optional, Dict, Any
+from typing import Optional
 
 import os
 

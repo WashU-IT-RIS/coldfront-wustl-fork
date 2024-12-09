@@ -525,8 +525,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        mock_allocation_view_AD: MagicMock,
-        mock_allocation_view_async_task: MagicMock,
+        mock_allocation_service_AD: MagicMock,
+        mock_allocation_service_async_task: MagicMock,
     ):
         mock_async_task.side_effect = lambda *args: args[0](*args[1:])
 
@@ -562,8 +562,8 @@ class TestAddUsersToADGroup(TestCase):
         self,
         mock_active_directory_api: MagicMock,
         mock_async_task: MagicMock,
-        mock_allocation_view_AD: MagicMock,
-        mock_allocation_view_async_task: MagicMock,
+        mock_allocation_service_AD: MagicMock,
+        mock_allocation_service_async_task: MagicMock,
     ):
         active_directory_instance = MagicMock()
         mock_active_directory_api.return_value = active_directory_instance

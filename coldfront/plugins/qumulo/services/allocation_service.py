@@ -20,7 +20,6 @@ from coldfront.core.allocation.models import (
 )
 
 from coldfront.plugins.qumulo.tasks import addUsersToADGroup
-from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 
@@ -61,6 +60,8 @@ class AllocationService:
             form_data, allocation, parent_allocation
         )
 
+        AllocationService.__set_default_value_allocation_attributes(allocation)
+
         access_allocations = AllocationService.__create_access_privileges(
             form_data, project, allocation
         )
@@ -83,8 +84,30 @@ class AllocationService:
         return {"allocation": allocation, "access_allocations": access_allocations}
 
     @staticmethod
+    def __handle_sub_allocation_scoping(
+        sub_allocation_name: str, parent_allocation_name: str
+    ):
+        """
+        NOTE:
+          if sub_allocation_name is same as parent, or is completely different, then
+          prepend parent name to sub name
+          if sub-allocation name provided already *has* parent name prepended (but is not identical to parent name)
+          use it directly
+        EXAMPLE:
+          parent: foo + sub: bar => foo-bar
+          parent: foo + sub: foo => foo-foo
+          parent: foo + sub: foo-blah => foo-blah
+        """
+        if (
+            sub_allocation_name.startswith(parent_allocation_name)
+            and sub_allocation_name != parent_allocation_name
+        ):
+            return sub_allocation_name
+        return f"{parent_allocation_name}-{sub_allocation_name}"
+
+    @staticmethod
     def __create_access_privileges(
-        form_data: dict, project: Project, storage_allocation: Allocation
+        form_data: Dict[str, Any], project: Project, storage_allocation: Allocation
     ) -> list[Allocation]:
         rw_users = {
             "name": "RW Users",
@@ -103,11 +126,6 @@ class AllocationService:
             access_allocation = AllocationService.__create_access_allocation(
                 value, project, form_data["storage_name"], storage_allocation
             )
-
-            for username in value["users"]:
-                AclAllocations.add_user_to_access_allocation(
-                    username, access_allocation
-                )
 
             access_allocations.append(access_allocation)
 
@@ -152,7 +170,9 @@ class AllocationService:
 
     @staticmethod
     def __set_allocation_attributes(
-        form_data: dict, allocation, parent_allocation: Optional[Allocation] = None
+        form_data: Dict[str, Any],
+        allocation,
+        parent_allocation: Optional[Allocation] = None,
     ):
         # NOTE - parent-child linkage handled separately as it is not an
         # attribute like the other fields
@@ -218,6 +238,8 @@ class AllocationService:
                     value=value,
                 )
 
+    @staticmethod
+    def __set_default_value_allocation_attributes(allocation):
         # handle allocations with built-in defaults differently
         # (since they're not sourced from form_data)
 
@@ -235,25 +257,3 @@ class AllocationService:
                 allocation=allocation,
                 value=value,
             )
-
-    @staticmethod
-    def __handle_sub_allocation_scoping(
-        sub_allocation_name: str, parent_allocation_name: str
-    ):
-        """
-        NOTE:
-          if sub_allocation_name is same as parent, or is completely different, then
-          prepend parent name to sub name
-          if sub-allocation name provided already *has* parent name prepended (but is not identical to parent name)
-          use it directly
-        EXAMPLE:
-          parent: foo + sub: bar => foo-bar
-          parent: foo + sub: foo => foo-foo
-          parent: foo + sub: foo-blah => foo-blah
-        """
-        if (
-            sub_allocation_name.startswith(parent_allocation_name)
-            and sub_allocation_name != parent_allocation_name
-        ):
-            return sub_allocation_name
-        return f"{parent_allocation_name}-{sub_allocation_name}"
