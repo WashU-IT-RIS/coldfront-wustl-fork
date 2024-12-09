@@ -405,6 +405,9 @@ class TestAddUsersToADGroup(TestCase):
     ):
         active_directory_instance = MagicMock()
         active_directory_instance.get_user.side_effect = ValueError("Invalid wustlkey")
+        active_directory_instance.get_group.side_effect = ValueError(
+            "Invalid group_name"
+        )
         mock_active_directory_api.return_value = active_directory_instance
 
         wustlkeys = ["foo", "bar"]
@@ -518,7 +521,7 @@ class TestAddUsersToADGroup(TestCase):
 
         addUsersToADGroup(wustlkeys, acl_allocation)
 
-        active_directory_instance.add_user_dns_to_ad_group.assert_not_called()
+        active_directory_instance.add_members_to_ad_group.assert_not_called()
 
     def test_ads_good_users_to_allocation(
         self,
@@ -535,6 +538,9 @@ class TestAddUsersToADGroup(TestCase):
         active_directory_instance = MagicMock()
         active_directory_instance.get_user.side_effect = (
             lambda username: self.__get_user_mock(username, good_keys)
+        )
+        active_directory_instance.get_group.side_effect = ValueError(
+            "Invalid group_name"
         )
         mock_active_directory_api.return_value = active_directory_instance
 
@@ -582,7 +588,7 @@ class TestAddUsersToADGroup(TestCase):
             [], acl_allocation, [], [{"wustlkey": wustlkeys[0], "dn": "foo"}]
         )
 
-        active_directory_instance.add_user_dns_to_ad_group.assert_called_once_with(
+        active_directory_instance.add_members_to_ad_group.assert_called_once_with(
             ["foo"], group_name
         )
 
@@ -596,7 +602,7 @@ class TestAddUsersToADGroup(TestCase):
         mock_allocation_view_async_task: MagicMock,
     ):
         active_directory_instance = MagicMock()
-        active_directory_instance.add_user_dns_to_ad_group.side_effect = (
+        active_directory_instance.add_members_to_ad_group.side_effect = (
             LDAPInvalidDnError("foo")
         )
         mock_active_directory_api.return_value = active_directory_instance
