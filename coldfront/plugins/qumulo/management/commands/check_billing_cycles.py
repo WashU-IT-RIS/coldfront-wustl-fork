@@ -68,7 +68,9 @@ def check_allocations() -> None:
     def calculate_prepaid_expiration(
         bill_cycle, prepaid_months, prepaid_billing_start, prepaid_expiration
     ) -> None:
+        logger.warn(f"Calculation prepaid expiration")
         if bill_cycle == "prepaid" and prepaid_expiration == "":
+            logger.warn(f"Inside if statement")
             prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
             prepaid_until = datetime(
                 prepaid_billing_start.year
