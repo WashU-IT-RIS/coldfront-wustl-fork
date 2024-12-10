@@ -59,6 +59,27 @@ def check_allocations() -> None:
     for allocation in allocations:
         logger.warn(f"{allocation.billing_cycle}")
 
+    def calculate_prepaid_expiration(bill_cycle) -> None:
+        prepaid_billing_start = allocation.get_attribute(name="prepaid_billing_date")
+
+        if bill_cycle == "prepaid":
+            prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
+            prepaid_until = datetime(
+                prepaid_billing_start.year
+                + (prepaid_billing_start.month + prepaid_months - 1) // 12,
+                (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
+                prepaid_billing_start.day,
+            )
+
+        else:
+            prepaid_until = datetime.today().strftime("%Y-%m-%d")
+
+        AllocationAttribute.objects.get_or_create(
+            allocation_attribute_type=allocation_attribute_obj_type,
+            allocation=allocation,
+            value=prepaid_until,
+        )
+
     # def conditionally_update_billing_cycle_types() -> None:
     #     logger.warn(
     #         f"Checking billing_cycle in {len(BillingCycleManager.allocations)} qumulo allocations"
