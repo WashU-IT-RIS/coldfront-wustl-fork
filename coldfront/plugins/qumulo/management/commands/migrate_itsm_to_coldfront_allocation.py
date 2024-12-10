@@ -21,7 +21,7 @@ class Command(BaseCommand):
             help="Queries by fileset_alias instead of by fileset_name",
         )
 
-    def handle(self, *args, **options) -> str:
+    def handle(self, *args, **options) -> None:
         fileset = options["fileset"]
         ic(fileset)
         find_by_alias = options["fileset_alias"]
@@ -34,4 +34,3 @@ class Command(BaseCommand):
             result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset)
 
         ic(result)
-        return result
