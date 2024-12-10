@@ -130,7 +130,7 @@ class MigrateToColdfront:
         pi_role = ProjectUserRoleChoice.objects.get(name="Manager")
         user_status = ProjectUserStatusChoice.objects.get(name="Active")
 
-        project_user = ProjectUser.objects.get_or_create(
+        project_user = ProjectUser.objects.create(
             user=pi_user,
             project=project,
             role=pi_role,
