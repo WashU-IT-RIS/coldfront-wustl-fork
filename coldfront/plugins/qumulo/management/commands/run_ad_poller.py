@@ -5,8 +5,8 @@ from django_q.tasks import async_chain
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_groups,
     conditionally_update_storage_allocation_statuses,
-    conditionally_update_billing_cycle_types,
 )
+from coldfront.plugins.qumulo.utils.billing_cycle_manager import check_allocations
 
 
 class Command(BaseCommand):
@@ -20,6 +20,6 @@ class Command(BaseCommand):
             [
                 (poll_ad_groups),
                 (conditionally_update_storage_allocation_statuses),
-                (conditionally_update_billing_cycle_types),
+                (check_allocations),
             ]
         )

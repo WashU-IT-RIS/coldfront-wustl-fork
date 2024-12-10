@@ -6,8 +6,9 @@ from django_q.models import Schedule
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_groups,
     conditionally_update_storage_allocation_statuses,
-    conditionally_update_billing_cycle_types,
 )
+
+from coldfront.plugins.qumulo.utils.billing_cycle_manager import check_allocations
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,8 @@ class Command(BaseCommand):
         Schedule.objects.get_or_create(
             func="coldfront.plugins.qumulo.management.commands.add_scheduled_ad_poller.prepaid_expiration_cleanup",
             name="Check Billing Statuses",
-            schedule_type=Schedule.DAILY,
+            schedule_type=Schedule.MINUTES,
+            minutes=1,
             repeats=-1,
         )
 
@@ -38,4 +40,4 @@ def sequential_poll_and_check() -> None:
 
 def prepaid_expiration_cleanup() -> None:
     logger.warn(f"Calling conditionally_update_billing_cycle_type")
-    conditionally_update_billing_cycle_types()
+    check_allocations()
