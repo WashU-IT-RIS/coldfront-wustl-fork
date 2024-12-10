@@ -23,6 +23,20 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+ def calculate_prepaid_expiration(
+        bill_cycle, prepaid_months, prepaid_billing_start, prepaid_expiration
+    ) -> None:
+        logger.warn(f"Calculation prepaid expiration")
+        if bill_cycle == "prepaid" and prepaid_expiration == "":
+            logger.warn(f"Inside if statement")
+            prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
+            prepaid_until = datetime(
+                prepaid_billing_start.year
+                + (prepaid_billing_start.month + prepaid_months - 1) // 12,
+                (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
+                prepaid_billing_start.day,
+            )
+            logger.warn(f"Checking billing_cycle in {prepaid_until} qumulo allocations")
 
 def check_allocations() -> None:
     resource = Resource.objects.get(name="Storage2")
@@ -65,20 +79,7 @@ def check_allocations() -> None:
             allocation.prepaid_expiration,
         )
 
-    def calculate_prepaid_expiration(
-        bill_cycle, prepaid_months, prepaid_billing_start, prepaid_expiration
-    ) -> None:
-        logger.warn(f"Calculation prepaid expiration")
-        if bill_cycle == "prepaid" and prepaid_expiration == "":
-            logger.warn(f"Inside if statement")
-            prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
-            prepaid_until = datetime(
-                prepaid_billing_start.year
-                + (prepaid_billing_start.month + prepaid_months - 1) // 12,
-                (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
-                prepaid_billing_start.day,
-            )
-            logger.warn(f"Checking billing_cycle in {prepaid_until} qumulo allocations")
+   
 
     # def conditionally_update_billing_cycle_types() -> None:
     #     logger.warn(
