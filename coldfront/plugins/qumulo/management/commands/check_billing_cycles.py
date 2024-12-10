@@ -29,7 +29,7 @@ def calculate_prepaid_expiration(
 ) -> None:
     logger.warn(f"Calculation prepaid expiration")
     logger.warn(f"{prepaid_expiration}")
-    if bill_cycle == "prepaid" and prepaid_expiration == "":
+    if bill_cycle == "prepaid" and prepaid_expiration == None:
         logger.warn(f"Inside if statement")
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
         prepaid_until = datetime(
