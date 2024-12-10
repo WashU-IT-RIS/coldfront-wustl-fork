@@ -38,7 +38,7 @@ def calculate_prepaid_expiration(
             (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
             prepaid_billing_start.day,
         )
-        logger.warn(f"Checking billing_cycle in {prepaid_until} qumulo allocations")
+        logger.warn(f"{prepaid_until}")
 
 
 def check_allocations() -> None:
