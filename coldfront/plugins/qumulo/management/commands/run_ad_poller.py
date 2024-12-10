@@ -6,7 +6,7 @@ from coldfront.plugins.qumulo.tasks import (
     poll_ad_groups,
     conditionally_update_storage_allocation_statuses,
 )
-from coldfront.plugins.qumulo.management.commands.billing_cycle_manager import (
+from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
     check_allocations,
 )
 
