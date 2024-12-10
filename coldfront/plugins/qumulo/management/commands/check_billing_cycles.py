@@ -24,7 +24,7 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
-class BillingCycleManager:
+def check_allocations() -> None:
     resource = Resource.objects.get(name="Storage2")
     allocations = Allocation.objects.filter(status__name="Active", resources=resource)
     billing_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
@@ -55,13 +55,9 @@ class BillingCycleManager:
         prepaid_billing_start=Subquery(prepaid_billing_date_sub_q),
         prepaid_months=Subquery(prepaid_months_sub_q),
     )
-
-    def check_allocations() -> None:
-        logger.warn(
-            f"Checking billing_cycle in {len(BillingCycleManager.allocations)} qumulo allocations"
-        )
-        for allocation in BillingCycleManager.allocations:
-            logger.warn(f"{allocation.billing_cycle}")
+    logger.warn(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
+    for allocation in allocations:
+        logger.warn(f"{allocation.billing_cycle}")
 
     # def conditionally_update_billing_cycle_types() -> None:
     #     logger.warn(

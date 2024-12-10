@@ -8,7 +8,9 @@ from coldfront.plugins.qumulo.tasks import (
     conditionally_update_storage_allocation_statuses,
 )
 
-from coldfront.plugins.qumulo.utils.billing_cycle_manager import check_allocations
+from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
+    check_allocations,
+)
 
 logger = logging.getLogger(__name__)
 
