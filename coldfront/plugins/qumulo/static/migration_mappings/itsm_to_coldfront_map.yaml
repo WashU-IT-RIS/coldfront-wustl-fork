@@ -350,7 +350,7 @@ itsm_to_coldfront_map:
                   allow_blank: true
       - entity: allocation_form
         attributes:
-          - name: storage_protocols
+          - name: protocols
             value:
               type: string
               transforms: comment_to_protocols
