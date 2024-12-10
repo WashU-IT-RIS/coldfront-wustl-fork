@@ -361,6 +361,7 @@ itsm_to_coldfront_map:
       attribute: comment
       type: text
       nulls: true
+      defaults_to: {}
   billing_cycle:
     coldfront:
       - entity: allocation_attribute
