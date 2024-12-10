@@ -11,7 +11,7 @@ from icecream import ic
 
 class Command(BaseCommand):
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser) -> None:
         parser.add_argument(
             "fileset", type=str, help="The fileset_name or fileset_alias"
         )
@@ -21,7 +21,7 @@ class Command(BaseCommand):
             help="Queries by fileset_alias instead of by fileset_name",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args, **options) -> str:
         fileset = options["fileset"]
         ic(fileset)
         find_by_alias = options["fileset_alias"]
@@ -34,3 +34,4 @@ class Command(BaseCommand):
             result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset)
 
         ic(result)
+        return result

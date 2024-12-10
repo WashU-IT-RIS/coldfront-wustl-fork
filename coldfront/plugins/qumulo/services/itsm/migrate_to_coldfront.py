@@ -28,18 +28,18 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
 
 class MigrateToColdfront:
 
-    def by_fileset_alias(self, fileset_alias):
+    def by_fileset_alias(self, fileset_alias) -> str:
         itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
         result = self.__create_by(fileset_alias, itsm_result)
         return result
 
-    def by_fileset_name(self, fileset_name):
+    def by_fileset_name(self, fileset_name) -> str:
         itsm_result = self.__get_itsm_allocation_by_fileset_name(fileset_name)
         result = self.__create_by(fileset_name, itsm_result)
         return result
 
     # Private Methods
-    def __create_by(self, fileset_key, itsm_result):
+    def __create_by(self, fileset_key, itsm_result) -> str:
         self.__validate_itsm_result_set(fileset_key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
@@ -53,14 +53,15 @@ class MigrateToColdfront:
 
                 field_error_massages[field.itsm_attribute_name] += validation_messages
 
-
         if field_error_massages:
-            raise Exception("Validation error messages: ", field_error_massages)
+            errors = {"errors": field_error_massages}
+            raise Exception("Validation messages: ", errors)
 
-        pi_user = self.__create_user(fields)
-        project = self.__create_project(pi_user)
-        self.__create_project_user(project, pi_user)
-        self.__create_project_attributes(fields, project)
+        pi_user = self.__get_or_create_user(fields)
+        project, created = self.__get_or_create_project(pi_user)
+        if created:
+            self.__create_project_user(project, pi_user)
+            self.__create_project_attributes(fields, project)
         allocation = self.__create_allocation(fields, project, pi_user)
         self.__create_allocation_attributes(fields, allocation)
         return {
@@ -69,12 +70,12 @@ class MigrateToColdfront:
             "pi_user_id": pi_user.id,
         }
 
-    def __get_itsm_allocation_by_fileset_name(self, fileset_name):
+    def __get_itsm_allocation_by_fileset_name(self, fileset_name) -> str:
         itsm_client = ItsmClient()
         itsm_allocation = itsm_client.get_fs1_allocation_by_fileset_name(fileset_name)
         return itsm_allocation
 
-    def __get_itsm_allocation_by_fileset_alias(self, fileset_alias):
+    def __get_itsm_allocation_by_fileset_alias(self, fileset_alias) -> str:
         itsm_client = ItsmClient()
         itsm_allocation = itsm_client.get_fs1_allocation_by_fileset_alias(fileset_alias)
         return itsm_allocation
@@ -93,15 +94,22 @@ class MigrateToColdfront:
 
         return True
 
-    def __create_user(self, fields):
+    def __get_or_create_user(self, fields) -> User:
         username = self.__get_username(fields)
-        user = User.objects.create(
+        user, _ = User.objects.get_or_create(
             username=username,
             email=f"{username}@wustl.edu",
         )
         return user
 
-    def __create_project(self, pi_user):
+    def __get_or_create_project(self, pi_user) -> Project:
+        project_query = Project.objects.filter(
+            title=pi_user.username,
+            pi=pi_user,
+        )
+        if project_query.exists():
+            return (project_query[0], False)
+
         description = f"project for {pi_user.username}"
         title = pi_user.username
         field_of_science = FieldOfScience.objects.get(description="Other")
@@ -116,13 +124,13 @@ class MigrateToColdfront:
             force_review=False,
             requires_review=False,
         )
-        return project
+        return (project, True)
 
-    def __create_project_user(self, project, pi_user):
+    def __create_project_user(self, project, pi_user) -> ProjectUser:
         pi_role = ProjectUserRoleChoice.objects.get(name="Manager")
         user_status = ProjectUserStatusChoice.objects.get(name="Active")
 
-        project_user = ProjectUser.objects.create(
+        project_user = ProjectUser.objects.get_or_create(
             user=pi_user,
             project=project,
             role=pi_role,
@@ -130,7 +138,7 @@ class MigrateToColdfront:
         )
         return project_user
 
-    def __create_project_attributes(self, fields, project):
+    def __create_project_attributes(self, fields, project) -> None:
         project_attributes = filter(
             lambda field: field.entity == "project_attribute"
             and field.value is not None,
@@ -148,7 +156,7 @@ class MigrateToColdfront:
                         value=field.value,
                     )
 
-    def __create_allocation(self, fields, project, pi_user):
+    def __create_allocation(self, fields, project, pi_user) -> str:
         attributes_for_allocation = filter(
             lambda field: field.entity == "allocation_form", fields
         )
@@ -164,7 +172,7 @@ class MigrateToColdfront:
         )
         return service_result["allocation"]
 
-    def __create_allocation_attributes(self, fields, allocation):
+    def __create_allocation_attributes(self, fields, allocation) -> None:
         allocation_attributes = filter(
             lambda field: field.entity == "allocation_attribute"
             and field.value is not None,
@@ -183,7 +191,7 @@ class MigrateToColdfront:
                         defaults={"value": field.value},
                     )
 
-    def __get_username(self, fields):
+    def __get_username(self, fields) -> str:
         username = None
         for field in fields:
             username = field.get_username()
