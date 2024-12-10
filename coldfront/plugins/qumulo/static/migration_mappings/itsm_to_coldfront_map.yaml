@@ -348,6 +348,14 @@ itsm_to_coldfront_map:
               validates:
                 validate_json:
                   allow_blank: true
+      - entity: allocation_form
+        attributes:
+          - name: name
+            value:
+              type: string
+              transforms: comment_to_protocols
+              validates:
+                inclusion: [smb, nfs]
     itsm_value:
       entity: service_provision
       attribute: comment
