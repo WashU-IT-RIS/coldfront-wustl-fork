@@ -1,8 +1,6 @@
 import datetime
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
-import formencode
-from formencode import validators, Invalid
+from formencode import validators
 import json
 
 from coldfront.core.constants import BILLING_CYCLE_OPTIONS
@@ -54,14 +52,6 @@ class AttributeValidator:
                 f"Invalid Value. Value must be valid JSON:\n {self.value}"
             )
 
-    def validate_billing_cycle(self):
-        try:
-            validate = validators.OneOf(BILLING_CYCLE_OPTIONS)
-            validate.to_python(self.value)
-        except:
-            raise ValidationError(
-                f"Invalid Value {self.value}. Value must be one of {BILLING_CYCLE_OPTIONS}."
-            )
 
 class AllocationAttributeValidator:
 
@@ -70,13 +60,9 @@ class AllocationAttributeValidator:
 
     def validate_billing_cycle(self):
         try:
-            validate = validators.OneOf(BILLING_CYCLE_OPTIONS)
+            validate = validators.OneOf([option[0] for option in BILLING_CYCLE_OPTIONS])
             validate.to_python(self.value)
         except:
             raise ValidationError(
-                f"Invalid Value {self.value}. Value must be one of {BILLING_CYCLE_OPTIONS}."
+                f"Invalid Value {self.value}. Value must be one of {[option[0] for option in BILLING_CYCLE_OPTIONS]}."
             )
-
-# jprew - TODO - do we need this?
-# class ProjectAttributeValidator:
-#     pass
