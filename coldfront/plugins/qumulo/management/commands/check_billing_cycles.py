@@ -45,8 +45,8 @@ def calculate_prepaid_expiration(
             allocation_attribute_type=prepaid_exp_attribute,
             value=prepaid_until,
         )
-        logger.warn(f"{prepaid_until}")
-        logger.warn(f"{allocation.prepaid_expiration}")
+        # logger.warn(f"{prepaid_until}")
+        # logger.warn(f"{allocation.prepaid_expiration}")
 
 
 def check_allocations() -> None:
