@@ -63,6 +63,7 @@ class AttributeValidator:
                 f"Invalid Value {self.value}. Value must be one of {BILLING_CYCLE_OPTIONS}."
             )
 
+
 class AllocationAttributeValidator:
 
     def __init__(self, value):
@@ -76,7 +77,3 @@ class AllocationAttributeValidator:
             raise ValidationError(
                 f"Invalid Value {self.value}. Value must be one of {BILLING_CYCLE_OPTIONS}."
             )
-
-# jprew - TODO - do we need this?
-# class ProjectAttributeValidator:
-#     pass
