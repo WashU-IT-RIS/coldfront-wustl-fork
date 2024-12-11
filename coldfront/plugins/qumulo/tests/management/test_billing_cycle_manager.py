@@ -17,6 +17,7 @@ from datetime import datetime
 
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
     calculate_prepaid_expiration,
+    check_allocations,
 )
 
 
