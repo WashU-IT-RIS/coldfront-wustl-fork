@@ -70,7 +70,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         }
         return super().setUp()
 
-    def prepaid_past_expiration_date(self) -> None:
+    def prepaid_past_expiration_date(self):
         allocation = create_allocation(
             self.project, self.user, self.prepaid_past_form_data
         )
