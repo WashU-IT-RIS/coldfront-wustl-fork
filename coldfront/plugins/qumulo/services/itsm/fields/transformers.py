@@ -11,7 +11,7 @@ def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # bisiademuyiwa_active --> /storage2/fs1/bisiademuyiwa
     # gc6159 --> /storage2/fs1/gc6159
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    storage_filesystem_path = f"/{__get_storage2_base_path()}/{fileset_name_seed}"
+    storage_filesystem_path = f"{__get_storage2_base_path()}/{fileset_name_seed}"
 
     return storage_filesystem_path
 
@@ -19,7 +19,7 @@ def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
 def fileset_name_to_storage_export_path(fileset_name_or_alias) -> str:
     # TODO I cannot figure out from the code how to populate this.
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    export_path = f"/{__get_storage2_base_path()}/{fileset_name_seed}"
+    export_path = f"{__get_storage2_base_path()}/{fileset_name_seed}"
 
     return export_path
 
@@ -45,17 +45,19 @@ def fileset_name_to_storage_name(value) -> str:
     # fileset_name= "gc6159" --> "gc6159"
     return value.split("_active")[0]
 
-
+# Example: "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing".split(",")
+# return ['akronzer', 'derek.harford', 'd.ken', 'ehogue', 'jiaoy', 'perezm', 'xuebing']
+# from this array, create a user from every element in the array
 def acl_group_members_to_aggregate_create_users(value) -> str:
-    # Example: "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing".split(",")
-    # return ['akronzer', 'derek.harford', 'd.ken', 'ehogue', 'jiaoy', 'perezm', 'xuebing']
-    # from this array, create a user from every element in the array
+    if value is None:
+        return
+
     return value.split(",")
 
 
 def string_parsing_quota_and_unit_to_integer(value: str) -> int:
     if value is None:
-        raise Exception(f"The quota is null (None).")
+        return
 
     # all values in ITSM are kept in TB (T) and some in GB (G).
     if value[-1] == "T":
@@ -64,9 +66,7 @@ def string_parsing_quota_and_unit_to_integer(value: str) -> int:
     if value[-1] == "G":
         return int(math.ceil(int(value[:-1]) / 1000))
 
-    raise Exception(
-        f'The quota "{value}" is not valid. The unit is not T (for TB) or G (for GB), or the it is missing.'
-    )
+    return
 
 
 # service_provision.audit values: ["0", "1", "false", "true", null]
@@ -87,5 +87,4 @@ def truthy_or_falsy_to_boolean(value, default_value=None):
 
 
 def __get_storage2_base_path():
-    STORAGE2_BASE_PATH = os.environ.get("STORAGE2_PATH").strip("/")
-    return STORAGE2_BASE_PATH
+    return os.environ.get("STORAGE2_PATH")

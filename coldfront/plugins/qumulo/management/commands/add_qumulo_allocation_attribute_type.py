@@ -127,8 +127,7 @@ class Command(BaseCommand):
             is_unique=False,
         )
 
-        # jprew - here is where I'm adding ITDEV-35273-related attribute types
-        # for the allocation collection
+        # these are the fields that will be migrated from Storage1
         AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Yes/No"),
             name="secure",

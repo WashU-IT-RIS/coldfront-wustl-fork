@@ -27,7 +27,7 @@ itsm_to_coldfront_map:
       type: string
   acl_group_members:
     coldfront:
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: rw_users
             value:
@@ -56,7 +56,7 @@ itsm_to_coldfront_map:
                 presence: true
                 length:
                   maximum: 128
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: department_number
             value:
@@ -73,19 +73,7 @@ itsm_to_coldfront_map:
       nulls: true
   funding_number:
     coldfront:
-      - entity: allocation_attribute
-        attributes:
-          - name: allocation_attribute_type__name
-            value: funding_number
-          - name: value
-            value:
-              type: string
-              transforms: null
-              validates:
-                presence: true
-                length:
-                  maximum: 128
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: cost_center
             value:
@@ -168,7 +156,7 @@ itsm_to_coldfront_map:
               validates:
                 presence: true
                 validate_ticket: true
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: service_desk_ticket_number
             value:
@@ -235,7 +223,7 @@ itsm_to_coldfront_map:
       attribute: sponsor_department_number
       type: string
       nulls: true
-      defaults_to: ''
+      defaults_to: ""
   fileset_name:
     coldfront:
       - entity: allocation_attribute
@@ -250,7 +238,7 @@ itsm_to_coldfront_map:
                 presence: true
                 length:
                   maximum: 128
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: storage_filesystem_path
             value:
@@ -261,13 +249,13 @@ itsm_to_coldfront_map:
                 uniqueness:
                   entity: AllocationAttribute
                   entity_attribute: allocation_attribute_type__name
-                  attribute_name_value: storage_name
+                  attribute_name_value: storage_filesystem_path
                 length:
                   maximum: 128
-      - entity: allocation
-        attributes:          
+      - entity: allocation_form
+        attributes:
           - name: storage_export_path
-            value: 
+            value:
               type: string
               transforms: fileset_name_to_storage_export_path
               validates:
@@ -275,10 +263,10 @@ itsm_to_coldfront_map:
                 uniqueness:
                   entity: AllocationAttribute
                   entity_attribute: allocation_attribute_type__name
-                  attribute_name_value: storage_name
+                  attribute_name_value: storage_export_path
                 length:
                   maximum: 128
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: storage_name
             value:
@@ -332,7 +320,7 @@ itsm_to_coldfront_map:
       defaults_to: false
   service_rate_category:
     coldfront:
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: service_rate
             value:
@@ -360,11 +348,20 @@ itsm_to_coldfront_map:
               validates:
                 validate_json:
                   allow_blank: true
+      - entity: allocation_form
+        attributes:
+          - name: protocols
+            value:
+              type: string
+              transforms: comment_to_protocols
+              validates:
+                inclusion: [smb, nfs]
     itsm_value:
       entity: service_provision
       attribute: comment
       type: text
       nulls: true
+      defaults_to: {}
   billing_cycle:
     coldfront:
       - entity: allocation_attribute
@@ -406,7 +403,7 @@ itsm_to_coldfront_map:
       defaults_to: false
   quota:
     coldfront:
-      - entity: allocation
+      - entity: allocation_form
         attributes:
           - name: storage_quota
             value:
@@ -425,9 +422,9 @@ itsm_to_coldfront_map:
       nulls: true
   allow_nonfaculty:
     coldfront:
-      - entity: allocation_attribute
+      - entity: project_attribute
         attributes:
-          - name: allocation_attribute_type__name
+          - name: proj_attr_type
             value: allow_nonfaculty
           - name: value
             value:
@@ -459,7 +456,7 @@ itsm_to_coldfront_map:
       entity: service_provision
       attribute: sla
       type: string
-      defaults_to: ''
+      defaults_to: ""
   is_condo_group:
     coldfront:
       - entity: project_attribute

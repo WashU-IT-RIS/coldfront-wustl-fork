@@ -1,4 +1,5 @@
 import re, json
+from icecream import ic
 
 import coldfront.core.allocation.models as coldfront_models
 
@@ -105,12 +106,12 @@ def ad_record_exist(value, validate: bool = True):
 
 # This is a simple uniqueness validator that finds if a record exists for a
 # given entity (table), attribute (field), and value.
-# Note that the field is hardcoded to allocation_attribute_type__name since I need to 
-# figure out how to pass the entity_attribute from the conditions['entity_attribute'] to the filter. 
+# Note that the field is hardcoded to allocation_attribute_type__name since I need to
+# figure out how to pass the entity_attribute from the conditions['entity_attribute'] to the filter.
 # This seemed promissing to no avail: exec(f"{conditions['entity_attribute']}")
 def uniqueness(value, conditions):
 
-    # SELECT "allocation_allocationattribute"."id", "allocation_allocationattribute"."created", "allocation_allocationattribute"."modified", "allocation_allocationattribute"."allocation_attribute_type_id", "allocation_allocationattribute"."allocation_id", "allocation_allocationattribute"."value" FROM "allocation_allocationattribute" INNER JOIN "allocation_allocationattributetype" ON ("allocation_allocationattribute"."allocation_attribute_type_id" = "allocation_allocationattributetype"."id") WHERE ("allocation_allocationattributetype"."name" = storage_name AND "allocation_allocationattribute"."value" = /storage2-dev/jin810)
+    # SELECT "allocation_allocationattribute"."id", "allocation_allocationattribute"."created", "allocation_allocationattribute"."modified", "allocation_allocationattribute"."allocation_attribute_type_id", "allocation_allocationattribute"."allocation_id", "allocation_allocationattribute"."value" FROM "allocation_allocationattribute" INNER JOIN "allocation_allocationattributetype" ON ("allocation_allocationattribute"."allocation_attribute_type_id" = "allocation_allocationattributetype"."id") WHERE ("allocation_allocationattributetype"."name" = storage_name AND "allocation_allocationattribute"."value" = /storage2-dev/fs1/jin810)
     exists = (
         getattr(coldfront_models, conditions["entity"])
         .objects.filter(
@@ -119,8 +120,7 @@ def uniqueness(value, conditions):
         )
         .exists()
     )
-
     if exists:
-        return f"{value} is not unique"
+        return f"{value} is not unique for {conditions['attribute_name_value']}"
 
     return

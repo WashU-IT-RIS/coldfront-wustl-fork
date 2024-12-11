@@ -1,3 +1,5 @@
+from icecream import ic
+
 from django.core.management.base import BaseCommand
 
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
@@ -9,25 +11,26 @@ from icecream import ic
 
 class Command(BaseCommand):
 
-    def handle(self, *args, **options):
+    def add_arguments(self, parser) -> None:
+        parser.add_argument(
+            "fileset", type=str, help="The fileset_name or fileset_alias"
+        )
+        parser.add_argument(
+            "--fileset_alias",
+            action="store_true",
+            help="Queries by fileset_alias instead of by fileset_name",
+        )
 
-        ic(args)
-        ic(options)
-
-        fileset_name = None
-        fileset_alias = None
-        for key, value in options.items():
-            if key == "fileset_name":
-                fileset_name = value
-            if key == "fileset_alias":
-                fileset_alias = value
+    def handle(self, *args, **options) -> None:
+        fileset = options["fileset"]
+        ic(fileset)
+        find_by_alias = options["fileset_alias"]
+        ic(find_by_alias)
 
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
-        result = None
-        if fileset_name:
-            result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset_name)
-
-        if fileset_alias:
-            result = migrate_from_itsm_to_coldfront.by_fileset_alias(fileset_alias)
+        if find_by_alias:
+            result = migrate_from_itsm_to_coldfront.by_fileset_alias(fileset)
+        else:
+            result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset)
 
         ic(result)

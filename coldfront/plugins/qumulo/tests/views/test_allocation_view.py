@@ -11,7 +11,8 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 
 
-@patch("coldfront.plugins.qumulo.services.allocation_service.AclAllocations")
+@patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
+@patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
 @patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
 class AllocationViewTests(TestCase):
     def setUp(self):
@@ -39,7 +40,8 @@ class AllocationViewTests(TestCase):
 
     def test_create_new_allocation_create_allocation(
         self,
-        mock_AclAllocations: MagicMock,
+        mock_ActiveDirectoryValidator: MagicMock,
+        mock_async_task: MagicMock,
         mock_ActiveDirectoryAPI: MagicMock,
     ):
         AllocationService.create_new_allocation(self.form_data, self.user)
@@ -72,7 +74,8 @@ class AllocationViewTests(TestCase):
 
     def test_new_allocation_status_is_pending(
         self,
-        mock_AclAllocations: MagicMock,
+        mock_ActiveDirectoryValidator: MagicMock,
+        mock_async_task: MagicMock,
         mock_ActiveDirectoryAPI: MagicMock,
     ):
         AllocationService.create_new_allocation(self.form_data, self.user)
