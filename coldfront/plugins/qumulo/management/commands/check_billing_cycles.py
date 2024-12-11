@@ -32,6 +32,7 @@ def calculate_prepaid_expiration(
     if bill_cycle == "prepaid" and prepaid_expiration == None:
         logger.warn(f"Inside if statement")
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
+        prepaid_months = int(prepaid_months)
         prepaid_until = datetime(
             prepaid_billing_start.year
             + (prepaid_billing_start.month + prepaid_months - 1) // 12,
