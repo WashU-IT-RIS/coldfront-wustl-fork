@@ -1,4 +1,8 @@
-BILLING_CYCLE_OPTIONS = ["monthly", "prepaid"]
+BILLING_CYCLE_OPTIONS = [
+    ("monthly", "Monthly"),
+    ("prepaid", "Prepayment"),
+    ("yearly", "Yearly"),
+]
 
 ALL_ATTRIBUTE_TYPES = [
     "Date",
