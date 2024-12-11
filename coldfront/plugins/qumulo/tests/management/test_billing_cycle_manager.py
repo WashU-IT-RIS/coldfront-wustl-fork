@@ -104,7 +104,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation=allocation,
             allocation_attribute_type=prepaid_expiration_attribute,
         ).value
-        self.assertEqual(datetime(prepaid_exp_value), prepaid_until)
+        self.assertEqual(prepaid_exp_value, str(prepaid_until))
 
 
 # def all_allocations_checked(self) -> None:
