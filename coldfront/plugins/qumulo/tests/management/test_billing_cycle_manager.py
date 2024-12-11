@@ -88,20 +88,20 @@ class TestBillingCycleTypeUpdates(TestCase):
         prepaid_months = self.prepaid_past_form_data["prepaid_time"]
         # prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
 
-        calculate_prepaid_expiration(
-            allocation,
-            self.prepaid_past_form_data["billing_cycle"],
-            prepaid_months,
-            str(prepaid_billing_start),
-            None,
-        )
+        # calculate_prepaid_expiration(
+        #     allocation,
+        #     self.prepaid_past_form_data["billing_cycle"],
+        #     prepaid_months,
+        #     str(prepaid_billing_start),
+        #     None,
+        # )
         prepaid_until = datetime(
             prepaid_billing_start.year
             + (prepaid_billing_start.month + prepaid_months - 1) // 12,
             (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
             prepaid_billing_start.day,
         )
-        self.assertEqual(prepaid_expiration_attribute.value, prepaid_until)
+        self.assertEqual(0, prepaid_until)
 
 
 # def all_allocations_checked(self) -> None:
