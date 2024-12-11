@@ -15,6 +15,10 @@ from coldfront.core.allocation.models import (
 )
 from datetime import datetime
 
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 
 class TestBillingCycleTypeUpdates(TestCase):
     def setUp(self):
