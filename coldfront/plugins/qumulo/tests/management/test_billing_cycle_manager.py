@@ -89,7 +89,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             self.prepaid_past_form_data["billing_cycle"],
             prepaid_months,
             prepaid_billing_start,
-            prepaid_expiration_attribute.value,
+            None,
         )
         prepaid_until = datetime(
             prepaid_billing_start.year
