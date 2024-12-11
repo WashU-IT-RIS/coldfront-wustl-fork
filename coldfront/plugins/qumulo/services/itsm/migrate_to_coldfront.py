@@ -3,9 +3,10 @@ from coldfront.core.field_of_science.models import FieldOfScience
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 
 from coldfront.core.allocation.models import (
-    Project,
+    Allocation,
     AllocationAttribute,
     AllocationAttributeType,
+    Project,
     User,
 )
 
@@ -28,18 +29,18 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
 
 class MigrateToColdfront:
 
-    def by_fileset_alias(self, fileset_alias) -> str:
+    def by_fileset_alias(self, fileset_alias: str) -> str:
         itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
         result = self.__create_by(fileset_alias, itsm_result)
         return result
 
-    def by_fileset_name(self, fileset_name) -> str:
+    def by_fileset_name(self, fileset_name: str) -> str:
         itsm_result = self.__get_itsm_allocation_by_fileset_name(fileset_name)
         result = self.__create_by(fileset_name, itsm_result)
         return result
 
     # Private Methods
-    def __create_by(self, fileset_key, itsm_result) -> str:
+    def __create_by(self, fileset_key: str, itsm_result: str) -> str:
         self.__validate_itsm_result_set(fileset_key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
@@ -70,17 +71,17 @@ class MigrateToColdfront:
             "pi_user_id": pi_user.id,
         }
 
-    def __get_itsm_allocation_by_fileset_name(self, fileset_name) -> str:
+    def __get_itsm_allocation_by_fileset_name(self, fileset_name: str) -> str:
         itsm_client = ItsmClient()
         itsm_allocation = itsm_client.get_fs1_allocation_by_fileset_name(fileset_name)
         return itsm_allocation
 
-    def __get_itsm_allocation_by_fileset_alias(self, fileset_alias) -> str:
+    def __get_itsm_allocation_by_fileset_alias(self, fileset_alias: str) -> list:
         itsm_client = ItsmClient()
         itsm_allocation = itsm_client.get_fs1_allocation_by_fileset_alias(fileset_alias)
         return itsm_allocation
 
-    def __validate_itsm_result_set(self, fileset_key, itsm_result) -> bool:
+    def __validate_itsm_result_set(self, fileset_key: str, itsm_result: list) -> bool:
         how_many = len(itsm_result)
         # ITSM does not return a respond code of 404 when the service provision record is not found.
         # Instead, it returns an empty array.
@@ -94,7 +95,7 @@ class MigrateToColdfront:
 
         return True
 
-    def __get_or_create_user(self, fields) -> User:
+    def __get_or_create_user(self, fields: list) -> User:
         username = self.__get_username(fields)
         user, _ = User.objects.get_or_create(
             username=username,
@@ -102,7 +103,7 @@ class MigrateToColdfront:
         )
         return user
 
-    def __get_or_create_project(self, pi_user) -> Project:
+    def __get_or_create_project(self, pi_user: User) -> Project:
         project_query = Project.objects.filter(
             title=pi_user.username,
             pi=pi_user,
@@ -126,7 +127,7 @@ class MigrateToColdfront:
         )
         return (project, True)
 
-    def __create_project_user(self, project, pi_user) -> ProjectUser:
+    def __create_project_user(self, project: Project, pi_user: User) -> ProjectUser:
         pi_role = ProjectUserRoleChoice.objects.get(name="Manager")
         user_status = ProjectUserStatusChoice.objects.get(name="Active")
 
@@ -138,7 +139,7 @@ class MigrateToColdfront:
         )
         return project_user
 
-    def __create_project_attributes(self, fields, project) -> None:
+    def __create_project_attributes(self, fields: list, project: Project) -> None:
         project_attributes = filter(
             lambda field: field.entity == "project_attribute"
             and field.value is not None,
@@ -156,7 +157,7 @@ class MigrateToColdfront:
                         value=field.value,
                     )
 
-    def __create_allocation(self, fields, project, pi_user) -> str:
+    def __create_allocation(self, fields: list, project: Project, pi_user: User) -> str:
         attributes_for_allocation = filter(
             lambda field: field.entity == "allocation_form", fields
         )
@@ -172,7 +173,9 @@ class MigrateToColdfront:
         )
         return service_result["allocation"]
 
-    def __create_allocation_attributes(self, fields, allocation) -> None:
+    def __create_allocation_attributes(
+        self, fields: list, allocation: Allocation
+    ) -> None:
         allocation_attributes = filter(
             lambda field: field.entity == "allocation_attribute"
             and field.value is not None,
@@ -191,7 +194,7 @@ class MigrateToColdfront:
                         defaults={"value": field.value},
                     )
 
-    def __get_username(self, fields) -> str:
+    def __get_username(self, fields: list) -> str:
         username = None
         for field in fields:
             username = field.get_username()

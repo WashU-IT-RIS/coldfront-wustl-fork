@@ -137,7 +137,7 @@ itsm_to_coldfront_map:
               type: Yes/No
               transforms: truthy_or_falsy_to_boolean
               validates:
-                inclusion: [true, false]
+                inclusion: ["Yes", "No"]
     itsm_value:
       entity: service_provision
       attribute: secure
@@ -180,7 +180,7 @@ itsm_to_coldfront_map:
               type: Yes/No
               transforms: truthy_or_falsy_to_boolean
               validates:
-                inclusion: [true, false]
+                inclusion: ["Yes", "No"]
     itsm_value:
       entity: service_provision
       attribute: audit
@@ -311,7 +311,7 @@ itsm_to_coldfront_map:
               type: Yes/No
               transforms: truthy_or_falsy_to_boolean
               validates:
-                inclusion: [true, false]
+                inclusion: ["Yes", "No"]
     itsm_value:
       entity: service_provision
       attribute: exempt
@@ -394,7 +394,7 @@ itsm_to_coldfront_map:
               type: Yes/No
               transforms: truthy_or_falsy_to_boolean
               validates:
-                inclusion: [true, false]
+                inclusion: ["Yes", "No"]
     itsm_value:
       entity: service_provision
       attribute: subsidized
@@ -431,7 +431,7 @@ itsm_to_coldfront_map:
               type: Yes/No
               transforms: truthy_or_falsy_to_boolean
               validates:
-                inclusion: [true, false] # should NULL default to false?
+                inclusion: ["Yes", "No"]
     itsm_value:
       entity: service_provision
       attribute: allow_nonfaculty
@@ -468,7 +468,7 @@ itsm_to_coldfront_map:
               type: Yes/No
               transforms: truthy_or_falsy_to_boolean
               validates:
-                inclusion: [true, false] # should NULL default to false?
+                inclusion: ["Yes", "No"]
     itsm_value:
       entity: service_provision
       attribute: is_condo_group

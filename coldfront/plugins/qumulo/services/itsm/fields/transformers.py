@@ -45,6 +45,7 @@ def fileset_name_to_storage_name(value) -> str:
     # fileset_name= "gc6159" --> "gc6159"
     return value.split("_active")[0]
 
+
 # Example: "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing".split(",")
 # return ['akronzer', 'derek.harford', 'd.ken', 'ehogue', 'jiaoy', 'perezm', 'xuebing']
 # from this array, create a user from every element in the array
@@ -69,8 +70,22 @@ def string_parsing_quota_and_unit_to_integer(value: str) -> int:
     return
 
 
+def truthy_or_falsy_to_boolean(value, default_value=None) -> str:
+    transfromed_value = __truthy_or_falsy_to_boolean(value, default_value)
+    return __boolean_to_coldfront_yes_no(transfromed_value)
+
+
+def __boolean_to_coldfront_yes_no(value: bool) -> str:
+    if value is None:
+        return
+
+    if value:
+        return "Yes"
+    return "No"
+
+
 # service_provision.audit values: ["0", "1", "false", "true", null]
-def truthy_or_falsy_to_boolean(value, default_value=None):
+def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
     if value is None:
         return default_value
 

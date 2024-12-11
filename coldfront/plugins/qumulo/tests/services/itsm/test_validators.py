@@ -196,5 +196,5 @@ class TestValidators(TestCase):
 
         self.assertEqual(
             uniqueness(value_to_be_compared, conditions),
-            f"{value_to_be_compared} is not unique",
+            f"{value_to_be_compared} is not unique for storage_name",
         )

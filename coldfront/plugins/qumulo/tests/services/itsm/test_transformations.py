@@ -97,17 +97,17 @@ class TestValidators(TestCase):
             )
 
     def test_truthy_or_falsy_to_boolean(self):
-        self.assertTrue(truthy_or_falsy_to_boolean("True"))
-        self.assertTrue(truthy_or_falsy_to_boolean("true"))
-        self.assertTrue(truthy_or_falsy_to_boolean("1"))
-        self.assertTrue(truthy_or_falsy_to_boolean(1))
-        self.assertTrue(truthy_or_falsy_to_boolean(True))
+        self.assertEqual("Yes", truthy_or_falsy_to_boolean("True"))
+        self.assertEqual("Yes", truthy_or_falsy_to_boolean("true"))
+        self.assertEqual("Yes", truthy_or_falsy_to_boolean("1"))
+        self.assertEqual("Yes", truthy_or_falsy_to_boolean(1))
+        self.assertEqual("Yes", truthy_or_falsy_to_boolean(True))
 
-        self.assertFalse(truthy_or_falsy_to_boolean("False"))
-        self.assertFalse(truthy_or_falsy_to_boolean("false"))
-        self.assertFalse(truthy_or_falsy_to_boolean("0"))
-        self.assertFalse(truthy_or_falsy_to_boolean(0))
-        self.assertFalse(truthy_or_falsy_to_boolean(False))
+        self.assertEqual("No", truthy_or_falsy_to_boolean("False"))
+        self.assertEqual("No", truthy_or_falsy_to_boolean("false"))
+        self.assertEqual("No", truthy_or_falsy_to_boolean("0"))
+        self.assertEqual("No", truthy_or_falsy_to_boolean(0))
+        self.assertEqual("No", truthy_or_falsy_to_boolean(False))
 
         self.assertIsNone(truthy_or_falsy_to_boolean(None))
         defaults_to = True
