@@ -43,7 +43,7 @@ def calculate_prepaid_expiration(
         AllocationAttribute.objects.filter(
             allocation=allocation, allocation_attribute_type=prepaid_exp_attribute
         ).update(value=prepaid_until)
-        logger.warn(f"{prepaid_expiration}")
+        logger.warn(f"{allocation.prepaid_expiration}")
 
 
 def check_allocations() -> None:
