@@ -355,7 +355,7 @@ class TestAddUsersToADGroup(TestCase):
 
         addUsersToADGroup(wustlkeys, acl_allocation)
 
-        active_directory_instance.get_user.assert_called_once_with(wustlkeys[0])
+        active_directory_instance.get_member.assert_called_once_with(wustlkeys[0])
 
     def test_adds_new_task_with_sliced_list(
         self,
@@ -371,7 +371,7 @@ class TestAddUsersToADGroup(TestCase):
             "dn": "user_dn",
         }
         active_directory_instance = MagicMock()
-        active_directory_instance.get_user.return_value = mock_user_response
+        active_directory_instance.get_member.return_value = mock_user_response
         active_directory_instance.add_ad_user
         mock_active_directory_api.return_value = active_directory_instance
 
@@ -404,9 +404,8 @@ class TestAddUsersToADGroup(TestCase):
         mock_allocation_view_async_task: MagicMock,
     ):
         active_directory_instance = MagicMock()
-        active_directory_instance.get_user.side_effect = ValueError("Invalid wustlkey")
-        active_directory_instance.get_group.side_effect = ValueError(
-            "Invalid group_name"
+        active_directory_instance.get_member.side_effect = ValueError(
+            "Invalid wustlkey"
         )
         mock_active_directory_api.return_value = active_directory_instance
 
@@ -439,7 +438,7 @@ class TestAddUsersToADGroup(TestCase):
             "dn": "user_dn",
         }
         active_directory_instance = MagicMock()
-        active_directory_instance.get_user.return_value = mock_user_response
+        active_directory_instance.get_member.return_value = mock_user_response
         mock_active_directory_api.return_value = active_directory_instance
 
         wustlkeys = ["foo", "bar"]
@@ -489,12 +488,12 @@ class TestAddUsersToADGroup(TestCase):
 
         mock_send_email_template.assert_called_once()
 
-    def __get_user_mock(self, username: str, good_users: list[str]) -> dict:
-        mock_user_response = {
+    def __get_member_mock(self, account_name: str, good_users: list[str]) -> dict:
+        mock_member_response = {
             "dn": "user_dn",
         }
-        if username in good_users:
-            return mock_user_response
+        if account_name in good_users:
+            return mock_member_response
         else:
             raise ValueError("Invalid wustlkey")
 
@@ -536,11 +535,8 @@ class TestAddUsersToADGroup(TestCase):
         good_keys = wustlkeys[0:2]
 
         active_directory_instance = MagicMock()
-        active_directory_instance.get_user.side_effect = (
-            lambda username: self.__get_user_mock(username, good_keys)
-        )
-        active_directory_instance.get_group.side_effect = ValueError(
-            "Invalid group_name"
+        active_directory_instance.get_member.side_effect = (
+            lambda username: self.__get_member_mock(username, good_keys)
         )
         mock_active_directory_api.return_value = active_directory_instance
 

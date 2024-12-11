@@ -137,14 +137,10 @@ def addUsersToADGroup(
     wustlkey = wustlkeys[0]
 
     try:
-        user = active_directory_api.get_user(wustlkey)
+        user = active_directory_api.get_member(wustlkey)
         good_keys.append({"wustlkey": wustlkey, "dn": user["dn"]})
     except ValueError:
-        try:
-            group = active_directory_api.get_group(wustlkey)
-            good_keys.append({"wustlkey": wustlkey, "dn": group["dn"]})
-        except ValueError:
-            bad_keys.append(wustlkey)
+        bad_keys.append(wustlkey)
 
     async_task(addUsersToADGroup, wustlkeys[1:], acl_allocation, bad_keys, good_keys)
 
