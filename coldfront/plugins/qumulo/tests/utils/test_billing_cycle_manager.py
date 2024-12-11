@@ -15,9 +15,9 @@ from coldfront.core.allocation.models import (
 )
 from datetime import datetime
 
-from dotenv import load_dotenv
-
-load_dotenv(override=True)
+from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
+    calculate_prepaid_expiration,
+)
 
 
 class TestBillingCycleTypeUpdates(TestCase):
@@ -82,16 +82,14 @@ class TestBillingCycleTypeUpdates(TestCase):
         )
         prepaid_billing_start = self.prepaid_past_form_data["prepaid_billing_date"]
         prepaid_months = self.prepaid_past_form_data["prepaid_time"]
-        with patch(
-            "coldfront.plugins.qumulo.management.commands.check_billing_cycles"
-        ) as calculate_prepaid_expiration:
-            calculate_prepaid_expiration(
-                allocation,
-                self.prepaid_past_form_data["billing_cycle"],
-                prepaid_months,
-                prepaid_billing_start,
-                prepaid_expiration_attribute.value,
-            )
+
+        calculate_prepaid_expiration(
+            allocation,
+            self.prepaid_past_form_data["billing_cycle"],
+            prepaid_months,
+            prepaid_billing_start,
+            prepaid_expiration_attribute.value,
+        )
         prepaid_until = datetime(
             prepaid_billing_start.year
             + (prepaid_billing_start.month + prepaid_months - 1) // 12,
