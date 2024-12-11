@@ -64,5 +64,5 @@ class AllocationAttributeValidator:
             validate.to_python(self.value)
         except:
             raise ValidationError(
-                f"Invalid Value {self.value}. Value must be one of {[option[0] for option in BILLING_CYCLE_OPTIONS]}."
+                f"Invalid Value {self.value}. Value must be one of {", ".join([option[1] for option in BILLING_CYCLE_OPTIONS])}."
             )
