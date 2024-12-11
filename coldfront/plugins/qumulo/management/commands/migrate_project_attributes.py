@@ -31,7 +31,6 @@ class Command(BaseCommand):
         )
 
         for project in all_projects:
-            if getattr(project, attribute_name, None) is None:
-                ProjectAttribute.objects.create(
-                    proj_attr_type=attribute_type, project=project, value=default_value
-                )
+            ProjectAttribute.objects.get_or_create(
+                proj_attr_type=attribute_type, project=project, value=default_value
+            )
