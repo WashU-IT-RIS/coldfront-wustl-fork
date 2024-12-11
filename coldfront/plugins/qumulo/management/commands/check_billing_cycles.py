@@ -40,9 +40,11 @@ def calculate_prepaid_expiration(
             (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
             prepaid_billing_start.day,
         )
-        AllocationAttribute.objects.filter(
-            allocation=allocation, allocation_attribute_type=prepaid_exp_attribute
-        ).update(value=prepaid_until)
+        AllocationAttribute.objects.get_or_create(
+            allocation=allocation,
+            allocation_attribute_type=prepaid_exp_attribute,
+            value=prepaid_until,
+        )
         logger.warn(f"{prepaid_until}")
         logger.warn(f"{allocation.prepaid_expiration}")
 
