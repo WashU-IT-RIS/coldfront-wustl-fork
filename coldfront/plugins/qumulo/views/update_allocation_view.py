@@ -227,7 +227,7 @@ class UpdateAllocationView(AllocationView):
         users_to_remove = set(allocation_usernames) - set(access_users)
         for allocation_username in users_to_remove:
             allocation_users.get(user__username=allocation_username).delete()
-            active_directory_api.remove_user_from_group(
+            active_directory_api.remove_member_from_group(
                 allocation_username,
                 access_allocation.get_attribute("storage_acl_name"),
             )
