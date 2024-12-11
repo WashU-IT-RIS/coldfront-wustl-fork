@@ -97,7 +97,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             prepaid_billing_start.day,
         )
         prepaid_expiration_attribute = AllocationAttributeType.objects.get(
-            name="prepaid_expiration"
+            name="prepaid_expiration", allocation=allocation
         )
         self.assertEqual(prepaid_expiration_attribute.value, prepaid_until)
 
