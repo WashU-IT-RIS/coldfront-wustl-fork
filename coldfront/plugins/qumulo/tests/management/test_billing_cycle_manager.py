@@ -12,6 +12,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 
 from coldfront.core.allocation.models import (
     AllocationAttributeType,
+    AllocationAttribute,
 )
 from datetime import datetime
 
@@ -99,7 +100,11 @@ class TestBillingCycleTypeUpdates(TestCase):
         prepaid_expiration_attribute = AllocationAttributeType.objects.get(
             name="prepaid_expiration"
         )
-        self.assertEqual(prepaid_expiration_attribute, prepaid_until)
+        prepaid_exp_value = AllocationAttribute.objects.get(
+            allocation=allocation,
+            allocation_attribute_type=prepaid_expiration_attribute,
+        ).value
+        self.assertEqual(prepaid_exp_value, prepaid_until)
 
 
 # def all_allocations_checked(self) -> None:
