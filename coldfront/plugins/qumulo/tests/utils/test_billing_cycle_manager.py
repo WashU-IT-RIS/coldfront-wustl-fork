@@ -68,7 +68,6 @@ class TestBillingCycleTypeUpdates(TestCase):
             "billing_cycle": "prepaid",
             "prepaid_time": 0,
         }
-        return super().setUp()
 
     def prepaid_past_expiration_date(self):
         allocation = create_allocation(
