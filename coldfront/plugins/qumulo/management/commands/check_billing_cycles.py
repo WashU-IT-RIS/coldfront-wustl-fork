@@ -25,12 +25,13 @@ logger = logging.getLogger(__name__)
 
 
 def calculate_prepaid_expiration(
-    bill_cycle, prepaid_months, prepaid_billing_start, prepaid_expiration
+    allocation, bill_cycle, prepaid_months, prepaid_billing_start, prepaid_expiration
 ) -> None:
     logger.warn(f"Calculation prepaid expiration")
-    logger.warn(f"{prepaid_expiration}")
+    prepaid_exp_attribute = AllocationAttributeType.objects.get(
+        name="prepaid_expiration"
+    )
     if bill_cycle == "prepaid" and prepaid_expiration == None:
-        logger.warn(f"Inside if statement")
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
         prepaid_months = int(prepaid_months)
         prepaid_until = datetime(
@@ -39,7 +40,10 @@ def calculate_prepaid_expiration(
             (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
             prepaid_billing_start.day,
         )
-        logger.warn(f"{prepaid_until}")
+        AllocationAttribute.objects.filter(
+            allocation=allocation, allocation_attribute_type=prepaid_exp_attribute
+        ).update(value=prepaid_until)
+        logger.warn(f"{prepaid_expiration}")
 
 
 def check_allocations() -> None:
@@ -77,6 +81,7 @@ def check_allocations() -> None:
     for allocation in allocations:
         logger.warn(f"{allocation.billing_cycle}")
         calculate_prepaid_expiration(
+            allocation,
             allocation.billing_cycle,
             allocation.prepaid_months,
             allocation.prepaid_billing_start,
