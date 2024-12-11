@@ -107,7 +107,7 @@ class TestActiveDirectoryAPI(TestCase):
         )
         self.assertTrue(user_in_group)
 
-        self.ad_api.remove_user_from_group(self.test_wustlkey, group_name)
+        self.ad_api.remove_member_from_group(self.test_wustlkey, group_name)
         user_in_group = self.ad_api.conn.search(
             search_base="dc=accounts,dc=ad,dc=wustl,dc=edu",
             search_filter=self.user_in_group_filter(group_name),

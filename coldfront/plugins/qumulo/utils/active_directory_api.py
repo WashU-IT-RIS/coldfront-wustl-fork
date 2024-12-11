@@ -41,6 +41,18 @@ class ActiveDirectoryAPI:
 
         return self.conn.response[0]
 
+    def get_member(self, account_name: str):
+        self.conn.search(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            f"(&(|(objectclass=group)(objectclass=person))(sAMAccountName={account_name}))",
+            attributes=["sAMAccountName"],
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid account_name")
+
+        return self.conn.response[0]
+
     def get_user_by_email(self, email: str):
         if not email:
             raise ValueError(("email must be defined"))
@@ -97,11 +109,11 @@ class ActiveDirectoryAPI:
 
         return self.conn.delete(group_dn)
 
-    def remove_user_from_group(self, user_name: str, group_name: str):
-        user_dn = self.get_user(user_name)["dn"]
+    def remove_member_from_group(self, member_name: str, group_name: str):
+        member_dn = self.get_member(member_name)["dn"]
         group_dn = self.get_group_dn(group_name)
 
-        self.conn.modify(group_dn, {"member": [(MODIFY_DELETE, [user_dn])]})
+        self.conn.modify(group_dn, {"member": [(MODIFY_DELETE, [member_dn])]})
 
     @staticmethod
     def generate_group_dn(group_name: str) -> str:

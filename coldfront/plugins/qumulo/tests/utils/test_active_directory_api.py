@@ -168,27 +168,29 @@ class TestActiveDirectoryAPI(TestCase):
 
         self.mock_connection.delete.assert_called_once_with(group_dn)
 
-    def test_remove_user_from_group_gets_user_dn(self):
+    def test_remove_member_from_group_gets_user_dn(self):
         self.mock_connection.response = [
             {"dn": "user_dn", "attributes": {"other_attr": "value"}}
         ]
 
         user_name = "test_wustlkey"
-        expected_filter = f"(&(objectclass=person)(sAMAccountName={user_name}))"
+        expected_filter = (
+            f"(&(|(objectclass=group)(objectclass=person))(sAMAccountName={user_name}))"
+        )
 
-        self.ad_api.remove_user_from_group(user_name=user_name, group_name="bar")
+        self.ad_api.remove_member_from_group(member_name=user_name, group_name="bar")
 
         self.mock_connection.search.assert_has_calls(
             [
                 call(
                     "dc=accounts,dc=ad,dc=wustl,dc=edu",
                     expected_filter,
-                    attributes=["sAMAccountName", "mail", "givenName", "sn"],
+                    attributes=["sAMAccountName"],
                 )
             ]
         )
 
-    def test_remove_user_from_group_gets_group_dn(self):
+    def test_remove_member_from_group_gets_group_dn(self):
         groups_OU = os.environ.get("AD_GROUPS_OU")
         group_name = "some_group_name"
 
@@ -198,12 +200,12 @@ class TestActiveDirectoryAPI(TestCase):
 
         expected_filter = f"(&(objectclass=group)(sAMAccountName={group_name}))"
 
-        self.ad_api.remove_user_from_group("user_name", group_name)
+        self.ad_api.remove_member_from_group("user_name", group_name)
 
         self.mock_connection.search.assert_has_calls([call(groups_OU, expected_filter)])
 
     @patch("coldfront.plugins.qumulo.utils.active_directory_api.Connection")
-    def test_remove_user_from_group_calls_modify(self, mock_connection):
+    def test_remove_member_from_group_calls_modify(self, mock_connection):
         group_name = "some_group_name"
         user_name = "some_user_name"
         user_dn = "user_dn_foo"
@@ -211,7 +213,7 @@ class TestActiveDirectoryAPI(TestCase):
 
         with patch.object(
             ActiveDirectoryAPI,
-            "get_user",
+            "get_member",
             MagicMock(),
         ) as mock_get_user:
             with patch.object(
@@ -230,7 +232,7 @@ class TestActiveDirectoryAPI(TestCase):
                 ad_api = ActiveDirectoryAPI()
                 self.mock_connection.response = []
 
-                ad_api.remove_user_from_group(user_name, group_name)
+                ad_api.remove_member_from_group(user_name, group_name)
 
                 self.mock_connection.modify.assert_called_once_with(
                     group_dn, {"member": [(MODIFY_DELETE, [user_dn])]}
