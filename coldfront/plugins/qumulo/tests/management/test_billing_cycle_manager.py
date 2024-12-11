@@ -81,7 +81,9 @@ class TestBillingCycleTypeUpdates(TestCase):
         prepaid_expiration_attribute = AllocationAttributeType.objects.get(
             name="prepaid_expiration"
         )
-        prepaid_billing_start = self.prepaid_past_form_data["prepaid_billing_date"]
+        prepaid_billing_start = datetime.strptime(
+            self.prepaid_past_form_data["prepaid_billing_date"], "%Y-%m-%d"
+        )
         prepaid_months = self.prepaid_past_form_data["prepaid_time"]
         # prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
 
