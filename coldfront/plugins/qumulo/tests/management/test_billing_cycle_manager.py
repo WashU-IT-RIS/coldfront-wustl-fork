@@ -42,7 +42,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "general",
             "billing_cycle": "prepaid",
             "prepaid_time": 6,
-            "prepaid_billing_date": "11/01/2024",
+            "prepaid_billing_date": "2024-11-01",
         }
         self.prepaid_present_form_data = {
             "storage_filesystem_path": "foo",
