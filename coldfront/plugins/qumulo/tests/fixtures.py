@@ -1,5 +1,5 @@
-
 from coldfront.core.test_helpers.factories import (
+    AAttributeTypeFactory,
     AllocationAttributeTypeFactory,
     AllocationStatusChoiceFactory,
     AllocationUserStatusChoiceFactory,
@@ -14,6 +14,7 @@ from coldfront.core.test_helpers.factories import (
 
 from coldfront.core.test_helpers.factories import field_of_science_provider
 
+
 def create_allocation_assets() -> None:
     field_of_science_provider.add_element("Other")
     FieldOfScienceFactory(description="Other")
@@ -23,44 +24,53 @@ def create_allocation_assets() -> None:
     AllocationStatusChoiceFactory(name="Pending")
     AllocationUserStatusChoiceFactory(name="Active")
     allocation_attribute_names = [
-        "storage_name",
-        "storage_ticket",
-        "storage_quota",
-        "storage_protocols",
-        "storage_filesystem_path",
-        "storage_export_path",
-        "cost_center",
-        "department_number",
-        "technical_contact",
-        "billing_contact",
-        "service_rate",
-        "storage_acl_name",
-        "storage_allocation_pk",
-        "secure",
-        "audit",
-        "billing_startdate",
-        "sponsor_department_number",
-        "fileset_name",
-        "fileset_alias",
-        "exempt",
-        "itsm_comment",
-        "billing_cycle",
-        "subsidized",
-        "allow_nonfaculty",
-        "sla_name",
+        ("storage_name", "Text"),
+        ("storage_ticket", "Text"),
+        ("storage_quota", "Int"),
+        ("storage_protocols", "Text"),
+        ("storage_filesystem_path", "Text"),
+        ("storage_export_path", "Text"),
+        ("cost_center", "Text"),
+        ("department_number", "Text"),
+        ("technical_contact", "Text"),
+        ("billing_contact", "Text"),
+        ("service_rate", "Text"),
+        ("storage_acl_name", "Text"),
+        ("storage_allocation_pk", "Int"),
+        ("secure", "Yes/No"),
+        ("audit", "Yes/No"),
+        ("billing_startdate", "Date"),
+        ("sponsor_department_number", "Text"),
+        ("fileset_name", "Text"),
+        ("fileset_alias", "Text"),
+        ("exempt", "Yes/No"),
+        ("itsm_comment", "JSON"),
+        ("billing_cycle", "Text"),
+        ("subsidized", "Yes/No"),
+        ("allow_nonfaculty", "Yes/No"),
+        ("sla_name", "Text"),
     ]
-    for allocation_attribute_name in allocation_attribute_names:
-        AllocationAttributeTypeFactory(name=allocation_attribute_name)
+    for (
+        allocation_attribute_name,
+        allocation_attribute_type,
+    ) in allocation_attribute_names:
+
+        AllocationAttributeTypeFactory(
+            name=allocation_attribute_name,
+            attribute_type=AAttributeTypeFactory(
+                name=allocation_attribute_type
+            ),
+        )
 
     project_attribute_names = [
-        "is_condo_group",
-        "sponsor_department_number",
-        "allow_nonfaculty",
+        ("is_condo_group", "Yes/No"),
+        ("sponsor_department_number", "Text"),
+        ("allow_nonfaculty", "Yes/No"),
     ]
-    for project_attribute_name in project_attribute_names:
+    for project_attribute_name, project_attribute_type in project_attribute_names:
         ProjectAttributeTypeFactory(
             name=project_attribute_name,
-            attribute_type=PAttributeTypeFactory(name="Text"),
+            attribute_type=PAttributeTypeFactory(name=project_attribute_type),
         )
 
     ResourceFactory(name="Storage2")
