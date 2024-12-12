@@ -132,8 +132,22 @@ class TestBillingCycleTypeUpdates(TestCase):
         billing_cycle_attribute = AllocationAttributeType.objects.get(
             name="billing_cycle"
         )
+        prepaid_expiration_attribute = AllocationAttribute.objects.get(
+            name="prepaid_expiration"
+        )
+        prepaid_expiration = AllocationAttributeType.objects.get_or_create(
+            attribute_type=prepaid_expiration_attribute,
+            allocation=allocation,
+            value=datetime.today(),
+        )
 
-        conditionally_update_billing_cycle_types(allocation, billing_cycle_attribute)
+        conditionally_update_billing_cycle_types(
+            allocation,
+            billing_cycle_attribute,
+            self.prepaid_present_form_data["billing_cycle"],
+            prepaid_expiration,
+            self.prepaid_present_form_data["prepaid_billing_date"],
+        )
 
         self.assertEqual(billing_cycle_attribute, "prepaid")
 
