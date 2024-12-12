@@ -9,7 +9,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
 )
 
-
+import logging
 from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationAttribute,
@@ -21,6 +21,8 @@ from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
     check_allocations,
     conditionally_update_billing_cycle_types,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class TestBillingCycleTypeUpdates(TestCase):
@@ -143,6 +145,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         # prepaid_billing_start = datetime.strptime(
         #     self.prepaid_present_form_data["prepaid_billing_date"], "%Y-%m-%d"
         # )
+        logger.warn(f"{prepaid_expiration}")
         prepaid_expiration = datetime.strptime(prepaid_expiration.value, "%Y-%m-%d")
         conditionally_update_billing_cycle_types(
             allocation,
