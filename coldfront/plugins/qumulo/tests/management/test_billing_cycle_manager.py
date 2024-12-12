@@ -140,9 +140,9 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation=allocation,
             value="2025-06-02",
         )
-        prepaid_billing_start = datetime.strptime(
-            self.prepaid_present_form_data["prepaid_billing_date"], "%Y-%m-%d"
-        )
+        # prepaid_billing_start = datetime.strptime(
+        #     self.prepaid_present_form_data["prepaid_billing_date"], "%Y-%m-%d"
+        # )
         prepaid_expiration = datetime.strptime(
             self.prepaid_present_form_data["prepaid_expiration"], "%Y-%m-%d"
         )
@@ -151,7 +151,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             billing_cycle_attribute,
             self.prepaid_present_form_data["billing_cycle"],
             prepaid_expiration,
-            prepaid_billing_start,
+            self.prepaid_present_form_data["prepaid_billing_date"],
         )
 
         self.assertEqual(billing_cycle_attribute, "prepaid")
