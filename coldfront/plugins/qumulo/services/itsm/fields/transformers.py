@@ -1,6 +1,7 @@
 import math, os
 from typing import Optional
 
+
 def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # In ITSM, fileset_names are mapped into name
     # Examples

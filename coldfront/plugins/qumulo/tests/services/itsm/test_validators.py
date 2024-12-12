@@ -7,10 +7,11 @@ from coldfront.core.test_helpers.factories import (
 )
 
 from coldfront.plugins.qumulo.services.itsm.fields.validators import (
+    exclusion,
+    inclusion,
+    length,
     numericallity,
     presence,
-    length,
-    inclusion,
     validate_ticket,
     validate_json,
     uniqueness,
@@ -127,6 +128,13 @@ class TestValidators(TestCase):
         self.assertEqual(
             length(value, conditions), f"exceeds the limit of 128: {value}"
         )
+
+    def test_exclusion(self):
+        exclude = "emails"
+        self.assertIsNone(exclusion("wustl.key", exclude))
+        an_email = "wustl.key@wustl.edu"
+        error_message = f"constains an email and should only contain valid WUSTL keys: value {an_email}"
+        self.assertEqual(exclusion("wustl.key@wustl.edu", exclude), error_message)
 
     def test_inclusion(self):
         accepted_values = ["monthly", "yearly", "quarterly", "prepaid", "fiscal year"]

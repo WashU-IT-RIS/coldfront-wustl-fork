@@ -12,6 +12,7 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
 
 from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
 
+
 class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:

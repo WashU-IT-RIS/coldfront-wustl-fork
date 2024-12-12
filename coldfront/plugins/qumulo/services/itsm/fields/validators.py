@@ -8,16 +8,16 @@ import coldfront.core.allocation.models as coldfront_models
 # loading the validator from Django causes an exception due to app requirements.
 def validate_ticket(ticket: str, validate: bool = True):
     if not validate:
-        return
+        return None
 
     if isinstance(ticket, int):
-        return
+        return None
 
     if re.match("\d+$", ticket):
-        return
+        return None
 
     if re.match("ITSD-\d+$", ticket, re.IGNORECASE):
-        return
+        return None
 
     return f"{ticket} is not in the format ITSD-12345 or 12345"
 
@@ -43,7 +43,7 @@ def numericallity(value: int, conditions: dict):
         if not less_than_or_equal_to:
             return f"must be less than or equals to {maximum}"
 
-    return
+    return None
 
 
 def presence(value, presence: bool = True):
@@ -61,14 +61,15 @@ def length(value, conditions):
     allow_blank = conditions.get("allow_blank")
     if allow_blank:
         if not bool(value):
-            return
+            return None
 
     if not bool(value):
         return "must not be blank"
 
     maximum_length = conditions.get("maximum")
     if len(value) <= maximum_length:
-        return
+        return None
+
     return f"exceeds the limit of {maximum_length}: {value}"
 
 
@@ -76,32 +77,43 @@ def inclusion(value, accepted_values):
     if isinstance(value, list):
         value_list = value
         if all(element in accepted_values for element in value_list):
-            return
+            return None
 
     if value in accepted_values:
-        return
+        return None
 
     return f"{value} is not amongst {accepted_values}"
+
+
+def exclusion(value, exclusions):
+    if exclusions != "emails":
+        return None
+
+    if not "@" in value:
+        return None
+
+    return f"constains an email and should only contain valid WUSTL keys: value {value}"
 
 
 def validate_json(value, conditions={}):
     if conditions.get("allow_blank"):
         if value in [None, ""]:
-            return
+            return None
 
     try:
         bool(json.loads(value))
     except:
         return "is not a valid JSON"
-    return
+
+    return None
 
 
 # TODO check if the user exists
 def ad_record_exist(value, validate: bool = True):
     if not validate:
-        return
+        return None
 
-    return
+    return None
 
 
 # This is a simple uniqueness validator that finds if a record exists for a
@@ -123,4 +135,4 @@ def uniqueness(value, conditions):
     if exists:
         return f"{value} is not unique for {conditions['attribute_name_value']}"
 
-    return
+    return None

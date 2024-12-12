@@ -99,6 +99,7 @@ itsm_to_coldfront_map:
               type: string
               transforms: null
               validates:
+                exclusion: emails
                 length:
                   maximum: 128
                   allow_blank: true
@@ -118,6 +119,7 @@ itsm_to_coldfront_map:
               type: string
               transforms: null
               validates:
+                exclusion: emails
                 length:
                   maximum: 128
                   allow_blank: true
