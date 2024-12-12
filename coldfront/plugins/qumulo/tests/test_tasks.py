@@ -369,6 +369,7 @@ class TestAddUsersToADGroup(TestCase):
 
         mock_user_response = {
             "dn": "user_dn",
+            "objectclass": ["top", "person", "organizationalPerson", "user"],
         }
         active_directory_instance = MagicMock()
         active_directory_instance.get_member.return_value = mock_user_response
@@ -392,7 +393,13 @@ class TestAddUsersToADGroup(TestCase):
                 ["bar"],
                 acl_allocation,
                 [],
-                [{"wustlkey": wustlkeys[0], "dn": mock_user_response["dn"]}],
+                [
+                    {
+                        "wustlkey": wustlkeys[0],
+                        "dn": mock_user_response["dn"],
+                        "is_group": False,
+                    }
+                ],
             ),
         )
 
@@ -436,6 +443,7 @@ class TestAddUsersToADGroup(TestCase):
     ):
         mock_user_response = {
             "dn": "user_dn",
+            "objectclass": ["top", "person", "organizationalPerson", "user"],
         }
         active_directory_instance = MagicMock()
         active_directory_instance.get_member.return_value = mock_user_response
@@ -461,7 +469,58 @@ class TestAddUsersToADGroup(TestCase):
                 ["bar"],
                 acl_allocation,
                 [],
-                [{"wustlkey": wustlkeys[0], "dn": mock_user_response["dn"]}],
+                [
+                    {
+                        "wustlkey": wustlkeys[0],
+                        "dn": mock_user_response["dn"],
+                        "is_group": False,
+                    }
+                ],
+            ),
+        )
+
+    def test_appends_good_group_with_is_group(
+        self,
+        mock_active_directory_api: MagicMock,
+        mock_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
+    ):
+        mock_user_response = {
+            "dn": "user_dn",
+            "objectclass": ["top", "group"],
+        }
+        active_directory_instance = MagicMock()
+        active_directory_instance.get_member.return_value = mock_user_response
+        mock_active_directory_api.return_value = active_directory_instance
+
+        wustlkeys = ["foo", "bar"]
+        self.form_data["rw_users"] = wustlkeys
+
+        allocation = self.create_allocation(user=self.user, form_data=self.form_data)[
+            "allocation"
+        ]
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=allocation, resource_name="rw"
+        )
+
+        addUsersToADGroup(wustlkeys, acl_allocation)
+
+        mock_async_task.assert_called_once()
+        self.assertTupleEqual(
+            mock_async_task.call_args[0],
+            (
+                addUsersToADGroup,
+                ["bar"],
+                acl_allocation,
+                [],
+                [
+                    {
+                        "wustlkey": wustlkeys[0],
+                        "dn": mock_user_response["dn"],
+                        "is_group": True,
+                    }
+                ],
             ),
         )
 
@@ -491,6 +550,7 @@ class TestAddUsersToADGroup(TestCase):
     def __get_member_mock(self, account_name: str, good_users: list[str]) -> dict:
         mock_member_response = {
             "dn": "user_dn",
+            "objectclass": ["top", "person", "organizationalPerson", "user"],
         }
         if account_name in good_users:
             return mock_member_response
@@ -559,6 +619,54 @@ class TestAddUsersToADGroup(TestCase):
         )
         self.assertListEqual(allocation_users, good_keys)
 
+    def test_ads_good_group_user_with_group_flag(
+        self,
+        mock_active_directory_api: MagicMock,
+        mock_async_task: MagicMock,
+        mock_allocation_view_AD: MagicMock,
+        mock_allocation_view_async_task: MagicMock,
+    ):
+        mock_async_task.side_effect = lambda *args: args[0](*args[1:])
+
+        wustlkeys = ["foo"]
+        good_keys = wustlkeys[0:1]
+
+        active_directory_instance = MagicMock()
+        mock_member_response = {
+            "dn": "user_dn",
+            "objectclass": ["top", "group"],
+        }
+        active_directory_instance.get_member.return_value = mock_member_response
+        mock_active_directory_api.return_value = active_directory_instance
+
+        form_data = self.form_data
+        form_data["rw_users"] = wustlkeys
+
+        base_allocation = self.create_allocation(user=self.user, form_data=form_data)[
+            "allocation"
+        ]
+        acl_allocation = AclAllocations.get_access_allocation(
+            storage_allocation=base_allocation, resource_name="rw"
+        )
+
+        addUsersToADGroup(wustlkeys, acl_allocation, [])
+        allocation_users = list(
+            map(
+                lambda allocation_user: allocation_user.user.username,
+                AllocationUser.objects.filter(allocation=acl_allocation),
+            )
+        )
+        self.assertListEqual(allocation_users, good_keys)
+
+        is_group = list(
+            map(
+                lambda allocation_user: allocation_user.user.userprofile.is_group,
+                AllocationUser.objects.filter(allocation=acl_allocation),
+            )
+        )
+
+        self.assertListEqual(is_group, [True])
+
     def test_adds_users_to_group_when_done(
         self,
         mock_active_directory_api: MagicMock,
@@ -581,7 +689,10 @@ class TestAddUsersToADGroup(TestCase):
         group_name = acl_allocation.get_attribute("storage_acl_name")
 
         addUsersToADGroup(
-            [], acl_allocation, [], [{"wustlkey": wustlkeys[0], "dn": "foo"}]
+            [],
+            acl_allocation,
+            [],
+            [{"wustlkey": wustlkeys[0], "dn": "foo", "is_group": False}],
         )
 
         active_directory_instance.add_members_to_ad_group.assert_called_once_with(

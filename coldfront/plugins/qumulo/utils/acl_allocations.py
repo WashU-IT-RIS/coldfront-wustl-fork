@@ -37,10 +37,14 @@ class AclAllocations:
             )
 
     @staticmethod
-    def add_user_to_access_allocation(username: str, allocation: Allocation):
+    def add_user_to_access_allocation(
+        username: str, allocation: Allocation, is_group: bool = False
+    ):
         # NOTE - just need to provide the proper username
         # post_save handler will retrieve email, given/surname, etc.
         user_tuple = User.objects.get_or_create(username=username)
+        user_tuple[0].userprofile.is_group = is_group
+        user_tuple[0].save()
 
         AllocationUser.objects.create(
             allocation=allocation,

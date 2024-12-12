@@ -45,7 +45,7 @@ class ActiveDirectoryAPI:
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
             f"(&(|(objectclass=group)(objectclass=person))(sAMAccountName={account_name}))",
-            attributes=["sAMAccountName"],
+            attributes=["sAMAccountName", "objectclass"],
         )
 
         if not self.conn.response:

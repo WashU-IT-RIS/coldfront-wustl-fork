@@ -185,7 +185,7 @@ class TestActiveDirectoryAPI(TestCase):
                 call(
                     "dc=accounts,dc=ad,dc=wustl,dc=edu",
                     expected_filter,
-                    attributes=["sAMAccountName"],
+                    attributes=["sAMAccountName", "objectclass"],
                 )
             ]
         )

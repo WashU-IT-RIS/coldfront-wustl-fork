@@ -32,6 +32,12 @@ class TestActiveDirectoryAPI(TestCase):
         self.assertIn("Harter", user["dn"])
 
     @tag("integration")
+    def test_get_member(self):
+        member = self.ad_api.get_member("self.test_wustlkey")
+
+        self.assertIn("Harter", member["dn"])
+
+    @tag("integration")
     def test_create_ad_group(self):
         group_name = "storage-delme-test-create_ad_group"
 
