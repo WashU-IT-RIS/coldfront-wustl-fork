@@ -24,18 +24,24 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
-def conditionally_update_billing_cycle_types(allocation, billing_attribute) -> None:
-    if allocation.billing_cycle == "prepaid":
-        if allocation.prepaid_expiration == datetime.today().strftime(
+def conditionally_update_billing_cycle_types(
+    allocation,
+    billing_attribute,
+    billing_cycle,
+    prepaid_expiration,
+    prepaid_billing_start,
+) -> None:
+    if billing_cycle == "prepaid":
+        if prepaid_expiration == datetime.today().strftime(
             "%Y-%m-%d"
-        ) or allocation.prepaid_expiration < datetime.today().strftime("%Y-%m-%d"):
+        ) or prepaid_expiration < datetime.today().strftime("%Y-%m-%d"):
             logger.warn(f"Changing {allocation} billing_cycle to monthly")
             AllocationAttribute.objects.filter(
                 allocation=allocation,
                 allocation_attribute_type=billing_attribute,
             ).update(value="monthly")
-    elif allocation.billing_cycle == "monthly":
-        if allocation.prepaid_billing_start == datetime.today().strftime("%Y-%m-%d"):
+    elif billing_cycle == "monthly":
+        if prepaid_billing_start == datetime.today().strftime("%Y-%m-%d"):
             logger.warn(f"Changing {allocation} billing_cycle to prepaid")
             AllocationAttribute.objects.filter(
                 allocation=allocation,
@@ -100,7 +106,13 @@ def check_allocations() -> None:
     logger.warn(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
     for allocation in allocations:
         logger.warn(f"{allocation.billing_cycle}")
-        conditionally_update_billing_cycle_types(allocation, billing_attribute)
+        conditionally_update_billing_cycle_types(
+            allocation,
+            billing_attribute,
+            allocation.billing_cycle,
+            allocation.prepaid_billing_start,
+            allocation.prepaid_expiration,
+        )
         calculate_prepaid_expiration(
             allocation,
             allocation.billing_cycle,
