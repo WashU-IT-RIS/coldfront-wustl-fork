@@ -136,7 +136,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             name="prepaid_expiration"
         )
         prepaid_expiration = AllocationAttribute.objects.get_or_create(
-            attribute_type=prepaid_expiration_attribute,
+            allocation_attribute_type=prepaid_expiration_attribute,
             allocation=allocation,
             value=datetime.today(),
         )
