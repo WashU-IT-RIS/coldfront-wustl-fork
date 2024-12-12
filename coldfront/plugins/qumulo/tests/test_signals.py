@@ -1,5 +1,7 @@
 from django.test import TestCase, Client
 from unittest.mock import patch, MagicMock
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
@@ -11,6 +13,11 @@ from coldfront.core.allocation.signals import (
     allocation_disable,
     allocation_change_approved,
 )
+from coldfront.core.allocation.models import (
+    AllocationAttribute,
+    AllocationAttributeType,
+)
+from django.core.management import call_command
 
 
 def mock_get_attribute(name):
@@ -46,12 +53,34 @@ class TestSignals(TestCase):
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
             "service_rate": "general",
+            "billing_cycle": "monthly",
+        }
+
+        self.prepaid_form_data_past = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "general",
+            "billing_cycle": "prepaid",
+            "prepaid_time": 6,
+            "prepaid_billing_date": "11/01/2024",
         }
 
         self.client.force_login(self.user)
 
         self.storage_allocation = create_allocation(
             self.project, self.user, self.form_data
+        )
+
+        self.prepaid_storage_allocation_past = create_allocation(
+            project=self.project, user=self.user, form_data=self.prepaid_form_data_past
         )
 
     @patch("coldfront.plugins.qumulo.signals.async_task")
@@ -96,6 +125,52 @@ class TestSignals(TestCase):
         mock_getLogger.return_value.warn.assert_called_once_with(
             "Can't create allocation: Some attributes are missing or invalid"
         )
+
+    @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.signals.async_task")
+    def test_allocation_activates_calculates_prepaid_expiration_monthly(
+        self,
+        mock_async_task: MagicMock,
+        mock_ACL_ActiveDirectoryApi: MagicMock,
+        mock_QumuloAPI: MagicMock,
+    ):
+        allocation_activate.send(
+            sender=self.__class__, allocation_pk=self.storage_allocation.pk
+        )
+
+        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+            name="prepaid_expiration"
+        )
+        prepaid_exp = AllocationAttribute.objects.get(
+            allocation_attribute_type=allocation_attribute_obj_type,
+            allocation=self.storage_allocation,
+        )
+
+        self.assertEqual(prepaid_exp.value, datetime.today().strftime("%Y-%m-%d"))
+
+    @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.signals.async_task")
+    def test_allocation_activates_calculates_prepaid_expiration_prepaid_past(
+        self,
+        mock_async_task: MagicMock,
+        mock_ACL_ActiveDirectoryApi: MagicMock,
+        mock_QumuloAPI: MagicMock,
+    ):
+        allocation_activate.send(
+            sender=self.__class__, allocation_pk=self.prepaid_storage_allocation_past.pk
+        )
+
+        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+            name="prepaid_expiration"
+        )
+        prepaid_exp = AllocationAttribute.objects.get(
+            allocation_attribute_type=allocation_attribute_obj_type,
+            allocation=self.prepaid_storage_allocation,
+        )
+
+        correct_prepaid = date.today() + relativedelta(months=+6)
+
+        self.assertEqual(prepaid_exp.value, correct_prepaid.strftime("%Y-%m-%d"))
 
     def test_allocation_change_approved_updates_allocation(
         self,
