@@ -19,6 +19,7 @@ from datetime import datetime
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
     calculate_prepaid_expiration,
     check_allocations,
+    conditionally_update_billing_cycle_types,
 )
 
 
@@ -136,17 +137,15 @@ class TestBillingCycleTypeUpdates(TestCase):
 
 #         self.assertEqual(conditionally_update_billing_cycle_types.call_count, 3)
 
-# def prepaid_past_prepaid_exp(self) -> None:
-#     create_allocation(self.project, self.user, self.prepaid_form_data_exp)
-#     billing_cycle_attribute = AllocationAttributeType.objects.get(
-#         name="billing_cycle"
-#     )
-#     with patch(
-#         "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
-#     ) as conditionally_update_billing_cycle_types:
-#         conditionally_update_billing_cycle_types()
 
-#         self.assertEqual(billing_cycle_attribute, "monthly")
+def prepaid_start_today(self) -> None:
+    create_allocation(self.project, self.user, self.prepaid_present_form_data)
+    billing_cycle_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
+
+    conditionally_update_billing_cycle_types()
+
+    self.assertEqual(billing_cycle_attribute, "prepaid")
+
 
 # def prepaid_not_past_prepaid_exp(self) -> None:
 #     create_allocation(self.project, self.user, self.prepaid_form_data_not_exp)
