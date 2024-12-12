@@ -45,17 +45,17 @@ class MigrateToColdfront:
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
 
-        field_error_massages = {}
+        field_error_messages = {}
         for field in fields:
             validation_messages = field.validate()
             if validation_messages:
-                if not field.itsm_attribute_name in field_error_massages:
-                    field_error_massages[field.itsm_attribute_name] = []
+                if not field.itsm_attribute_name in field_error_messages:
+                    field_error_messages[field.itsm_attribute_name] = []
 
-                field_error_massages[field.itsm_attribute_name] += validation_messages
+                field_error_messages[field.itsm_attribute_name] += validation_messages
 
-        if field_error_massages:
-            errors = {"errors": field_error_massages}
+        if field_error_messages:
+            errors = {"errors": field_error_messages}
             raise Exception("Validation messages: ", errors)
 
         pi_user = self.__get_or_create_user(fields)
@@ -195,9 +195,9 @@ class MigrateToColdfront:
                     )
 
     def __get_username(self, fields: list) -> str:
-        username = None
         for field in fields:
             username = field.get_username()
             if username is not None:
-                break
-        return username
+                return username
+
+        return None

@@ -19,9 +19,6 @@ class ItsmClient:
         port = os.environ.get("ITSM_REST_API_PORT")
         endpoint_path = os.environ.get("ITSM_SERVICE_PROVISION_ENDPOINT")
 
-        # TODO is there a way to get the name of the environment such as prod, qa, or localhost?
-        self.is_itsm_localhost = host == "localhost"
-
         itsm_fields = ",".join(itsm_attributes)
         self.url = f"{protocol}://{host}:{port}{endpoint_path}?attribute={itsm_fields}"
 
@@ -30,6 +27,10 @@ class ItsmClient:
 
     def get_fs1_allocation_by_fileset_alias(self, fileset_alias) -> str:
         return self.__get_fs1_allocation_by("fileset_alias", fileset_alias)
+
+    # TODO is there a way to get the name of the environment such as prod, qa, or localhost?
+    def is_itsm_localhost(self, host):
+        return host == "localhost"
 
     #### PRIVATE METHODS ####
     def __get_fs1_allocation_by(self, fileset_key, fileset_value) -> str:

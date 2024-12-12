@@ -2,8 +2,6 @@ from typing import Any
 import coldfront.plugins.qumulo.services.itsm.fields.transformers as value_transformers
 import coldfront.plugins.qumulo.services.itsm.fields.validators as value_validators
 
-from icecream import ic
-
 
 class Field:
     def __init__(self, coldfront_definitions, itsm_value_field, value):
@@ -12,6 +10,18 @@ class Field:
         self._coldfront_entity = coldfront_definitions["entity"]
         self._coldfront_attributes = coldfront_definitions["attributes"]
         self._value = value
+        self._itsm_to_value = self.__get_value_definition()
+
+    def __get_value_definition(self):
+        entity = self.coldfront_definitions["entity"]
+        if entity in ["allocation_attribute", "project_attribute"]:
+            return next(
+                value_item
+                for value_item in self.coldfront_definitions["attributes"]
+                if value_item["name"] == "value"
+            )["value"]
+
+        return self.coldfront_definitions["attributes"][0]["value"]
 
     @property
     def value(self) -> Any:
@@ -27,7 +37,10 @@ class Field:
 
     @property
     def entity_item(self) -> str:
-        return {self.attributes[0].get("name"): self.value}
+        if self.entity == "allocation_form":
+            return {self.attributes[0].get("name"): self.value}
+
+        return None
 
     @property
     def itsm_attribute_name(self) -> str:
@@ -66,27 +79,22 @@ class Field:
         return bool(self.validate())
 
     def __transform_value(self) -> Any:
-        for attribute in self._coldfront_attributes:
-            attribute_value = attribute["value"]
-            if isinstance(attribute_value, dict):
-                transforms = attribute_value["transforms"]
-
-                value = self._value or self.__get_default_value()
-                if transforms is not None:
-                    transform_function = getattr(
-                        value_transformers,
-                        transforms,
-                    )
-                    value = transform_function(value)
-                return value
+        attribute_value = self._itsm_to_value
+        transforms = attribute_value["transforms"]
+        value = self._value or self.__get_default_value()
+        if transforms is not None:
+            transform_function = getattr(
+                value_transformers,
+                transforms,
+            )
+            value = transform_function(value)
+        return value
 
     # Special getters
     def get_username(self) -> str:
         if self.entity != "user":
             return None
 
-        username = None
-        for attribute in self.attributes:
-            if attribute["name"] == "username":
-                username = self.value
-        return username
+        if any(attribute["name"] == "username" for attribute in self.attributes):
+            return self.value
+        return None

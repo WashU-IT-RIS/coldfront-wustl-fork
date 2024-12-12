@@ -1,9 +1,5 @@
 import math, os
-
-from dotenv import load_dotenv
-
-load_dotenv(override=True)
-
+from typing import Optional
 
 def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # In ITSM, fileset_names are mapped into name
@@ -49,9 +45,9 @@ def fileset_name_to_storage_name(value) -> str:
 # Example: "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing".split(",")
 # return ['akronzer', 'derek.harford', 'd.ken', 'ehogue', 'jiaoy', 'perezm', 'xuebing']
 # from this array, create a user from every element in the array
-def acl_group_members_to_aggregate_create_users(value) -> str:
+def acl_group_members_to_aggregate_create_users(value) -> Optional[str]:
     if value is None:
-        return
+        return None
 
     return value.split(",")
 
