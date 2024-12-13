@@ -142,11 +142,16 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation=allocation,
             value="2025-06-02",
         )
-        prepaid_expiration = prepaid_expiration["value"]
+
+        prepaid_expiration = AllocationAttribute.objects.filter(
+            allocation=allocation,
+            allocation_attribute_type=prepaid_expiration_attribute,
+        ).values("value")[:1]
+        logger.warn(f"{prepaid_expiration}")
         # prepaid_billing_start = datetime.strptime(
         #     self.prepaid_present_form_data["prepaid_billing_date"], "%Y-%m-%d"
         # )
-        # logger.warn(f"{prepaid_expiration.value}")
+
         # prepaid_expiration = datetime.strptime(prepaid_expiration.value, "%Y-%m-%d")
         conditionally_update_billing_cycle_types(
             allocation,
