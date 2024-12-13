@@ -12,17 +12,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         storage_host = os.environ.get("QUMULO_HOST")
         request_res = requests.get("https://" + storage_host + "/api/v1/version")
-        print(f"Connects to Storage: {request_res.status_code == 200}")
+        print(f"Pod connects to Storage: {request_res.status_code == 200}")
         print(request_res.json())
 
         rc = RestClient(storage_host, os.environ.get("QUMULO_PORT"))
         rc.login(os.environ.get("QUMULO_USER"), os.environ.get("QUMULO_PASS"))
-
-        try:
-            rc.ad.list_ad()
-            print(f"Storage Connects to Qumulo: {request_res.status_code == 200}")
-        except Exception as e:
-            print(f"Doesn't connect to Storage: ${e}")
 
         serverName = os.environ.get("AD_SERVER_NAME")
         adUser = os.environ.get("AD_USERNAME")
@@ -36,4 +30,10 @@ class Command(BaseCommand):
             authentication=ldap3.NTLM,
         )
 
-        print(f"connects to AD: ${conn.bind()}")
+        print(f"Pod connects to AD: ${conn.bind()}")
+
+        try:
+            rc.ad.list_ad()
+            print(f"Storage connects to Qumulo")
+        except Exception as e:
+            print(f"Storage doesn't connect to Storage")
