@@ -142,6 +142,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation=allocation,
             value="2025-06-02",
         )
+        prepaid_expiration = prepaid_expiration["value"]
         # prepaid_billing_start = datetime.strptime(
         #     self.prepaid_present_form_data["prepaid_billing_date"], "%Y-%m-%d"
         # )
