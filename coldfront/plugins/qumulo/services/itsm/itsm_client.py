@@ -1,4 +1,5 @@
 import os
+from typing import Any, Optional
 import requests
 
 from dotenv import load_dotenv
@@ -14,13 +15,13 @@ class ItsmClient:
     def __init__(self):
         self.user = os.environ.get("ITSM_SERVICE_USER")
         self.password = os.environ.get("ITSM_SERVICE_PASSWORD")
+        self.host = os.environ.get("ITSM_HOST")
         protocol = os.environ.get("ITSM_PROTOCOL")
-        host = os.environ.get("ITSM_HOST")
         port = os.environ.get("ITSM_REST_API_PORT")
         endpoint_path = os.environ.get("ITSM_SERVICE_PROVISION_ENDPOINT")
 
         itsm_fields = ",".join(itsm_attributes)
-        self.url = f"{protocol}://{host}:{port}{endpoint_path}?attribute={itsm_fields}"
+        self.url = f"{protocol}://{self.host}:{port}{endpoint_path}?attribute={itsm_fields}"
 
     def get_fs1_allocation_by_fileset_name(self, fileset_name) -> str:
         return self.__get_fs1_allocation_by("fileset_name", fileset_name)
@@ -29,8 +30,8 @@ class ItsmClient:
         return self.__get_fs1_allocation_by("fileset_alias", fileset_alias)
 
     # TODO is there a way to get the name of the environment such as prod, qa, or localhost?
-    def is_itsm_localhost(self, host):
-        return host == "localhost"
+    def __is_itsm_localhost(self):
+        return self.host == "localhost"
 
     #### PRIVATE METHODS ####
     def __get_fs1_allocation_by(self, fileset_key, fileset_value) -> str:
@@ -48,24 +49,25 @@ class ItsmClient:
         filters = f'filter={{"{fileset_key}":"{fileset_value}","status":"active","service_id":{itsm_active_allocation_service_id}}}'
         return f"{self.url}&{filters}"
 
-    def __get_session(self):
+    def __get_session(self) -> requests.Session:
         session = requests.Session()
         session.auth = self.__get_session_authentication()
         session.headers = self.__get_session_headers()
         return session
 
-    def __get_session_headers(self) -> None:
+    def __get_session_headers(self) -> dict:
         headers = {"content-type": "application/json"}
-        if self.is_itsm_localhost:
+        if self.__is_itsm_localhost():
             headers["x-remote-user"] = self.user
 
         return headers
 
-    def __get_session_authentication(self) -> None:
-        if self.is_itsm_localhost:
-            return
+    def __get_session_authentication(self) -> Optional[tuple]:
+        if self.__is_itsm_localhost():
+            return None
 
         return (self.user, self.password)
 
-    def __get_verify_certificate(self):
+    def __get_verify_certificate(self) -> Any:
+        # Unfortunately, the verify could be a path where the certificated is located or True
         return os.environ.get("RIS_CHAIN_CERTIFICATE") or True
