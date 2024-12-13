@@ -145,8 +145,8 @@ class TestBillingCycleTypeUpdates(TestCase):
         # prepaid_billing_start = datetime.strptime(
         #     self.prepaid_present_form_data["prepaid_billing_date"], "%Y-%m-%d"
         # )
-        logger.warn(f"{prepaid_expiration.value}")
-        prepaid_expiration = datetime.strptime(prepaid_expiration.value, "%Y-%m-%d")
+        # logger.warn(f"{prepaid_expiration.value}")
+        # prepaid_expiration = datetime.strptime(prepaid_expiration.value, "%Y-%m-%d")
         conditionally_update_billing_cycle_types(
             allocation,
             billing_cycle_attribute,
