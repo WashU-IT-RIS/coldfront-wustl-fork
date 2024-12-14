@@ -4,6 +4,8 @@ from unittest.mock import patch
 
 from unittest import skip
 
+from django.db.models import OuterRef, Subquery
+
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
@@ -137,31 +139,22 @@ class TestBillingCycleTypeUpdates(TestCase):
         prepaid_expiration_attribute = AllocationAttributeType.objects.get(
             name="prepaid_expiration"
         )
-        prepaid_expiration = AllocationAttribute.objects.get_or_create(
+        AllocationAttribute.objects.get_or_create(
             allocation_attribute_type=prepaid_expiration_attribute,
             allocation=allocation,
             value="2025-06-02",
         )
+        prepaid_exp = allocation.get_attribute(name="prepaid_expiration")
 
-        prepaid_expiration = AllocationAttribute.objects.filter(
-            allocation=allocation,
-            allocation_attribute_type=prepaid_expiration_attribute,
-        ).values("value")[:1]
-        logger.warn(f"{prepaid_expiration}")
-        # prepaid_billing_start = datetime.strptime(
-        #     self.prepaid_present_form_data["prepaid_billing_date"], "%Y-%m-%d"
-        # )
-
-        # prepaid_expiration = datetime.strptime(prepaid_expiration.value, "%Y-%m-%d")
         conditionally_update_billing_cycle_types(
             allocation,
             billing_cycle_attribute,
             self.prepaid_present_form_data["billing_cycle"],
-            prepaid_expiration,
+            prepaid_exp,
             self.prepaid_present_form_data["prepaid_billing_date"],
         )
-
-        self.assertEqual(billing_cycle_attribute, "prepaid")
+        final_bill_cycle = allocation.get_attribute(name="billing_cycle")
+        self.assertEqual(final_bill_cycle, "prepaid")
 
 
 # def all_allocations_checked(self) -> None:
