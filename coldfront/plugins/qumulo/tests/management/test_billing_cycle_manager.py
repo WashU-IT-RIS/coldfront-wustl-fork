@@ -156,6 +156,33 @@ class TestBillingCycleTypeUpdates(TestCase):
         final_bill_cycle = allocation.get_attribute(name="billing_cycle")
         self.assertEqual(final_bill_cycle, "prepaid")
 
+    def monthly_start_today(self) -> None:
+        allocation = create_allocation(
+            self.project, self.user, self.prepaid_past_form_data
+        )
+        billing_cycle_attribute = AllocationAttributeType.objects.get(
+            name="billing_cycle"
+        )
+        prepaid_expiration_attribute = AllocationAttributeType.objects.get(
+            name="prepaid_expiration"
+        )
+        AllocationAttribute.objects.get_or_create(
+            allocation_attribute_type=prepaid_expiration_attribute,
+            allocation=allocation,
+            value=datetime.today(),
+        )
+        prepaid_exp = allocation.get_attribute(name="prepaid_expiration")
+
+        conditionally_update_billing_cycle_types(
+            allocation,
+            billing_cycle_attribute,
+            self.prepaid_past_form_data["billing_cycle"],
+            prepaid_exp,
+            self.prepaid_past_form_data["prepaid_billing_date"],
+        )
+        final_bill_cycle = allocation.get_attribute(name="billing_cycle")
+        self.assertEqual(final_bill_cycle, "monthly")
+
 
 # def all_allocations_checked(self) -> None:
 #     create_allocation(self.project, self.user, self.prepaid_form_data_not_exp)
