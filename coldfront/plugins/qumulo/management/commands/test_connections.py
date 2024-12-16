@@ -3,7 +3,6 @@ import ldap3
 from qumulo.rest_client import RestClient
 
 import os
-from dotenv import load_dotenv
 
 from django.core.management.base import BaseCommand
 
