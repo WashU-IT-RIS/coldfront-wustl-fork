@@ -29,6 +29,7 @@ from coldfront.plugins.qumulo.tasks import addUsersToADGroup
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 from pathlib import PurePath
+from datetime import date
 
 
 class AllocationView(LoginRequiredMixin, FormView):
@@ -49,6 +50,8 @@ class AllocationView(LoginRequiredMixin, FormView):
         user = self.request.user
         storage_filesystem_path = form_data.get("storage_filesystem_path")
         is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
+        billing_cycle = form_data.get("billing_cycle")
+        prepaid_billing_date = form_data.get("prepaid_billing_date")
         if is_absolute_path:
             absolute_path = storage_filesystem_path
         else:
@@ -65,6 +68,8 @@ class AllocationView(LoginRequiredMixin, FormView):
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
         validate_filesystem_path_unique(absolute_path)
+        if billing_cycle == "prepaid" and prepaid_billing_date > date.today():
+            form_data["billing_cycle"] = "monthly"
 
         self.new_allocation = AllocationView.create_new_allocation(
             form_data, user, parent_allocation
@@ -245,6 +250,9 @@ class AllocationView(LoginRequiredMixin, FormView):
             "department_number",
             "technical_contact",
             "billing_contact",
+            "billing_cycle",
+            "prepaid_time",
+            "prepaid_billing_date",
             "service_rate",
         ]
 
@@ -263,6 +271,14 @@ class AllocationView(LoginRequiredMixin, FormView):
                     allocation=allocation,
                     value=json.dumps(protocols),
                 )
+            # elif allocation_attribute_name == "billing cycle":
+            #     billing_cycle = form_data.get("billing_cycle")
+
+            #     AllocationAttribute.objects.create(
+            #         allocation_attribute_type=allocation_attribute_type,
+            #         allocation=allocation,
+            #         value=json.dumps(billing_cycle),
+            #     )
             else:
                 value = form_data.get(allocation_attribute_name)
                 if value is None:

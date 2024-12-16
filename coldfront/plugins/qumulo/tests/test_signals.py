@@ -1,5 +1,7 @@
 from django.test import TestCase, Client
 from unittest.mock import patch, MagicMock
+from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
@@ -11,6 +13,11 @@ from coldfront.core.allocation.signals import (
     allocation_disable,
     allocation_change_approved,
 )
+from coldfront.core.allocation.models import (
+    AllocationAttribute,
+    AllocationAttributeType,
+)
+from django.core.management import call_command
 
 
 def mock_get_attribute(name):
@@ -46,12 +53,34 @@ class TestSignals(TestCase):
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
             "service_rate": "general",
+            "billing_cycle": "monthly",
+        }
+
+        self.prepaid_form_data_past = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "general",
+            "billing_cycle": "prepaid",
+            "prepaid_time": 6,
+            "prepaid_billing_date": "11/01/2024",
         }
 
         self.client.force_login(self.user)
 
         self.storage_allocation = create_allocation(
             self.project, self.user, self.form_data
+        )
+
+        self.prepaid_storage_allocation_past = create_allocation(
+            project=self.project, user=self.user, form_data=self.prepaid_form_data_past
         )
 
     @patch("coldfront.plugins.qumulo.signals.async_task")

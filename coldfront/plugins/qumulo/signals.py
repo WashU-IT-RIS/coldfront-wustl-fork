@@ -3,13 +3,19 @@ from django_q.tasks import async_task
 
 import logging
 import json
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.tasks import reset_allocation_acls
 
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationAttributeType,
+)
 from coldfront.core.allocation.signals import (
     allocation_activate,
     allocation_disable,
@@ -41,6 +47,16 @@ def on_allocation_activate(sender, **kwargs):
     qumulo_api = QumuloAPI()
 
     allocation = Allocation.objects.get(pk=kwargs["allocation_pk"])
+
+    fs_path = allocation.get_attribute(name="storage_filesystem_path")
+    export_path = allocation.get_attribute(name="storage_export_path")
+    protocols = json.loads(allocation.get_attribute(name="storage_protocols"))
+    name = allocation.get_attribute(name="storage_name")
+    limit_in_bytes = allocation.get_attribute(name="storage_quota") * (2**40)
+    bill_cycle = allocation.get_attribute(name="billing_cycle")
+    allocation_attribute_obj_type = AllocationAttributeType.objects.get(
+        name="prepaid_expiration"
+    )
 
     fs_path = allocation.get_attribute(name="storage_filesystem_path")
     export_path = allocation.get_attribute(name="storage_export_path")
