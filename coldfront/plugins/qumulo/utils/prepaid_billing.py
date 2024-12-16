@@ -25,10 +25,7 @@ class PrepaidBilling:
         logger.debug(f"{self.usage_date}")
         # The first day of the service month
         self.delivery_date = (
-            (
-                datetime.strptime(self.usage_date, YYYY_MM_DD).replace(day=1)
-                - timedelta(1)
-            )
+            (datetime.strptime(self.usage_date, YYYY_MM_DD).replace(day=1))
             .replace(day=1)
             .strftime(YYYY_MM_DD)
         )
