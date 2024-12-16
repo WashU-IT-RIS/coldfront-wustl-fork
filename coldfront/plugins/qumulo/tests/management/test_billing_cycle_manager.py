@@ -20,7 +20,6 @@ from datetime import datetime
 
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
     calculate_prepaid_expiration,
-    check_allocations,
     conditionally_update_billing_cycle_types,
 )
 
@@ -182,40 +181,3 @@ class TestBillingCycleTypeUpdates(TestCase):
         )
         final_bill_cycle = allocation.get_attribute(name="billing_cycle")
         self.assertEqual(final_bill_cycle, "monthly")
-
-
-# def all_allocations_checked(self) -> None:
-#     create_allocation(self.project, self.user, self.prepaid_form_data_not_exp)
-#     create_allocation(self.project, self.user, self.monthly_form_data)
-#     create_allocation(self.project, self.user, self.prepaid_form_data_exp)
-#     with patch(
-#         "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
-#     ) as conditionally_update_billing_cycle_types:
-#         conditionally_update_billing_cycle_types()
-
-#         self.assertEqual(conditionally_update_billing_cycle_types.call_count, 3)
-
-
-# def prepaid_not_past_prepaid_exp(self) -> None:
-#     create_allocation(self.project, self.user, self.prepaid_form_data_not_exp)
-#     billing_cycle_attribute = AllocationAttributeType.objects.get(
-#         name="billing_cycle"
-#     )
-#     with patch(
-#         "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
-#     ) as conditionally_update_billing_cycle_types:
-#         conditionally_update_billing_cycle_types()
-
-#         self.assertEqual(billing_cycle_attribute, "prepaid")
-
-# def monthly_no_change(self) -> None:
-#     create_allocation(self.project, self.user, self.monthly_form_data)
-#     billing_cycle_attribute = AllocationAttributeType.objects.get(
-#         name="billing_cycle"
-#     )
-#     with patch(
-#         "coldfront.plugins.qumulo.tasks.conditionally_update_billing_cycle_types"
-#     ) as conditionally_update_billing_cycle_types:
-#         conditionally_update_billing_cycle_types()
-
-#         self.assertEqual(billing_cycle_attribute, "monthly")
