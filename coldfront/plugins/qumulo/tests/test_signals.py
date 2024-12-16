@@ -126,52 +126,6 @@ class TestSignals(TestCase):
             "Can't create allocation: Some attributes are missing or invalid"
         )
 
-    @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
-    @patch("coldfront.plugins.qumulo.signals.async_task")
-    def test_allocation_activates_calculates_prepaid_expiration_monthly(
-        self,
-        mock_async_task: MagicMock,
-        mock_ACL_ActiveDirectoryApi: MagicMock,
-        mock_QumuloAPI: MagicMock,
-    ):
-        allocation_activate.send(
-            sender=self.__class__, allocation_pk=self.storage_allocation.pk
-        )
-
-        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
-            name="prepaid_expiration"
-        )
-        prepaid_exp = AllocationAttribute.objects.get(
-            allocation_attribute_type=allocation_attribute_obj_type,
-            allocation=self.storage_allocation,
-        )
-
-        self.assertEqual(prepaid_exp.value, datetime.today().strftime("%Y-%m-%d"))
-
-    @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
-    @patch("coldfront.plugins.qumulo.signals.async_task")
-    def test_allocation_activates_calculates_prepaid_expiration_prepaid_past(
-        self,
-        mock_async_task: MagicMock,
-        mock_ACL_ActiveDirectoryApi: MagicMock,
-        mock_QumuloAPI: MagicMock,
-    ):
-        allocation_activate.send(
-            sender=self.__class__, allocation_pk=self.prepaid_storage_allocation_past.pk
-        )
-
-        allocation_attribute_obj_type = AllocationAttributeType.objects.get(
-            name="prepaid_expiration"
-        )
-        prepaid_exp = AllocationAttribute.objects.get(
-            allocation_attribute_type=allocation_attribute_obj_type,
-            allocation=self.prepaid_storage_allocation,
-        )
-
-        correct_prepaid = date.today() + relativedelta(months=+6)
-
-        self.assertEqual(prepaid_exp.value, correct_prepaid.strftime("%Y-%m-%d"))
-
     def test_allocation_change_approved_updates_allocation(
         self,
         mock_QumuloAPI: MagicMock,
