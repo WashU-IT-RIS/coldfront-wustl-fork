@@ -10,9 +10,9 @@ from coldfront.plugins.qumulo.utils.eib_billing import PrepaidBilling
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
-        print("Scheduling generating storage2 monthly billing report")
+        print("Scheduling generating storage2 monthly prepaid billing report")
         schedule(
-            "coldfront.plugins.qumulo.management.commands.prepaid_billing_report.generate_prepaid_billing_report",
+            "coldfront.plugins.qumulo.management.utils.prepaid_billing.PrepaidBilling",
             name="Generate Prepaid Billing Report",
             schedule_type=Schedule.DAILY,
         )
