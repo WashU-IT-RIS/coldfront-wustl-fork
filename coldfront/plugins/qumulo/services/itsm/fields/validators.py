@@ -86,6 +86,9 @@ def inclusion(value, accepted_values):
 
 
 def exclusion(value, exclusions):
+    if value is None:
+        return None
+
     if exclusions != "emails":
         return None
 

@@ -2,13 +2,9 @@ import os
 from typing import Any, Optional
 import requests
 
-from dotenv import load_dotenv
-
 from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_factory import (
     itsm_attributes,
 )
-
-load_dotenv(override=True)
 
 
 class ItsmClient:
@@ -21,7 +17,9 @@ class ItsmClient:
         endpoint_path = os.environ.get("ITSM_SERVICE_PROVISION_ENDPOINT")
 
         itsm_fields = ",".join(itsm_attributes)
-        self.url = f"{protocol}://{self.host}:{port}{endpoint_path}?attribute={itsm_fields}"
+        self.url = (
+            f"{protocol}://{self.host}:{port}{endpoint_path}?attribute={itsm_fields}"
+        )
 
     def get_fs1_allocation_by_fileset_name(self, fileset_name) -> str:
         return self.__get_fs1_allocation_by("fileset_name", fileset_name)
@@ -33,7 +31,6 @@ class ItsmClient:
     def __is_itsm_localhost(self):
         return self.host == "localhost"
 
-    #### PRIVATE METHODS ####
     def __get_fs1_allocation_by(self, fileset_key, fileset_value) -> str:
         filtered_url = self.__get_filtered_url(fileset_key, fileset_value)
         session = self.__get_session()
@@ -69,5 +66,5 @@ class ItsmClient:
         return (self.user, self.password)
 
     def __get_verify_certificate(self) -> Any:
-        # Unfortunately, the verify could be a path where the certificated is located or True
+        # Unfortunately, the verify attribute could be a path where the certificate is located or bool
         return os.environ.get("RIS_CHAIN_CERTIFICATE") or True
