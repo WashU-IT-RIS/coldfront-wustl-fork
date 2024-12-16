@@ -22,7 +22,7 @@ class PrepaidBilling:
     def __init__(self, today=datetime.today().replace(day=1)):
         future_date = today + relativedelta(months=1)
         self.usage_date = future_date.strftime(YYYY_MM_DD)
-
+        logger.debug(f"{self.usage_date}")
         # The first day of the service month
         self.delivery_date = (
             (
@@ -32,10 +32,12 @@ class PrepaidBilling:
             .replace(day=1)
             .strftime(YYYY_MM_DD)
         )
+        logger.debug(f"{self.delivery_date}")
         # The service month for billing
         self.billing_month = datetime.strptime(self.delivery_date, YYYY_MM_DD).strftime(
             "%B"
         )
+        logger.debug(f"{self.billing_month}")
         self.filename = (
             f"/tmp/RIS-{self.billing_month}-storage2-prepaid-active-billing.csv"
         )
