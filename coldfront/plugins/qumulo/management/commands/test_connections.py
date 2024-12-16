@@ -29,7 +29,7 @@ class Command(BaseCommand):
             authentication=ldap3.NTLM,
         )
 
-        print(f"Pod connects to AD: ${conn.bind()}")
+        print(f"Pod connects to AD: {conn.bind()}")
 
         try:
             rc.ad.list_ad()
