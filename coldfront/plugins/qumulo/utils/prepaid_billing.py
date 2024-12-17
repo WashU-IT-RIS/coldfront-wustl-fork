@@ -152,6 +152,7 @@ FROM (
         LEFT JOIN (SELECT aa.allocation_id, aa.value service_rate_category FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='service_rate') AS service_rate_category ON a.id=service_rate_category.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value storage_quota FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='storage_quota') AS storage_quota ON a.id=storage_quota.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_billing_date FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_billing_date') AS prepaid_billing_date ON a.id=prepaid_billing_date.allocation_id
+        LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_expiration FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_expiration') AS prepaid_expiration ON a.id=prepaid_expiration.allocation_id
         JOIN (
             SELECT haau.allocation_attribute_id, haau.value storage_usage
             FROM allocation_historicalallocationattributeusage haau
