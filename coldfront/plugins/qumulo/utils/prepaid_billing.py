@@ -92,7 +92,6 @@ FROM (
         data.service_unit,
         data.storage_name,
         data.service_name,
-        data.prepaid_billing_date,
         data.sponsor,
         CASE service_rate_category
             WHEN 'consumption' THEN
@@ -109,7 +108,8 @@ FROM (
         data.rate,
         data.service_rate_category,
         data.department_number,
-        data.cost_center
+        data.cost_center,
+        data.prepaid_billing_date
     FROM (
         SELECT
             '1' service_id,
