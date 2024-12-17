@@ -92,6 +92,7 @@ FROM (
         data.service_unit,
         data.storage_name,
         data.service_name,
+        data.prepaid_billing_date,
         data.sponsor,
         CASE service_rate_category
             WHEN 'consumption' THEN
