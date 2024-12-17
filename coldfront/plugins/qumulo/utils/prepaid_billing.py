@@ -171,7 +171,7 @@ FROM (
         AND
           astatus.name = 'Active'
     ) AS data
-    WHERE billing_cycle = 'prepaid'
+    WHERE prepaid_billing_date.month.strftime("%B") = self.billing_month
         AND exempt <> TRUE
 ) AS report 
 WHERE report.billing_amount > 0;
