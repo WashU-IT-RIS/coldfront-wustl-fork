@@ -66,7 +66,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "prepaid_billing_date": datetime.today(),
         }
 
-    def prepaid_past_expiration_date(self):
+    def test_prepaid_past_expiration_date(self):
         allocation = create_allocation(
             self.project, self.user, self.prepaid_past_form_data
         )
@@ -97,7 +97,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         ).value
         self.assertEqual(prepaid_exp_value, str(prepaid_until))
 
-    def prepaid_present_expiration_date(self):
+    def test_prepaid_present_expiration_date(self):
         allocation = create_allocation(
             self.project, self.user, self.prepaid_present_form_data
         )
@@ -128,7 +128,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         ).value
         self.assertEqual(prepaid_exp_value, str(prepaid_until))
 
-    def prepaid_start_today(self) -> None:
+    def test_prepaid_start_today(self) -> None:
         allocation = create_allocation(
             self.project, self.user, self.prepaid_present_form_data
         )
@@ -155,7 +155,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         final_bill_cycle = allocation.get_attribute(name="billing_cycle")
         self.assertEqual(final_bill_cycle, "prepaid")
 
-    def monthly_start_today(self) -> None:
+    def test_monthly_start_today(self) -> None:
         allocation = create_allocation(
             self.project, self.user, self.prepaid_past_form_data
         )
