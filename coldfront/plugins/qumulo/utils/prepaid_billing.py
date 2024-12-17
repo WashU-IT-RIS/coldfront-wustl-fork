@@ -173,7 +173,7 @@ FROM (
         AND
           astatus.name = 'Active'
     ) AS data
-    WHERE prepaid_billing_date = delivery_date
+    WHERE data.prepaid_billing_date = delivery_date
         AND exempt <> TRUE
 ) AS report 
 WHERE report.billing_amount > 0;
