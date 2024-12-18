@@ -120,7 +120,7 @@ FROM (
             cost_center,
             prepaid_billing_date,
             'prepaid' billing_cycle,
-            report.delivery_date delivery_date,
+            delivery_date,
             TRUE subsidized,
             FALSE exempt,
             CASE service_rate_category
