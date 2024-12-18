@@ -191,23 +191,15 @@ class UpdateAllocationView(AllocationView):
         form_value: Union[str, int],
     ) -> None:
         # some attributes are optional and so may not exist
-        try:
-            attribute = AllocationAttribute.objects.get(
-                allocation_attribute_type=AllocationAttributeType.objects.get(
-                    name=attribute_name
-                ),
-                allocation=allocation,
-            )
-        except AllocationAttribute.DoesNotExist:
-            # create the attribute if it doesn't exist, but do it with an empty
-            # value to the change request workflow can proceed
-            attribute = AllocationAttribute.objects.create(
-                allocation=allocation,
-                allocation_attribute_type=AllocationAttributeType.objects.get(
-                    name=attribute_name
-                ),
-                value="",
-            )
+        # if they don't, we want to create them with an empty
+        # value so the change request flow will work
+        attribute, _ = AllocationAttribute.objects.get_or_create(
+            allocation_attribute_type=AllocationAttributeType.objects.get(
+                name=attribute_name
+            ),
+            allocation=allocation,
+            defaults={"value": ""},
+        )
 
         # storage quota needs to be compared as an integer
         comparand = int(attribute.value) if type(form_value) is int else attribute.value
