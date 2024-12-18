@@ -47,6 +47,16 @@ class TestActiveDirectoryAPI(TestCase):
         self.assertGreater(len(group_dn), 0)
 
     @tag("integration")
+    def test_stress_test_get_group(self):
+        group_name_prefix = "storage-delme-test-stress_test_get_group"
+
+        for _ in range(10):
+            group_name = f"{group_name_prefix}-{_}"
+            self.ad_api.create_ad_group(group_name=group_name)
+
+            self.ad_api.get_group(group_name)
+
+    @tag("integration")
     def test_add_user_to_ad_group(self):
         group_name = "storage-delme-test-add_user_to_ad_group"
 

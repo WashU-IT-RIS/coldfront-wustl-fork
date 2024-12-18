@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
+import logging
+
 
 class ActiveDirectoryAPI:
     def __init__(self) -> None:
@@ -97,6 +99,7 @@ class ActiveDirectoryAPI:
         )
 
         if not self.conn.response:
+            logging.error(f"Group {group_name} not found.\nOU: {groups_OU}")
             raise ValueError("Invalid group_name")
 
         return self.conn.response[0]
