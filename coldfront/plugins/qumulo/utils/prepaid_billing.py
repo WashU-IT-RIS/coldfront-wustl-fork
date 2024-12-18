@@ -120,6 +120,7 @@ FROM (
             cost_center,
             prepaid_billing_date,
             'prepaid' billing_cycle,
+            '%s' delivery_date,
             TRUE subsidized,
             FALSE exempt,
             CASE service_rate_category
@@ -174,7 +175,7 @@ FROM (
         AND
           astatus.name = 'Active'
     ) AS data
-    WHERE prepaid_billing_date = report.delivery_date
+    WHERE prepaid_billing_date = delivery_date
         AND exempt <> TRUE
 ) AS report 
 WHERE report.billing_amount > 0;
