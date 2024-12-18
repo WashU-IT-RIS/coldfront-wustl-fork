@@ -117,7 +117,7 @@ def ingest_quotas_with_daily_usage() -> None:
     __validate_results(base_allocation_quota_usages, logger)
 
 
-def addUsersToADGroup(
+def addMembersToADGroup(
     wustlkeys: list[str],
     acl_allocation: Allocation,
     bad_keys: Optional[list[str]] = None,
@@ -137,14 +137,16 @@ def addUsersToADGroup(
     wustlkey = wustlkeys[0]
 
     try:
-        user = active_directory_api.get_member(wustlkey)
-        is_group = True if "group" in user["objectclass"] else False
+        member = active_directory_api.get_member(wustlkey)
+        is_group = "group" in member["objectclass"]
 
-        good_keys.append({"wustlkey": wustlkey, "dn": user["dn"], "is_group": is_group})
+        good_keys.append(
+            {"wustlkey": wustlkey, "dn": member["dn"], "is_group": is_group}
+        )
     except ValueError:
         bad_keys.append(wustlkey)
 
-    async_task(addUsersToADGroup, wustlkeys[1:], acl_allocation, bad_keys, good_keys)
+    async_task(addMembersToADGroup, wustlkeys[1:], acl_allocation, bad_keys, good_keys)
 
 
 def __ad_members_and_handle_errors(
@@ -157,7 +159,7 @@ def __ad_members_and_handle_errors(
     group_name = acl_allocation.get_attribute("storage_acl_name")
 
     if len(good_keys) > 0:
-        member_dns = [user["dn"] for user in good_keys]
+        member_dns = [member["dn"] for member in good_keys]
         try:
             active_directory_api.add_members_to_ad_group(member_dns, group_name)
         except Exception as e:
