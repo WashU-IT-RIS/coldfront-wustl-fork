@@ -138,6 +138,8 @@ def addMembersToADGroup(
 
     try:
         member = active_directory_api.get_member(wustlkey)
+        logger.warn(f"member: {member}")
+
         is_group = "group" in member["objectclass"]
 
         good_keys.append(
