@@ -21,7 +21,7 @@ class TestActiveDirectoryAPI(TestCase):
             {"dn": "user_dn", "attributes": {"other_attr": "value"}}
         ]
         wustlkey = "test_wustlkey"
-        expected_filter = f"(&(objectclass=person)(sAMAccountName={wustlkey}))"
+        expected_filter = f"(&(objectClass=person)(sAMAccountName={wustlkey}))"
 
         self.ad_api.get_user(wustlkey)
 
@@ -37,7 +37,7 @@ class TestActiveDirectoryAPI(TestCase):
             {"dn": "user_dn", "attributes": {"other_attr": "value"}}
         ]
         email = "wustlkey@wustl.edu"
-        expected_filter = f"(&(objectclass=person)(mail={email}))"
+        expected_filter = f"(&(objectClass=person)(mail={email}))"
 
         self.ad_api.get_user_by_email(email)
 
@@ -113,7 +113,7 @@ class TestActiveDirectoryAPI(TestCase):
             {"dn": "group_dn", "attributes": {"other_attr": "value"}}
         ]
 
-        expected_filter = f"(&(objectclass=group)(sAMAccountName={group_name}))"
+        expected_filter = f"(&(objectClass=group)(sAMAccountName={group_name}))"
 
         self.ad_api.get_group_dn(group_name)
 
@@ -150,7 +150,7 @@ class TestActiveDirectoryAPI(TestCase):
             {"dn": "group_dn", "attributes": {"other_attr": "value"}}
         ]
 
-        expected_filter = f"(&(objectclass=group)(sAMAccountName={group_name}))"
+        expected_filter = f"(&(objectClass=group)(sAMAccountName={group_name}))"
 
         self.ad_api.delete_ad_group(group_name)
 
@@ -175,7 +175,7 @@ class TestActiveDirectoryAPI(TestCase):
 
         user_name = "test_wustlkey"
         expected_filter = (
-            f"(&(|(objectclass=group)(objectclass=person))(sAMAccountName={user_name}))"
+            f"(&(|(objectClass=group)(objectClass=person))(sAMAccountName={user_name}))"
         )
 
         self.ad_api.remove_member_from_group(member_name=user_name, group_name="bar")
@@ -185,7 +185,7 @@ class TestActiveDirectoryAPI(TestCase):
                 call(
                     "dc=accounts,dc=ad,dc=wustl,dc=edu",
                     expected_filter,
-                    attributes=["sAMAccountName", "objectclass"],
+                    attributes=["sAMAccountName", "objectClass"],
                 )
             ]
         )
@@ -198,7 +198,7 @@ class TestActiveDirectoryAPI(TestCase):
             {"dn": "group_dn", "attributes": {"other_attr": "value"}}
         ]
 
-        expected_filter = f"(&(objectclass=group)(sAMAccountName={group_name}))"
+        expected_filter = f"(&(objectClass=group)(sAMAccountName={group_name}))"
 
         self.ad_api.remove_member_from_group("user_name", group_name)
 

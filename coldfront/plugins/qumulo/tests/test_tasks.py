@@ -370,7 +370,7 @@ class TestAddMembersToADGroup(TestCase):
 
         mock_user_response = {
             "dn": "user_dn",
-            "objectclass": ["top", "person", "organizationalPerson", "user"],
+            "objectClass": ["top", "person", "organizationalPerson", "user"],
         }
         active_directory_instance = MagicMock()
         active_directory_instance.get_member.return_value = mock_user_response
@@ -444,7 +444,7 @@ class TestAddMembersToADGroup(TestCase):
     ):
         mock_user_response = {
             "dn": "user_dn",
-            "objectclass": ["top", "person", "organizationalPerson", "user"],
+            "objectClass": ["top", "person", "organizationalPerson", "user"],
         }
         active_directory_instance = MagicMock()
         active_directory_instance.get_member.return_value = mock_user_response
@@ -489,7 +489,7 @@ class TestAddMembersToADGroup(TestCase):
     ):
         mock_user_response = {
             "dn": "user_dn",
-            "objectclass": ["top", "group"],
+            "objectClass": ["top", "group"],
         }
         active_directory_instance = MagicMock()
         active_directory_instance.get_member.return_value = mock_user_response
@@ -551,7 +551,7 @@ class TestAddMembersToADGroup(TestCase):
     def __get_member_mock(self, account_name: str, good_users: list[str]) -> dict:
         mock_member_response = {
             "dn": "user_dn",
-            "objectclass": ["top", "person", "organizationalPerson", "user"],
+            "objectClass": ["top", "person", "organizationalPerson", "user"],
         }
         if account_name in good_users:
             return mock_member_response
@@ -635,7 +635,7 @@ class TestAddMembersToADGroup(TestCase):
         active_directory_instance = MagicMock()
         mock_member_response = {
             "dn": "user_dn",
-            "objectclass": ["top", "group"],
+            "objectClass": ["top", "group"],
         }
         active_directory_instance.get_member.return_value = mock_member_response
         mock_active_directory_api.return_value = active_directory_instance

@@ -32,7 +32,7 @@ class ActiveDirectoryAPI:
 
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
-            f"(&(objectclass=person)(sAMAccountName={wustlkey}))",
+            f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
             attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
 
@@ -44,8 +44,8 @@ class ActiveDirectoryAPI:
     def get_member(self, account_name: str):
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
-            f"(&(|(objectclass=group)(objectclass=person))(sAMAccountName={account_name}))",
-            attributes=["sAMAccountName", "objectclass"],
+            f"(&(|(objectClass=group)(objectClass=person))(sAMAccountName={account_name}))",
+            attributes=["sAMAccountName", "objectClass"],
         )
 
         if not self.conn.response:
@@ -59,7 +59,7 @@ class ActiveDirectoryAPI:
 
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
-            f"(&(objectclass=person)(mail={email}))",
+            f"(&(objectClass=person)(mail={email}))",
             attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
 
@@ -93,7 +93,7 @@ class ActiveDirectoryAPI:
     def get_group(self, group_name: str) -> str:
         groups_OU = os.environ.get("AD_GROUPS_OU")
         self.conn.search(
-            groups_OU, f"(&(objectclass=group)(sAMAccountName={group_name}))"
+            groups_OU, f"(&(objectClass=group)(sAMAccountName={group_name}))"
         )
 
         if not self.conn.response:

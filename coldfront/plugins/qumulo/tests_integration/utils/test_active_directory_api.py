@@ -33,7 +33,7 @@ class TestActiveDirectoryAPI(TestCase):
 
     @tag("integration")
     def test_get_member(self):
-        member = self.ad_api.get_member("self.test_wustlkey")
+        member = self.ad_api.get_member(self.test_wustlkey)
 
         self.assertIn("Harter", member["dn"])
 
