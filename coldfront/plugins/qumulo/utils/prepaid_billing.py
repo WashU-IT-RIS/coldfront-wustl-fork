@@ -112,7 +112,7 @@ FROM (
         data.department_number,
         data.cost_center,
         data.prepaid_expiration,
-        data.prepaid_time,
+        data.prepaid_time
     FROM (
         SELECT
             '1' service_id,
