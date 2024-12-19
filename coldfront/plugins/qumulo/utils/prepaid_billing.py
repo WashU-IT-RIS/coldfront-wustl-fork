@@ -190,6 +190,7 @@ WHERE report.billing_amount > 0;
             self.billing_month,
             self.delivery_date,
             self.usage_date,
+            self.delivery_date,
         )
 
         try:
