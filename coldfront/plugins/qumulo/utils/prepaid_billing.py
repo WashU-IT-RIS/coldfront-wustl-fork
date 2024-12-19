@@ -79,6 +79,8 @@ SELECT
     report.delivery_date delivery_date,
     ('"' || report.storage_name || '"') AS fileset_memo,
     report.cost_center cost_center,
+    report.prepaid_expiration prepaid_expiration,
+    report.prepaid_time prepaid_time,
     NULL fund,
     NULL,
     NULL,
@@ -108,7 +110,9 @@ FROM (
         data.rate,
         data.service_rate_category,
         data.department_number,
-        data.cost_center
+        data.cost_center,
+        data.prepaid_expiration,
+        data.prepaid_time,
     FROM (
         SELECT
             '1' service_id,
