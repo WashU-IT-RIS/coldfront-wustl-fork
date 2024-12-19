@@ -119,7 +119,7 @@ FROM (
             service_rate_category,
             cost_center,
             prepaid_billing_date,
-            prepaid_expiration_date,
+            prepaid_expiration,
             'monthly' billing_cycle,
             TRUE subsidized,
             FALSE exempt,
