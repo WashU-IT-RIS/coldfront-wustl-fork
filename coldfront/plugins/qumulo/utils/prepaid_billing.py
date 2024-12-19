@@ -69,7 +69,7 @@ SELECT
     '1' row_id,
     NULL internal_service_delivery_line_id,
     '1' internal_service_delivery_line_number,
-    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.billing_amount || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"') AS item_description,
+    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.prepaid_time || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"') AS item_description,
     'SC510' spend_category,
     '1' quantity,
     'EA' unit_of_measure,
@@ -85,7 +85,6 @@ SELECT
     NULL,
     NULL,
     NULL,
-    report.billing_amount usage_amount,
     report.rate rate,
     report.service_unit unit
 FROM (
