@@ -119,24 +119,21 @@ FROM (
             service_rate_category,
             cost_center,
             prepaid_billing_date,
-            'prepaid' billing_cycle,
+            'monthly' billing_cycle,
             TRUE subsidized,
             FALSE exempt,
             CASE service_rate_category
-                WHEN 'consumption' THEN 13
                 WHEN 'subscription' THEN 634
                 WHEN 'subscription_500tb' THEN 2643
                 WHEN 'condo' THEN 529
             END rate,
             storage_quota,
             CASE service_rate_category
-                WHEN 'consumption' THEN CAST(storage_usage_of_the_day.storage_usage AS FLOAT8) /1024/1024/1024/1024
                 WHEN 'subscription' THEN CEILING(CAST(storage_quota AS FLOAT8) /100)
                 WHEN 'subscription_500tb' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
                 WHEN 'condo' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
             END billing_amount_tb,
             CASE service_rate_category
-                WHEN 'consumption' THEN 'TB'
                 WHEN 'subscription' THEN '100TB'
                 WHEN 'subscription_500tb' THEN '500TB'
                 WHEN 'condo' THEN '500TB'
@@ -154,19 +151,6 @@ FROM (
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value storage_quota FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='storage_quota') AS storage_quota ON a.id=storage_quota.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_billing_date FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_billing_date') AS prepaid_billing_date ON a.id=prepaid_billing_date.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_expiration FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_expiration') AS prepaid_expiration ON a.id=prepaid_expiration.allocation_id
-        JOIN (
-            SELECT haau.allocation_attribute_id, haau.value storage_usage
-            FROM allocation_historicalallocationattributeusage haau
-            JOIN (
-                SELECT allocation_attribute_id aa_id, MAX(modified) usage_timestamp
-                FROM allocation_historicalallocationattributeusage
-                WHERE DATE(modified) = '%s'
-                GROUP BY aa_id, DATE(modified)
-            ) AS aa_id_usage_timestamp
-            ON haau.allocation_attribute_id = aa_id_usage_timestamp.aa_id
-                AND haau.modified = aa_id_usage_timestamp.usage_timestamp
-        ) AS storage_usage_of_the_day
-            ON storage_quota.id = storage_usage_of_the_day.allocation_attribute_id
         JOIN allocation_allocation_resources ar ON ar.allocation_id=a.id
         JOIN resource_resource r ON r.id=ar.resource_id
         WHERE
