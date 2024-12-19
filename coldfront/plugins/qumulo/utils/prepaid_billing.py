@@ -47,7 +47,7 @@ class PrepaidBilling:
 Area,All,,Business Process Parameters,Internal Service Delivery Data,,,,,,,Internal Service Delivery Line Data+,,,,,,,,,,,,,
 Restrictions,Required,Optional,Optional,Optional,Optional,Required,Required,Required,Required,Optional,Required,Optional,Required,Optional,Optional,Optional,Optional,Optional,Required,Optional,Optional,Optional,Optional. May have multiples,Optional. May have multiples
 Format,Text,Y/N,Y/N,Text,Y/N,Company_Reference_ID,Internal_Service_Provider_ID,Currency_ID,YYYY-MM-DD,Text,Text,Text,Number,Text,Spend_Category_ID,Number (22,2),UN_CEFACT_Common_Code_ID,Number (26,6),Number (18,3),Employee_ID,YYYY-MM-DD,Text,Cost_Center_Reference_ID,Fund_ID
-Fields,Spreadsheet Key*,Add Only,Auto Complete,Internal Service Delivery ID,Submit,Company*,Internal Service Provider*,Currency*,Document Date*,Memo,Row ID**,Internal Service Delivery Line ID,Internal Service Delivery Line Number*,Item Description,Spend Category,Quantity,Unit of Measure,Unit Cost,Extended Amount*,Requester,Delivery Date,Memo,Cost Center,Prepaid Billing Date,Prepaid Expiration Date,Fund,,,,USAGE,RATE,UNIT
+Fields,Spreadsheet Key*,Add Only,Auto Complete,Internal Service Delivery ID,Submit,Company*,Internal Service Provider*,Currency*,Document Date*,Memo,Row ID**,Internal Service Delivery Line ID,Internal Service Delivery Line Number*,Item Description,Spend Category,Quantity,Unit of Measure,Unit Cost,Extended Amount*,Requester,Delivery Date,Memo,Cost Center,Prepaid Billing Date,Prepaid Expiration Date,Prepaid Time,Fund,,,,USAGE,RATE,UNIT
 """
 
         return report_header
@@ -120,6 +120,7 @@ FROM (
             cost_center,
             prepaid_billing_date,
             prepaid_expiration,
+            prepaid_time,
             'monthly' billing_cycle,
             TRUE subsidized,
             FALSE exempt,
@@ -152,6 +153,7 @@ FROM (
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value storage_quota FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='storage_quota') AS storage_quota ON a.id=storage_quota.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_billing_date FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_billing_date') AS prepaid_billing_date ON a.id=prepaid_billing_date.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_expiration FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_expiration') AS prepaid_expiration ON a.id=prepaid_expiration.allocation_id
+        LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_time FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_time') AS prepaid_time ON a.id=prepaid_time.allocation_id
         JOIN allocation_allocation_resources ar ON ar.allocation_id=a.id
         JOIN resource_resource r ON r.id=ar.resource_id
         WHERE
