@@ -91,6 +91,8 @@ def construct_suballocation_form_data(quota_tb: int, parent_allocation: Allocati
         "ro_users": ["test1"],
         "storage_ticket": "ITSD-1234",
         "cost_center": parent_allocation.get_attribute("cost_center"),
+        "prepaid_billing_date": "2025-01-01",
+        "prepaid_time": 5,
         "department_number": parent_allocation.get_attribute("department_number"),
         "billing_cycle": parent_allocation.get_attribute("billing_cycle"),
         "service_rate": parent_allocation.get_attribute("service_rate"),
