@@ -144,6 +144,33 @@ def mock_get_multiple_quotas() -> str:
     }
 
 
+def mock_get_quota() -> str:
+    name = "15tb-consumption"
+    quota = "15000000000000"
+    usage = "10995116277760"
+    suballocation_name = "5tb-suballocation"
+    suballocation_quota = "5000000000000"
+    suballocation_usage = "5497558138880"
+    usage_in_json = [
+        {
+            "id": "101",
+            "path": f"{STORAGE2_PATH}/{name}/",
+            "limit": f"{quota}",
+            "capacity_usage": f"{usage}",
+        },
+        {
+            "id": "102",
+            "path": f"{STORAGE2_PATH}/{name}/Active/{suballocation_name}",
+            "limit": f"{suballocation_quota}",
+            "capacity_usage": f"{suballocation_usage}",
+        },
+    ]
+
+    return {
+        "quotas": usage_in_json,
+    }
+
+
 class TestPrepaidBilling(TestCase):
     def setUp(self) -> None:
         self.client = Client()
@@ -176,3 +203,76 @@ class TestPrepaidBilling(TestCase):
                 "^\s*SELECT\s*", prepaid_billing.get_prepaid_billing_query_template()
             )
         )
+
+    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    def test_create_multiple_allocations_ingest_usages_generate_billing_report(
+        self, qumulo_api_mock: MagicMock
+    ) -> None:
+        qumulo_api = MagicMock()
+        qumulo_api.get_all_quotas_with_usage.return_value = mock_get_multiple_quotas()
+        qumulo_api_mock.return_value = qumulo_api
+
+        quota_service_rate_categories = mock_get_quota_service_rate_categories()
+
+        for quota, service_rate_category in quota_service_rate_categories:
+            allocation = create_allocation(
+                project=self.project,
+                user=self.user,
+                form_data=construct_allocation_form_data(quota, service_rate_category),
+            )
+
+            allocation.status = AllocationStatusChoice.objects.get(name="Active")
+            allocation.save()
+
+        storage2_allocations = Allocation.objects.filter(
+            resources__name="Storage2", status__name__in=["Active"]
+        )
+        self.assertEqual(len(storage2_allocations), len(quota_service_rate_categories))
+
+        ingest_quotas_with_daily_usage()
+        prepaid_billing = PrepaidBilling(
+            datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        )
+        prepaid_billing.generate_prepaid_billing_report()
+
+        filename = prepaid_billing.get_filename()
+        with open(filename) as csvreport:
+            data = list(csv.reader(csvreport))
+
+        header = prepaid_billing.get_report_header()
+        num_lines_header = len(header.splitlines())
+        print("Numer of lines of the report header: %s" % num_lines_header)
+        self.assertEqual(num_lines_header, 5)
+
+        billing_entries = []
+        for index in range(num_lines_header, len(data)):
+            billing_entries.append(data[index])
+
+        row_num_index = REPORT_COLUMNS.index("spreadsheet_key")
+        billing_amount_index = REPORT_COLUMNS.index("extended_amount")
+        fileset_memo_index = REPORT_COLUMNS.index("memo_filesets")
+        for index in range(0, len(billing_entries)):
+            row_num = billing_entries[index][row_num_index]
+            self.assertEqual(str(index + 1), row_num)
+            billing_amount = billing_entries[index][billing_amount_index].replace(
+                '"', ""
+            )
+            fileset_memo = billing_entries[index][fileset_memo_index].replace('"', "")
+
+            # Confirm the billing amounts of each test cases
+            # hardcoded
+            if fileset_memo == "5tb-subscription":
+                self.assertEqual(float(billing_amount) - 634.0, 0)
+            elif fileset_memo == "100tb-subscription":
+                self.assertEqual(float(billing_amount) - 634.0, 0)
+            elif fileset_memo == "500tb-subscription":
+                self.assertEqual(float(billing_amount) - 3170.0, 0)
+            elif fileset_memo == "500tb-subscription_500tb":
+                self.assertEqual(float(billing_amount) - 2643.0, 0)
+            elif fileset_memo == "500tb-condo":
+                self.assertEqual(float(billing_amount) - 529.0, 0)
+            else:
+                print(fileset_memo, billing_amount)
+                self.assertFalse(True)
+
+        os.remove(filename)

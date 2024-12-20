@@ -19,7 +19,8 @@ YYYY_MM_DD = "%Y-%m-%d"
 
 
 class PrepaidBilling:
-    def __init__(self, today=datetime.today().replace(day=1)):
+    def __init__(self):
+        today = datetime.today().replace(day=1)
         future_date = today + relativedelta(months=1)
         self.usage_date = future_date.strftime(YYYY_MM_DD)
         logger.debug(f"{self.usage_date}")
