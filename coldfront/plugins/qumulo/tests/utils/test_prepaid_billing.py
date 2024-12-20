@@ -168,3 +168,11 @@ class TestPrepaidBilling(TestCase):
         #     hashlib.md5(header.encode("utf-8")).hexdigest(),
         #     "250225b6615daaa68b067ceef5abaf51",
         # )
+
+    def test_query_return_sql_statement(self):
+        prepaid_billing = PrepaidBilling()
+        self.assertTrue(
+            re.search(
+                "^\s*SELECT\s*", prepaid_billing.get_prepaid_billing_query_template()
+            )
+        )
