@@ -111,7 +111,8 @@ FROM (
         data.department_number,
         data.cost_center,
         data.prepaid_expiration,
-        data.prepaid_time
+        data.prepaid_time,
+        data.rate * data.prepaid_time as total_cost
     FROM (
         SELECT
             '1' service_id,
@@ -143,8 +144,7 @@ FROM (
                 WHEN 'subscription_500tb' THEN '500TB'
                 WHEN 'condo' THEN '500TB'
             END service_unit,
-            storage_filesystem_path,
-            rate * prepaid_time AS total_cost,
+            storage_filesystem_path
         FROM allocation_allocation a
         JOIN allocation_allocationstatuschoice astatus ON a.status_id=astatus.id
         JOIN project_project p ON a.project_id=p.id
