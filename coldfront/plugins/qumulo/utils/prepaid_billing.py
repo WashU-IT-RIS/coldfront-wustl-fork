@@ -143,7 +143,8 @@ FROM (
                 WHEN 'subscription_500tb' THEN '500TB'
                 WHEN 'condo' THEN '500TB'
             END service_unit,
-            storage_filesystem_path
+            storage_filesystem_path,
+            rate * prepaid_time AS total_cost,
         FROM allocation_allocation a
         JOIN allocation_allocationstatuschoice astatus ON a.status_id=astatus.id
         JOIN project_project p ON a.project_id=p.id
