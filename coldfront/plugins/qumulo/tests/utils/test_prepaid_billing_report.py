@@ -278,3 +278,92 @@ class TestPrepaidBilling(TestCase):
                 self.assertFalse(True)
 
         os.remove(filename)
+
+    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    def test_create_a_suballocation_ingest_usage_and_generate_billing_report(
+        self, qumulo_api_mock: MagicMock
+    ) -> None:
+        qumulo_api = MagicMock()
+        qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quota()
+        qumulo_api_mock.return_value = qumulo_api
+
+        allocation = create_allocation(
+            project=self.project,
+            user=self.user,
+            form_data=construct_allocation_form_data(100, "subscription"),
+        )
+
+        allocation.status = AllocationStatusChoice.objects.get(name="Active")
+        allocation.save()
+
+        suballocation = create_allocation(
+            project=self.project,
+            user=self.user,
+            form_data=construct_suballocation_form_data(10, allocation),
+            parent=allocation,
+        )
+
+        suballocation.status = AllocationStatusChoice.objects.get(name="Active")
+        suballocation.save()
+
+        # Confirm creating 2 Storage2 allocations, 1 parent and 1 child
+        num_storage2_allocations = len(
+            Allocation.objects.filter(resources__name="Storage2")
+        )
+        self.assertEqual(2, num_storage2_allocations)
+
+        # Confirm the existence of the sub allocation
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                SELECT count(*)
+                FROM allocation_allocationlinkage_children alc
+                JOIN allocation_allocation a
+                    ON alc.allocation_id = a.id
+            """
+            )
+            rows = cursor.fetchall()
+
+        self.assertEqual(1, rows[0][0])
+
+        allocation_linkages = AllocationLinkage.objects.all()
+        num_linkages = len(allocation_linkages)
+        self.assertEqual(1, num_linkages)
+
+        num_suballocations = 0
+        for linkage in allocation_linkages:
+            num_suballocations += len(linkage.children.all())
+
+        self.assertEqual(1, num_suballocations)
+
+        ingest_quotas_with_daily_usage()
+        prepaid_billing = PrepaidBilling(
+            datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        )
+        prepaid_billing.generate_prepaid_billing_report()
+
+        filename = prepaid_billing.get_filename()
+        with open(filename) as csvreport:
+            data = list(csv.reader(csvreport))
+
+        num_lines_header = len(prepaid_billing.get_report_header().splitlines())
+
+        billing_entries = []
+        for index in range(num_lines_header, len(data)):
+            billing_entries.append(data[index])
+
+        row_num_index = REPORT_COLUMNS.index("spreadsheet_key")
+        billing_amount_index = REPORT_COLUMNS.index("extended_amount")
+        fileset_memo_index = REPORT_COLUMNS.index("memo_filesets")
+        for index in range(0, len(billing_entries)):
+            row_num = billing_entries[index][row_num_index]
+            self.assertEqual(str(index + 1), row_num)
+            billing_amount = billing_entries[index][billing_amount_index].replace(
+                '"', ""
+            )
+            fileset_memo = billing_entries[index][fileset_memo_index].replace('"', "")
+
+            # Confirm no billing entry for the sub allocation
+            self.assertEqual(fileset_memo, "100tb-subscription")
+
+        os.remove(filename)
