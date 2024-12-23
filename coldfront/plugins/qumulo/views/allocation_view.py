@@ -26,7 +26,6 @@ from coldfront.plugins.qumulo.forms import AllocationForm
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.validators import (
     validate_filesystem_path_unique,
-    validate_prepaid_start_date,
 )
 from coldfront.plugins.qumulo.tasks import addUsersToADGroup
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
@@ -71,7 +70,6 @@ class AllocationView(LoginRequiredMixin, FormView):
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
         validate_filesystem_path_unique(absolute_path)
-        validate_prepaid_start_date(prepaid_billing_date)
         if billing_cycle == "prepaid" and prepaid_billing_date > date.today():
             form_data["billing_cycle"] = "monthly"
 
@@ -275,14 +273,6 @@ class AllocationView(LoginRequiredMixin, FormView):
                     allocation=allocation,
                     value=json.dumps(protocols),
                 )
-            # elif allocation_attribute_name == "billing cycle":
-            #     billing_cycle = form_data.get("billing_cycle")
-
-            #     AllocationAttribute.objects.create(
-            #         allocation_attribute_type=allocation_attribute_type,
-            #         allocation=allocation,
-            #         value=json.dumps(billing_cycle),
-            #     )
             else:
                 value = form_data.get(allocation_attribute_name)
                 if value is None:

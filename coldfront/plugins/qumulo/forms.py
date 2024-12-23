@@ -13,6 +13,7 @@ from coldfront.plugins.qumulo.validators import (
     validate_single_ad_user,
     validate_ticket,
     validate_storage_name,
+    validate_prepaid_start_date,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -78,6 +79,7 @@ class AllocationForm(forms.Form):
     prepaid_billing_date = forms.DateField(
         help_text="Start Date Date of Prepaid Billing",
         label="Prepaid Billing Start Date",
+        validators=[validate_prepaid_start_date],
         required=False,
     )
     service_rate = forms.ChoiceField(
