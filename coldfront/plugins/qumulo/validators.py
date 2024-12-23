@@ -229,7 +229,7 @@ def __ldap_usernames_and_groups_validator(name: str) -> bool:
 def validate_prepaid_start_date(date: datetime):
     # datetime_object = datetime.strptime(date, YYYY_MM_DD)
     start_day = date.day
-    if start_day != "01":
+    if start_day != 1:
         raise ValidationError(
             gettext_lazy("Prepaid billing can only start on the first of the month")
         )
