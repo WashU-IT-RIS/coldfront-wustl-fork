@@ -16,6 +16,9 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 
 from pathlib import PurePath
 from qumulo.lib import request
+from datetime import datetime
+
+YYYY_MM_DD = "%Y-%m-%d"
 
 
 def validate_ad_users(ad_users: list[str]):
@@ -221,3 +224,12 @@ def __ldap_usernames_and_groups_validator(name: str) -> bool:
         return False
 
     return True
+
+
+def validate_prepaid_start_date(date: str):
+    datetime_object = datetime.strptime(date, YYYY_MM_DD)
+    if datetime_object.day != "01":
+        raise ValidationError(
+            gettext_lazy("Prepaid billing can only start on the first of the month")
+        )
+    return
