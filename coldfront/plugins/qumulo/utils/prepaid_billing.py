@@ -47,7 +47,7 @@ class PrepaidBilling:
 Area,All,,Business Process Parameters,Internal Service Delivery Data,,,,,,,Internal Service Delivery Line Data+,,,,,,,,,,,,,
 Restrictions,Required,Optional,Optional,Optional,Optional,Required,Required,Required,Required,Optional,Required,Optional,Required,Optional,Optional,Optional,Optional,Optional,Required,Optional,Optional,Optional,Optional. May have multiples,Optional. May have multiples
 Format,Text,Y/N,Y/N,Text,Y/N,Company_Reference_ID,Internal_Service_Provider_ID,Currency_ID,YYYY-MM-DD,Text,Text,Text,Number,Text,Spend_Category_ID,Number (22,2),UN_CEFACT_Common_Code_ID,Number (26,6),Number (18,3),Employee_ID,YYYY-MM-DD,Text,Cost_Center_Reference_ID,Fund_ID
-Fields,Spreadsheet Key*,Add Only,Auto Complete,Internal Service Delivery ID,Submit,Company*,Internal Service Provider*,Currency*,Document Date*,Memo,Row ID**,Internal Service Delivery Line ID,Internal Service Delivery Line Number*,Item Description,Spend Category,Quantity,Unit of Measure,Unit Cost,Extended Amount*,Requester,Delivery Date,Memo,Cost Center,Prepaid Billing Date,Prepaid Expiration Date,Prepaid Time,Total Cost,Fund,,,,USAGE,RATE,UNIT
+Fields,Spreadsheet Key*,Add Only,Auto Complete,Internal Service Delivery ID,Submit,Company*,Internal Service Provider*,Currency*,Document Date*,Memo,Row ID**,Internal Service Delivery Line ID,Internal Service Delivery Line Number*,Item Description,Spend Category,Quantity,Unit of Measure,Unit Cost,Extended Amount*,Requester,Delivery Date,Memo,Cost Center,Prepaid Billing Date,Prepaid Expiration Date,Prepaid Time,Fund,,,,USAGE,RATE,UNIT
 """
 
         return report_header
@@ -69,7 +69,7 @@ SELECT
     '1' row_id,
     NULL internal_service_delivery_line_id,
     '1' internal_service_delivery_line_number,
-    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.prepaid_time || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"') AS item_description,
+    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.prepaid_time || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || ' = Toal Cost: ' || report.total_cost ||'"') AS item_description,
     'SC510' spend_category,
     '1' quantity,
     'EA' unit_of_measure,
@@ -81,7 +81,6 @@ SELECT
     report.cost_center cost_center,
     report.prepaid_expiration prepaid_expiration,
     report.prepaid_time prepaid_time,
-    report.total_cost total_cost,
     NULL fund,
     NULL,
     NULL,
