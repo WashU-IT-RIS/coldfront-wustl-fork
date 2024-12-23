@@ -112,7 +112,7 @@ FROM (
         data.cost_center,
         data.prepaid_expiration,
         data.prepaid_time,
-        data.rate * data.prepaid_time as total_cost
+        data.rate * data.prepaid_time AS total_cost
     FROM (
         SELECT
             '1' service_id,
