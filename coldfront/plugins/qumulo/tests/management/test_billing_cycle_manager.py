@@ -60,8 +60,8 @@ class TestBillingCycleTypeUpdates(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
-            "billing_cycle": "prepaid",
+            "service_rate": "general",
+            "billing_cycle": "monthly",
             "prepaid_time": 3,
             "prepaid_billing_date": datetime.today(),
         }
