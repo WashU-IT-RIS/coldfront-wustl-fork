@@ -101,7 +101,7 @@ function handlePrepaidBillingDateDisplay(){
   const bill_cycle_value = document.getElementById("id_billing_cycle").value;
   const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
   const prepaid_billing_date_value = document.getElementById("id_prepaid_billing_date").value;
-  const prepaid_billing_date_invalid = document.getElementById("error_1_id_prepaid_billing_date");
+  const prepaid_billing_date_invalid = document.getElementById("error_1_id_prepaid_billing_date.invalid-feedback");
 
   if (bill_cycle_value !== "prepaid" && prepaid_billing_date_value === "") {
     prepaid_billing_date.style.visibility = "hidden";
