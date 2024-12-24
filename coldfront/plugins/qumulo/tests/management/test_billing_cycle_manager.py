@@ -153,7 +153,9 @@ class TestBillingCycleTypeUpdates(TestCase):
             self.prepaid_present_form_data["prepaid_billing_date"],
         )
         final_bill_cycle = allocation.get_attribute(name="billing_cycle")
+        final_service_rate = allocation.get_attribute(name="service_rate")
         self.assertEqual(final_bill_cycle, "prepaid")
+        self.assertEqual(final_service_rate, "subscription")
 
     def test_monthly_start_today(self) -> None:
         allocation = create_allocation(

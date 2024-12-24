@@ -53,10 +53,6 @@ def on_allocation_activate(sender, **kwargs):
     protocols = json.loads(allocation.get_attribute(name="storage_protocols"))
     name = allocation.get_attribute(name="storage_name")
     limit_in_bytes = allocation.get_attribute(name="storage_quota") * (2**40)
-    bill_cycle = allocation.get_attribute(name="billing_cycle")
-    allocation_attribute_obj_type = AllocationAttributeType.objects.get(
-        name="prepaid_expiration"
-    )
 
     fs_path = allocation.get_attribute(name="storage_filesystem_path")
     export_path = allocation.get_attribute(name="storage_export_path")
