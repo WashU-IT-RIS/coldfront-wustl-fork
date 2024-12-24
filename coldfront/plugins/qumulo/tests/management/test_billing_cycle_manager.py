@@ -63,7 +63,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "general",
             "billing_cycle": "monthly",
             "prepaid_time": 3,
-            "prepaid_billing_date": datetime.today(),
+            "prepaid_billing_date": datetime.today().strftime("%Y-%m-%d"),
         }
 
     def test_prepaid_past_expiration_date(self):
