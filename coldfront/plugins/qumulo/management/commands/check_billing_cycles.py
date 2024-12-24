@@ -32,6 +32,7 @@ def conditionally_update_billing_cycle_types(
     prepaid_billing_start,
 ) -> None:
     today = datetime.today().strftime("%Y-%m-%d")
+    prepaid_billing_start = prepaid_billing_start.strftime("%Y-%m-%d")
     service_rate_attribute = AllocationAttributeType.objects.get(name="service_rate")
     if billing_cycle == "prepaid":
         if prepaid_expiration == today or prepaid_expiration < today:
