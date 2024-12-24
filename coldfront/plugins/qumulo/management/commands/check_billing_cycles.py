@@ -41,6 +41,7 @@ def conditionally_update_billing_cycle_types(
                 allocation_attribute_type=billing_attribute,
             ).update(value="monthly")
     elif billing_cycle == "monthly":
+        logger.warn(f"{prepaid_billing_start}")
         if prepaid_billing_start == today:
             logger.warn(f"Changing {allocation} billing_cycle to prepaid")
             AllocationAttribute.objects.filter(
