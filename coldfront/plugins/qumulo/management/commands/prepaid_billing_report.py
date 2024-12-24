@@ -14,7 +14,7 @@ class Command(BaseCommand):
         schedule(
             "coldfront.plugins.qumulo.management.utils.prepaid_billing.PrepaidBilling",
             name="Generate Prepaid Billing Report",
-            schedule_type=Schedule.DAILY,
+            schedule_type=Schedule.MONTHLY,
         )
 
 

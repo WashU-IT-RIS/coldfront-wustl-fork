@@ -17,20 +17,19 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        # print("Scheduling AD Poller")
-        # Schedule.objects.get_or_create(
-        #     func="coldfront.plugins.qumulo.management.commands.add_scheduled_ad_poller.sequential_poll_and_check",
-        #     name="Update Pending Allocations",
-        #     schedule_type=Schedule.MINUTES,
-        #     minutes=1,
-        #     repeats=-1,
-        # )
+        print("Scheduling AD Poller")
+        Schedule.objects.get_or_create(
+            func="coldfront.plugins.qumulo.management.commands.add_scheduled_ad_poller.sequential_poll_and_check",
+            name="Update Pending Allocations",
+            schedule_type=Schedule.MINUTES,
+            minutes=1,
+            repeats=-1,
+        )
         print("Scheduling Prepaid Expiration Date Scanner")
         Schedule.objects.get_or_create(
             func="coldfront.plugins.qumulo.management.commands.add_scheduled_ad_poller.prepaid_expiration_cleanup",
             name="Check Billing Statuses",
-            schedule_type=Schedule.MINUTES,
-            minutes=1,
+            schedule_type=Schedule.DAILY,
             repeats=-1,
         )
 
