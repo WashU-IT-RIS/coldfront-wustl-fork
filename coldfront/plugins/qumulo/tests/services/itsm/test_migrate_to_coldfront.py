@@ -7,7 +7,6 @@ from unittest import mock
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
-    AllocationAttributeType,
 )
 from coldfront.core.project.models import Project, ProjectAttribute
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (

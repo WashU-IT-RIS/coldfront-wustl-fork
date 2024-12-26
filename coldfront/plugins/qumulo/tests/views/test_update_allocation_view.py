@@ -15,7 +15,6 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
 from coldfront.core.allocation.models import (
-    Allocation,
     AllocationAttribute,
     AllocationAttributeChangeRequest,
     AllocationAttributeType,
