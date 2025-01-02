@@ -14,7 +14,7 @@ def update_user_with_additional_data(
     # jprew - NOTE - adding this to avoid this running during tests
     # as it does not work locally
 
-    logging.warning("update_user_with_additional_data")
+    logging.warn("update_user_with_additional_data")
     if "test" in sys.argv and not test_override:
         logging.warning("update_user_with_additional_data - test_override")
         return None
