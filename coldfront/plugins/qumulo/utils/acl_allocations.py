@@ -46,6 +46,7 @@ class AclAllocations:
         # post_save handler will retrieve email, given/surname, etc.
         logging.warning(f"add_user_to_access_allocation - username: {username}")
         user_tuple = User.objects.get_or_create(username=username)
+        user_tuple[0].refresh_from_db()
         user_tuple[0].userprofile.is_group = is_group
         user_tuple[0].save()
         logging.warning("user saved")
