@@ -4,10 +4,10 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationLinkage,
     AllocationStatusChoice,
-    Resource,
     AllocationUserStatusChoice,
     AllocationUser,
     User,
+    UserProfile,
 )
 
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
@@ -46,8 +46,9 @@ class AclAllocations:
         # post_save handler will retrieve email, given/surname, etc.
         logging.warning(f"add_user_to_access_allocation - username: {username}")
         user_tuple = User.objects.get_or_create(username=username)
-        user_tuple[0].userprofile.is_group = is_group
-        user_tuple[0].userprofile.save()
+        user_profile = UserProfile.objects.get(user=user_tuple[0])
+        user_profile.is_group = is_group
+        user_profile.save()
         logging.warning("user saved")
 
         AllocationUser.objects.create(
