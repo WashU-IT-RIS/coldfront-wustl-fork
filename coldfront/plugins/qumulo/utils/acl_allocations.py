@@ -7,8 +7,8 @@ from coldfront.core.allocation.models import (
     AllocationUserStatusChoice,
     AllocationUser,
     User,
-    UserProfile,
 )
+from coldfront.core.user.models import UserProfile
 
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
