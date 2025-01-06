@@ -5,8 +5,6 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 
 import sys
 
-import logging
-
 
 def update_user_with_additional_data(
     username: str, test_override=False
@@ -14,9 +12,7 @@ def update_user_with_additional_data(
     # jprew - NOTE - adding this to avoid this running during tests
     # as it does not work locally
 
-    logging.warn("update_user_with_additional_data")
     if "test" in sys.argv and not test_override:
-        logging.warning("update_user_with_additional_data - test_override")
         return None
 
     # jprew - NOTE: at this point, I think the user *should* exist
@@ -37,13 +33,11 @@ def update_user_with_additional_data(
     if should_update_or_create_user:
         active_directory_api = ActiveDirectoryAPI()
         attrs = active_directory_api.get_user(username)["attributes"]
-        logging.warning(f"update_user_with_additional_data - attrs: \n {attrs}")
         # either this user *already* exists with the specified username
         # or it doesn't
         user_tuple = User.objects.get_or_create(username=username)
         user = user_tuple[0]
 
-        logging.warning(f"update_user_with_additional_data - user: \n {user}")
         user.email = attrs["mail"]
         user.first_name = attrs["givenName"]
         user.last_name = attrs["sn"]

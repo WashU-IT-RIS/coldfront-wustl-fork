@@ -31,7 +31,6 @@ import sys
 def on_allocation_save_retrieve_additional_user_data(
     sender, instance, created, **kwargs
 ):
-    logging.warn("on_allocation_save_retrieve_additional_user_data")
     if created and "admin" not in instance.username:
         _ = update_user_with_additional_data(instance.username)
 

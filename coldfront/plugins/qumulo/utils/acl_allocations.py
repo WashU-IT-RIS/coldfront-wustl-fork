@@ -23,8 +23,6 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-import logging
-
 
 class AclAllocations:
     def __init__(self, project_pk):
@@ -44,12 +42,11 @@ class AclAllocations:
     ):
         # NOTE - just need to provide the proper username
         # post_save handler will retrieve email, given/surname, etc.
-        logging.warning(f"add_user_to_access_allocation - username: {username}")
         user_tuple = User.objects.get_or_create(username=username)
-        # user_profile = UserProfile.objects.get(user=user_tuple[0])
-        # user_profile.is_group = is_group
-        # user_profile.save()
-        logging.warning("user saved")
+
+        user_profile = UserProfile.objects.get(user=user_tuple[0])
+        user_profile.is_group = is_group
+        user_profile.save()
 
         AllocationUser.objects.create(
             allocation=allocation,
