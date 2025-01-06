@@ -17,7 +17,7 @@ class Command(BaseCommand):
         self._migrate_allocation_attribute("audit", "No")
         self._migrate_allocation_attribute("exempt", "No")
         self._migrate_allocation_attribute("subsidized", "No")
-        self._migrate_allocation_attribute("billing_cycle", "monthly")
+        # self._migrate_allocation_attribute("billing_cycle", "monthly")
 
     def _migrate_allocation_attribute(self, attribute_name, default_value):
         attribute_type = AllocationAttributeType.objects.get(name=attribute_name)

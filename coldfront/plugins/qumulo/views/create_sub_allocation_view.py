@@ -41,7 +41,6 @@ class CreateSubAllocationView(UpdateAllocationView):
             "technical_contact",
             "billing_contact",
             "service_rate",
-            "billing_cycle",
         ]
 
         for key in allocation_attribute_keys:
