@@ -32,17 +32,24 @@ def update_user_with_additional_data(
 
     if should_update_or_create_user:
         active_directory_api = ActiveDirectoryAPI()
-        attrs = active_directory_api.get_user(username)["attributes"]
-        # either this user *already* exists with the specified username
-        # or it doesn't
-        user_tuple = User.objects.get_or_create(username=username)
-        user = user_tuple[0]
+        try:
+            attrs = active_directory_api.get_user(username)["attributes"]
 
-        user.email = attrs["mail"]
-        user.first_name = attrs["givenName"]
-        user.last_name = attrs["sn"]
-        user.save()
+            # either this user *already* exists with the specified username
+            # or it doesn't
+            user_tuple = User.objects.get_or_create(username=username)
+            user = user_tuple[0]
 
-        # NOTE - returning user to make debugging easier
-        # no code currently uses this returned value
-        return user
+            user.email = attrs["mail"]
+            user.first_name = attrs["givenName"]
+            user.last_name = attrs["sn"]
+            user.save()
+
+            # NOTE - returning user to make debugging easier
+            # no code currently uses this returned value
+            return user
+        except ValueError:
+            member = active_directory_api.get_member(username)
+            user_tuple = User.objects.get_or_create(username=username)
+
+            return member
