@@ -127,8 +127,7 @@ class Command(BaseCommand):
             is_unique=False,
         )
 
-        # jprew - here is where I'm adding ITDEV-35273-related attribute types
-        # for the allocation collection
+        # these are the fields that will be migrated from Storage1
         AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Yes/No"),
             name="secure",
@@ -138,14 +137,6 @@ class Command(BaseCommand):
         )
 
         # indicates whether the allocation is subject to being audited
-        AllocationAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="Yes/No"),
-            name="audit",
-            is_required=True,
-            is_private=False,
-            is_changeable=False,
-        )
-
         AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Yes/No"),
             name="audit",
@@ -165,7 +156,7 @@ class Command(BaseCommand):
         AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Date"),
             name="billing_startdate",
-            is_required=True,
+            is_required=False,
             is_private=False,
             is_changeable=False,
         )
@@ -211,7 +202,7 @@ class Command(BaseCommand):
         )
 
         AllocationAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="BillingCycle"),
+            attribute_type=AttributeType.objects.get(name="Text"),
             name="billing_cycle",
             is_required=True,
             is_private=False,

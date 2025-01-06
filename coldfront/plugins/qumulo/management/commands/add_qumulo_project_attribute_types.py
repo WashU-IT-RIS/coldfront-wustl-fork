@@ -30,9 +30,9 @@ class Command(BaseCommand):
         )
 
         ProjectAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="Int"),
-            name="quota_limit",
-            is_required=False,
+            attribute_type=AttributeType.objects.get(name="Yes/No"),
+            name="allow_nonfaculty",
+            is_required=True,
             is_private=False,
             is_unique=False,
             is_changeable=True,

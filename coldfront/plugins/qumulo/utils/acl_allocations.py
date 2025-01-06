@@ -231,13 +231,10 @@ class AclAllocations:
 
         if is_base_allocation:
             aces.extend(AcesManager.default_copy())
-            aces.extend(AcesManager.everyone_ace)
             acl["aces"] = AcesManager.filter_duplicates(aces)
             qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
             aces.extend(AcesManager.get_allocation_aces(rw_groupname, ro_groupname))
-            acl["aces"] = AcesManager.filter_duplicates(
-                AcesManager.remove_everyone_aces(aces)
-            )
+            acl["aces"] = AcesManager.filter_duplicates(aces)
             qumulo_api.rc.fs.set_acl_v2(acl=acl, path=f"{fs_path}/Active")
         else:
             for extension in [
@@ -247,7 +244,7 @@ class AclAllocations:
                 aces.extend(extension)
             if reset:
                 aces.extend(
-                    AclAllocations.get_sub_allocation_parent_aces(
+                    AclAllocations.get_sub_allocation_parent_directory_aces(
                         allocation, qumulo_api
                     )
                 )
@@ -258,7 +255,9 @@ class AclAllocations:
     # ACL groups on a sub-allocation so those aces can be added to those for
     # the sub-allocation ACL groups.
     @staticmethod
-    def get_sub_allocation_parent_aces(allocation: Allocation, qumulo_api: QumuloAPI):
+    def get_sub_allocation_parent_directory_aces(
+        allocation: Allocation, qumulo_api: QumuloAPI
+    ):
         # 1.) use linkage to get parent and parent groups
         parent = AllocationLinkage.objects.get(children=allocation).parent
         access_allocations = AclAllocations.get_access_allocations(parent)
@@ -271,6 +270,22 @@ class AclAllocations:
 
         # 2.) return ACL "aces" for parent groups
         return AcesManager.get_allocation_aces(rw_group, ro_group)
+
+    @staticmethod
+    def get_sub_allocation_parent_file_aces(
+        allocation: Allocation, qumulo_api: QumuloAPI
+    ):
+        parent = AllocationLinkage.objects.get(children=allocation).parent
+        access_allocations = AclAllocations.get_access_allocations(parent)
+        rw_group = AclAllocations.get_allocation_rwro_group_name(
+            access_allocations, "rw"
+        )
+        ro_group = AclAllocations.get_allocation_rwro_group_name(
+            access_allocations, "ro"
+        )
+        # get the aces needed from the parent allocation for files in the child
+        # allocation
+        return AcesManager.get_allocation_file_aces(rw_group, ro_group)
 
     @staticmethod
     def set_traverse_acl(
