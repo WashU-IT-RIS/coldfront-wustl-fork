@@ -224,7 +224,7 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["prepaid_expiration"] = forms.DateField(
             help_text="Allocation is paid until this date",
             label="Prepaid Expiration Date",
-            required=True,
+            required=False,
         )
         self.fields["prepaid_expiration"].disabled = True
 
