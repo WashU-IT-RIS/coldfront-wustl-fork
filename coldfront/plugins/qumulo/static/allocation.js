@@ -124,6 +124,10 @@ function prepaidDisplayOptions(){
     prepaid_billing_date.style.visibility = "visible";
     prepaid_time.style.visibility = "visible";
     prepaid_billing_date_invalid.style.visibility = "visible";
+  } else if (prepaid_time_value !== "" && prepaid_billing_date_value !== "" && bill_cycle_value === "prepaid") {
+    prepaid_billing_date.style.visibility = "visible";
+    prepaid_time.style.visibility = "visible";
+    prepaid_billing_date_invalid.style.visibility = "visible";
   } else {
     prepaid_billing_date.style.visibility = "hidden";
     prepaid_time.style.visibility = "hidden";
