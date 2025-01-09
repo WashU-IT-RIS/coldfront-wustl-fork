@@ -33,6 +33,7 @@ def conditionally_update_billing_cycle_types(
 ) -> None:
     today = datetime.today().strftime("%Y-%m-%d")
     service_rate_attribute = AllocationAttributeType.objects.get(name="service_rate")
+    logger.warn(f"Prepaid Expiration: {prepaid_expiration}")
     if billing_cycle == "prepaid":
         if prepaid_expiration == today or prepaid_expiration < today:
             logger.warn(f"Changing {allocation} billing_cycle to monthly")
