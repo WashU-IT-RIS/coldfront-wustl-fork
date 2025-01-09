@@ -28,8 +28,8 @@ def conditionally_update_billing_cycle_types(
     allocation,
     billing_attribute,
     billing_cycle,
-    prepaid_expiration,
     prepaid_billing_start,
+    prepaid_expiration,
 ) -> None:
     today = datetime.today().strftime("%Y-%m-%d")
     service_rate_attribute = AllocationAttributeType.objects.get(name="service_rate")
