@@ -149,8 +149,8 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation,
             billing_cycle_attribute,
             self.prepaid_present_form_data["billing_cycle"],
-            prepaid_exp,
             self.prepaid_present_form_data["prepaid_billing_date"],
+            prepaid_exp,
         )
         final_bill_cycle = allocation.get_attribute(name="billing_cycle")
         final_service_rate = allocation.get_attribute(name="service_rate")
@@ -178,8 +178,8 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation,
             billing_cycle_attribute,
             self.prepaid_past_form_data["billing_cycle"],
-            prepaid_exp,
             self.prepaid_past_form_data["prepaid_billing_date"],
+            prepaid_exp,
         )
         final_bill_cycle = allocation.get_attribute(name="billing_cycle")
         self.assertEqual(final_bill_cycle, "monthly")
