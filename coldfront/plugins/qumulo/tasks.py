@@ -160,6 +160,16 @@ def __ad_members_and_handle_errors(
 
     if len(good_keys) > 0:
         member_dns = [member["dn"] for member in good_keys]
+
+        for x in range(1, 5):
+            try:
+                active_directory_api.get_group_dn(group_name)
+                logger.warn(f"Group {group_name} found on try number {x}")
+                break
+            except ValueError:
+                logger.warn(f"Group {group_name} not found on try number {x}")
+                time.sleep(3)
+
         try:
             active_directory_api.add_members_to_ad_group(member_dns, group_name)
         except Exception as e:
