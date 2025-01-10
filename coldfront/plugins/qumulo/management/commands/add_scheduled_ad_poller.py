@@ -29,8 +29,7 @@ class Command(BaseCommand):
         Schedule.objects.get_or_create(
             func="coldfront.plugins.qumulo.management.commands.add_scheduled_ad_poller.prepaid_expiration_cleanup",
             name="Check Billing Statuses",
-            schedule_type=Schedule.MINUTES,
-            minutes=1,
+            schedule_type=Schedule.DAILY,
             repeats=-1,
         )
 
