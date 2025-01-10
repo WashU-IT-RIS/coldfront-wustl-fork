@@ -4,11 +4,11 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationLinkage,
     AllocationStatusChoice,
-    Resource,
     AllocationUserStatusChoice,
     AllocationUser,
     User,
 )
+from coldfront.core.user.models import UserProfile
 
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
@@ -37,44 +37,22 @@ class AclAllocations:
             )
 
     @staticmethod
-    def add_user_to_access_allocation(username: str, allocation: Allocation):
+    def add_user_to_access_allocation(
+        username: str, allocation: Allocation, is_group: bool = False
+    ):
         # NOTE - just need to provide the proper username
         # post_save handler will retrieve email, given/surname, etc.
         user_tuple = User.objects.get_or_create(username=username)
+
+        user_profile = UserProfile.objects.get(user=user_tuple[0])
+        user_profile.is_group = is_group
+        user_profile.save()
 
         AllocationUser.objects.create(
             allocation=allocation,
             user=user_tuple[0],
             status=AllocationUserStatusChoice.objects.get(name="Active"),
         )
-
-    def create_acl_allocation(
-        self, acl_type: str, users: list, active_directory_api=None
-    ):
-        allocation = Allocation.objects.create(
-            project=self.project_pk,
-            justification="",
-            quantity=1,
-            status=AllocationStatusChoice.objects.get(name="Active"),
-        )
-
-        resource = Resource.objects.get(name=acl_type)
-
-        allocation.resources.add(resource)
-
-        self.add_allocation_users(allocation=allocation, wustlkeys=users)
-        self.set_allocation_attributes(
-            allocation=allocation, acl_type=acl_type, wustlkey=users[0]
-        )
-
-        try:
-            self.create_ad_group_and_add_users(
-                wustlkeys=users,
-                allocation=allocation,
-                active_directory_api=active_directory_api,
-            )
-        except LDAPException as e:
-            Allocation.delete(allocation)
 
     @staticmethod
     def get_access_allocation(storage_allocation: Allocation, resource_name: str):
@@ -231,13 +209,10 @@ class AclAllocations:
 
         if is_base_allocation:
             aces.extend(AcesManager.default_copy())
-            aces.extend(AcesManager.everyone_ace)
             acl["aces"] = AcesManager.filter_duplicates(aces)
             qumulo_api.rc.fs.set_acl_v2(acl=acl, path=fs_path)
             aces.extend(AcesManager.get_allocation_aces(rw_groupname, ro_groupname))
-            acl["aces"] = AcesManager.filter_duplicates(
-                AcesManager.remove_everyone_aces(aces)
-            )
+            acl["aces"] = AcesManager.filter_duplicates(aces)
             qumulo_api.rc.fs.set_acl_v2(acl=acl, path=f"{fs_path}/Active")
         else:
             for extension in [
@@ -247,7 +222,7 @@ class AclAllocations:
                 aces.extend(extension)
             if reset:
                 aces.extend(
-                    AclAllocations.get_sub_allocation_parent_aces(
+                    AclAllocations.get_sub_allocation_parent_directory_aces(
                         allocation, qumulo_api
                     )
                 )
@@ -258,7 +233,9 @@ class AclAllocations:
     # ACL groups on a sub-allocation so those aces can be added to those for
     # the sub-allocation ACL groups.
     @staticmethod
-    def get_sub_allocation_parent_aces(allocation: Allocation, qumulo_api: QumuloAPI):
+    def get_sub_allocation_parent_directory_aces(
+        allocation: Allocation, qumulo_api: QumuloAPI
+    ):
         # 1.) use linkage to get parent and parent groups
         parent = AllocationLinkage.objects.get(children=allocation).parent
         access_allocations = AclAllocations.get_access_allocations(parent)
@@ -271,6 +248,22 @@ class AclAllocations:
 
         # 2.) return ACL "aces" for parent groups
         return AcesManager.get_allocation_aces(rw_group, ro_group)
+
+    @staticmethod
+    def get_sub_allocation_parent_file_aces(
+        allocation: Allocation, qumulo_api: QumuloAPI
+    ):
+        parent = AllocationLinkage.objects.get(children=allocation).parent
+        access_allocations = AclAllocations.get_access_allocations(parent)
+        rw_group = AclAllocations.get_allocation_rwro_group_name(
+            access_allocations, "rw"
+        )
+        ro_group = AclAllocations.get_allocation_rwro_group_name(
+            access_allocations, "ro"
+        )
+        # get the aces needed from the parent allocation for files in the child
+        # allocation
+        return AcesManager.get_allocation_file_aces(rw_group, ro_group)
 
     @staticmethod
     def set_traverse_acl(
