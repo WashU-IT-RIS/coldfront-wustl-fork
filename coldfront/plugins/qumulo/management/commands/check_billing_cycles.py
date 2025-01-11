@@ -103,7 +103,7 @@ def update_prepaid_exp_and_billing_cycle(
     )
 
 
-def check_allocations() -> None:
+def check_allocation_billing_cycle_and_prepaid_exp() -> None:
     resource = Resource.objects.get(name="Storage2")
     allocations = Allocation.objects.filter(status__name="Active", resources=resource)
     billing_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
