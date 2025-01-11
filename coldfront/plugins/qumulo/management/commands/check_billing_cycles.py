@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 def conditionally_update_billing_cycle_types(
     allocation,
     billing_attribute,
-    billing_cycle,
-    prepaid_billing_start,
-    prepaid_expiration,
+    billing_cycle: str,
+    prepaid_billing_start: str,
+    prepaid_expiration: str,
 ) -> None:
     today = datetime.today().strftime("%Y-%m-%d")
     service_rate_attribute = AllocationAttributeType.objects.get(name="service_rate")
@@ -41,7 +41,7 @@ def conditionally_update_billing_cycle_types(
                 logger.warn(f"Prepaid Expiration: {prepaid_expiration}")
                 AllocationAttribute.objects.filter(
                     allocation=allocation,
-                    allocation_attribute_type=billing_attribute,
+                    allocation_attribute__name="billing_cycle",
                 ).update(value="monthly")
     elif billing_cycle == "monthly":
         if prepaid_billing_start == today:
