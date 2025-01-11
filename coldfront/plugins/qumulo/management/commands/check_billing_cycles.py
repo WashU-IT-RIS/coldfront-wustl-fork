@@ -83,6 +83,26 @@ def calculate_prepaid_expiration(
         )
 
 
+def update_prepaid_exp_and_billing_cycle(
+    allocation: Allocation, billing_attribute: str
+):
+    logger.warn(f"{allocation.billing_cycle}")
+    conditionally_update_billing_cycle_types(
+        allocation,
+        billing_attribute,
+        allocation.billing_cycle,
+        allocation.prepaid_billing_start,
+        allocation.prepaid_expiration,
+    )
+    calculate_prepaid_expiration(
+        allocation,
+        allocation.billing_cycle,
+        allocation.prepaid_months,
+        allocation.prepaid_billing_start,
+        allocation.prepaid_expiration,
+    )
+
+
 def check_allocations() -> None:
     resource = Resource.objects.get(name="Storage2")
     allocations = Allocation.objects.filter(status__name="Active", resources=resource)
@@ -116,18 +136,4 @@ def check_allocations() -> None:
     )
     logger.warn(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
     for allocation in allocations:
-        logger.warn(f"{allocation.billing_cycle}")
-        conditionally_update_billing_cycle_types(
-            allocation,
-            billing_attribute,
-            allocation.billing_cycle,
-            allocation.prepaid_billing_start,
-            allocation.prepaid_expiration,
-        )
-        calculate_prepaid_expiration(
-            allocation,
-            allocation.billing_cycle,
-            allocation.prepaid_months,
-            allocation.prepaid_billing_start,
-            allocation.prepaid_expiration,
-        )
+        update_prepaid_exp_and_billing_cycle(allocation, billing_attribute)
