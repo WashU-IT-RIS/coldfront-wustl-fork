@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", prepaidDisplayOptions);
+document.addEventListener("DOMContentLoaded", prepaidDisplayOptionsInitialPageLoad);
 const protocols = Array.from(
   document.querySelectorAll(
     "#div_id_protocols div div.form-check input.form-check-input",
@@ -24,7 +24,7 @@ if (billOptions.value !== "prepaid") {
   document.getElementById("div_id_prepaid_time").style.visibility = "hidden";
   document.getElementById("div_id_prepaid_billing_date").style.visibility = "hidden";
 }
-billOptions.addEventListener("change", handlePrepaidCycleSelection);
+billOptions.addEventListener("change", prepaidDisplayOptionsDuringBillingCycleSelection);
 
 
 let confirmed = false;
@@ -82,36 +82,28 @@ function handleExportPathInput(event) {
   }
 }
 
-function handlePrepaidCycleSelection(event) {
+function prepaidDateAndTimeVisibility(prepaid_billing_date, prepaid_time, visible_setting){
+  prepaid_billing_date.style.visibility = visible_setting;
+  prepaid_time.style.visibility = visible_setting;
+}
+
+function prepaidDisplayOptionsDuringBillingCycleSelection(event) {
   const bill_cycle_value = event.target.value;
   const prepaid_time = document.getElementById("div_id_prepaid_time");
   const prepaid_time_value = document.getElementById("id_prepaid_time").value;
-
-  if (bill_cycle_value !== "prepaid" && prepaid_time_value === "") {
-    prepaid_time.style.visibility = "hidden";
-    prepaid_time.value = "";
-  } else {
-    prepaid_time.style.visibility = "visible";
-    prepaid_time.value = "";
-  }
-  handlePrepaidBillingDateDisplay();
-}
-
-function handlePrepaidBillingDateDisplay(){
-  const bill_cycle_value = document.getElementById("id_billing_cycle").value;
   const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
   const prepaid_billing_date_value = document.getElementById("id_prepaid_billing_date").value;
 
-  if (bill_cycle_value !== "prepaid" && prepaid_billing_date_value === "") {
-    prepaid_billing_date.style.visibility = "hidden";
-    prepaid_billing_date.value = "";
+  if (bill_cycle_value !== "prepaid" && prepaid_time_value === "" && prepaid_billing_date_value === "") {
+    field_visibility = "hidden"
   } else {
-    prepaid_billing_date.style.visibility = "visible";
-    prepaid_billing_date.value = "";
+    field_visibility = "visible"
   }
+  prepaidDateAndTimeVisibility(prepaid_billing_date, prepaid_time, field_visibility)
+  
 }
 
-function prepaidDisplayOptions(){
+function prepaidDisplayOptionsInitialPageLoad(){
   const prepaid_billing_date = document.getElementById("div_id_prepaid_billing_date");
   const prepaid_time = document.getElementById("div_id_prepaid_time");
 
@@ -119,18 +111,17 @@ function prepaidDisplayOptions(){
   const prepaid_time_value = document.getElementById("id_prepaid_time").value;
   const prepaid_billing_date_value = document.getElementById("id_prepaid_billing_date").value;
   const prepaid_billing_date_invalid = document.getElementById("error_1_id_prepaid_billing_date");
+  prepaid_billing_date_invalid.style.visibility = "visible";
 
   if (prepaid_time_value !== "" && prepaid_billing_date_value !== "" && bill_cycle_value !== "prepaid") {
-    prepaid_billing_date.style.visibility = "visible";
-    prepaid_time.style.visibility = "visible";
-    prepaid_billing_date_invalid.style.visibility = "visible";
+    field_visibility = "visible"
   } else if (prepaid_time_value !== "" && prepaid_billing_date_value !== "" && bill_cycle_value === "prepaid") {
-    prepaid_billing_date.style.visibility = "visible";
-    prepaid_time.style.visibility = "visible";
-    prepaid_billing_date_invalid.style.visibility = "visible";
+    field_visibility = "visible"
   } else {
-    prepaid_billing_date.style.visibility = "hidden";
-    prepaid_time.style.visibility = "hidden";
-    prepaid_billing_date_invalid.style.visibility = "visible";
+    field_visibility = "visible"
   }
+  prepaidDateAndTimeVisibility(prepaid_billing_date, prepaid_time, field_visibility)
 }
+
+
+
