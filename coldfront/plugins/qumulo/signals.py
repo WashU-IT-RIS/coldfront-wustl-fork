@@ -54,12 +54,6 @@ def on_allocation_activate(sender, **kwargs):
     name = allocation.get_attribute(name="storage_name")
     limit_in_bytes = allocation.get_attribute(name="storage_quota") * (2**40)
 
-    fs_path = allocation.get_attribute(name="storage_filesystem_path")
-    export_path = allocation.get_attribute(name="storage_export_path")
-    protocols = json.loads(allocation.get_attribute(name="storage_protocols"))
-    name = allocation.get_attribute(name="storage_name")
-    limit_in_bytes = allocation.get_attribute(name="storage_quota") * (2**40)
-
     try:
         # Create allocation
         qumulo_api.create_allocation(
