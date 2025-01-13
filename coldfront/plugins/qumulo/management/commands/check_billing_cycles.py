@@ -35,7 +35,7 @@ def process_prepaid_billing_cycle_changes(
     service_rate_attribute = AllocationAttributeType.objects.get(name="service_rate")
     logger.warn(f"Prepaid Expiration: {prepaid_expiration}")
     if billing_cycle == "prepaid":
-        if prepaid_expiration != None:
+        if prepaid_expiration is not None:
             if prepaid_expiration == today or prepaid_expiration < today:
                 logger.warn(f"Changing {allocation} billing_cycle to monthly")
                 logger.warn(f"Prepaid Expiration: {prepaid_expiration}")
