@@ -79,14 +79,9 @@ class TestBillingCycleTypeUpdates(TestCase):
 
         return prepaid_until
 
-    def test_prepaid_past_expiration_date(self):
-        allocation = create_allocation(
-            self.project, self.user, self.prepaid_past_form_data
-        )
-
-        prepaid_billing_start = self.prepaid_past_form_data["prepaid_billing_date"]
-        prepaid_months = self.prepaid_past_form_data["prepaid_time"]
-
+    def billing_cycle_manager_prepaid_expiration_calculation(
+        self, allocation, prepaid_months, prepaid_billing_start
+    ):
         calculate_prepaid_expiration(
             allocation,
             self.prepaid_past_form_data["billing_cycle"],
@@ -101,12 +96,24 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation=allocation,
             allocation_attribute_type=prepaid_expiration_attribute,
         ).value
+        return prepaid_exp_value
+
+    def test_prepaid_past_expiration_date(self):
+        allocation = create_allocation(
+            self.project, self.user, self.prepaid_past_form_data
+        )
+
+        prepaid_billing_start = self.prepaid_past_form_data["prepaid_billing_date"]
+        prepaid_months = self.prepaid_past_form_data["prepaid_time"]
+
         prepaid_until = (
             TestBillingCycleTypeUpdates.prepaid_expiration_calculation_for_comparison(
                 allocation, prepaid_billing_start, prepaid_months
             )
         )
-
+        prepaid_exp_value = TestBillingCycleTypeUpdates.billing_cycle_manager_prepaid_expiration_calculation(
+            self, allocation, prepaid_months, prepaid_billing_start
+        )
         self.assertEqual(prepaid_exp_value, str(prepaid_until))
 
     def test_prepaid_present_expiration_date(self):
