@@ -111,7 +111,6 @@ function prepaidDisplayOptionsInitialPageLoad(){
   const prepaid_time_value = document.getElementById("id_prepaid_time").value;
   const prepaid_billing_date_value = document.getElementById("id_prepaid_billing_date").value;
   const prepaid_billing_date_invalid = document.getElementById("error_1_id_prepaid_billing_date");
-  // prepaid_billing_date_invalid.style.visibility = "visible";
 
   if (bill_cycle_value !== "prepaid" && prepaid_time_value !== "" && prepaid_billing_date_value !== "") {
     field_visibility = "visible"
