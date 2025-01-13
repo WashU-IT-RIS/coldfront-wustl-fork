@@ -24,7 +24,7 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
-def conditionally_update_billing_cycle_types(
+def process_prepaid_billing_cycle_changes(
     allocation,
     billing_attribute,
     billing_cycle: str,
@@ -87,7 +87,7 @@ def update_prepaid_exp_and_billing_cycle(
     allocation: Allocation, billing_attribute: str
 ):
     logger.warn(f"{allocation.billing_cycle}")
-    conditionally_update_billing_cycle_types(
+    process_prepaid_billing_cycle_changes(
         allocation,
         billing_attribute,
         allocation.billing_cycle,

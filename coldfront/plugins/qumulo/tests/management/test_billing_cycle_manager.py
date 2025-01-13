@@ -20,7 +20,7 @@ from datetime import datetime
 
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
     calculate_prepaid_expiration,
-    conditionally_update_billing_cycle_types,
+    process_prepaid_billing_cycle_changes,
 )
 
 logger = logging.getLogger(__name__)
@@ -145,7 +145,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         )
         prepaid_exp = allocation.get_attribute(name="prepaid_expiration")
 
-        conditionally_update_billing_cycle_types(
+        process_prepaid_billing_cycle_changes(
             allocation,
             billing_cycle_attribute,
             self.prepaid_present_form_data["billing_cycle"],
@@ -174,7 +174,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         )
         prepaid_exp = allocation.get_attribute(name="prepaid_expiration")
 
-        conditionally_update_billing_cycle_types(
+        process_prepaid_billing_cycle_changes(
             allocation,
             billing_cycle_attribute,
             self.prepaid_past_form_data["billing_cycle"],
