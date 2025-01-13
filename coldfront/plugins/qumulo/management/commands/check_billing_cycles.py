@@ -64,9 +64,6 @@ def calculate_prepaid_expiration(
     prepaid_expiration,
 ) -> None:
     logger.warn(f"Calculation prepaid expiration")
-    prepaid_exp_attribute = AllocationAttributeType.objects.get(
-        name="prepaid_expiration"
-    )
     if bill_cycle == "prepaid" and prepaid_expiration == None:
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
         prepaid_months = int(prepaid_months)
@@ -78,7 +75,7 @@ def calculate_prepaid_expiration(
         )
         AllocationAttribute.objects.get_or_create(
             allocation=allocation,
-            allocation_attribute_type=prepaid_exp_attribute,
+            allocation_attribute_type__name="prepaid_expiration",
             value=prepaid_until,
         )
 
