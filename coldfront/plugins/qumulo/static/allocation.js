@@ -118,7 +118,7 @@ function prepaidDisplayOptionsInitialPageLoad(){
   } else if (prepaid_time_value !== "" && prepaid_billing_date_value !== "" && bill_cycle_value === "prepaid") {
     field_visibility = "visible"
   } else {
-    field_visibility = "visible"
+    field_visibility = "hidden"
   }
   prepaidDateAndTimeVisibility(prepaid_billing_date, prepaid_time, field_visibility)
 }
