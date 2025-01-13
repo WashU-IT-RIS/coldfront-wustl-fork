@@ -113,9 +113,9 @@ function prepaidDisplayOptionsInitialPageLoad(){
   const prepaid_billing_date_invalid = document.getElementById("error_1_id_prepaid_billing_date");
   prepaid_billing_date_invalid.style.visibility = "visible";
 
-  if (prepaid_time_value !== "" && prepaid_billing_date_value !== "" && bill_cycle_value !== "prepaid") {
+  if (bill_cycle_value !== "prepaid" && prepaid_time_value !== "" && prepaid_billing_date_value !== "") {
     field_visibility = "visible"
-  } else if (prepaid_time_value !== "" && prepaid_billing_date_value !== "" && bill_cycle_value === "prepaid") {
+  } else if (bill_cycle_value === "prepaid" && prepaid_time_value !== "" && prepaid_billing_date_value !== "") {
     field_visibility = "visible"
   } else {
     field_visibility = "hidden"
