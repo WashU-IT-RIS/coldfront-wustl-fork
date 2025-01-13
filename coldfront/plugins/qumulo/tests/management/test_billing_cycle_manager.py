@@ -67,7 +67,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         }
 
     def prepaid_expiration_calculation_for_comparison(
-        allocation, prepaid_billing_start_date, prepaid_months
+        allocation, prepaid_billing_start, prepaid_months
     ):
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
         prepaid_until = datetime(
