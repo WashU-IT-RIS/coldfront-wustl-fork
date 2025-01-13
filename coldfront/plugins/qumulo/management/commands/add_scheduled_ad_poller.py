@@ -9,7 +9,7 @@ from coldfront.plugins.qumulo.tasks import (
 )
 
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
-    check_allocations,
+    check_allocation_billing_cycle_and_prepaid_exp,
 )
 
 logger = logging.getLogger(__name__)
@@ -40,5 +40,4 @@ def sequential_poll_and_check() -> None:
 
 
 def prepaid_expiration_cleanup() -> None:
-    logger.warn(f"Calling check_allocations")
-    check_allocations()
+    check_allocation_billing_cycle_and_prepaid_exp()
