@@ -124,13 +124,6 @@ class TestBillingCycleTypeUpdates(TestCase):
             str(prepaid_billing_start),
             None,
         )
-        prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
-        prepaid_until = datetime(
-            prepaid_billing_start.year
-            + (prepaid_billing_start.month + prepaid_months - 1) // 12,
-            (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
-            prepaid_billing_start.day,
-        )
         prepaid_expiration_attribute = AllocationAttributeType.objects.get(
             name="prepaid_expiration"
         )
@@ -138,6 +131,11 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation=allocation,
             allocation_attribute_type=prepaid_expiration_attribute,
         ).value
+        prepaid_until = (
+            TestBillingCycleTypeUpdates.prepaid_expiration_calculation_for_comparison(
+                allocation, prepaid_billing_start, prepaid_months
+            )
+        )
         self.assertEqual(prepaid_exp_value, str(prepaid_until))
 
     def test_prepaid_start_today(self) -> None:
