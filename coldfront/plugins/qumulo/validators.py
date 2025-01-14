@@ -189,6 +189,7 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
         raise ValidationError(
             gettext_lazy("Prepaid billing can only start on the first of the month")
         )
+    return
 
 
 def _ad_user_validation_helper(ad_user: str) -> bool:
