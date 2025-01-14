@@ -24,10 +24,9 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
 )
 from datetime import datetime, date
+from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
-    calculate_prepaid_expiration,
-    process_prepaid_billing_cycle_changes,
     check_allocation_billing_cycle_and_prepaid_exp,
 )
 
@@ -44,6 +43,16 @@ class TestBillingCycleTypeUpdates(TestCase):
             "storage_protocols": '["nfs"]',
         }
         return attribute_dict[name]
+
+    def calculate_future_date(self):
+        current = date.today()
+        future = current + relativedelta(months=3)
+        return future
+
+    def calculate_past_date(self):
+        current = date.today()
+        past = current - relativedelta(months=3)
+        return past
 
     def setUp(self):
         self.client = Client()
@@ -67,7 +76,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "general",
             "billing_cycle": "prepaid",
             "prepaid_time": 6,
-            "prepaid_billing_date": date(2024, 11, 1),
+            "prepaid_billing_date": self.calculate_past_date(),
         }
         self.prepaid_present_form_data = {
             "storage_filesystem_path": "foo",
@@ -83,7 +92,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "consumption",
             "billing_cycle": "monthly",
             "prepaid_time": 3,
-            "prepaid_billing_date": date.today().strftime("%Y-%m-%d"),
+            "prepaid_billing_date": date.today(),
         }
         self.prepaid_future_form_data = {
             "storage_filesystem_path": "foo",
@@ -99,7 +108,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "subscription",
             "billing_cycle": "monthly",
             "prepaid_time": 3,
-            "prepaid_billing_date": date(2025, 11, 1),
+            "prepaid_billing_date": self.calculate_future_date(),
         }
         self.monthly_form_data = {
             "storage_filesystem_path": "foo",
