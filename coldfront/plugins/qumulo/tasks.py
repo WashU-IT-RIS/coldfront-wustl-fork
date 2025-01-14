@@ -161,6 +161,9 @@ def __ad_members_and_handle_errors(
     if len(good_keys) > 0:
         member_dns = [member["dn"] for member in good_keys]
 
+        logger.warn(
+            f"Adding {len(member_dns)} users to AD group {group_name} at time {datetime.now()}"
+        )
         for x in range(1, 5):
             try:
                 active_directory_api.get_group_dn(group_name)
