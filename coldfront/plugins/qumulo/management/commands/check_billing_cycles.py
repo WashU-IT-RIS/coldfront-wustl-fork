@@ -24,6 +24,14 @@ from typing import Optional
 logger = logging.getLogger(__name__)
 
 
+def update_billing_cycle(allocation, billing_cycle):
+    logger.info(f"Changing {allocation} billing_cycle to {billing_cycle}")
+    AllocationAttribute.objects.filter(
+        allocation=allocation,
+        allocation_attribute_type__name="billing_cycle",
+    ).update(value=billing_cycle)
+
+
 def process_prepaid_billing_cycle_changes(
     allocation,
     prepaid_billing_start: str,
@@ -33,23 +41,15 @@ def process_prepaid_billing_cycle_changes(
         allocation=allocation, allocation_attribute_type__name="billing_cycle"
     ).value
     today = datetime.today().strftime("%Y-%m-%d")
-    logger.warn(f"Prepaid Expiration: {prepaid_expiration}")
     if billing_cycle == "prepaid":
         if prepaid_expiration is not None:
             if prepaid_expiration == today or prepaid_expiration < today:
-                logger.warn(f"Changing {allocation} billing_cycle to monthly")
-                logger.warn(f"Prepaid Expiration: {prepaid_expiration}")
-                AllocationAttribute.objects.filter(
-                    allocation=allocation,
-                    allocation_attribute_type__name="billing_cycle",
-                ).update(value="monthly")
+                billing_cycle = "monthly"
+                update_billing_cycle(allocation, billing_cycle)
     elif billing_cycle == "monthly":
         if prepaid_billing_start == today:
-            logger.warn(f"Changing {allocation} billing_cycle to prepaid")
-            AllocationAttribute.objects.filter(
-                allocation=allocation,
-                allocation_attribute_type__name="billing_cycle",
-            ).update(value="prepaid")
+            billing_cycle = "prepaid"
+            update_billing_cycle(allocation, billing_cycle)
             AllocationAttribute.objects.filter(
                 allocation=allocation,
                 allocation_attribute_type__name="service_rate",
@@ -119,6 +119,6 @@ def check_allocation_billing_cycle_and_prepaid_exp() -> None:
         prepaid_billing_start=Subquery(prepaid_billing_date_sub_q),
         prepaid_months=Subquery(prepaid_months_sub_q),
     )
-    logger.warn(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
+    logger.info(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
     for allocation in allocations:
         update_prepaid_exp_and_billing_cycle(allocation)
