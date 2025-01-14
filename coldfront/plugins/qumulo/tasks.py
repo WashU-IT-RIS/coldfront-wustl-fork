@@ -172,7 +172,7 @@ def __ad_members_and_handle_errors(
 
         current_time = datetime.now()
         logger.warn(
-            f"Adding {len(member_dns)} users to AD group {group_name} at time {current_time}}\nTime since group creation: {current_time - create_group_time}"
+            f"Adding {len(member_dns)} users to AD group {group_name} at time {current_time}\nTime since group creation: {current_time - create_group_time}"
         )
         for x in range(1, 5):
             try:
