@@ -131,6 +131,7 @@ def check_allocation_billing_cycle_and_prepaid_exp() -> None:
         prepaid_billing_start=Subquery(prepaid_billing_date_sub_q),
         prepaid_months=Subquery(prepaid_months_sub_q),
     )
+    breakpoint()
     logger.warn(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
     for allocation in allocations:
         update_prepaid_exp_and_billing_cycle(allocation, billing_attribute)
