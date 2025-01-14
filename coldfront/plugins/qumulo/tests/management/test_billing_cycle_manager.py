@@ -92,7 +92,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             self.project, self.user, self.prepaid_past_form_data
         )
         self.prepaid_present_allocation = create_allocation(
-            self.project, self.user, self.prepaid_past_form_data
+            self.project, self.user, self.prepaid_present_form_data
         )
 
     def expected_prepaid_expiration_calculation(allocation):

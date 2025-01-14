@@ -26,13 +26,13 @@ logger = logging.getLogger(__name__)
 
 def process_prepaid_billing_cycle_changes(
     allocation,
-    billing_attribute,
-    billing_cycle: str,
     prepaid_billing_start: str,
     prepaid_expiration: str,
 ) -> None:
+    billing_cycle = AllocationAttribute.objects.get(
+        allocation=allocation, allocation_attribute_type__name="billing_cycle"
+    ).value
     today = datetime.today().strftime("%Y-%m-%d")
-    service_rate_attribute = AllocationAttributeType.objects.get(name="service_rate")
     logger.warn(f"Prepaid Expiration: {prepaid_expiration}")
     if billing_cycle == "prepaid":
         if prepaid_expiration is not None:
@@ -58,12 +58,16 @@ def process_prepaid_billing_cycle_changes(
 
 def calculate_prepaid_expiration(
     allocation,
-    bill_cycle,
     prepaid_months,
     prepaid_billing_start,
     prepaid_expiration,
-    prepaid_expiration_attribute,
 ) -> None:
+    bill_cycle = AllocationAttribute.objects.get(
+        allocation=allocation, allocation_attribute_type__name="billing_cycle"
+    ).value
+    prepaid_expiration_attribute = AllocationAttributeType.objects.get(
+        name="prepaid_expiration"
+    )
     logger.warn(f"Calculation prepaid expiration")
     if bill_cycle == "prepaid" and prepaid_expiration == None:
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
@@ -81,60 +85,40 @@ def calculate_prepaid_expiration(
         )
 
 
-def update_prepaid_exp_and_billing_cycle(
-    allocation: Allocation, billing_attribute: str, prepaid_expiration_attribute
-):
-    logger.warn(f"{allocation.billing_cycle}")
+def update_prepaid_exp_and_billing_cycle(allocation: Allocation):
     process_prepaid_billing_cycle_changes(
         allocation,
-        billing_attribute,
-        allocation.billing_cycle,
         allocation.prepaid_billing_start,
         allocation.prepaid_expiration,
     )
     calculate_prepaid_expiration(
         allocation,
-        allocation.billing_cycle,
         allocation.prepaid_months,
         allocation.prepaid_billing_start,
         allocation.prepaid_expiration,
-        prepaid_expiration_attribute,
     )
 
 
 def check_allocation_billing_cycle_and_prepaid_exp() -> None:
     resource = Resource.objects.get(name="Storage2")
     allocations = Allocation.objects.filter(status__name="Active", resources=resource)
-    billing_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
-    prepaid_exp_attribute = AllocationAttributeType.objects.get(
-        name="prepaid_expiration"
-    )
-    prepaid_billing_start_attribute = AllocationAttributeType.objects.get(
-        name="prepaid_billing_date"
-    )
-    prepaid_months_attribute = AllocationAttributeType.objects.get(name="prepaid_time")
-    billing_sub_q = AllocationAttribute.objects.filter(
-        allocation=OuterRef("pk"), allocation_attribute_type=billing_attribute
-    ).values("value")[:1]
+
     prepaid_exp_sub_q = AllocationAttribute.objects.filter(
-        allocation=OuterRef("pk"), allocation_attribute_type=prepaid_exp_attribute
+        allocation=OuterRef("pk"), allocation_attribute_type__name="prepaid_expiration"
     ).values("value")[:1]
     prepaid_billing_date_sub_q = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"),
-        allocation_attribute_type=prepaid_billing_start_attribute,
+        allocation_attribute_type__name="prepaid_billing_date",
     ).values("value")[:1]
     prepaid_months_sub_q = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"),
-        allocation_attribute_type=prepaid_months_attribute,
+        allocation_attribute_type__name="prepaid_time",
     ).values("value")[:1]
     allocations = allocations.annotate(
-        billing_cycle=Subquery(billing_sub_q),
         prepaid_expiration=Subquery(prepaid_exp_sub_q),
         prepaid_billing_start=Subquery(prepaid_billing_date_sub_q),
         prepaid_months=Subquery(prepaid_months_sub_q),
     )
     logger.warn(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
     for allocation in allocations:
-        update_prepaid_exp_and_billing_cycle(
-            allocation, billing_attribute, prepaid_exp_attribute
-        )
+        update_prepaid_exp_and_billing_cycle(allocation)
