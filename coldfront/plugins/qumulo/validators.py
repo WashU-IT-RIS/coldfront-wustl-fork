@@ -16,9 +16,7 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 
 from pathlib import PurePath
 from qumulo.lib import request
-from datetime import datetime, date
-
-YYYY_MM_DD = "%Y-%m-%d"
+from datetime import date
 
 
 def validate_ad_users(ad_users: list[str]):
