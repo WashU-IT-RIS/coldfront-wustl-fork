@@ -6,9 +6,6 @@ from ldap3.extend.microsoft.addMembersToGroups import (
 import os
 from dotenv import load_dotenv
 
-import logging
-from datetime import datetime
-
 load_dotenv(override=True)
 
 
@@ -73,8 +70,6 @@ class ActiveDirectoryAPI:
 
     def create_ad_group(self, group_name: str) -> None:
         new_group_DN = self.generate_group_dn(group_name)
-
-        logging.warning(f"Creating group {group_name} at time {datetime.now()}")
 
         self.conn.add(
             new_group_DN,
