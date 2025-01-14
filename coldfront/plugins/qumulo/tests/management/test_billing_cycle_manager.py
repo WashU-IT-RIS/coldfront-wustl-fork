@@ -98,6 +98,8 @@ class TestBillingCycleTypeUpdates(TestCase):
         self.prepaid_allocation.status = AllocationStatusChoice.objects.get(
             name="Active"
         )
+        self.prepaid_allocation.save()
+        breakpoint()
         check_allocation_billing_cycle_and_prepaid_exp()
         return True
 
