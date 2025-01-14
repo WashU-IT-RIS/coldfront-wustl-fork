@@ -205,7 +205,7 @@ def set_allocation_attributes(
         "billing_contact",
         "billing_cycle",
         "prepaid_time",
-        "prepaid_billing_start",
+        "prepaid_billing_date",
     ]
 
     for allocation_attribute_name in allocation_attribute_names:

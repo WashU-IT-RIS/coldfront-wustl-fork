@@ -87,7 +87,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         }
 
         self.client.force_login(self.user)
-        breakpoint()
+
         self.prepaid_allocation = create_allocation(
             self.project, self.user, self.prepaid_past_form_data
         )
