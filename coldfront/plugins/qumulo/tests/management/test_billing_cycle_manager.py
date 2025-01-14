@@ -19,6 +19,7 @@ from coldfront.core.allocation.signals import (
 
 import logging
 from coldfront.core.allocation.models import (
+    AllocationStatusChoice,
     AllocationAttributeType,
     AllocationAttribute,
 )
@@ -33,7 +34,6 @@ from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
 logger = logging.getLogger(__name__)
 
 
-@patch("coldfront.plugins.qumulo.signals.QumuloAPI")
 class TestBillingCycleTypeUpdates(TestCase):
     def mock_get_attribute(name):
         attribute_dict = {
@@ -92,16 +92,11 @@ class TestBillingCycleTypeUpdates(TestCase):
             self.project, self.user, self.prepaid_past_form_data
         )
 
-    @patch("coldfront.plugins.qumulo.signals.async_task")
     def test_billing_cycle_manager_end_to_end_past(
         self,
-        mock_async_task: MagicMock,
-        mock_QumuloAPI: MagicMock,
     ):
-        qumulo_instance = mock_QumuloAPI.return_value
-        breakpoint()
-        allocation_activate.send(
-            sender=self.__class__, allocation_pk=self.prepaid_allocation.pk
+        self.prepaid_allocation.status = AllocationStatusChoice.objects.get(
+            name="Active"
         )
         check_allocation_billing_cycle_and_prepaid_exp()
         return True

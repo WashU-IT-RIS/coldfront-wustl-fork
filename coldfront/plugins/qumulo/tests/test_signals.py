@@ -56,31 +56,10 @@ class TestSignals(TestCase):
             "billing_cycle": "monthly",
         }
 
-        self.prepaid_form_data_past = {
-            "storage_filesystem_path": "foo",
-            "storage_export_path": "bar",
-            "storage_ticket": "ITSD-54321",
-            "storage_name": "baz",
-            "storage_quota": 7,
-            "protocols": ["nfs"],
-            "rw_users": ["test"],
-            "ro_users": ["test1"],
-            "cost_center": "Uncle Pennybags",
-            "department_number": "Time Travel Services",
-            "service_rate": "general",
-            "billing_cycle": "prepaid",
-            "prepaid_time": 6,
-            "prepaid_billing_date": "11/01/2024",
-        }
-
         self.client.force_login(self.user)
 
         self.storage_allocation = create_allocation(
             self.project, self.user, self.form_data
-        )
-
-        self.prepaid_storage_allocation_past = create_allocation(
-            project=self.project, user=self.user, form_data=self.prepaid_form_data_past
         )
 
     @patch("coldfront.plugins.qumulo.signals.async_task")
@@ -90,7 +69,6 @@ class TestSignals(TestCase):
         mock_QumuloAPI: MagicMock,
     ):
         qumulo_instance = mock_QumuloAPI.return_value
-
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
