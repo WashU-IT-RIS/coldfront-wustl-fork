@@ -80,15 +80,18 @@ class TestBillingCycleTypeUpdates(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "general",
+            "service_rate": "consumption",
             "billing_cycle": "monthly",
             "prepaid_time": 3,
-            "prepaid_billing_date": datetime.today().strftime("%Y-%m-%d"),
+            "prepaid_billing_date": date.today().strftime("%Y-%m-%d"),
         }
 
         self.client.force_login(self.user)
 
         self.prepaid_allocation = create_allocation(
+            self.project, self.user, self.prepaid_past_form_data
+        )
+        self.prepaid_present_allocation = create_allocation(
             self.project, self.user, self.prepaid_past_form_data
         )
 
@@ -114,9 +117,7 @@ class TestBillingCycleTypeUpdates(TestCase):
 
         return prepaid_until
 
-    def test_billing_cycle_manager_end_to_end_past(
-        self,
-    ):
+    def test_billing_cycle_manager_past(self):
         self.prepaid_allocation.status = AllocationStatusChoice.objects.get(
             name="Active"
         )
@@ -143,6 +144,41 @@ class TestBillingCycleTypeUpdates(TestCase):
             )
         )
         self.assertEqual(new_billing_cycle, "prepaid")
+        self.assertEqual(new_prepaid_expiration, expected_prepaid_exp)
+
+    def test_billing_cycle_manager_prepaid_today(self):
+        self.prepaid_present_allocation.status = AllocationStatusChoice.objects.get(
+            name="Active"
+        )
+        self.prepaid_present_allocation.save()
+
+        check_allocation_billing_cycle_and_prepaid_exp()
+
+        new_billing_cycle = AllocationAttribute.objects.get(
+            allocation=self.prepaid_present_allocation,
+            allocation_attribute_type__name="billing_cycle",
+        ).value
+
+        new_prepaid_expiration = AllocationAttribute.objects.get(
+            allocation=self.prepaid_present_allocation,
+            allocation_attribute_type__name="prepaid_expiration",
+        ).value
+
+        new_service_rate = AllocationAttribute.objects.get(
+            allocation=self.prepaid_present_allocation,
+            allocation_attribute_type__name="service_rate",
+        ).value
+        new_prepaid_expiration = datetime.strptime(
+            new_prepaid_expiration, "%Y-%m-%d %H:%M:%S"
+        )
+
+        expected_prepaid_exp = (
+            TestBillingCycleTypeUpdates.expected_prepaid_expiration_calculation(
+                self.prepaid_present_allocation
+            )
+        )
+        self.assertEqual(new_billing_cycle, "prepaid")
+        self.assertEqual(new_service_rate, "subscription")
         self.assertEqual(new_prepaid_expiration, expected_prepaid_exp)
 
     # def billing_cycle_manager_prepaid_expiration_calculation(

@@ -41,18 +41,18 @@ def process_prepaid_billing_cycle_changes(
                 logger.warn(f"Prepaid Expiration: {prepaid_expiration}")
                 AllocationAttribute.objects.filter(
                     allocation=allocation,
-                    allocation_attribute_type=billing_attribute,
+                    allocation_attribute_type__name="billing_cycle",
                 ).update(value="monthly")
     elif billing_cycle == "monthly":
         if prepaid_billing_start == today:
             logger.warn(f"Changing {allocation} billing_cycle to prepaid")
             AllocationAttribute.objects.filter(
                 allocation=allocation,
-                allocation_attribute_type=billing_attribute,
+                allocation_attribute_type__name="billing_cycle",
             ).update(value="prepaid")
             AllocationAttribute.objects.filter(
                 allocation=allocation,
-                allocation_attribute_type=service_rate_attribute,
+                allocation_attribute_type__name="service_rate",
             ).update(value="subscription")
 
 
