@@ -1,20 +1,10 @@
 from django.test import TestCase, Client
 
-from unittest.mock import patch, MagicMock
-
 from unittest import skip
-
-from django.db.models import OuterRef, Subquery
-
-from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
-)
-
-from coldfront.core.allocation.signals import (
-    allocation_activate,
 )
 
 import logging
