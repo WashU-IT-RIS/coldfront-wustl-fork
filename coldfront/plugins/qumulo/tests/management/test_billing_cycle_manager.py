@@ -101,6 +101,20 @@ class TestBillingCycleTypeUpdates(TestCase):
             "prepaid_time": 3,
             "prepaid_billing_date": date(2025, 11, 1),
         }
+        self.monthly_form_data = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "subscription",
+            "billing_cycle": "monthly",
+        }
 
         self.client.force_login(self.user)
 
@@ -112,6 +126,9 @@ class TestBillingCycleTypeUpdates(TestCase):
         )
         self.prepaid_future_allocation = create_allocation(
             self.project, self.user, self.prepaid_future_form_data
+        )
+        self.monthly_allocation = create_allocation(
+            self.project, self.user, self.monthly_form_data
         )
 
     def expected_prepaid_expiration_calculation(allocation):
@@ -235,6 +252,21 @@ class TestBillingCycleTypeUpdates(TestCase):
 
         new_billing_cycle = AllocationAttribute.objects.get(
             allocation=self.prepaid_allocation,
+            allocation_attribute_type__name="billing_cycle",
+        ).value
+
+        self.assertEqual(new_billing_cycle, "monthly")
+
+    def test_billing_cycle_manager_monthly(self):
+        self.monthly_allocation.status = AllocationStatusChoice.objects.get(
+            name="Active"
+        )
+        self.monthly_allocation.save()
+
+        check_allocation_billing_cycle_and_prepaid_exp()
+
+        new_billing_cycle = AllocationAttribute.objects.get(
+            allocation=self.monthly_allocation,
             allocation_attribute_type__name="billing_cycle",
         ).value
 
