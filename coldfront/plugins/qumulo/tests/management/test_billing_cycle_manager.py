@@ -6,6 +6,8 @@ from unittest import skip
 
 from django.db.models import OuterRef, Subquery
 
+from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
@@ -31,7 +33,18 @@ from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
 logger = logging.getLogger(__name__)
 
 
+@patch("coldfront.plugins.qumulo.signals.QumuloAPI")
 class TestBillingCycleTypeUpdates(TestCase):
+    def mock_get_attribute(name):
+        attribute_dict = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "storage_protocols": '["nfs"]',
+        }
+        return attribute_dict[name]
+
     def setUp(self):
         self.client = Client()
 
@@ -54,7 +67,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "general",
             "billing_cycle": "prepaid",
             "prepaid_time": 6,
-            "prepaid_billing_date": "2024-11-01",
+            "prepaid_billing_date": "01-11-2024",
         }
         self.prepaid_present_form_data = {
             "storage_filesystem_path": "foo",
@@ -86,6 +99,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         mock_QumuloAPI: MagicMock,
     ):
         qumulo_instance = mock_QumuloAPI.return_value
+        breakpoint()
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.prepaid_allocation.pk
         )
