@@ -92,6 +92,28 @@ class TestBillingCycleTypeUpdates(TestCase):
             self.project, self.user, self.prepaid_past_form_data
         )
 
+    def expected_prepaid_expiration_calculation(allocation):
+        prepaid_months = AllocationAttribute.objects.get(
+            allocation=allocation,
+            allocation_attribute_type__name="prepaid_time",
+        ).value
+
+        prepaid_billing_start = AllocationAttribute.objects.get(
+            allocation=allocation,
+            allocation_attribute_type__name="prepaid_billing_date",
+        ).value
+        prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
+        prepaid_months = int(prepaid_months)
+
+        prepaid_until = datetime(
+            prepaid_billing_start.year
+            + (prepaid_billing_start.month + prepaid_months - 1) // 12,
+            (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
+            prepaid_billing_start.day,
+        )
+
+        return prepaid_until
+
     def test_billing_cycle_manager_end_to_end_past(
         self,
     ):
@@ -99,22 +121,29 @@ class TestBillingCycleTypeUpdates(TestCase):
             name="Active"
         )
         self.prepaid_allocation.save()
-        breakpoint()
+
         check_allocation_billing_cycle_and_prepaid_exp()
-        return True
 
-    # def prepaid_expiration_calculation_for_comparison(
-    #     allocation, prepaid_billing_start, prepaid_months
-    # ):
-    #     prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
-    #     prepaid_until = datetime(
-    #         prepaid_billing_start.year
-    #         + (prepaid_billing_start.month + prepaid_months - 1) // 12,
-    #         (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
-    #         prepaid_billing_start.day,
-    #     )
+        new_billing_cycle = AllocationAttribute.objects.get(
+            allocation=self.prepaid_allocation,
+            allocation_attribute_type__name="billing_cycle",
+        ).value
 
-    #     return prepaid_until
+        new_prepaid_expiration = AllocationAttribute.objects.get(
+            allocation=self.prepaid_allocation,
+            allocation_attribute_type__name="prepaid_expiration",
+        ).value
+        new_prepaid_expiration = datetime.strptime(
+            new_prepaid_expiration, "%Y-%m-%d %H:%M:%S"
+        )
+
+        expected_prepaid_exp = (
+            TestBillingCycleTypeUpdates.expected_prepaid_expiration_calculation(
+                self.prepaid_allocation
+            )
+        )
+        self.assertEqual(new_billing_cycle, "prepaid")
+        self.assertEqual(new_prepaid_expiration, expected_prepaid_exp)
 
     # def billing_cycle_manager_prepaid_expiration_calculation(
     #     self, allocation, prepaid_months, prepaid_billing_start
