@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 
 import logging
-import datetime from datetime
+from datetime import datetime
 
 load_dotenv(override=True)
 
