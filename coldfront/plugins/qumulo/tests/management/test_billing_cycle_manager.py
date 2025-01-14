@@ -23,7 +23,7 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationAttribute,
 )
-from datetime import datetime
+from datetime import datetime, date
 
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
     calculate_prepaid_expiration,
@@ -67,7 +67,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "general",
             "billing_cycle": "prepaid",
             "prepaid_time": 6,
-            "prepaid_billing_date": "01-11-2024",
+            "prepaid_billing_date": date(2024, 11, 1),
         }
         self.prepaid_present_form_data = {
             "storage_filesystem_path": "foo",
@@ -87,7 +87,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         }
 
         self.client.force_login(self.user)
-
+        breakpoint()
         self.prepaid_allocation = create_allocation(
             self.project, self.user, self.prepaid_past_form_data
         )
