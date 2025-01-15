@@ -104,7 +104,7 @@ class TestValidateFilesystemPathUnique(TestCase):
             "storage_ticket": "ITSD-54321",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
         create_allocation(
             user_project_data["project"], user_project_data["user"], form_data
@@ -131,7 +131,7 @@ class TestValidateFilesystemPathUnique(TestCase):
             "storage_ticket": "ITSD-54321",
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         existing_allocation = create_allocation(

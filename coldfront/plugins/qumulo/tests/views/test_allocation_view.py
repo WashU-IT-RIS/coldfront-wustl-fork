@@ -35,7 +35,7 @@ class AllocationViewTests(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
     def test_create_new_allocation_create_allocation(

@@ -42,7 +42,7 @@ class TestAclAllocations(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         self.client.force_login(self.user)

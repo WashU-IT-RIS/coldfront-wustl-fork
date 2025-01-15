@@ -34,7 +34,7 @@ def create_allocation_assets() -> None:
         ("department_number", "Text"),
         ("technical_contact", "Text"),
         ("billing_contact", "Text"),
-        ("service_rate", "Text"),
+        ("service_rate_category", "Text"),
         ("storage_acl_name", "Text"),
         ("storage_allocation_pk", "Int"),
         ("secure", "Yes/No"),

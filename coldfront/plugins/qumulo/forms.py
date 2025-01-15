@@ -71,9 +71,9 @@ class AllocationForm(forms.Form):
         choices=BILLING_CYCLE_OPTIONS,
         required=True,
     )
-    service_rate = forms.ChoiceField(
-        help_text="Service rate option for the Storage2 allocation",
-        label="Service Rate",
+    service_rate_category = forms.ChoiceField(
+        help_text="Service rate category options for the Storage2 allocation",
+        label="Service Rate Category",
         choices=STORAGE_SERVICE_RATES,
     )
     storage_quota = forms.IntegerField(

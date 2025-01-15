@@ -194,7 +194,7 @@ class AllocationService:
             "department_number",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
         ]
 
         # some of the above are optional
