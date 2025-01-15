@@ -25,5 +25,5 @@ class Command(BaseCommand):
 
 
 def generate_prepaid_billing_report() -> None:
-    prepaid_billing = PrepaidBilling()
+    prepaid_billing = PrepaidBilling("prepaid")
     prepaid_billing.generate_prepaid_billing_report()
