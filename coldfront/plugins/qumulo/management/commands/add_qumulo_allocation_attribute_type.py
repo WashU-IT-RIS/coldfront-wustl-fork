@@ -29,6 +29,7 @@ class Command(BaseCommand):
         )
 
         AllocationAttributeType.objects.get_or_create(
+            attribute_type=AttributeType.objects.get(name="Text"),
             name="storage_protocols",
             is_required=True,
             is_private=False,
