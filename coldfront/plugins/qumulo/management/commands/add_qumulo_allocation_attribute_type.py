@@ -28,7 +28,7 @@ class Command(BaseCommand):
             is_changeable=True,
         )
 
-        AllocationAttributeType.objects.update_or_create(
+        AllocationAttributeType.objects.get_or_create(
             name="storage_protocols",
             is_required=True,
             is_private=False,
