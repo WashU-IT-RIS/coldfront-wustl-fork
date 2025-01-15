@@ -53,7 +53,7 @@ class BillingReport:
 
     def get_report_header(self) -> str:
         if self.billing_cycle == "prepaid":
-            additional_headers = (
+            additional_headers = str(
                 ",Prepaid Billing Date,Prepaid Expiration Date,Prepaid Time"
             )
         else:
