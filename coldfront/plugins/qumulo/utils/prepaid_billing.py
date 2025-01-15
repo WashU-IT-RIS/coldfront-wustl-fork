@@ -10,6 +10,7 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
 )
+from coldfront.plugins.qumulo.utils.billing_report import BillingReport
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -18,30 +19,7 @@ logger.addHandler(logging.StreamHandler())
 YYYY_MM_DD = "%Y-%m-%d"
 
 
-class PrepaidBilling:
-    def __init__(self, today=datetime.today().replace(day=1).strftime(YYYY_MM_DD)):
-        future_date = datetime.strptime(today, YYYY_MM_DD) + relativedelta(months=1)
-        self.usage_date = future_date.strftime(YYYY_MM_DD)
-        logger.debug(f"{self.usage_date}")
-        # The first day of the service month
-        self.delivery_date = (
-            (datetime.strptime(self.usage_date, YYYY_MM_DD).replace(day=1))
-            .replace(day=1)
-            .strftime(YYYY_MM_DD)
-        )
-        logger.debug(f"{self.delivery_date}")
-        # The service month for billing
-        self.billing_month = datetime.strptime(self.delivery_date, YYYY_MM_DD).strftime(
-            "%B"
-        )
-        logger.debug(f"{self.billing_month}")
-        self.filename = (
-            f"/tmp/RIS-{self.billing_month}-storage2-prepaid-active-billing.csv"
-        )
-
-    def get_filename(self) -> str:
-        return self.filename
-
+class PrepaidBilling(BillingReport):
     def get_report_header(self) -> str:
         report_header = """Submit Internal Service Delivery,,,,,,,,,,,,,,,,,,,,,,,,,,,
 Area,All,,Business Process Parameters,Internal Service Delivery Data,,,,,,,Internal Service Delivery Line Data+,,,,,,,,,,,,,
