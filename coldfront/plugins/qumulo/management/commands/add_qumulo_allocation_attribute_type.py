@@ -28,8 +28,7 @@ class Command(BaseCommand):
             is_changeable=True,
         )
 
-        AllocationAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="Text"),
+        AllocationAttributeType.objects.update_or_create(
             name="storage_protocols",
             is_required=True,
             is_private=False,
@@ -118,9 +117,13 @@ class Command(BaseCommand):
             is_changeable=True,
         )
 
+        AllocationAttributeType.objects.filter(name="service_rate").update(
+            name="service_rate_category"
+        )
+
         AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Text"),
-            name="service_rate",
+            name="service_rate_category",
             is_required=True,
             is_private=False,
             is_changeable=True,
