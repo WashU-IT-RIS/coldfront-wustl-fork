@@ -47,6 +47,7 @@ class BillingReport:
             "%B"
         )
         self.filename = f"/tmp/RIS-{self.billing_month}-storage2-{self.billing_cycle}-active-billing.csv"
+        logger.debug(f"Filename: {self.filename}")
 
     def get_filename(self) -> str:
         return self.filename
