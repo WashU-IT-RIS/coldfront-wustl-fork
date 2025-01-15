@@ -150,6 +150,8 @@ WHERE report.billing_amount > 0;
         """
         return query_prepaid_billing
 
+    prepaid_billing_report = BillingReport("prepaid")
+
     def generate_prepaid_billing_report(self) -> bool:
         # The date when the billing report was generated
         document_date = datetime.today().strftime("%m/%d/%Y")
