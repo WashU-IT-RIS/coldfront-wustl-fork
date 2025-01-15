@@ -10,7 +10,6 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
 )
-from coldfront.plugins.qumulo.utils.eib_billing import EIBBilling
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
