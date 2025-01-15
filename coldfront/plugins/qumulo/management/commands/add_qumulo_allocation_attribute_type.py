@@ -121,13 +121,18 @@ class Command(BaseCommand):
             name="service_rate_category"
         )
 
-        AllocationAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="Text"),
+        service_rate_category_defaults = {
+            "attribute_type__name": "Text",
+            "is_required": True,
+            "is_private": False,
+            "is_changeable": True,
+            "is_unique": False,
+        }
+
+        AllocationAttributeType.objects.update_or_create(
             name="service_rate_category",
-            is_required=True,
-            is_private=False,
-            is_changeable=True,
-            is_unique=False,
+            defaults=service_rate_category_defaults,
+            create_defaults=service_rate_category_defaults,
         )
 
         # these are the fields that will be migrated from Storage1
