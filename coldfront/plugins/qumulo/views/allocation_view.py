@@ -28,6 +28,12 @@ class AllocationView(LoginRequiredMixin, FormView):
         kwargs["user_id"] = self.request.user.id
         return kwargs
 
+    def set_billing_cycle(form_data):
+        billing_cycle = form_data.get("billing_cycle")
+        prepaid_billing_date = form_data.get("prepaid_billing_date")
+        if billing_cycle == "prepaid" and prepaid_billing_date > date.today():
+            form_data["billing_cycle"] = "monthly"
+
     def form_valid(
         self, form: AllocationForm, parent_allocation: Optional[Allocation] = None
     ):
@@ -35,8 +41,6 @@ class AllocationView(LoginRequiredMixin, FormView):
         user = self.request.user
         storage_filesystem_path = form_data.get("storage_filesystem_path")
         is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
-        billing_cycle = form_data.get("billing_cycle")
-        prepaid_billing_date = form_data.get("prepaid_billing_date")
         if is_absolute_path:
             absolute_path = storage_filesystem_path
         else:
@@ -52,9 +56,8 @@ class AllocationView(LoginRequiredMixin, FormView):
                 prepend_val = storage_root
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
+        AllocationView.set_billing_cycle(form_data)
         validate_filesystem_path_unique(absolute_path)
-        if billing_cycle == "prepaid" and prepaid_billing_date > date.today():
-            form_data["billing_cycle"] = "monthly"
 
         self.new_allocation = AllocationService.create_new_allocation(
             form_data, user, parent_allocation
