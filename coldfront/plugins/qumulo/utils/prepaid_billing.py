@@ -2,6 +2,7 @@ import logging
 import csv
 import re
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from django.db import connection
 
 from coldfront.core.allocation.models import (
@@ -9,7 +10,6 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
 )
-
 from coldfront.plugins.qumulo.utils.billing_report import BillingReport
 
 logger = logging.getLogger(__name__)
@@ -19,10 +19,10 @@ logger.addHandler(logging.StreamHandler())
 YYYY_MM_DD = "%Y-%m-%d"
 
 
-class EIBBilling(BillingReport):
-    def get_monthly_billing_query_template(self) -> str:
-        query_monthly_billing = """
-    SELECT
+class PrepaidBilling(BillingReport):
+    def get_prepaid_billing_query_template(self) -> str:
+        query_prepaid_billing = """
+SELECT
     NULL fields,
     ROW_NUMBER() OVER (ORDER BY report.service_name) spreadsheet_key,
     'N' add_only,
@@ -33,11 +33,11 @@ class EIBBilling(BillingReport):
     'ISP0000030' internal_service_provider,
     'USD' currency,
     '%s' document_date,
-    ('FY25 ' || '%s' || ' Monthly for ' || report.sponsor) AS memo,
+    ('FY25 ' || '%s' || ' Prepaid for ' || report.sponsor) AS memo,
     '1' row_id,
     NULL internal_service_delivery_line_id,
     '1' internal_service_delivery_line_number,
-    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.billing_amount || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || '"') AS item_description,
+    ('"' || 'WashU IT RIS ' || report.service_name || ' - ' || report.service_rate_category || '; Usage: ' || report.prepaid_time || ' X Rate: ' || report.rate || ' X Per: ' || report.service_unit || ' = Toal Cost: ' || report.total_cost ||'"') AS item_description,
     'SC510' spend_category,
     '1' quantity,
     'EA' unit_of_measure,
@@ -47,11 +47,12 @@ class EIBBilling(BillingReport):
     report.delivery_date delivery_date,
     ('"' || report.storage_name || '"') AS fileset_memo,
     report.cost_center cost_center,
+    report.prepaid_expiration prepaid_expiration,
+    report.prepaid_time prepaid_time,
     NULL fund,
     NULL,
     NULL,
     NULL,
-    report.billing_amount usage_amount,
     report.rate rate,
     report.service_unit unit
 FROM (
@@ -76,7 +77,10 @@ FROM (
         data.rate,
         data.service_rate_category,
         data.department_number,
-        data.cost_center
+        data.cost_center,
+        data.prepaid_expiration,
+        data.prepaid_time,
+        data.rate * data.prepaid_time AS total_cost
     FROM (
         SELECT
             '1' service_id,
@@ -86,24 +90,24 @@ FROM (
             u.username sponsor,
             service_rate_category,
             cost_center,
+            prepaid_billing_date,
+            prepaid_expiration,
+            prepaid_time,
             'monthly' billing_cycle,
             TRUE subsidized,
             FALSE exempt,
             CASE service_rate_category
-                WHEN 'consumption' THEN 13
                 WHEN 'subscription' THEN 634
                 WHEN 'subscription_500tb' THEN 2643
                 WHEN 'condo' THEN 529
             END rate,
             storage_quota,
             CASE service_rate_category
-                WHEN 'consumption' THEN CAST(storage_usage_of_the_day.storage_usage AS FLOAT8) /1024/1024/1024/1024
                 WHEN 'subscription' THEN CEILING(CAST(storage_quota AS FLOAT8) /100)
                 WHEN 'subscription_500tb' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
                 WHEN 'condo' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
             END billing_amount_tb,
             CASE service_rate_category
-                WHEN 'consumption' THEN 'TB'
                 WHEN 'subscription' THEN '100TB'
                 WHEN 'subscription_500tb' THEN '500TB'
                 WHEN 'condo' THEN '500TB'
@@ -119,46 +123,32 @@ FROM (
         LEFT JOIN (SELECT aa.allocation_id, aa.value department_number FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='department_number') AS department_number ON a.id=department_number.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.value service_rate_category FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='service_rate') AS service_rate_category ON a.id=service_rate_category.allocation_id
         LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value storage_quota FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='storage_quota') AS storage_quota ON a.id=storage_quota.allocation_id
-        JOIN (
-            SELECT haau.allocation_attribute_id, haau.value storage_usage
-            FROM allocation_historicalallocationattributeusage haau
-            JOIN (
-                SELECT allocation_attribute_id aa_id, MAX(modified) usage_timestamp
-                FROM allocation_historicalallocationattributeusage
-                WHERE DATE(modified) = '%s'
-                GROUP BY aa_id, DATE(modified)
-            ) AS aa_id_usage_timestamp
-            ON haau.allocation_attribute_id = aa_id_usage_timestamp.aa_id
-                AND haau.modified = aa_id_usage_timestamp.usage_timestamp
-        ) AS storage_usage_of_the_day
-            ON storage_quota.id = storage_usage_of_the_day.allocation_attribute_id
+        LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_billing_date FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_billing_date') AS prepaid_billing_date ON a.id=prepaid_billing_date.allocation_id
+        LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_expiration FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_expiration') AS prepaid_expiration ON a.id=prepaid_expiration.allocation_id
+        LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_time FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_time') AS prepaid_time ON a.id=prepaid_time.allocation_id
         JOIN allocation_allocation_resources ar ON ar.allocation_id=a.id
         JOIN resource_resource r ON r.id=ar.resource_id
         WHERE
             r.name = 'Storage2'
         AND
           astatus.name = 'Active'
-        AND
-          a.id NOT IN (
-            SELECT allocation_id FROM allocation_allocationlinkage_children
-        )
     ) AS data
-    WHERE billing_cycle = 'monthly'
+    WHERE prepaid_billing_date = '%s'
         AND exempt <> TRUE
 ) AS report 
 WHERE report.billing_amount > 0;
         """
-        return query_monthly_billing
+        return query_prepaid_billing
 
-    def generate_monthly_billing_report(self) -> bool:
+    def generate_prepaid_billing_report(self) -> bool:
         # The date when the billing report was generated
         document_date = datetime.today().strftime("%m/%d/%Y")
 
-        monthly_billing_query = self.get_monthly_billing_query_template() % (
+        prepaid_billing_query = self.get_prepaid_billing_query_template() % (
             document_date,
             self.billing_month,
             self.delivery_date,
-            self.usage_date,
+            self.delivery_date,
         )
 
         try:
@@ -168,7 +158,7 @@ WHERE report.billing_amount > 0;
 
             logger.debug(f"[INFO] Database: {row[0]}")
             if re.search("mariadb", row[0], re.IGNORECASE):
-                monthly_billing_query = monthly_billing_query.replace(
+                prepaid_billing_query = prepaid_billing_query.replace(
                     "('", "CONCAT('"
                 ).replace("||", ",")
 
@@ -181,12 +171,12 @@ WHERE report.billing_amount > 0;
 
         try:
             with connection.cursor() as cursor:
-                cursor.execute(monthly_billing_query)
+                cursor.execute(prepaid_billing_query)
                 rows = cursor.fetchall()
 
         except Exception as e:
             logger.error("[Error] Database error: %s", e)
-            logger.debug("Monthly billing query: %s", monthly_billing_query)
+            logger.debug("Prepaid billing query: %s", prepaid_billing_query)
             return False
 
         try:
