@@ -32,7 +32,7 @@ class AllocationListItem:
     pi_user_name: str
     itsd_ticket: str
     file_path: str
-    service_rate: str
+    service_rate_category: str
     child_allocation_ids: List[str]
     is_child: bool
 
@@ -80,7 +80,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 name="storage_filesystem_path"
             )
 
-            service_rate_type = AllocationAttributeType.objects.get(name="service_rate")
+            service_rate_categoty_type = AllocationAttributeType.objects.get(
+                name="service_rate_category"
+            )
 
             # add sub-queries
             department_sub_q = AllocationAttribute.objects.filter(
@@ -95,15 +97,15 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocation=OuterRef("pk"), allocation_attribute_type=file_path_type
             ).values("value")[:1]
 
-            service_rate_sub_q = AllocationAttribute.objects.filter(
-                allocation=OuterRef("pk"), allocation_attribute_type=service_rate_type
+            service_rate_category_sub_q = AllocationAttribute.objects.filter(
+                allocation=OuterRef("pk"), allocation_attribute_type=service_rate_categoty_type
             ).values("value")[:1]
 
             allocations = allocations.annotate(
                 department_number=Subquery(department_sub_q),
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
                 file_path=Subquery(file_path_sub_q),
-                service_rate=Subquery(service_rate_sub_q),
+                service_rate_category=Subquery(service_rate_category_sub_q),
             )
 
             # add filters
@@ -157,7 +159,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                     department_number=Subquery(department_sub_q),
                     itsd_ticket=Subquery(itsd_ticket_sub_q),
                     file_path=Subquery(file_path_sub_q),
-                    service_rate=Subquery(service_rate_sub_q),
+                    service_rate_category=Subquery(service_rate_category_sub_q),
                 )
                 linkage_children = linkage_children.order_by(order_by)
                 children = [str(child.id) for child in linkage_children]
@@ -181,7 +183,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                                 department_number=allocation.department_number,
                                 itsd_ticket=allocation.itsd_ticket,
                                 file_path=allocation.file_path,
-                                service_rate=allocation.service_rate,
+                                service_rate_category=allocation.service_rate_category,
                                 child_allocation_ids=parent_to_children_map[
                                     allocation.id
                                 ],
@@ -205,7 +207,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                                         department_number=child_allocation.department_number,
                                         itsd_ticket=child_allocation.itsd_ticket,
                                         file_path=child_allocation.file_path,
-                                        service_rate=child_allocation.service_rate,
+                                        service_rate_category=child_allocation.service_rate_category,
                                         child_allocation_ids=[],
                                         is_child=True,
                                     )
@@ -224,7 +226,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                             department_number=allocation.department_number,
                             itsd_ticket=allocation.itsd_ticket,
                             file_path=allocation.file_path,
-                            service_rate=allocation.service_rate,
+                            service_rate_category=allocation.service_rate_category,
                             child_allocation_ids=parent_to_children_map[allocation.id],
                             is_child=(str(allocation.pk) in all_children),
                         )
