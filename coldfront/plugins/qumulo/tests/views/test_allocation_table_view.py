@@ -35,7 +35,7 @@ class AllocationTableViewTests(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         self.allocation = create_allocation(self.project, self.user, self.form_data)
@@ -73,7 +73,7 @@ class AllocationTableViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
             "department_number": "Whale-watching",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_allocation = create_allocation(other_project, other_user, other_form_data)
@@ -111,7 +111,7 @@ class AllocationTableViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
             "department_number": "Whale-watching",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_allocation = create_allocation(other_project, other_user, other_form_data)
@@ -182,7 +182,7 @@ class AllocationTableViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
             "department_number": "Whale-watching",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_form_data_b = {
@@ -196,7 +196,7 @@ class AllocationTableViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "CC-001122",
             "department_number": "Whale-watching",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         _ = create_allocation(
@@ -239,7 +239,7 @@ class AllocationTableViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
             "department_number": "Whale-watching",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_allocations = []
@@ -323,7 +323,7 @@ class AllocationTableViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
             "department_number": "Whale-watching",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         child_allocation = create_allocation(

@@ -72,7 +72,7 @@ def construct_allocation_form_data(quota_tb: int, service_rate_category: str):
         "cost_center": "CC0000123",
         "department_number": "CH000123",
         "billing_cycle": "monthly",
-        "service_rate": service_rate_category,
+        "service_rate_category": service_rate_category,
     }
     return form_data
 
@@ -91,7 +91,9 @@ def construct_suballocation_form_data(quota_tb: int, parent_allocation: Allocati
         "cost_center": parent_allocation.get_attribute("cost_center"),
         "department_number": parent_allocation.get_attribute("department_number"),
         "billing_cycle": parent_allocation.get_attribute("billing_cycle"),
-        "service_rate": parent_allocation.get_attribute("service_rate"),
+        "service_rate_category": parent_allocation.get_attribute(
+            "service_rate_category"
+        ),
     }
     return form_data
 
@@ -379,7 +381,7 @@ class TestEIBBilling(TestCase):
             allocation.save()
 
         storage2_allocations = Allocation.objects.filter(
-            resources__name="Storage2", status__name__in=["Active"]
+            resources__name="Storage2", status__name="Active"
         )
         self.assertEqual(len(storage2_allocations), len(quota_service_rate_categories))
 

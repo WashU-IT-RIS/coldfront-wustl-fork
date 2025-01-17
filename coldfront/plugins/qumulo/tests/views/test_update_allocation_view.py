@@ -50,7 +50,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
             "technical_contact": "it.guru",
             "billing_contact": "finance.guru",
         }
@@ -73,7 +73,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -96,7 +96,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -119,7 +119,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -143,7 +143,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -171,7 +171,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -209,7 +209,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -250,7 +250,7 @@ class UpdateAllocationViewTests(TestCase):
             "department_number",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
             "storage_ticket",
             "storage_quota",
         ]
@@ -316,7 +316,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Internation Monetary Fund",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         storage_allocation_missing_contacts = create_allocation(
@@ -328,7 +328,7 @@ class UpdateAllocationViewTests(TestCase):
             "department_number",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
             "storage_ticket",
             "storage_quota",
         ]
@@ -419,7 +419,7 @@ class UpdateAllocationViewTests(TestCase):
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
             "technical_contact": "it.guru",
             "billing_contact": "finance.guru",
         }
