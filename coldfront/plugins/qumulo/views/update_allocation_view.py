@@ -3,10 +3,10 @@ from django.urls import reverse_lazy
 from django_q.tasks import async_task
 
 from typing import Union, Optional
+from datetime import datetime
 
 import json
 import logging
-import datetime
 
 from coldfront.core.allocation.models import (
     Allocation,
