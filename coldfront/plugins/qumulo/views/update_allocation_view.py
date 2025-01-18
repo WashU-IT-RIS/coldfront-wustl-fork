@@ -6,6 +6,7 @@ from typing import Union, Optional
 
 import json
 import logging
+import datetime
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -226,7 +227,10 @@ class UpdateAllocationView(AllocationView):
         ]
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
-        async_task(addMembersToADGroup, users_to_add, access_allocation)
+        create_group_time = datetime.now()
+        async_task(
+            addMembersToADGroup, users_to_add, access_allocation, create_group_time
+        )
 
         users_to_remove = set(allocation_usernames) - set(access_users)
         for allocation_username in users_to_remove:
