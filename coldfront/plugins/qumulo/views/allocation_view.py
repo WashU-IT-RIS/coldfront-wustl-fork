@@ -56,7 +56,7 @@ class AllocationView(LoginRequiredMixin, FormView):
                 prepend_val = storage_root
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
-        AllocationView.set_billing_cycle(form_data)
+        # AllocationView.set_billing_cycle(form_data)
         validate_filesystem_path_unique(absolute_path)
 
         self.new_allocation = AllocationService.create_new_allocation(
