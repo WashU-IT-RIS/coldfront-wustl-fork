@@ -171,10 +171,10 @@ class Command(BaseCommand):
 
         AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Yes/No"),
-            name="exempt",
+            name="billing_exempt",
             is_required=True,
             is_private=False,
-            is_changeable=False,
+            is_changeable=True,
         )
 
         AllocationAttributeType.objects.get_or_create(

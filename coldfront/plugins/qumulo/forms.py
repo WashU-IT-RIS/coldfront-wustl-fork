@@ -49,6 +49,14 @@ class AllocationForm(forms.Form):
         help_text="The cost center for billing",
         label="Cost Center",
     )
+    billing_exempt = forms.ChoiceField(
+        help_text="Exempt the allocation from billing",
+        label="Billing Exempt",
+        choices=[("Yes", "Yes"), ("No", "No")],
+        initial="No",
+        # widget=forms.CheckboxInput(),
+        required=True,
+    )
     department_number = forms.CharField(
         help_text="The department for billing",
         label="Department Number",
@@ -69,12 +77,14 @@ class AllocationForm(forms.Form):
         help_text="The billing cycle of the allocation",
         label="Billing Cycle",
         choices=BILLING_CYCLE_OPTIONS,
+        initial="monthly",
         required=True,
     )
     service_rate = forms.ChoiceField(
         help_text="Service rate option for the Storage2 allocation",
         label="Service Rate",
         choices=STORAGE_SERVICE_RATES,
+        # initial="Consumption",
     )
     storage_quota = forms.IntegerField(
         min_value=0,
