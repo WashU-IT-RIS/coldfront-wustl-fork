@@ -20,6 +20,9 @@ YYYY_MM_DD = "%Y-%m-%d"
 
 
 class EIBBilling(BillingReport):
+    def __init__(self, timestamp):
+        super().__init__("monthly", timestamp)
+
     def get_monthly_billing_query_template(self) -> str:
         query_monthly_billing = """
     SELECT
@@ -150,7 +153,7 @@ WHERE report.billing_amount > 0;
         """
         return query_monthly_billing
 
-    def generate_monthly_billing_report(self) -> bool:
+    def _get_monthly_billing_query(self) -> str:
         # The date when the billing report was generated
         document_date = datetime.today().strftime("%m/%d/%Y")
 
@@ -160,6 +163,11 @@ WHERE report.billing_amount > 0;
             self.delivery_date,
             self.usage_date,
         )
+        return monthly_billing_query
+
+    def generate_monthly_billing_report(self) -> bool:
+
+        monthly_billing_query = self._get_monthly_billing_query()
 
         try:
             with connection.cursor() as cursor:
