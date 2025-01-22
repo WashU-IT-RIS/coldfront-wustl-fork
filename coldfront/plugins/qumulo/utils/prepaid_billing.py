@@ -156,8 +156,12 @@ class PrepaidBilling(BillingReport):
         return prepaid_billing_query
 
     def generate_prepaid_billing_report(self) -> bool:
+        args = dict()
+        args["document_date"] = datetime.today().strftime("%m/%d/%Y")
+        args["billing_month"] = self.billing_month
+        args["delivery_date"] = self.delivery_date
 
-        prepaid_billing_query = super().get_query("prepaid", "prepaid")
+        prepaid_billing_query = super().get_query(args, "prepaid")
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT version();")
