@@ -142,7 +142,7 @@ class PrepaidBilling(BillingReport):
         WHERE report.billing_amount > 0;
         """
         return query_prepaid_billing
-    
+
     def _get_prepaid_billing_query(self) -> str:
         # The date when the billing report was generated
         document_date = datetime.today().strftime("%m/%d/%Y")
@@ -157,7 +157,7 @@ class PrepaidBilling(BillingReport):
 
     def generate_prepaid_billing_report(self) -> bool:
 
-        prepaid_billing_query = self._get_prepaid_billing_query()
+        prepaid_billing_query = super().get_query("prepaid")
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT version();")

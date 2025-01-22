@@ -10,6 +10,7 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
 )
+from coldfront.plugins.qumulo.utils.billing_query_generator import BillingGenerator
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -23,6 +24,7 @@ class BillingReport:
         self, billing_cycle, today=datetime.today().replace(day=1).strftime(YYYY_MM_DD)
     ):
         self.billing_cycle = billing_cycle
+        self.billing_generator = BillingGenerator()
         if self.billing_cycle == "prepaid":
             future_date = datetime.strptime(today, YYYY_MM_DD) + relativedelta(months=1)
             self.usage_date = future_date.strftime(YYYY_MM_DD)
@@ -70,5 +72,10 @@ Fields,Spreadsheet Key*,Add Only,Auto Complete,Internal Service Delivery ID,Subm
             + """,Fund,,,,USAGE,RATE,UNIT
 """
         )
-
         return report_header
+
+    def get_query(self, type):
+        if type == "monthly":
+            return self.billing_generator.get_billing_query("monthly")
+        elif type == "prepaid":
+            return self.billing_generator.get_billing_query("prepaid")
