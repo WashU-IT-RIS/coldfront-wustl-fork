@@ -16,7 +16,7 @@ from coldfront.plugins.qumulo.validators import (
 )
 
 from coldfront.plugins.qumulo.constants import (
-    STORAGE_SERVICE_RATES,
+    SERVICE_RATE_CATEGORIES,
     PROTOCOL_OPTIONS,
 )
 
@@ -74,7 +74,7 @@ class AllocationForm(forms.Form):
     service_rate_category = forms.ChoiceField(
         help_text="Service rate category options for the Storage2 allocation",
         label="Service Rate Category",
-        choices=STORAGE_SERVICE_RATES,
+        choices=SERVICE_RATE_CATEGORIES,
     )
     storage_quota = forms.IntegerField(
         min_value=0,
