@@ -157,7 +157,7 @@ class PrepaidBilling(BillingReport):
 
     def generate_prepaid_billing_report(self) -> bool:
 
-        prepaid_billing_query = super().get_query("prepaid")
+        prepaid_billing_query = super().get_query("prepaid", "prepaid")
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT version();")
