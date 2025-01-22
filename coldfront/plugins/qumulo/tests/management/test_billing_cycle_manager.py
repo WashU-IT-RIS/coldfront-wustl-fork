@@ -123,6 +123,7 @@ class TestBillingCycleTypeUpdates(TestCase):
         self.prepaid_present_allocation = create_allocation(
             self.project, self.user, self.prepaid_present_form_data
         )
+
         self.prepaid_future_allocation = create_allocation(
             self.project, self.user, self.prepaid_future_form_data
         )
