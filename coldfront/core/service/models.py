@@ -8,7 +8,7 @@ class Service(TimeStampedModel):
 
 
 class ServiceRateCategory(TimeStampedModel):
-    service_id = models.ForeignKey(Service, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
     model_name = models.CharField(max_length=255)
     model_display_name = models.CharField(max_length=255)
     model_description = models.CharField(max_length=255)
@@ -17,7 +17,7 @@ class ServiceRateCategory(TimeStampedModel):
 
 
 class ServiceRateCategoryTier(TimeStampedModel):
-    service_rate_category_id = models.ForeignKey(
+    service_rate_category = models.ForeignKey(
         ServiceRateCategory, on_delete=models.CASCADE
     )
     name = models.CharField(max_length=255)
