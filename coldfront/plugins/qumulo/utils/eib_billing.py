@@ -166,8 +166,13 @@ WHERE report.billing_amount > 0;
         return monthly_billing_query
 
     def generate_monthly_billing_report(self) -> bool:
+        args = dict()
+        args["document_date"] = datetime.today().strftime("%m/%d/%Y")
+        args["billing_month"] = self.billing_month
+        args["delivery_date"] = self.delivery_date
+        args["usage_date"] = self.usage_date
 
-        monthly_billing_query = self._get_monthly_billing_query()
+        monthly_billing_query = super().get_query(args, "monthly")
 
         try:
             with connection.cursor() as cursor:
