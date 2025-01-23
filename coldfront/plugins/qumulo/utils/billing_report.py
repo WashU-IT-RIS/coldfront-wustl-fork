@@ -74,8 +74,8 @@ Fields,Spreadsheet Key*,Add Only,Auto Complete,Internal Service Delivery ID,Subm
         )
         return report_header
 
-    def get_query(self, type):
+    def get_query(self, args, type):
         if type == "monthly":
-            return self.billing_generator.get_billing_query("monthly")
+            return self.billing_generator.get_billing_query(args, "monthly")
         elif type == "prepaid":
-            return self.billing_generator.get_billing_query("prepaid")
+            return self.billing_generator.get_billing_query(args, "prepaid")
