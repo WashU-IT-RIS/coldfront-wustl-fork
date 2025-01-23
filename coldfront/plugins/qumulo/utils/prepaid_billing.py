@@ -20,8 +20,8 @@ YYYY_MM_DD = "%Y-%m-%d"
 
 
 class PrepaidBilling(BillingReport):
-    def __init__(self):
-        super().__init__("prepaid")
+    def __init__(self, timestamp):
+        super().__init__("prepaid", timestamp)
 
     def get_prepaid_billing_query_template(self) -> str:
         query_prepaid_billing = """

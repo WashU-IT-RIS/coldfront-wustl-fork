@@ -190,7 +190,9 @@ class TestPrepaidBilling(TestCase):
         return super().setUp()
 
     def test_header_return_csv(self):
-        prepaid_billing = PrepaidBilling()
+        prepaid_billing = PrepaidBilling(
+            datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        )
         header = prepaid_billing.get_report_header()
         self.assertTrue(re.search("^Submit Internal Service Delivery(,){27}", header))
         self.assertEqual(
@@ -199,7 +201,9 @@ class TestPrepaidBilling(TestCase):
         )
 
     def test_query_return_sql_statement(self):
-        prepaid_billing = PrepaidBilling()
+        prepaid_billing = PrepaidBilling(
+            datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        )
         self.assertTrue(
             re.search(
                 "^\s*SELECT\s*", prepaid_billing.get_prepaid_billing_query_template()

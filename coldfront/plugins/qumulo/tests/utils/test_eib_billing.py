@@ -194,7 +194,7 @@ class TestEIBBilling(TestCase):
         return super().setUp()
 
     def test_header_return_csv(self):
-        eib_billing = EIBBilling()
+        eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
         header = eib_billing.get_report_header()
         self.assertTrue(re.search("^Submit Internal Service Delivery(,){27}", header))
         self.assertEqual(
@@ -203,7 +203,7 @@ class TestEIBBilling(TestCase):
         )
 
     def test_query_return_sql_statement(self):
-        eib_billing = EIBBilling()
+        eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
         self.assertTrue(
             re.search("^\s*SELECT\s*", eib_billing.get_monthly_billing_query_template())
         )
