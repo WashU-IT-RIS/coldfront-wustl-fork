@@ -84,7 +84,7 @@ class AllocationForm(forms.Form):
         help_text="Service rate option for the Storage2 allocation",
         label="Service Rate",
         choices=STORAGE_SERVICE_RATES,
-        # initial="Consumption",
+        # initial="consumption",
     )
     storage_quota = forms.IntegerField(
         min_value=0,

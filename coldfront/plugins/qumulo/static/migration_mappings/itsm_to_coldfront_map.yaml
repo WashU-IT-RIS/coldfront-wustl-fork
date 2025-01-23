@@ -307,7 +307,7 @@ itsm_to_coldfront_map:
       - entity: allocation_attribute
         attributes:
           - name: allocation_attribute_type__name
-            value: exempt
+            value: billing_exempt
           - name: value
             value:
               type: Yes/No
