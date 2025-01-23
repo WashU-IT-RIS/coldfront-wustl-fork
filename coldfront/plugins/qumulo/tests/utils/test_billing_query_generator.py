@@ -59,12 +59,8 @@ class TestBillingQueryGenerator(TestCase):
         args["billing_month"] = eib_billing.billing_month
         args["delivery_date"] = eib_billing.delivery_date
         args["usage_date"] = eib_billing.usage_date
-        compare = _process_string(
-            BillingGenerator.get_billing_query(
-                args,
-                "monthly",
-            )
-        )
+
+        compare = _process_string(BillingGenerator.get_billing_query(args, "monthly"))
 
         self.assertEqual(original, compare)
 

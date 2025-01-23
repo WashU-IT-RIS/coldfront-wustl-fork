@@ -2,8 +2,19 @@ import os
 
 
 class BillingGenerator:
-    def __init__(self):
-        self.MONTHLY_COLS = [
+    def _get_item_description(cols: list[str]):
+
+        item_description_format = """('"' %s '"') AS item_description"""
+        item_description_contents = f"|| {' || '.join(cols)} ||"
+
+        return item_description_format % item_description_contents
+
+    def _get_current_fiscal_year() -> str:
+        # TODO - get current fiscal year from environment variable
+        return os.getenv("CURRENT_FISCAL_YEAR", "FY25")
+
+    def get_billing_query(self, report_type: str) -> str:
+        MONTHLY_COLS = [
             "'WashU IT RIS '",
             "report.service_name",
             "' - '",
@@ -16,7 +27,7 @@ class BillingGenerator:
             "report.service_unit",
         ]
 
-        self.PREPAID_COLS = [
+        PREPAID_COLS = [
             "'WashU IT RIS '",
             "report.service_name",
             "' - '",
@@ -30,29 +41,15 @@ class BillingGenerator:
             "' = Total Cost: '",
             "report.total_cost",
         ]
-
-    def _get_item_description(cols: list[str]):
-
-        item_description_format = """('"' %s '"') AS item_description"""
-        item_description_contents = f"|| {' || '.join(cols)} ||"
-
-        return item_description_format % item_description_contents
-
-    def _get_current_fiscal_year() -> str:
-        # TODO - get current fiscal year from environment variable
-        return os.getenv("CURRENT_FISCAL_YEAR", "FY25")
-
-    def get_billing_query(self, args: dict, report_type: str) -> str:
-
         fiscal_year = BillingGenerator._get_current_fiscal_year()
         if report_type == "monthly":
             report_header_type = "Monthly for"
         elif report_type == "prepaid":
             report_header_type = "Prepaid for"
         if report_type == "monthly":
-            item_description = BillingGenerator._get_item_description(self.MONTHLY_COLS)
+            item_description = BillingGenerator._get_item_description(MONTHLY_COLS)
         elif report_type == "prepaid":
-            item_description = BillingGenerator._get_item_description(self.PREPAID_COLS)
+            item_description = BillingGenerator._get_item_description(PREPAID_COLS)
         monthly_specific_columns = ""
         if report_type == "monthly":
             monthly_specific_columns = "report.billing_amount usage_amount,"
@@ -88,7 +85,7 @@ class BillingGenerator:
                     JOIN (
                         SELECT allocation_attribute_id aa_id, MAX(modified) usage_timestamp
                         FROM allocation_historicalallocationattributeusage
-                        WHERE DATE(modified) = '{args["usage_date"]}'
+                        WHERE DATE(modified) = '{self["usage_date"]}'
                         GROUP BY aa_id, DATE(modified)
                     ) AS aa_id_usage_timestamp
                     ON haau.allocation_attribute_id = aa_id_usage_timestamp.aa_id
@@ -117,7 +114,7 @@ class BillingGenerator:
             final_where_clause = "WHERE billing_cycle = 'monthly'"
         elif report_type == "prepaid":
             final_where_clause = (
-                f"WHERE prepaid_billing_date = '{args['delivery_date']}'"
+                f"WHERE prepaid_billing_date = '{self['delivery_date']}'"
             )
 
         query_text = f"""
@@ -131,8 +128,8 @@ class BillingGenerator:
                 'CP0001' company,
                 'ISP0000030' internal_service_provider,
                 'USD' currency,
-                '{args["document_date"]}' document_date,
-                ('{fiscal_year} ' || '{args["billing_month"]}' || ' {report_header_type} ' || report.sponsor) AS memo,
+                '{self["document_date"]}' document_date,
+                ('{fiscal_year} ' || '{self["billing_month"]}' || ' {report_header_type} ' || report.sponsor) AS memo,
                 '1' row_id,
                 NULL internal_service_delivery_line_id,
                 '1' internal_service_delivery_line_number,
@@ -156,7 +153,7 @@ class BillingGenerator:
                 report.service_unit unit
             FROM (
                 SELECT
-                    '{args["delivery_date"]}' delivery_date,
+                    '{self["delivery_date"]}' delivery_date,
                     data.service_unit,
                     data.storage_name,
                     data.service_name,
