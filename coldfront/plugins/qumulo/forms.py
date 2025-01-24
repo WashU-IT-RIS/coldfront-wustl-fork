@@ -54,7 +54,6 @@ class AllocationForm(forms.Form):
         label="Billing Exempt",
         choices=[("Yes", "Yes"), ("No", "No")],
         initial="No",
-        # widget=forms.CheckboxInput(),
         required=True,
     )
     department_number = forms.CharField(
@@ -84,7 +83,6 @@ class AllocationForm(forms.Form):
         help_text="Service rate option for the Storage2 allocation",
         label="Service Rate",
         choices=STORAGE_SERVICE_RATES,
-        # initial="consumption",
     )
     storage_quota = forms.IntegerField(
         min_value=0,
