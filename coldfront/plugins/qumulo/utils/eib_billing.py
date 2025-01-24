@@ -23,18 +23,6 @@ class EIBBilling(BillingReport):
     def __init__(self, timestamp):
         super().__init__("monthly", timestamp)
 
-    def _get_monthly_billing_query(self) -> str:
-        # The date when the billing report was generated
-        document_date = datetime.today().strftime("%m/%d/%Y")
-
-        monthly_billing_query = self.get_monthly_billing_query_template() % (
-            document_date,
-            self.billing_month,
-            self.delivery_date,
-            self.usage_date,
-        )
-        return monthly_billing_query
-
     def generate_monthly_billing_report(self) -> bool:
         args = dict()
         args["document_date"] = datetime.today().strftime("%m/%d/%Y")
