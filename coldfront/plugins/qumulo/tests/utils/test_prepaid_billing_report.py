@@ -204,10 +204,12 @@ class TestPrepaidBilling(TestCase):
         prepaid_billing = PrepaidBilling(
             datetime.now(timezone.utc).strftime("%Y-%m-%d")
         )
+        args = dict()
+        args["document_date"] = datetime.today().strftime("%m/%d/%Y")
+        args["billing_month"] = prepaid_billing.billing_month
+        args["delivery_date"] = prepaid_billing.delivery_date
         self.assertTrue(
-            re.search(
-                "^\s*SELECT\s*", prepaid_billing.get_prepaid_billing_query_template()
-            )
+            re.search("^\s*SELECT\s*", prepaid_billing.get_query(args, "prepaid"))
         )
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")

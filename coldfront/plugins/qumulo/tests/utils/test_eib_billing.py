@@ -204,8 +204,13 @@ class TestEIBBilling(TestCase):
 
     def test_query_return_sql_statement(self):
         eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+        args = dict()
+        args["document_date"] = datetime.today().strftime("%m/%d/%Y")
+        args["billing_month"] = eib_billing.billing_month
+        args["delivery_date"] = eib_billing.delivery_date
+        args["usage_date"] = eib_billing.usage_date
         self.assertTrue(
-            re.search("^\s*SELECT\s*", eib_billing.get_monthly_billing_query_template())
+            re.search("^\s*SELECT\s*", eib_billing.get_query(args, "monthly"))
         )
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
