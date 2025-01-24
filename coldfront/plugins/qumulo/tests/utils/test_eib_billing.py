@@ -339,9 +339,11 @@ class TestEIBBilling(TestCase):
         eib_billing.generate_monthly_billing_report()
 
         filename = eib_billing.get_filename()
-        self.assertFalse(re.search("RIS-%s-storage2-active-billing.csv", filename))
+        self.assertFalse(
+            re.search("RIS-%s-storage2-monthly-active-billing.csv", filename)
+        )
         self.assertTrue(
-            re.search("RIS-[A-Za-z]+-storage2-active-billing.csv", filename)
+            re.search("RIS-[A-Za-z]+-storage2-monthly-active-billing.csv", filename)
         )
         self.assertTrue(os.path.exists(filename))
         os.system(f"ls -l {filename}")

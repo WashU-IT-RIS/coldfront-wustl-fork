@@ -79,3 +79,49 @@ Fields,Spreadsheet Key*,Add Only,Auto Complete,Internal Service Delivery ID,Subm
             return self.billing_generator.get_billing_query(args, "monthly")
         elif type == "prepaid":
             return self.billing_generator.get_billing_query(args, "prepaid")
+
+    def generate_report(self, billing_query):
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT version();")
+                row = cursor.fetchone()
+
+            logger.debug(f"[INFO] Database: {row[0]}")
+            if re.search("mariadb", row[0], re.IGNORECASE):
+                billing_query = billing_query.replace("('", "CONCAT('").replace(
+                    "||", ","
+                )
+
+        except Exception as e:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT sqlite_version();")
+                row = cursor.fetchone()
+
+            logger.debug(f"[INFO] Database: sqlite version {row[0]}")
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(billing_query)
+                rows = cursor.fetchall()
+
+        except Exception as e:
+            logger.error("[Error] Database error: %s", e)
+            logger.debug("Billing query: %s", billing_query)
+            return False
+
+        try:
+            file_handle = open(self.filename, "w")
+            file_handle.write(self.get_report_header())
+            file_handle.close()
+
+            file_handle = open(self.filename, "a")
+            billing_report = csv.writer(file_handle)
+            billing_report.writerows(rows)
+            file_handle.close()
+
+        except Exception as e:
+            logger.error("[Error] Write file error: %s", e)
+            logger.debug("Filename: %s" % self.filename)
+            return False
+
+        return True
