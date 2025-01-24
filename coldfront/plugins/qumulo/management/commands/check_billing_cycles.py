@@ -35,7 +35,7 @@ def process_prepaid_billing_cycle_changes(
     today = datetime.today().strftime("%Y-%m-%d")
     if billing_cycle == "prepaid":
         if prepaid_expiration is not None:
-            if prepaid_expiration == today or prepaid_expiration < today:
+            if prepaid_expiration <= today:
                 billing_cycle = "monthly"
                 update_billing_cycle(allocation, billing_cycle)
     elif billing_cycle == "monthly":
