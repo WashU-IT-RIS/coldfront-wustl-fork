@@ -27,7 +27,7 @@ urlpatterns = [
         name="allocation-table-list",
     ),
     path(
-        "allocation/user-management",
+        "allocation-admin/user-management",
         user_management_view.UserManagementView.as_view(),
         name="userManagement",
     ),
