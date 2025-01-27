@@ -42,42 +42,23 @@ class BillingGenerator:
             "report.total_cost",
         ]
         fiscal_year = BillingGenerator._get_current_fiscal_year()
-        if report_type == "monthly":
-            report_header_type = "Monthly for"
-        elif report_type == "prepaid":
-            report_header_type = "Prepaid for"
-        if report_type == "monthly":
-            item_description = BillingGenerator._get_item_description(MONTHLY_COLS)
-        elif report_type == "prepaid":
-            item_description = BillingGenerator._get_item_description(PREPAID_COLS)
-        monthly_specific_columns = ""
-        if report_type == "monthly":
-            monthly_specific_columns = "report.billing_amount usage_amount,"
-
         prepaid_custom_columns_from_select_top_level = ""
         prepaid_custom_columns_from_select_lower_level = ""
         prepaid_custom_columns_from_select_lowest_level = ""
-        if report_type == "prepaid":
-            prepaid_custom_columns_from_select_top_level = "report.prepaid_expiration prepaid_expiration,\n            report.prepaid_time prepaid_time,"
-            prepaid_custom_columns_from_select_lower_level = "data.prepaid_expiration,\ndata.prepaid_time,\n            data.rate * data.prepaid_time AS total_cost"
-            prepaid_custom_columns_from_select_lowest_level = (
-                "prepaid_billing_date,\nprepaid_expiration,\n            prepaid_time,"
-            )
-
         additional_category_case_monthly = ""
-        if report_type == "monthly":
-            additional_category_case_monthly = "WHEN 'consumption' THEN 13"
-
-        additional_category_case_monthly_cast = ""
-        if report_type == "monthly":
-            additional_category_case_monthly_cast = "WHEN 'consumption' THEN CAST(storage_usage_of_the_day.storage_usage AS FLOAT8) /1024/1024/1024/1024"
-
-        additional_category_case_monthly_unit = ""
-        if report_type == "monthly":
-            additional_category_case_monthly_unit = "WHEN 'consumption' THEN 'TB'"
-
         join_clause = ""
+        monthly_specific_where_clause = ""
+        monthly_specific_columns = ""
+        additional_category_case_monthly_cast = ""
+        additional_category_case_monthly_unit = ""
+        final_where_clause = ""
         if report_type == "monthly":
+            report_header_type = "Monthly for"
+            item_description = BillingGenerator._get_item_description(MONTHLY_COLS)
+            monthly_specific_columns = "report.billing_amount usage_amount,"
+            additional_category_case_monthly = "WHEN 'consumption' THEN 13"
+            additional_category_case_monthly_cast = "WHEN 'consumption' THEN CAST(storage_usage_of_the_day.storage_usage AS FLOAT8) /1024/1024/1024/1024"
+            additional_category_case_monthly_unit = "WHEN 'consumption' THEN 'TB'"
             join_clause = f"""
                 JOIN (
                     SELECT haau.allocation_attribute_id, haau.value storage_usage
@@ -93,26 +74,27 @@ class BillingGenerator:
                 ) AS storage_usage_of_the_day
                     ON storage_quota.id = storage_usage_of_the_day.allocation_attribute_id
             """
-        elif report_type == "prepaid":
-            join_clause = """
-                LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_billing_date FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_billing_date') AS prepaid_billing_date ON a.id=prepaid_billing_date.allocation_id
-                LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_expiration FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_expiration') AS prepaid_expiration ON a.id=prepaid_expiration.allocation_id
-                LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_time FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_time') AS prepaid_time ON a.id=prepaid_time.allocation_id
-            """
-
-        monthly_specific_where_clause = ""
-        if report_type == "monthly":
             monthly_specific_where_clause = """
                 AND
                     a.id NOT IN (
                     SELECT allocation_id FROM allocation_allocationlinkage_children
                 )
             """
-
-        final_where_clause = ""
-        if report_type == "monthly":
             final_where_clause = "WHERE billing_cycle = 'monthly'"
+
         elif report_type == "prepaid":
+            report_header_type = "Prepaid for"
+            item_description = BillingGenerator._get_item_description(PREPAID_COLS)
+            prepaid_custom_columns_from_select_top_level = "report.prepaid_expiration prepaid_expiration,\n            report.prepaid_time prepaid_time,"
+            prepaid_custom_columns_from_select_lower_level = "data.prepaid_expiration,\ndata.prepaid_time,\n            data.rate * data.prepaid_time AS total_cost"
+            prepaid_custom_columns_from_select_lowest_level = (
+                "prepaid_billing_date,\nprepaid_expiration,\n            prepaid_time,"
+            )
+            join_clause = """
+                LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_billing_date FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_billing_date') AS prepaid_billing_date ON a.id=prepaid_billing_date.allocation_id
+                LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_expiration FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_expiration') AS prepaid_expiration ON a.id=prepaid_expiration.allocation_id
+                LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value prepaid_time FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='prepaid_time') AS prepaid_time ON a.id=prepaid_time.allocation_id
+            """
             final_where_clause = (
                 f"WHERE prepaid_billing_date = '{args['delivery_date']}'"
             )
