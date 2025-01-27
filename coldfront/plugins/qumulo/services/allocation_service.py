@@ -253,7 +253,6 @@ class AllocationService:
         allocation_defaults = {
             "secure": "No",
             "audit": "No",
-            # "billing_exempt": "No",
             "subsidized": "No",
         }
 
