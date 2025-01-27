@@ -1,0 +1,24 @@
+{% extends "common/base.html" %} 
+{% load crispy_forms_tags %}
+{% load common_tags %}
+{% load static %}
+
+{% block title %}
+User Management
+{% endblock %}
+
+{% block content %}
+<div>
+  <form method="post" id="user_management_form">
+    {% csrf_token %}
+    {{ form | crispy }}
+    <div class="d-flex justify-content-end">
+      <button type="submit" class="btn btn-primary mr-2" id="user_management_form_submit">Submit</button>
+    </div>
+  </form>
+</div>
+{% endblock content %}
+
+{% comment %} {% block javascript %}
+{{ form.media }}
+{% endblock javascript%} {% endcomment %}
