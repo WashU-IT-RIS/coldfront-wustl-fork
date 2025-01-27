@@ -9,7 +9,7 @@ from coldfront.plugins.qumulo.fields import ADUserField
 class UserManagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["allocations"].choices = self.get_allocaions()
+        self.fields["allocations"].choices = self.get_allocations()
 
     users = ADUserField(
         label="Users",
