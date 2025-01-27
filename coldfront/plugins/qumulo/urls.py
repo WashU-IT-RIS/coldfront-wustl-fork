@@ -5,6 +5,7 @@ from coldfront.plugins.qumulo.views import (
     update_allocation_view,
     create_sub_allocation_view,
     allocation_table_view,
+    user_management_view,
 )
 
 app_name = "qumulo"
@@ -24,5 +25,10 @@ urlpatterns = [
         "allocation-table-list",
         allocation_table_view.AllocationTableView.as_view(),
         name="allocation-table-list",
+    ),
+    path(
+        "allocation/user-management",
+        user_management_view.UserManagementView.as_view(),
+        name="userManagement",
     ),
 ]
