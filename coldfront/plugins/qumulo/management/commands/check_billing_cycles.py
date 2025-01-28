@@ -106,6 +106,7 @@ def check_allocation_billing_cycle_and_prepaid_exp() -> None:
         allocation=OuterRef("pk"),
         allocation_attribute_type__name="prepaid_time",
     ).values("value")[:1]
+
     allocations = allocations.annotate(
         prepaid_expiration=Subquery(prepaid_exp_sub_q),
         prepaid_billing_start=Subquery(prepaid_billing_date_sub_q),
