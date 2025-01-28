@@ -1,7 +1,5 @@
 from django.test import TestCase, Client
 from unittest.mock import patch, MagicMock
-from datetime import datetime, date
-from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
@@ -13,11 +11,6 @@ from coldfront.core.allocation.signals import (
     allocation_disable,
     allocation_change_approved,
 )
-from coldfront.core.allocation.models import (
-    AllocationAttribute,
-    AllocationAttributeType,
-)
-from django.core.management import call_command
 
 
 def mock_get_attribute(name):
