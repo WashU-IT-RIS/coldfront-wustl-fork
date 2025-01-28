@@ -25,7 +25,7 @@ class UserManagementForm(forms.Form):
     def get_allocations(self):
         allocations = Allocation.objects.filter(resources__name="Storage2")
 
-        logging.warning(f"Allocations: {allocations}")
+        logging.warning(f"Allocations: {allocations[0]}")
         return map(
             lambda allocation: (allocation.id, "foo"),
             Allocation.objects.filter(resources__name="Storage2"),
