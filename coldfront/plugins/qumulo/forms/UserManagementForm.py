@@ -23,7 +23,7 @@ class UserManagementForm(forms.Form):
     def get_allocations(self):
         return map(
             lambda allocation: (allocation.id, allocation.name),
-            Allocation.objects.filter(resources__name="Storager2"),
+            Allocation.objects.filter(resources__name="Storage2"),
         )
 
     def get_fos_choices(self):
