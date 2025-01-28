@@ -7,6 +7,7 @@ from coldfront.plugins.qumulo.fields import ADUserField
 from coldfront.plugins.qumulo.widgets import FilterableCheckBoxTableInput
 
 import logging
+import pprint
 
 
 class UserManagementForm(forms.Form):
@@ -26,6 +27,8 @@ class UserManagementForm(forms.Form):
 
     def build_allocation_choice(self, allocation: Allocation):
         allocation_choice = {}
+
+        pprint.pprint(allocation)
         allocation_choice["id"] = allocation.id
         allocation_choice["resource_name"] = allocation.resources.name
         allocation_choice["allocation_status"] = allocation.status.name
