@@ -24,16 +24,24 @@ class UserManagementForm(forms.Form):
         widget=FilterableCheckBoxTableInput,
     )
 
+    def build_allocation_choice(self, allocation: Allocation):
+        allocation_choice = {}
+        allocation_choice["id"] = allocation.id
+        allocation_choice["resource_name"] = allocation.resources.name
+        allocation_choice["allocation_status"] = allocation.status.name
+        allocation_choice["file_path"] = allocation.get_attribute("storage_file_path")
+
     def get_allocations(self):
         allocations = Allocation.objects.filter(resources__name="Storage2")
+        allocation_choices = map(
+            self.build_allocation_choice,
+            allocations,
+        )
 
         return map(
             lambda allocation: (
                 allocation.id,
                 allocation,
             ),
-            Allocation.objects.filter(resources__name="Storage2"),
+            allocation_choices,
         )
-
-    def get_fos_choices(self):
-        return map(lambda fos: (fos.id, fos.description), FieldOfScience.objects.all())
