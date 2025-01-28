@@ -8,7 +8,7 @@ import os
 
 from coldfront.core.allocation.models import Allocation
 
-from coldfront.plugins.qumulo.forms import AllocationForm
+from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from coldfront.plugins.qumulo.validators import validate_filesystem_path_unique
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService

@@ -1,4 +1,4 @@
-from coldfront.plugins.qumulo.forms import AllocationForm
+from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 
 
 class BaseTestableAllocationForm(AllocationForm):
