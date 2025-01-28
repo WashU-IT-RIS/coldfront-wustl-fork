@@ -42,8 +42,7 @@ class UserManagementForm(forms.Form):
             )
         )
 
-        pprint.pprint(allocation_choices)
-
+        logging.warning(pprint.pformat(allocation_choices))
         return map(
             lambda allocation: (
                 allocation["id"],
