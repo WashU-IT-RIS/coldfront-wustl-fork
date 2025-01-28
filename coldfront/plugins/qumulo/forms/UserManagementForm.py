@@ -28,18 +28,19 @@ class UserManagementForm(forms.Form):
     def build_allocation_choice(self, allocation: Allocation):
         allocation_choice = {}
 
-        pprint.pprint(allocation)
         allocation_choice["id"] = allocation.pk
         allocation_choice["resource_name"] = allocation.resources.name
         allocation_choice["allocation_status"] = allocation.status.name
         allocation_choice["file_path"] = allocation.get_attribute("storage_file_path")
 
     def get_allocations(self):
-        allocations = Allocation.objects.filter(resources__name="Storage2")
+        allocations = list(Allocation.objects.filter(resources__name="Storage2"))
         allocation_choices = map(
             self.build_allocation_choice,
             allocations,
         )
+
+        pprint.pprint(allocation_choices)
 
         return map(
             lambda allocation: (
