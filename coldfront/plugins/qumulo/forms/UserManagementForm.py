@@ -5,6 +5,8 @@ from coldfront.core.allocation.models import Allocation
 
 from coldfront.plugins.qumulo.fields import ADUserField
 
+import logging
+
 
 class UserManagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -21,8 +23,11 @@ class UserManagementForm(forms.Form):
     )
 
     def get_allocations(self):
+        allocations = Allocation.objects.filter(resources__name="Storage2")
+
+        logging.warning(f"Allocations: {allocations}")
         return map(
-            lambda allocation: (allocation.id, allocation.name),
+            lambda allocation: (allocation.id, "foo"),
             Allocation.objects.filter(resources__name="Storage2"),
         )
 
