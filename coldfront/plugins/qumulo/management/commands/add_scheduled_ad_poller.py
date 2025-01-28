@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-import logging
 
 from django_q.models import Schedule
 
@@ -11,8 +10,6 @@ from coldfront.plugins.qumulo.tasks import (
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
     check_allocation_billing_cycle_and_prepaid_exp,
 )
-
-logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
