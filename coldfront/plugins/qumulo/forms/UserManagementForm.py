@@ -29,7 +29,7 @@ class UserManagementForm(forms.Form):
         allocation_choice = {}
 
         pprint.pprint(allocation)
-        allocation_choice["id"] = allocation.id
+        allocation_choice["id"] = allocation.pk
         allocation_choice["resource_name"] = allocation.resources.name
         allocation_choice["allocation_status"] = allocation.status.name
         allocation_choice["file_path"] = allocation.get_attribute("storage_file_path")
@@ -43,7 +43,7 @@ class UserManagementForm(forms.Form):
 
         return map(
             lambda allocation: (
-                allocation.id,
+                allocation["id"],
                 allocation,
             ),
             allocation_choices,
