@@ -4,6 +4,7 @@ from coldfront.core.field_of_science.models import FieldOfScience
 from coldfront.core.allocation.models import Allocation
 
 from coldfront.plugins.qumulo.fields import ADUserField
+from coldfront.plugins.qumulo.widgets import FilterableCheckBoxTableInput
 
 import logging
 
@@ -20,6 +21,7 @@ class UserManagementForm(forms.Form):
 
     allocations = forms.TypedMultipleChoiceField(
         label="Allocations",
+        widget=FilterableCheckBoxTableInput,
     )
 
     def get_allocations(self):
@@ -28,7 +30,7 @@ class UserManagementForm(forms.Form):
         return map(
             lambda allocation: (
                 allocation.id,
-                allocation.get_attribute("storage_filesystem_path"),
+                allocation,
             ),
             Allocation.objects.filter(resources__name="Storage2"),
         )

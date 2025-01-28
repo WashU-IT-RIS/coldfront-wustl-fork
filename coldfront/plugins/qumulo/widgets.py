@@ -25,3 +25,10 @@ class MultiSelectLookupInput(Widget):
         )
 
         return raw_string.split(",")
+
+
+class FilterableCheckBoxTableInput(Widget):
+    template_name = "filterable_checkbox_table_input.html"
+
+    # class Media:
+    #     js = ("filterable_checkbox_table_input.js",)
