@@ -1,3 +1,5 @@
+{% load static %}
+
 <strong>Allocation{{allocations_count|pluralize}}: {{allocations_count}}</strong>
   <div class="table-responsive">
     <table class="table table-sm">
@@ -51,7 +53,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for allocation in choices %}
+        {% for allocation in widget.value %}
           <tr class="{% if allocation.is_child %}table-secondary{% endif %} text-nowrap">
             <td><a href="/qumulo/allocation/{{allocation.id}}">{{ allocation.id }}</a></td>
             <td class="text-nowrap">
