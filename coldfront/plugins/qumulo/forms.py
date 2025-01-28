@@ -54,6 +54,7 @@ class AllocationForm(forms.Form):
         label="Billing Exempt",
         choices=[("Yes", "Yes"), ("No", "No")],
         initial="No",
+        widget=forms.RadioSelect,
         required=True,
     )
     department_number = forms.CharField(
