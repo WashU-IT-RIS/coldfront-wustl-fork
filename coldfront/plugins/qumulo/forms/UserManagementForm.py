@@ -25,11 +25,11 @@ class UserManagementForm(forms.Form):
     def get_allocations(self):
         allocations = Allocation.objects.filter(resources__name="Storage2")
 
-        logging.warning(
-            f"Allocations: {allocations[0].get_attribute('storage_filesystem_path')}"
-        )
         return map(
-            lambda allocation: (allocation.id, "foo"),
+            lambda allocation: (
+                allocation.id,
+                allocation.get_attribute("storage_filesystem_path"),
+            ),
             Allocation.objects.filter(resources__name="Storage2"),
         )
 
