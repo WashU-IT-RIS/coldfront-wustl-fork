@@ -29,7 +29,7 @@ class UserManagementForm(forms.Form):
         allocation_choice = {}
 
         allocation_choice["id"] = allocation.pk
-        allocation_choice["resource_name"] = allocation.resources[0].name
+        allocation_choice["resource_name"] = allocation.resources.last().name
         allocation_choice["allocation_status"] = allocation.status.name
         allocation_choice["file_path"] = allocation.get_attribute(
             "storage_filesystem_path"
