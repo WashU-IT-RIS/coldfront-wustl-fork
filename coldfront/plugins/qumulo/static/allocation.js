@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", prepaidDisplayOptionsInitialPageLoad);
+
 const protocols = Array.from(
   document.querySelectorAll(
     "#div_id_protocols div div.form-check input.form-check-input",
