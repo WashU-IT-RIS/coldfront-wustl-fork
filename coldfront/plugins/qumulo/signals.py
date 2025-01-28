@@ -3,8 +3,6 @@ from django_q.tasks import async_task
 
 import logging
 import json
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -13,8 +11,6 @@ from coldfront.plugins.qumulo.tasks import reset_allocation_acls
 
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationAttribute,
-    AllocationAttributeType,
 )
 from coldfront.core.allocation.signals import (
     allocation_activate,
@@ -29,8 +25,6 @@ from django.db.models.signals import post_save
 from coldfront.plugins.qumulo.utils.update_user_data import (
     update_user_with_additional_data,
 )
-
-import sys
 
 
 @receiver(post_save, sender=User)
