@@ -33,6 +33,8 @@ class UserManagementForm(forms.Form):
         allocation_choice["allocation_status"] = allocation.status.name
         allocation_choice["file_path"] = allocation.get_attribute("storage_file_path")
 
+        return allocation_choice
+
     def get_allocations(self):
         allocations = list(Allocation.objects.filter(resources__name="Storage2"))
         allocation_choices = list(
