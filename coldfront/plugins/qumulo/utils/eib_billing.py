@@ -1,14 +1,5 @@
 import logging
-import csv
-import re
-from datetime import datetime, timedelta
-from django.db import connection
-
-from coldfront.core.allocation.models import (
-    Allocation,
-    AllocationAttribute,
-    AllocationAttributeType,
-)
+from datetime import datetime
 
 from coldfront.plugins.qumulo.utils.billing_report import BillingReport
 
