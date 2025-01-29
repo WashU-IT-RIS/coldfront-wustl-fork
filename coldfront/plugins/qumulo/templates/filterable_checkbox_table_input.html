@@ -58,22 +58,22 @@
       <tbody>
         {% for group, option, index in widget.optgroups %}
           <tr class="text-nowrap">
-            <td><input type="checkbox" id="allocation_{{option[0].label.id}}" name="allocation_{{option[0].label.id}}" value="{{option[0].label.id}}"></td>
-            <td>{{ option[0].label.id }}</td>
+            <td><input type="checkbox" id="allocation_{{option.label.id}}" name="allocation_{{option.label.id}}" value="{{option.label.id}}"></td>
+            <td>{{ option.label.id }}</td>
             {% comment %} <td class="text-nowrap">
-              {% if option[0].label.is_child is not True %}
-              <a href="/qumulo/allocation/{{option[0].label.id}}/sub_allocation">+</a>
+              {% if option.label.is_child is not True %}
+              <a href="/qumulo/allocation/{{option.label.id}}/sub_allocation">+</a>
               {% endif %}
             </td> {% endcomment %}
-            {% comment %} <td class="text-nowrap">{{option[0].label.pi_first_name}} {{option[0].label.pi_last_name}}
-              ({{option[0].label.pi_user_name}})</td>       {% endcomment %}
+            {% comment %} <td class="text-nowrap">{{option.label.pi_first_name}} {{option.label.pi_last_name}}
+              ({{option.label.pi_user_name}})</td>       {% endcomment %}
               <!-- Replace with new columns -->
-            <td class="text-nowrap">{{ option[0].label.resource_name }}</td>
-            <td class="text-nowrap">{{ option[0].label.allocation_status }}</td>
-            {% comment %} <td class="text-nowrap">{{ option[0].label.department_number }}</td> {% endcomment %}
-            {% comment %} <td class="text-nowrap">{{ option[0].label.itsd_ticket }}</td> {% endcomment %}
-            <td class="text-nowrap">{{ option[0].label.file_path }}</td>
-            {% comment %} <td class="text-nowrap">{{ option[0].label.service_rate }}</td> {% endcomment %}
+            <td class="text-nowrap">{{ option.label.resource_name }}</td>
+            <td class="text-nowrap">{{ option.label.allocation_status }}</td>
+            {% comment %} <td class="text-nowrap">{{ option.label.department_number }}</td> {% endcomment %}
+            {% comment %} <td class="text-nowrap">{{ option.label.itsd_ticket }}</td> {% endcomment %}
+            <td class="text-nowrap">{{ option.label.file_path }}</td>
+            {% comment %} <td class="text-nowrap">{{ option.label.service_rate }}</td> {% endcomment %}
           </tr>
         {% endfor %}
       </tbody>
