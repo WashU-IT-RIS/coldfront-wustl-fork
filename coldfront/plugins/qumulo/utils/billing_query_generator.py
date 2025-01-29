@@ -11,6 +11,7 @@ class BillingGenerator:
 
     def _get_current_fiscal_year() -> str:
         # TODO - get current fiscal year from environment variable
+        # ITDEV-36278
         return os.getenv("CURRENT_FISCAL_YEAR", "FY25")
 
     def get_billing_query(self, args, report_type: str) -> str:
