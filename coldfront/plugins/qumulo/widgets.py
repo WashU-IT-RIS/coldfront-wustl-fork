@@ -40,7 +40,7 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
 
     def render(self, name, value, attrs=..., renderer=...):
         logger.warning(
-            f"FilterableCheckBoxTableInput.render() called with name={name}, value={value}, attrs={attrs}"
+            f"FilterableCheckBoxTableInput.render() called with self={pprint.pformat(self)}, name={name}, value={value}, attrs={attrs}"
         )
         return super().render(name, value, attrs, renderer)
 
