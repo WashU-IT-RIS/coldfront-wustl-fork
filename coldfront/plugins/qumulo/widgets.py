@@ -43,11 +43,14 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
 
         return return_value
 
-    def value_from_datadict(self, data, files, name):
+    def optgroups(self, name, value, attrs=...):
+        return_value = super().optgroups(name, value, attrs)
+
         logger.warning(
-            f"FilterableCheckBoxTableInput.value_from_datadict() called with data={pprint.pformat(data)}, files={pprint.pformat(files)}, name={name}"
+            f"FilterableCheckBoxTableInput.optgroups() called with name={name}, value={value}\n\nreturn_value={pprint.pformat(retrun_value)}"
         )
-        return super().value_from_datadict(data, files, name)
+
+        return return_value
 
     def render(self, name, value, attrs=..., renderer=...):
         logger.warning(
