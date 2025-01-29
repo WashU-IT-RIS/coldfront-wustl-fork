@@ -56,10 +56,10 @@
         </tr>
       </thead>
       <tbody>
-        {% for group, allocation, index in widget.optgroups %}
-          <tr class="{% if allocation.is_child %}table-secondary{% endif %} text-nowrap">
+        {% for group, option.label[0] as allocation, index in widget.optgroups %}
+          <tr class="text-nowrap">
             <td><input type="checkbox" id="allocation_{{allocation.id}}" name="allocation_{{allocation.id}}" value="{{allocation.id}}"></td>
-            <td>{{ allocation }}</td>
+            <td>{{ allocation.id }}</td>
             {% comment %} <td class="text-nowrap">
               {% if allocation.is_child is not True %}
               <a href="/qumulo/allocation/{{allocation.id}}/sub_allocation">+</a>
