@@ -5,7 +5,8 @@ from coldfront.plugins.qumulo.views import (
     update_allocation_view,
     create_sub_allocation_view,
     allocation_table_view,
-    client_list_view
+    client_list_view,
+    client_list_csv_view
 )
 
 app_name = "qumulo"
@@ -30,5 +31,10 @@ urlpatterns = [
         "client-list",
         client_list_view.ClientListView.as_view(),
         name="client-list",
+    ),
+    path(
+        "client-export",
+        client_list_csv_view.ClientListCSVView.as_view(),
+        name="client-export-csv",
     )
 ]

@@ -16,6 +16,7 @@ Client View
 
 {% if client_list %}
   <strong>client{{client_count|pluralize}}: {{client_count}}</strong>
+  <a href="{% url 'qumulo:client-export' %}" class="btn btn-primary float-right">Export to CSV</a>
   <div class="table-responsive">
     <table class="table table-sm">
       <thead>
