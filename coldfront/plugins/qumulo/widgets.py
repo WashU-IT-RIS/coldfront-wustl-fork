@@ -31,5 +31,11 @@ class MultiSelectLookupInput(Widget):
 class FilterableCheckBoxTableInput(Widget):
     template_name = "filterable_checkbox_table_input.html"
 
+    def render(self, name, value, attrs=..., renderer=...):
+        logger.warning(
+            f"FilterableCheckBoxTableInput.render() called with name={name}, value={value}, attrs={attrs}"
+        )
+        return super().render(name, value, attrs, renderer)
+
     # class Media:
     #     js = ("filterable_checkbox_table_input.js",)

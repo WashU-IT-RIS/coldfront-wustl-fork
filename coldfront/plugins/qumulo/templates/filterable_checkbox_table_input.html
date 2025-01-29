@@ -53,7 +53,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for allocation in widget.value %}
+        {% for allocation in widget.choices %}
           <tr class="{% if allocation.is_child %}table-secondary{% endif %} text-nowrap">
             <td><a href="/qumulo/allocation/{{allocation.id}}">{{ allocation.id }}</a></td>
             <td class="text-nowrap">

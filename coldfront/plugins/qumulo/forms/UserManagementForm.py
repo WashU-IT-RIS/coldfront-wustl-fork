@@ -6,9 +6,6 @@ from coldfront.core.allocation.models import Allocation
 from coldfront.plugins.qumulo.fields import ADUserField
 from coldfront.plugins.qumulo.widgets import FilterableCheckBoxTableInput
 
-import logging
-import pprint
-
 
 class UserManagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -46,7 +43,6 @@ class UserManagementForm(forms.Form):
             )
         )
 
-        logging.warning(pprint.pformat(allocation_choices))
         return map(
             lambda allocation: (
                 allocation["id"],
