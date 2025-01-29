@@ -32,7 +32,7 @@ class MultiSelectLookupInput(Widget):
 class FilterableCheckBoxTableInput(ChoiceWidget):
     template_name = "filterable_checkbox_table_input.html"
     allow_multiple_selected = True
-    input_type = "checkbox"
+    # input_type = "checkbox"
 
     def value_from_datadict(self, data, files, name):
         logger.warning(
