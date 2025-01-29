@@ -56,7 +56,7 @@
         </tr>
       </thead>
       <tbody>
-        {% for allocation in widget.choices %}
+        {% for group, allocation, index in widget.optgroups %}
           <tr class="{% if allocation.is_child %}table-secondary{% endif %} text-nowrap">
             <td><input type="checkbox" id="allocation_{{allocation.id}}" name="allocation_{{allocation.id}}" value="{{allocation.id}}"></td>
             <td>{{ allocation.id }}</td>
