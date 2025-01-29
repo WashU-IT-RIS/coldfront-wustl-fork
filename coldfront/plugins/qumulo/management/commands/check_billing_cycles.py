@@ -95,22 +95,22 @@ def check_allocation_billing_cycle_and_prepaid_exp() -> None:
     resource = Resource.objects.get(name="Storage2")
     allocations = Allocation.objects.filter(status__name="Active", resources=resource)
 
-    prepaid_exp_sub_q = AllocationAttribute.objects.filter(
+    prepaid_exp_sub_query = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"), allocation_attribute_type__name="prepaid_expiration"
     ).values("value")[:1]
-    prepaid_billing_date_sub_q = AllocationAttribute.objects.filter(
+    prepaid_billing_date_sub_query = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"),
         allocation_attribute_type__name="prepaid_billing_date",
     ).values("value")[:1]
-    prepaid_months_sub_q = AllocationAttribute.objects.filter(
+    prepaid_months_sub_query = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"),
         allocation_attribute_type__name="prepaid_time",
     ).values("value")[:1]
 
     allocations = allocations.annotate(
-        prepaid_expiration=Subquery(prepaid_exp_sub_q),
-        prepaid_billing_start=Subquery(prepaid_billing_date_sub_q),
-        prepaid_months=Subquery(prepaid_months_sub_q),
+        prepaid_expiration=Subquery(prepaid_exp_sub_query),
+        prepaid_billing_start=Subquery(prepaid_billing_date_sub_query),
+        prepaid_months=Subquery(prepaid_months_sub_query),
     )
     logger.info(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
     for allocation in allocations:
