@@ -56,24 +56,24 @@
         </tr>
       </thead>
       <tbody>
-        {% for group, option.label[0] as allocation, index in widget.optgroups %}
+        {% for group, option, index in widget.optgroups %}
           <tr class="text-nowrap">
-            <td><input type="checkbox" id="allocation_{{allocation.id}}" name="allocation_{{allocation.id}}" value="{{allocation.id}}"></td>
-            <td>{{ allocation.id }}</td>
+            <td><input type="checkbox" id="allocation_{{option.label[0].id}}" name="allocation_{{option.label[0].id}}" value="{{option.label[0].id}}"></td>
+            <td>{{ option.label[0].id }}</td>
             {% comment %} <td class="text-nowrap">
-              {% if allocation.is_child is not True %}
-              <a href="/qumulo/allocation/{{allocation.id}}/sub_allocation">+</a>
+              {% if option.label[0].is_child is not True %}
+              <a href="/qumulo/allocation/{{option.label[0].id}}/sub_allocation">+</a>
               {% endif %}
             </td> {% endcomment %}
-            {% comment %} <td class="text-nowrap">{{allocation.pi_first_name}} {{allocation.pi_last_name}}
-              ({{allocation.pi_user_name}})</td>       {% endcomment %}
+            {% comment %} <td class="text-nowrap">{{option.label[0].pi_first_name}} {{option.label[0].pi_last_name}}
+              ({{option.label[0].pi_user_name}})</td>       {% endcomment %}
               <!-- Replace with new columns -->
-            <td class="text-nowrap">{{ allocation.resource_name }}</td>
-            <td class="text-nowrap">{{ allocation.allocation_status }}</td>
-            {% comment %} <td class="text-nowrap">{{ allocation.department_number }}</td> {% endcomment %}
-            {% comment %} <td class="text-nowrap">{{ allocation.itsd_ticket }}</td> {% endcomment %}
-            <td class="text-nowrap">{{ allocation.file_path }}</td>
-            {% comment %} <td class="text-nowrap">{{ allocation.service_rate }}</td> {% endcomment %}
+            <td class="text-nowrap">{{ option.label[0].resource_name }}</td>
+            <td class="text-nowrap">{{ option.label[0].allocation_status }}</td>
+            {% comment %} <td class="text-nowrap">{{ option.label[0].department_number }}</td> {% endcomment %}
+            {% comment %} <td class="text-nowrap">{{ option.label[0].itsd_ticket }}</td> {% endcomment %}
+            <td class="text-nowrap">{{ option.label[0].file_path }}</td>
+            {% comment %} <td class="text-nowrap">{{ option.label[0].service_rate }}</td> {% endcomment %}
           </tr>
         {% endfor %}
       </tbody>
