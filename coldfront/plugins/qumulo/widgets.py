@@ -31,6 +31,12 @@ class MultiSelectLookupInput(Widget):
 class FilterableCheckBoxTableInput(Widget):
     template_name = "filterable_checkbox_table_input.html"
 
+    def value_from_datadict(self, data, files, name):
+        logger.warning(
+            f"FilterableCheckBoxTableInput.value_from_datadict() called with data={pprint.pformat(data)}, files={pprint.pformat(files)}, name={name}"
+        )
+        return super().value_from_datadict(data, files, name)
+
     def render(self, name, value, attrs=..., renderer=...):
         logger.warning(
             f"FilterableCheckBoxTableInput.render() called with name={name}, value={value}, attrs={attrs}"
