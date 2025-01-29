@@ -1,4 +1,5 @@
-from django.forms import Widget
+# from django.forms import Widget
+from django.forms.widgets import Widget, ChoiceWidget
 import logging
 import pprint
 
@@ -28,7 +29,7 @@ class MultiSelectLookupInput(Widget):
         return raw_string.split(",")
 
 
-class FilterableCheckBoxTableInput(Widget):
+class FilterableCheckBoxTableInput(ChoiceWidget):
     template_name = "filterable_checkbox_table_input.html"
 
     def value_from_datadict(self, data, files, name):
