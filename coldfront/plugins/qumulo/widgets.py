@@ -34,6 +34,15 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
     allow_multiple_selected = True
     # input_type = "checkbox"
 
+    def options(self, name, value, attrs=...):
+        return_value = super().options(name, value, attrs)
+
+        logger.warning(
+            f"FilterableCheckBoxTableInput.options() called with name={name}, value={value}\n\nreturn_value={pprint.pformat(return_value)}"
+        )
+
+        return return_value
+
     def value_from_datadict(self, data, files, name):
         logger.warning(
             f"FilterableCheckBoxTableInput.value_from_datadict() called with data={pprint.pformat(data)}, files={pprint.pformat(files)}, name={name}"
