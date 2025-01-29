@@ -47,7 +47,7 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
         return_value = super().optgroups(name, value, attrs)
 
         logger.warning(
-            f"FilterableCheckBoxTableInput.optgroups() called with name={name}, value={value}\n\nreturn_value={pprint.pformat(retrun_value)}"
+            f"FilterableCheckBoxTableInput.optgroups() called with name={name}, value={value}\n\nreturn_value={pprint.pformat(return_value)}"
         )
 
         return return_value
