@@ -34,20 +34,11 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
     allow_multiple_selected = True
     # input_type = "checkbox"
 
-    def options(self, name, value, attrs=...):
-        return_value = super().options(name, value, attrs)
+    def get_context(self, name, value, attrs):
+        return_value = super().get_context(name, value, attrs)
 
         logger.warning(
-            f"FilterableCheckBoxTableInput.options() called with name={name}, value={value}\n\nreturn_value={pprint.pformat(return_value)}"
-        )
-
-        return return_value
-
-    def optgroups(self, name, value, attrs=...):
-        return_value = super().optgroups(name, value, attrs)
-
-        logger.warning(
-            f"FilterableCheckBoxTableInput.optgroups() called with name={name}, value={value}\n\nreturn_value={pprint.pformat(return_value)}"
+            f"FilterableCheckBoxTableInput.get_context() called with name={name}, value={value}, attrs={attrs}\n\nreturn_value={pprint.pformat(return_value)}"
         )
 
         return return_value
