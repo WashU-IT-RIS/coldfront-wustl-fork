@@ -1,9 +1,9 @@
 class FilterableCheckboxTableInput {
-  constructor(widgetName, options, optionsJson, optionsPprint) {
+  constructor(widgetName, options, optionsJson) {
     this.widgetName = widgetName;
-    console.log({ widgetName, options, optionsJson, optionsPprint });
-    // this.options = JSON.parse(optionsPprint);
+    console.log({ widgetName, options, optionsJson });
+    this.options = JSON.parse(optionsJson);
     //
-    // console.log({ options, parsed: this.options });
+    console.log({ options, parsed: this.options });
   }
 }
