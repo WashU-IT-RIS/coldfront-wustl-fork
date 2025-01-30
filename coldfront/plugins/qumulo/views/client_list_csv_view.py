@@ -31,7 +31,7 @@ class ClientListCSVView(LoginRequiredMixin, View):
         writer = csv.writer(response)
         writer.writerow(['WUSTL Key'])
 
-        all_users = User.objects.filter(is_staff__ne=True)
+        all_users = User.objects.exclude(is_staff=True)
         for user in all_users:
             writer.writerow([user.username])
 
