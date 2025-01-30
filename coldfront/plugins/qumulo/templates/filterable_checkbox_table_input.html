@@ -1,30 +1,4 @@
-{% comment %} {% load common_tags %}
-{% load crispy_forms_tags %} {% endcomment %}
 {% load static %}
-
-{% block content %}
-{% comment %} {% if expand_accordion == "show" or allocation_list %}
-  <div class="mb-3" id="accordion">
-    <div class="card">
-      <div class="card-header">
-        <a id="expand_button" role="button" class="card-link " data-toggle="collapse" href="#collapseOne">
-          <i class="fas fa-filter" aria-hidden="true"></i> Filter
-          <i id="plus_minus" class="fas {{expand_accordion|get_icon}} float-right"></i>
-        </a>
-      </div>
-      <div id="collapseOne" class="collapse {{expand_accordion}}" data-parent="#accordion">
-        <div class="card-body">
-          <form id="filter_form" method="GET" action="{% url 'qumulo:allocation-table-list' %}" autocomplete="off">
-            {{ allocation_search_form|crispy }}
-            <input type="submit" class="btn btn-primary" value="Search">
-            <button id="form_reset_button" type="submit" class="btn btn-secondary">Reset</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-  <hr>
-{% endif %} {% endcomment %}
 
 <strong>Allocations</strong>
 <div class="table-responsive">
@@ -36,8 +10,8 @@
         </th>
         <th scope="col" class="text-nowrap">
           ID
-          <i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort ID asc</span>
-          <i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort ID desc</span>
+          <a><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort ID asc</span></a>
+          <a><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort ID desc</span></a>
         </th>
         <th scope="col" class="text-nowrap">
           Resource Name
@@ -70,5 +44,6 @@
   </table>
 </div>
 
-{% comment %} <script src="/static/allocation_table_view.js"></script> {% endcomment %}
-{% endblock content %}
+<script type="text/javascript">
+  window.addEventListener("DOMContentLoaded", () => new FilterableCheckboxTableInput("{{widget.name}}", "{{widget.options}}"))
+</script> 

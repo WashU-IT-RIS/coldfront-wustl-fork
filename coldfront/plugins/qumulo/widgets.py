@@ -45,5 +45,5 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
         )
         return super().render(name, value, attrs, renderer)
 
-    # class Media:
-    #     js = ("filterable_checkbox_table_input.js",)
+    class Media:
+        js = ("filterable_checkbox_table_input.js",)
