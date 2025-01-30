@@ -1,80 +1,71 @@
 {% load static %}
 
+
+{% if expand_accordion == "show" or allocation_list %}
+  <div class="mb-3" id="accordion">
+    <div class="card">
+      <div class="card-header">
+        <a id="expand_button" role="button" class="card-link " data-toggle="collapse" href="#collapseOne">
+          <i class="fas fa-filter" aria-hidden="true"></i> Filter
+          <i id="plus_minus" class="fas {{expand_accordion|get_icon}} float-right"></i>
+        </a>
+      </div>
+      <div id="collapseOne" class="collapse {{expand_accordion}}" data-parent="#accordion">
+        <div class="card-body">
+          <form id="filter_form" method="GET" action="{% url 'qumulo:allocation-table-list' %}" autocomplete="off">
+            {{ allocation_search_form|crispy }}
+            <input type="submit" class="btn btn-primary" value="Search">
+            <button id="form_reset_button" type="submit" class="btn btn-secondary">Reset</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+{% endif %}
+
 <strong>Allocation{{widget.allocations_count|pluralize}}: {{witdget.allocations_count}}</strong>
-  <div class="table-responsive">
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th scope="col" class="text-nowrap">
-            <input type="checkbox" id="select_all" name="select_all" value="select_all">
-          </th>
-          <th scope="col" class="text-nowrap">
-            ID
-            <a href="?order_by=id&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort ID asc</span></a>
-            <a href="?order_by=id&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort ID desc</span></a>
-          </th>
-          {% comment %} <th scope="col" class="text-nowrap">
-            Sub-Allocations
-          </th> {% endcomment %}
-          {% comment %} <th scope="col" class="text-nowrap">
-            Principal Investigator
-            <a href="?order_by=project__pi__username&direction=asc&{{filter_parameters}}"><i
-                class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort PI asc</span></a>
-            <a href="?order_by=project__pi__username&direction=des&{{filter_parameters}}"><i
-                class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort PI desc</span></a>
-          </th> {% endcomment %}
-          <th scope="col" class="text-nowrap">
-            Resource Name
-            <a href="?order_by=resource_name&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Resource Name asc</span></a>
-            <a href="?order_by=resource_name&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Resource Name desc</span></a>
-          </th>
-          <th scope="col" class="text-nowrap">
-            Status
-            <a href="?order_by=status__name&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Status asc</span></a>
-            <a href="?order_by=status__name&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Status desc</span></a>
-          </th>
-          {% comment %} <th scope="col" class="text-nowrap">
-            Department Number
-            <a href="?order_by=department_number&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Department ID asc</span></a>
-            <a href="?order_by=department_number&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort End Department ID desc</span></a>
-          </th> {% endcomment %}
-          {% comment %} <th scope="col" class="text-nowrap">
-            ITSD Ticket
-            <a href="?order_by=itsd_ticket&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort ITSD Ticket asc</span></a>
-            <a href="?order_by=itsd_ticket&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort ITSD Ticket desc</span></a>
-          </th> {% endcomment %}
-          <th scope="col" class="text-nowrap">
-            File Path
-            <a href="?order_by=file_path&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort File Path asc</span></a>
-            <a href="?order_by=file_path&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort File Path desc</span></a>
-          </th>
-          {% comment %} <th scope="col" class="text-nowrap">
-            Service Rate
-            <a href="?order_by=service_rate&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Service Rate asc</span></a>
-            <a href="?order_by=service_rate&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Service Rate desc</span></a>
-          </th> {% endcomment %}
+<div class="table-responsive">
+  <table class="table table-sm">
+    <thead>
+      <tr>
+        <th scope="col" class="text-nowrap">
+          <input type="checkbox" id="select_all" name="select_all" value="select_all">
+        </th>
+        <th scope="col" class="text-nowrap">
+          ID
+          <a href="?order_by=id&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort ID asc</span></a>
+          <a href="?order_by=id&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort ID desc</span></a>
+        </th>
+        <th scope="col" class="text-nowrap">
+          Resource Name
+          <a href="?order_by=resource_name&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Resource Name asc</span></a>
+          <a href="?order_by=resource_name&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Resource Name desc</span></a>
+        </th>
+        <th scope="col" class="text-nowrap">
+          Status
+          <a href="?order_by=status__name&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Status asc</span></a>
+          <a href="?order_by=status__name&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Status desc</span></a>
+        </th>
+        <th scope="col" class="text-nowrap">
+          File Path
+          <a href="?order_by=file_path&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort File Path asc</span></a>
+          <a href="?order_by=file_path&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort File Path desc</span></a>
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for option in widget.options %}
+        <tr class="text-nowrap">
+          <td><input type="checkbox" id="allocation_{{option.label.id}}" name="allocation_{{option.label.id}}" value="{{option.label.id}}"></td>
+          <td>{{ option.label.id }}</td>
+          <td class="text-nowrap">{{ option.label.resource_name}}</td>
+          <td class="text-nowrap">{{ option.label.allocation_status }}</td>
+          <td class="text-nowrap">{{ option.label.file_path }}</td>
         </tr>
-      </thead>
-      <tbody>
-        {% for option in widget.options %}
-          <tr class="text-nowrap">
-            <td><input type="checkbox" id="allocation_{{option.label.id}}" name="allocation_{{option.label.id}}" value="{{option.label.id}}"></td>
-            <td>{{ option.label.id }}</td>
-            {% comment %} <td class="text-nowrap">
-              {% if option.label.is_child is not True %}
-              <a href="/qumulo/allocation/{{option.label.id}}/sub_allocation">+</a>
-              {% endif %}
-            </td> {% endcomment %}
-            {% comment %} <td class="text-nowrap">{{option.label.pi_first_name}} {{option.label.pi_last_name}}
-              ({{option.label.pi_user_name}})</td>       {% endcomment %}
-              <!-- Replace with new columns -->
-            <td class="text-nowrap">{{ option.label.resource_name}}</td>
-            <td class="text-nowrap">{{ option.label.allocation_status }}</td>
-            {% comment %} <td class="text-nowrap">{{ option.label.department_number }}</td> {% endcomment %}
-            {% comment %} <td class="text-nowrap">{{ option.label.itsd_ticket }}</td> {% endcomment %}
-            <td class="text-nowrap">{{ option.label.file_path }}</td>
-            {% comment %} <td class="text-nowrap">{{ option.label.service_rate }}</td> {% endcomment %}
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script src="/static/allocation_table_view.js"></script
