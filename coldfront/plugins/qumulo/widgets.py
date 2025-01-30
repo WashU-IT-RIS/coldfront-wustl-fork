@@ -1,9 +1,6 @@
 # from django.forms import Widget
 from django.forms.widgets import Widget, ChoiceWidget, CheckboxSelectMultiple
-import logging
-import pprint
-
-logger = logging.getLogger(__name__)
+import json
 
 
 class MultiSelectLookupInput(Widget):
@@ -36,14 +33,9 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
         context["widget"]["options"] = context["widget"]["optgroups"][0][1]
+        context["widget"]["options_json"] = json.dumps(context["widget"]["options"])
 
         return context
-
-    def render(self, name, value, attrs=..., renderer=...):
-        logger.warning(
-            f"FilterableCheckBoxTableInput.render() called with choices={pprint.pformat(self.choices)}, name={name}, value={value}, attrs={attrs}"
-        )
-        return super().render(name, value, attrs, renderer)
 
     class Media:
         js = ("filterable_checkbox_table_input.js",)
