@@ -1,6 +1,9 @@
+{% extends "common/base.html" %}
+{% load common_tags %}
+{% load crispy_forms_tags %}
 {% load static %}
 
-
+{% block content %}
 {% if expand_accordion == "show" or allocation_list %}
   <div class="mb-3" id="accordion">
     <div class="card">
@@ -68,4 +71,5 @@
   </table>
 </div>
 
-<script src="/static/allocation_table_view.js"></script
+<script src="/static/allocation_table_view.js"></script>
+{% endblock content %}
