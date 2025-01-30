@@ -29,10 +29,10 @@ class ClientListCSVView(LoginRequiredMixin, View):
         response['Content-Disposition'] = 'attachment; filename="client_list.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(['WUSTL Key', 'Email'])
+        writer.writerow(['WUSTL Key'])
 
-        all_users = User.objects.all()
+        all_users = User.objects.filter(is_staff__neq=True)
         for user in all_users:
-            writer.writerow([user.username, user.email])
+            writer.writerow([user.username])
 
         return response
