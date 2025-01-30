@@ -199,8 +199,6 @@ itsm_to_coldfront_map:
             value:
               type: Date
               transforms: null
-              validates:
-                presence: true # Is the conditionally necessary? Not all allocations have a billing_startdate.
     itsm_value:
       entity: service_provision
       attribute: billing_startdate
