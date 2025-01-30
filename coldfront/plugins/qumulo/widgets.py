@@ -37,7 +37,7 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
 
-        context["widget"]["options"] = list(self.options(name, value, attrs))
+        context["widget"]["options"] = context["widget"]["optgroups"][0][1]
 
         logger.warning(
             f"FilterableCheckBoxTableInput.get_context() called with name={name}, value={value}, attrs={attrs}\n\nreturn_value={pprint.pformat(context)}"
