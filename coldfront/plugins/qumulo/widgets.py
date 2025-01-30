@@ -41,7 +41,9 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
             context["widget"]["options"]
         )
 
-        logging.warning(f"FilterableCheckBoxTableInput.get_context: {context}")
+        logging.warning(
+            f"FilterableCheckBoxTableInput.get_context: {pprint.pformat(context)}"
+        )
 
         return context
 
