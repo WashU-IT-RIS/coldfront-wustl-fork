@@ -34,7 +34,7 @@ class FilterableCheckboxTableInput {
     checkboxInput.setAttribute("value", option["value"]);
     checkbox_td.appendChild(checkboxInput);
 
-    for (const value of Object.values(Object.label)) {
+    for (const value of Object.values(option.label)) {
       const td = this.getOptionsColumnElement(value);
       tr.appendChild(td);
     }
