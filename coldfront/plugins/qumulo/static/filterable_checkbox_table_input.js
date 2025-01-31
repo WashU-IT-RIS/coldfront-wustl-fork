@@ -12,16 +12,16 @@ class FilterableCheckboxTableInput {
     this.populateOptions();
   }
 
-  populateOptions() {
+  populateOptions = () => {
     const tbody = document.getElementById(`${this.widgetName}-options-tbody`);
 
     for (const option of this.options) {
       const tr = this.getOptionsRowElement(option);
       tbody.appendChild(tr);
     }
-  }
+  };
 
-  getOptionsRowElement(option) {
+  getOptionsRowElement = (option) => {
     const tr = document.createElement("tr");
     tr.setAttribute("class", "text-nowrap");
 
@@ -42,17 +42,17 @@ class FilterableCheckboxTableInput {
     }
 
     return tr;
-  }
+  };
 
-  getOptionsColumnElement(value) {
+  getOptionsColumnElement = (value) => {
     const td = document.createElement("td");
     td.setAttribute("class", "text-nowrap");
     td.appendChild(document.createTextNode(value));
 
     return td;
-  }
+  };
 
-  onOptionChanged(event) {
+  onOptionChanged = (event) => {
     const checkboxInput = event.target;
     const isChecked = checkboxInput.checked;
 
@@ -74,5 +74,5 @@ class FilterableCheckboxTableInput {
       }-tbody`,
     });
     newTable.appendChild(optionRow);
-  }
+  };
 }
