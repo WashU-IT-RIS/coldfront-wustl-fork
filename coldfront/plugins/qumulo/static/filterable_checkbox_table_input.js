@@ -31,10 +31,8 @@ class FilterableCheckboxTableInput {
     checkboxInput.setAttribute("type", "checkbox");
     checkboxInput.setAttribute("id", `${this.widgetName}-${option["value"]}`);
     checkboxInput.setAttribute("value", option["value"]);
-    checkboxInput.addEventListener("onchange", self.onOptionChanged);
+    checkboxInput.addEventListener("change", this.onOptionChanged);
     checkbox_td.appendChild(checkboxInput);
-
-    console.log({ checkboxInput });
 
     tr.appendChild(checkbox_td);
 
