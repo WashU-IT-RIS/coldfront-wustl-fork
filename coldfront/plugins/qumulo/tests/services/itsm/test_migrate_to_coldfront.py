@@ -103,10 +103,14 @@ class TestMigrateToColdfront(TestCase):
     @mock.patch(
         "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
     )
+    @mock.patch(
+        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
+    )
     @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_by_fileset_name(
         self,
         mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
     ) -> None:
         with open(
@@ -150,10 +154,14 @@ class TestMigrateToColdfront(TestCase):
     @mock.patch(
         "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
     )
+    @mock.patch(
+        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
+    )
     @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_contacts_missing(
         self,
         mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
     ) -> None:
         with open(
@@ -189,14 +197,18 @@ class TestMigrateToColdfront(TestCase):
     @mock.patch(
         "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
     )
+    @mock.patch(
+        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
+    )
     @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_billing_startdate_missing(
         self,
         mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
     ) -> None:
         with open(
-            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_billing_startdate_not_found.json",
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_billing_startdate_not_found.json",
             "r",
         ) as file:
             mock_response = json.load(file)["data"]
