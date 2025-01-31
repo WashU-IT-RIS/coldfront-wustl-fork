@@ -170,7 +170,8 @@ class Command(BaseCommand):
         )
 
         AllocationAttributeType.objects.filter(name="exempt").update(
-            name="billing_exempt"
+            name="billing_exempt",
+            is_changeable=True,
         )
 
         AllocationAttributeType.objects.update_or_create(
