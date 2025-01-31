@@ -59,6 +59,8 @@ class FilterableCheckboxTableInput {
     const optionRow = checkboxInput.parentElement.parentElement;
     const parentTable = parentRow.parentElement;
 
+    console.log({ isChecked, optionRow, parentTable, checkboxInput, event });
+
     parentTable.removeChild(optionRow);
 
     const newTable = document.getElementById(
