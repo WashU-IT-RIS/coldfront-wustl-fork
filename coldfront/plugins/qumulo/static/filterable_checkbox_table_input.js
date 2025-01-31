@@ -67,6 +67,7 @@ class FilterableCheckboxTableInput {
       `${this.widgetName}-${isChecked ? "values" : "options"}-tbody`
     );
     console.log({
+      this: this,
       newTable,
       newTableId: `${this.widgetName}-${
         isChecked ? "values" : "options"
