@@ -7,7 +7,10 @@ from coldfront.plugins.qumulo.validators import (
     validate_relative_path,
 )
 
-from coldfront.plugins.qumulo.widgets import MultiSelectLookupInput
+from coldfront.plugins.qumulo.widgets import (
+    MultiSelectLookupInput,
+    FilterableCheckBoxTableInput,
+)
 
 
 class ADUserField(forms.Field):
@@ -29,3 +32,11 @@ class StorageFileSystemPathField(forms.CharField):
         validate_parent_directory,
         validate_filesystem_path_unique,
     ]
+
+
+# class FilterableCheckBoxTableField(forms.TypedMultipleChoiceField):
+#     widget = FilterableCheckBoxTableInput
+
+#     def __init__(self, *, choices=(), **kwargs):
+#         super().__init__(**kwargs)
+#         self.columns = []

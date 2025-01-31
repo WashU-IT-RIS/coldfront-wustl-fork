@@ -1,6 +1,6 @@
 {% load static %}
 
-<strong>Allocations</strong>
+<strong>{{widget.name}}</strong>
 <div class="table-responsive">
   <table class="table table-sm">
     <thead>
@@ -8,7 +8,24 @@
         <th scope="col" class="text-nowrap">
           <input type="checkbox" id="select_all" name="select_all" value="select_all">
         </th>
-        <th scope="col" class="text-nowrap">
+        {% for column in widget.columns%}
+          <th scope="col" class="text-nowrap">
+            {{column}}
+            <a href="?order_by={{column|lower}}&direction=asc&{{filter_parameters}}">
+              <i class="fas fa-sort-up" aria-hidden="true"></i>
+              <span class="sr-only">
+                Sort {{column}} asc
+              </span>
+            </a>
+            <a href="?order_by={{column|lower}}&direction=des&{{filter_parameters}}">
+              <i class="fas fa-sort-down" aria-hidden="true"></i>
+              <span class="sr-only">
+                Sort {{column}} desc
+              </span>
+              </a>
+          </th>
+        {% endfor %}
+        {% comment %} <th scope="col" class="text-nowrap">
           ID
           <a><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort ID asc</span></a>
           <a><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort ID desc</span></a>
@@ -27,7 +44,7 @@
           File Path
           <a href="?order_by=file_path&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort File Path asc</span></a>
           <a href="?order_by=file_path&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort File Path desc</span></a>
-        </th>
+        </th> {% endcomment %}
       </tr>
     </thead>
     <tbody>
@@ -47,4 +64,5 @@
 <script type="text/javascript">
   window.addEventListener("DOMContentLoaded", () => new FilterableCheckboxTableInput("{{widget.name}}"))
 </script>
-{{ widget.options|json_script:"foo" }}
+{{ widget.options|json_script:"checkbox-table-options" }}
+{{ widget.columns|json_script:"checkbox-table-columns" }}

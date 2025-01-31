@@ -11,6 +11,12 @@ class UserManagementForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["allocations"].choices = self.get_allocations()
+        self.fields["allocations"].widget.columns = [
+            "id",
+            "resource_name",
+            "allocation_status",
+            "file_path",
+        ]
 
     users = ADUserField(
         label="Users",

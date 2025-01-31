@@ -30,17 +30,15 @@ class MultiSelectLookupInput(Widget):
 
 class FilterableCheckBoxTableInput(ChoiceWidget):
     template_name = "filterable_checkbox_table_input.html"
+    columns = []
     allow_multiple_selected = True
 
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
 
         context["widget"]["options"] = context["widget"]["optgroups"][0][1]
-        context["widget"]["options_json"] = json.dumps(context["widget"]["options"])
-        context["widget"]["options_pprint"] = pprint.pformat(
-            context["widget"]["options"]
-        )
-        context["widget"]["options_name"] = f"{name}_options"
+        context["widget"]["columns"] = self.columns
+
         logging.warning(
             f"FilterableCheckBoxTableInput.get_context: {pprint.pformat(context)}"
         )
