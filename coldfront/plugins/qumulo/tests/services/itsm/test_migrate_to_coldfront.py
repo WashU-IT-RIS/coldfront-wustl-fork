@@ -89,7 +89,6 @@ class TestMigrateToColdfront(TestCase):
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
             ("storage_ticket", "ITSD-2222"),
-            ("billing_startdate", ""),
             ("fileset_name", "mocker_active"),
             ("fileset_alias", "mocker_active"),
             (
