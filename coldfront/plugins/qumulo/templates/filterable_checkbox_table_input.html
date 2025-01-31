@@ -1,4 +1,5 @@
 {% load static %}
+{% load templatetags %}
 
 <div class="table-responsive">
   <table class="table table-sm">
@@ -9,7 +10,7 @@
         </th>
         {% for column in widget.columns%}
           <th scope="col" class="text-nowrap">
-            {{column}}
+            {{column|field_name_to_label}}
             <a id="{{widget.name}}-{{column}}-asc" class="sort-asc">
               <i class="fas fa-sort-up" aria-hidden="true"></i>
               <span class="sr-only">
