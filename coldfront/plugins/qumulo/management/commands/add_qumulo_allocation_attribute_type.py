@@ -169,10 +169,8 @@ class Command(BaseCommand):
             is_changeable=False,
         )
 
-        breakpoint()
         AllocationAttributeType.objects.filter(name="exempt").update(
             name="billing_exempt",
-            is_changeable=True,
         )
 
         AllocationAttributeType.objects.update_or_create(
