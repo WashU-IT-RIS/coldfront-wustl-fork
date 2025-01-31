@@ -33,9 +33,9 @@ class FilterableCheckboxTableInput {
     checkboxInput.setAttribute("id", `${this.widgetName}-${option["value"]}`);
     checkboxInput.setAttribute("value", option["value"]);
     checkbox_td.appendChild(checkboxInput);
+    tr.appendChild(checkbox_td);
 
     for (const column of this.columns) {
-      console.log({ option, column });
       const td = this.getOptionsColumnElement(option.label[column]);
       tr.appendChild(td);
     }
