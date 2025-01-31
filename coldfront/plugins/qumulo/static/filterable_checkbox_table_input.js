@@ -66,6 +66,12 @@ class FilterableCheckboxTableInput {
     const newTable = document.getElementById(
       `${this.widgetName}-${isChecked ? "values" : "options"}-tbody`
     );
+    console.log({
+      newTable,
+      newTableId: `${this.widgetName}-${
+        isChecked ? "values" : "options"
+      }-tbody`,
+    });
     newTable.appendChild(optionRow);
   }
 }
