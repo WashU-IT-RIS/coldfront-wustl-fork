@@ -5,18 +5,18 @@
     <thead>
       <tr>
         <th scope="col" class="text-nowrap">
-          <input type="checkbox" id="select_all" name="select_all" value="select_all">
+          {% comment %} <input type="checkbox" id="select_all" name="select_all" value="select_all"> {% endcomment %}
         </th>
         {% for column in widget.columns%}
           <th scope="col" class="text-nowrap">
             {{column}}
-            <a href="?order_by={{column|lower}}&direction=asc&{{filter_parameters}}">
+            <a id="{{widget.name}}-{{column}}-asc" class="sort-asc">
               <i class="fas fa-sort-up" aria-hidden="true"></i>
               <span class="sr-only">
                 Sort {{column}} asc
               </span>
             </a>
-            <a href="?order_by={{column|lower}}&direction=des&{{filter_parameters}}">
+            <a id="{{widget.name}}-{{column}}-desc" class="sort-desc">
               <i class="fas fa-sort-down" aria-hidden="true"></i>
               <span class="sr-only">
                 Sort {{column}} desc
@@ -26,16 +26,11 @@
         {% endfor %}
       </tr>
     </thead>
+    <tbody id="{{widget.name}}-values-tbody">
+      {% comment %} JS populate this {% endcomment %}
+    </tbody>
     <tbody id="{{widget.name}}-options-tbody">
-      {% comment %} {% for option in widget.options %} {% endcomment %}
-        {% comment %} <tr id="{{widget.name}}-options-tr" class="text-nowrap">
-          <td><input type="checkbox" id="_{{option.label.id}}" name="allocation_{{option.label.id}}" value="{{option.label.id}}"></td>
-          <td>{{ option.label.id }}</td>
-          <td class="text-nowrap">{{ option.label.resource_name}}</td>
-          <td class="text-nowrap">{{ option.label.allocation_status }}</td>
-          <td class="text-nowrap">{{ option.label.file_path }}</td>
-        </tr> {% endcomment %}
-      {% comment %} {% endfor %} {% endcomment %}
+      {% comment %} JS populate this {% endcomment %}
     </tbody>
   </table>
 </div>

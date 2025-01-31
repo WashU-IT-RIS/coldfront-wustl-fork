@@ -10,8 +10,6 @@ class FilterableCheckboxTableInput {
     );
 
     this.populateOptions();
-
-    console.log({ widgetName, options: this.options });
   }
 
   populateOptions() {
@@ -28,11 +26,14 @@ class FilterableCheckboxTableInput {
     tr.setAttribute("class", "text-nowrap");
 
     const checkbox_td = document.createElement("td");
+
     const checkboxInput = document.createElement("input");
     checkboxInput.setAttribute("type", "checkbox");
     checkboxInput.setAttribute("id", `${this.widgetName}-${option["value"]}`);
     checkboxInput.setAttribute("value", option["value"]);
+    checkboxInput.addEventListener("change", onOptionChanged);
     checkbox_td.appendChild(checkboxInput);
+
     tr.appendChild(checkbox_td);
 
     for (const column of this.columns) {
@@ -49,5 +50,20 @@ class FilterableCheckboxTableInput {
     td.appendChild(document.createTextNode(value));
 
     return td;
+  };
+
+  onOptionChanged = (event) => {
+    const checkboxInput = event.target;
+    isChecked = checkboxInput.checked;
+
+    const optionRow = checkboxInput.parentElement.parentElement;
+    const parentTable = parentRow.parentElement;
+
+    parentTable.removeChild(optionRow);
+
+    const newTable = document.getElementById(
+      `${this.widgetName}-${isChecked ? "values" : "options"}-tbody`
+    );
+    newTable.appendChild(optionRow);
   };
 }
