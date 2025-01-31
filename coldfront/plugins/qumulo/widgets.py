@@ -36,10 +36,6 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
         context["widget"]["options"] = context["widget"]["optgroups"][0][1]
         context["widget"]["columns"] = self.columns
 
-        logging.warning(
-            f"FilterableCheckBoxTableInput.get_context: {pprint.pformat(context)}"
-        )
-
         return context
 
     class Media:
