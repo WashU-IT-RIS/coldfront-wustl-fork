@@ -40,7 +40,7 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
         context["widget"]["options_pprint"] = pprint.pformat(
             context["widget"]["options"]
         )
-
+        context["widget"]["options_name"] = f"{self.template_name}_options"
         logging.warning(
             f"FilterableCheckBoxTableInput.get_context: {pprint.pformat(context)}"
         )
