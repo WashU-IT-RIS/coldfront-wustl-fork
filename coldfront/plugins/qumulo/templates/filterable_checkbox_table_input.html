@@ -1,6 +1,5 @@
 {% load static %}
 
-<strong>{{widget.name}}</strong>
 <div class="table-responsive">
   <table class="table table-sm">
     <thead>
@@ -25,38 +24,18 @@
               </a>
           </th>
         {% endfor %}
-        {% comment %} <th scope="col" class="text-nowrap">
-          ID
-          <a><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort ID asc</span></a>
-          <a><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort ID desc</span></a>
-        </th>
-        <th scope="col" class="text-nowrap">
-          Resource Name
-          <a href="?order_by=resource_name&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Resource Name asc</span></a>
-          <a href="?order_by=resource_name&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Resource Name desc</span></a>
-        </th>
-        <th scope="col" class="text-nowrap">
-          Status
-          <a href="?order_by=status__name&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Status asc</span></a>
-          <a href="?order_by=status__name&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Status desc</span></a>
-        </th>
-        <th scope="col" class="text-nowrap">
-          File Path
-          <a href="?order_by=file_path&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort File Path asc</span></a>
-          <a href="?order_by=file_path&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort File Path desc</span></a>
-        </th> {% endcomment %}
       </tr>
     </thead>
-    <tbody>
-      {% for option in widget.options %}
-        <tr class="text-nowrap">
-          <td><input type="checkbox" id="allocation_{{option.label.id}}" name="allocation_{{option.label.id}}" value="{{option.label.id}}"></td>
+    <tbody id="{{widget.name}}-options-tbody">
+      {% comment %} {% for option in widget.options %} {% endcomment %}
+        {% comment %} <tr id="{{widget.name}}-options-tr" class="text-nowrap">
+          <td><input type="checkbox" id="_{{option.label.id}}" name="allocation_{{option.label.id}}" value="{{option.label.id}}"></td>
           <td>{{ option.label.id }}</td>
           <td class="text-nowrap">{{ option.label.resource_name}}</td>
           <td class="text-nowrap">{{ option.label.allocation_status }}</td>
           <td class="text-nowrap">{{ option.label.file_path }}</td>
-        </tr>
-      {% endfor %}
+        </tr> {% endcomment %}
+      {% comment %} {% endfor %} {% endcomment %}
     </tbody>
   </table>
 </div>
