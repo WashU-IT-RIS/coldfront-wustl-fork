@@ -21,7 +21,7 @@ class FilterableCheckboxTableInput {
     }
   }
 
-  getOptionsRowElement = (option) => {
+  getOptionsRowElement(option) {
     const tr = document.createElement("tr");
     tr.setAttribute("class", "text-nowrap");
 
@@ -34,6 +34,8 @@ class FilterableCheckboxTableInput {
     checkboxInput.addEventListener("change", self.onOptionChanged);
     checkbox_td.appendChild(checkboxInput);
 
+    console.log({ checkboxInput });
+
     tr.appendChild(checkbox_td);
 
     for (const column of this.columns) {
@@ -42,17 +44,17 @@ class FilterableCheckboxTableInput {
     }
 
     return tr;
-  };
+  }
 
-  getOptionsColumnElement = (value) => {
+  getOptionsColumnElement(value) {
     const td = document.createElement("td");
     td.setAttribute("class", "text-nowrap");
     td.appendChild(document.createTextNode(value));
 
     return td;
-  };
+  }
 
-  onOptionChanged = (event) => {
+  onOptionChanged(event) {
     const checkboxInput = event.target;
     isChecked = checkboxInput.checked;
 
@@ -67,5 +69,5 @@ class FilterableCheckboxTableInput {
       `${this.widgetName}-${isChecked ? "values" : "options"}-tbody`
     );
     newTable.appendChild(optionRow);
-  };
+  }
 }
