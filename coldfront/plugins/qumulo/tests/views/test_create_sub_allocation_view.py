@@ -49,7 +49,7 @@ class AllocationViewTests(TestCase):
             "ro_users": ["test1"],
             "cost_center": "CC-1234",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         self.sub_form_data = {
@@ -65,7 +65,7 @@ class AllocationViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "CC-3232",
             "department_number": "Whale-watching",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
     def test_create_sub_allocation(
