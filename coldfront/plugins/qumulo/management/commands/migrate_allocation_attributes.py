@@ -20,7 +20,6 @@ class Command(BaseCommand):
         self._migrate_allocation_attribute("billing_cycle", "monthly")
 
     def _migrate_allocation_attribute(self, attribute_name, default_value):
-        breakpoint()
         attribute_type = AllocationAttributeType.objects.get(name=attribute_name)
         attribute_sub_q = AllocationAttribute.objects.filter(
             allocation=OuterRef("pk"), allocation_attribute_type=attribute_type
