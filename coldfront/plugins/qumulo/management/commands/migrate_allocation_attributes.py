@@ -15,11 +15,12 @@ class Command(BaseCommand):
 
         self._migrate_allocation_attribute("secure", "No")
         self._migrate_allocation_attribute("audit", "No")
-        self._migrate_allocation_attribute("exempt", "No")
+        self._migrate_allocation_attribute("billing_exempt", "No")
         self._migrate_allocation_attribute("subsidized", "No")
         self._migrate_allocation_attribute("billing_cycle", "monthly")
 
     def _migrate_allocation_attribute(self, attribute_name, default_value):
+        breakpoint()
         attribute_type = AllocationAttributeType.objects.get(name=attribute_name)
         attribute_sub_q = AllocationAttribute.objects.filter(
             allocation=OuterRef("pk"), allocation_attribute_type=attribute_type
