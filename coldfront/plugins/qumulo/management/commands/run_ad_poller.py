@@ -7,7 +7,7 @@ from coldfront.plugins.qumulo.tasks import (
     conditionally_update_storage_allocation_statuses,
 )
 from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
-    check_allocations,
+    check_allocation_billing_cycle_and_prepaid_exp,
 )
 
 
@@ -22,6 +22,6 @@ class Command(BaseCommand):
             [
                 (poll_ad_groups),
                 (conditionally_update_storage_allocation_statuses),
-                (check_allocations),
+                (check_allocation_billing_cycle_and_prepaid_exp),
             ]
         )
