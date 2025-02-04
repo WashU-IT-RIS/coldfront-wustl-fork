@@ -155,6 +155,7 @@ class UpdateAllocationView(AllocationView):
         # NOTE - "storage_protocols" will have special handling
         attributes_to_check = [
             "cost_center",
+            "billing_exempt",
             "department_number",
             "technical_contact",
             "billing_contact",
