@@ -79,7 +79,7 @@ class AllocationForm(forms.Form):
     )
     prepaid_billing_date = forms.DateField(
         help_text="Start Date Date of Prepaid Billing",
-        label="Prepaid Billing Start Date",
+        label="Prepaid Billing Start Date (mm/dd/yyyy)",
         validators=[validate_prepaid_start_date],
         required=False,
     )
