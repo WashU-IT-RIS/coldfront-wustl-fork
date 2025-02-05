@@ -50,6 +50,14 @@ class AllocationForm(forms.Form):
         help_text="The cost center for billing",
         label="Cost Center",
     )
+    billing_exempt = forms.ChoiceField(
+        help_text="Exempt the allocation from billing",
+        label="Billing Exempt",
+        choices=[("Yes", "Yes"), ("No", "No")],
+        initial="No",
+        widget=forms.RadioSelect,
+        required=True,
+    )
     department_number = forms.CharField(
         help_text="The department for billing",
         label="Department Number",
@@ -68,8 +76,12 @@ class AllocationForm(forms.Form):
     )
     billing_cycle = forms.ChoiceField(
         choices=BILLING_CYCLE_OPTIONS,
+<<<<<<< HEAD
         label="Billing Cycle Options",
         help_text="Choose one billing cycle option from the above list",
+=======
+        initial="monthly",
+>>>>>>> origin/feature/itdev-36072_add_exempt_field_in_allocation_forms
         required=True,
     )
     prepaid_time = forms.IntegerField(
