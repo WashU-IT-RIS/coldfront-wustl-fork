@@ -76,12 +76,9 @@ class AllocationForm(forms.Form):
     )
     billing_cycle = forms.ChoiceField(
         choices=BILLING_CYCLE_OPTIONS,
-<<<<<<< HEAD
         label="Billing Cycle Options",
         help_text="Choose one billing cycle option from the above list",
-=======
         initial="monthly",
->>>>>>> origin/feature/itdev-36072_add_exempt_field_in_allocation_forms
         required=True,
     )
     prepaid_time = forms.IntegerField(
