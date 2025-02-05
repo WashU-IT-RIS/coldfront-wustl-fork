@@ -154,7 +154,7 @@ class AllocationFormTests(TestCase):
 
     # The value of billing_exempt is casesensitive, which will only take "Yes" or "No".
     def test_billing_exempt_invalid_values(self, mock_active_directory_api: MagicMock):
-        invalid_values = {True, False, "yes", "no", "YES", "NO", "Yes/No", "abc"}
+        invalid_values = {True, False, "yes", "no", "YES", "NO", "Yes/No", "abc", ""}
         for invalid_value in invalid_values:
             invalid_data = {
                 "project_pk": self.project1.id,
