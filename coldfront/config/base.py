@@ -123,10 +123,12 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "django_settings_export.settings_export",
+                "coldfront.config.context_processors.feature_flags",
             ],
         },
     },
 ]
+
 
 # Add local site templates files if set
 SITE_TEMPLATES = ENV.str("SITE_TEMPLATES", default="")

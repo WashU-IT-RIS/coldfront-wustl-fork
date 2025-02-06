@@ -34,6 +34,11 @@
         <li id="navbar-create-allocation" class="nav-item">
           <a class="nav-link" href="{% url 'qumulo:allocation' %}">Create Allocation</a>
         </li>
+        {% if feature_flag_service.is_feature_enabled('VIEW_ALL_ALLOCATIONS') %}
+        <li id="navbar-view-allocation" class="nav-item">
+          <a class="nav-link" href="{% url 'qumulo:allocation-table-list' %}">View All Allocations</a>
+        </li>
+        {% endif %}
         <li id="navbar-view-allocation" class="nav-item">
           <a class="nav-link" href="{% url 'qumulo:allocation-table-list' %}">View All Allocations</a>
         </li>
