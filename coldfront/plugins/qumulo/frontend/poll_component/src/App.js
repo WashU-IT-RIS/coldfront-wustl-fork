@@ -14,6 +14,7 @@ const PollComponent = () => {
         setStatus(data.status);
         if (data.status === 'completed') {
           clearInterval(interval);
+          
         }
       })
       .catch((error) => console.error(error));
