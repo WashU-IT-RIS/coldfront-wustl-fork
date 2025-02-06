@@ -14,7 +14,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceRateCategory)
 class ServiceRateCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("model_name",)
 
 
 @admin.register(ServiceRateCategoryTier)
