@@ -1,5 +1,12 @@
+from datetime import date
 from django.db import models
 from model_utils.models import TimeStampedModel
+
+
+class CurrentRatesManager(models.Manager):
+    def get_queryset(self):
+        today = date.today()
+        return super.get_queryset(self).filter(start_date__gt=today, end_date__lt=today)
 
 
 class Service(TimeStampedModel):
@@ -14,6 +21,9 @@ class ServiceRateCategory(TimeStampedModel):
     model_description = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
+
+    objects = models.Manager()
+    current = CurrentRatesManager()
 
 
 class ServiceRateCategoryTier(TimeStampedModel):
