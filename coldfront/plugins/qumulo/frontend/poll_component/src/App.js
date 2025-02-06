@@ -7,7 +7,7 @@ const PollComponent = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      fetch("/api/qumulo/progress-bar")
+      fetch("/qumulo/progress-bar")
       .then((rest) => rest.json())
       .then((data) => {
         setProgress(data.progress);
