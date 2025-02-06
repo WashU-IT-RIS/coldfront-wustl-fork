@@ -37,7 +37,7 @@ default_form_data = {
     "ro_users": ["test1"],
     "cost_center": "Uncle Pennybags",
     "department_number": "Time Travel Services",
-    "service_rate": "general",
+    "service_rate_category": "general",
 }
 
 
@@ -196,7 +196,7 @@ def set_allocation_attributes(
         "storage_export_path",
         "department_number",
         "cost_center",
-        "service_rate",
+        "service_rate_category",
         "storage_ticket",
         "technical_contact",
         "billing_contact",

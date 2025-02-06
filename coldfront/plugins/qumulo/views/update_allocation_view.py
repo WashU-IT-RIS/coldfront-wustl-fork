@@ -76,7 +76,7 @@ class UpdateAllocationView(AllocationView):
             "department_number",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
         ]
         for key in allocation_attribute_keys:
             form_data[key] = self.get_allocation_attribute(
@@ -156,7 +156,7 @@ class UpdateAllocationView(AllocationView):
             "department_number",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
             "storage_ticket",
             "storage_quota",
         ]
