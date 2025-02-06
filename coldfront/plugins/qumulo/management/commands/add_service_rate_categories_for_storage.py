@@ -10,35 +10,35 @@ from coldfront.core.service.models import (
 
 class Command(BaseCommand):
 
-    Service.objects.update_or_create(
-        name="Storage", defaults={"description": "Storage placeholder description"}
+    storage_2_service, _ = Service.objects.update_or_create(
+        name="Storage2", defaults={"description": "Storage 2 placeholder description"}
     )
-    Service.objects.update_or_create(
-        name="Compute2", defaults={"description": "Storage placeholder description"}
+    compute_2_service = Service.objects.update_or_create(
+        name="Compute2", defaults={"description": "Compute 2 placeholder description"}
     )
 
-    ServiceRateCategory.objects.update_or_create(
-        service__name="Storage",
+    comsumption_category, _ = ServiceRateCategory.objects.update_or_create(
+        service=storage_2_service,
         model_name="consumption",
         model_description="Consumption",
-        start_date=date(2025,7,1),
-        end_date=date(2026,7,1),
+        start_date=date(2025, 7, 1),
+        end_date=date(2026, 7, 1),
     )
 
-    ServiceRateCategory.objects.get_or_create(
-        service__name="Storage",
+    condo_category, _ = ServiceRateCategory.objects.get_or_create(
+        service=storage_2_service,
         model_name="condo",
         model_description="Condo",
-        start_date=date(2025,7,1),
-        end_date=date(2026,7,1),
+        start_date=date(2025, 7, 1),
+        end_date=date(2026, 7, 1),
     )
 
-    ServiceRateCategory.objects.update_or_create(
-        service__name="Storage",
+    subscription_category, _ = ServiceRateCategory.objects.update_or_create(
+        service=storage_2_service,
         model_name="subscription",
         model_description="Subscription",
-        start_date=date(2025,7,1),
-        end_date=date(2026,7,1),
+        start_date=date(2025, 7, 1),
+        end_date=date(2026, 7, 1),
     )
 
     ServiceRateCategoryTier.objects.update_or_create(
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         unit_rate="100",
         unit="TB",
         cycle="month",
-        service_rate_category__model_name="subscription",
+        service_rate_category=subscription_category,
     )
 
     ServiceRateCategoryTier.objects.update_or_create(
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         unit_rate="100",
         unit="TB",
         cycle="month",
-        service_rate_category__model_name="subscription",
+        service_rate_category=subscription_category,
     )
 
     ServiceRateCategoryTier.objects.update_or_create(
@@ -65,7 +65,7 @@ class Command(BaseCommand):
         unit_rate="500",
         unit="TB",
         cycle="month",
-        service_rate_category__model_name="subscription",
+        service_rate_category=subscription_category,
     )
 
     ServiceRateCategoryTier.objects.update_or_create(
@@ -74,5 +74,5 @@ class Command(BaseCommand):
         unit_rate="500",
         unit="TB",
         cycle="month",
-        service_rate_category__model_name="subscription",
+        service_rate_category=subscription_category,
     )
