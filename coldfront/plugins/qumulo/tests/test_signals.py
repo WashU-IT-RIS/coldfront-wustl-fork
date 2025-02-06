@@ -46,7 +46,6 @@ class TestSignals(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "general",
             "billing_cycle": "monthly",
         }

@@ -202,7 +202,6 @@ def set_allocation_attributes(
         "department_number",
         "cost_center",
         "billing_exempt",
-        "billing_cycle",
         "service_rate",
         "storage_ticket",
         "technical_contact",

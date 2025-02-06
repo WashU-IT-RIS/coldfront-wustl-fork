@@ -63,7 +63,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -104,7 +103,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -252,7 +250,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "not_a_rate",
             "billing_cycle": "monthly",
         }
@@ -273,7 +270,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -295,7 +291,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -317,7 +312,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "technical_contact": "captain.crunch",
             "billing_cycle": "monthly",
@@ -340,7 +334,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
@@ -362,7 +355,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate": "consumption",
             "billing_contact": "captain.crunch",
             "billing_cycle": "monthly",
