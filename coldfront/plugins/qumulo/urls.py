@@ -5,6 +5,7 @@ from coldfront.plugins.qumulo.views import (
     update_allocation_view,
     create_sub_allocation_view,
     allocation_table_view,
+    progress_view,
 )
 
 app_name = "qumulo"
@@ -25,4 +26,9 @@ urlpatterns = [
         allocation_table_view.AllocationTableView.as_view(),
         name="allocation-table-list",
     ),
+    path(
+        "progress-bar",
+        progress_view.ProgressView.as_view(),
+        name="progress-bar",
+    )
 ]
