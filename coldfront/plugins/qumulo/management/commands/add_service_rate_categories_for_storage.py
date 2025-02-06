@@ -1,5 +1,5 @@
-from datetime import date, datetime, timedelta
-from click import BaseCommand
+from datetime import date
+from django.core.management.base import BaseCommand
 
 from coldfront.core.service.models import (
     Service,
