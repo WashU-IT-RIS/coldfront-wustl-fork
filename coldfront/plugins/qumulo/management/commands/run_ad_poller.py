@@ -6,6 +6,9 @@ from coldfront.plugins.qumulo.tasks import (
     poll_ad_groups,
     conditionally_update_storage_allocation_statuses,
 )
+from coldfront.plugins.qumulo.management.commands.check_billing_cycles import (
+    check_allocation_billing_cycle_and_prepaid_exp,
+)
 
 
 class Command(BaseCommand):
@@ -16,5 +19,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Running AD Poller")
         async_chain(
-            [(poll_ad_groups), (conditionally_update_storage_allocation_statuses)]
+            [
+                (poll_ad_groups),
+                (conditionally_update_storage_allocation_statuses),
+                (check_allocation_billing_cycle_and_prepaid_exp),
+            ]
         )

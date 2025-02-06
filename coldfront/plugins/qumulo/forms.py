@@ -13,6 +13,7 @@ from coldfront.plugins.qumulo.validators import (
     validate_single_ad_user,
     validate_ticket,
     validate_storage_name,
+    validate_prepaid_start_date,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -49,6 +50,14 @@ class AllocationForm(forms.Form):
         help_text="The cost center for billing",
         label="Cost Center",
     )
+    billing_exempt = forms.ChoiceField(
+        help_text="Exempt the allocation from billing",
+        label="Billing Exempt",
+        choices=[("Yes", "Yes"), ("No", "No")],
+        initial="No",
+        widget=forms.RadioSelect,
+        required=True,
+    )
     department_number = forms.CharField(
         help_text="The department for billing",
         label="Department Number",
@@ -66,10 +75,22 @@ class AllocationForm(forms.Form):
         required=False,
     )
     billing_cycle = forms.ChoiceField(
-        help_text="The billing cycle of the allocation",
-        label="Billing Cycle",
         choices=BILLING_CYCLE_OPTIONS,
+        label="Billing Cycle Options",
+        help_text="Choose one billing cycle option from the above list",
+        initial="monthly",
         required=True,
+    )
+    prepaid_time = forms.IntegerField(
+        help_text="Prepaid Time in Months",
+        label="Prepaid Time",
+        required=False,
+    )
+    prepaid_billing_date = forms.DateField(
+        help_text="Start Date Date of Prepaid Billing",
+        label="Prepaid Billing Start Date",
+        validators=[validate_prepaid_start_date],
+        required=False,
     )
     service_rate = forms.ChoiceField(
         help_text="Service rate option for the Storage2 allocation",
@@ -208,6 +229,13 @@ class UpdateAllocationForm(AllocationForm):
 
         self.fields["storage_filesystem_path"].validators = []
         self.fields["storage_name"].validators = []
+
+        self.fields["prepaid_expiration"] = forms.DateField(
+            help_text="Allocation is paid until this date",
+            label="Prepaid Expiration Date",
+            required=False,
+        )
+        self.fields["prepaid_expiration"].disabled = True
 
 
 class CreateSubAllocationForm(AllocationForm):
