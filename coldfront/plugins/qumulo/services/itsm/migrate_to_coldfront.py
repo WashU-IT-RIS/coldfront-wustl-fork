@@ -64,7 +64,7 @@ class MigrateToColdfront:
         if self.dry_run:
             return {
                 f"validations checks for {fileset_key}": "successful",
-                "itsm_allocationt": itsm_allocation,
+                "itsm_allocation": itsm_allocation,
             }
 
         pi_user = self.__get_or_create_user(fields)
