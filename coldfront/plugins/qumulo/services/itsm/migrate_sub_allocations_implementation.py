@@ -5,6 +5,12 @@ from coldfront.core.allocation.models import (
     AllocationLinkage,
 )
 
+import time
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
 
 class MigrateSubAllocationsImplementation:
 
@@ -44,7 +50,12 @@ class MigrateSubAllocationsImplementation:
             sub_alloc_info["storage_filesystem_path"] =  entry["project_dir_name"]
             sub_alloc_info["storage_export_path"] = []
             sub_alloc_info["storage_ticket"] = parent_allocation.get_attribute("storage_ticket")
-            sub_alloc_info["storage_name"] = entry["project_dir_name"]
+            
+            if os.environ.get("ENVIRONMENT") == "qa":
+                sub_alloc_info["storage_name"] = entry["project_dir_name"]
+            else:
+                sub_alloc_info["storage_name"] = f"{entry["project_dir_name"]}_{int(time.time())}"
+                
             sub_alloc_info["storage_quota"] = int(parent_allocation.get_attribute("storage_quota"))
             sub_alloc_info["protocols"] = []
             sub_alloc_info["rw_users"] = entry["rw"]
