@@ -20,15 +20,19 @@ class MigrateSubAllocationsImplementation:
         if parent_allocation.status.name != "Active":
             raise Exception(f"Parent allocation with id {parent_allocation_id} is not active.")
 
+        # confirm that no sub-allocation with this name already exists
+        pdb.set_trace()
+        child_already_exists = False
         try:
-            linkage = AllocationLinkage.objects.filter(parent=parent_allocation)
+            linkage = AllocationLinkage.objects.get(parent=parent_allocation)
+            child_already_exists = linkage.children.filter(name__in=[entry["project_dir_name"] for entry in sub_allocs_to_create]).exists()
         except:
-            raise Exception(f"Parent allocation {parent_allocation_id} has no linkage")
-
-        existing_child_allocs = linkage.children.all()
-        if len(existing_child_allocs) > 0:
-            raise Exception(f"Parent allocation {parent_allocation_id} already has child sub-allocations.")
-
+            # no linkage exists, so continue
+            pass
+        
+        if child_already_exists:
+            raise Exception(f"Sub-allocation with name {entry['project_dir_name']} already exists.")
+        
         parent_pi_user = parent_allocation.project.pi
         pdb.set_trace()
         if dry_run:
