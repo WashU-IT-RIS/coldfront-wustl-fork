@@ -27,6 +27,9 @@ class ItsmClient:
     def get_fs1_allocation_by_fileset_alias(self, fileset_alias) -> str:
         return self.__get_fs1_allocation_by("fileset_alias", fileset_alias)
 
+    def get_fs1_allocation_by_name(self, name) -> str:
+        return self.__get_fs1_allocation_by("name", name)
+
     # TODO is there a way to get the name of the environment such as prod, qa, or localhost?
     def __is_itsm_localhost(self):
         return self.host == "localhost"
