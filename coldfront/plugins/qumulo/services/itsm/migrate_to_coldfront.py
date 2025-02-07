@@ -26,6 +26,13 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
     ItsmToColdfrontFieldsFactory,
 )
 
+import time
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 
 class MigrateToColdfront:
 
@@ -167,6 +174,13 @@ class MigrateToColdfront:
         allocation_data["ro_users"] = []
         for field in list(attributes_for_allocation):
             allocation_data.update(field.entity_item)
+
+        if os.environ.get("ENVIRONMENT") == "qa":
+            allocation_data["storage_name"] = allocation_data["storage_name"]
+        else:
+            allocation_data["storage_name"] = (
+                f"{allocation_data['storage_name']}_{int(time.time())}"
+            )
 
         service_result = AllocationService.create_new_allocation(
             allocation_data, pi_user
