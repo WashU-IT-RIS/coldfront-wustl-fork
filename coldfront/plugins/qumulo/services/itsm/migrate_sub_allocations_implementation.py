@@ -54,7 +54,9 @@ class MigrateSubAllocationsImplementation:
             if os.environ.get("ENVIRONMENT") != "qa":
                 sub_alloc_info["storage_name"] = entry["project_dir_name"]
             else:
-                sub_alloc_info["storage_name"] = f"{entry["project_dir_name"]}_{int(time.time())}"
+                original = entry["project_dir_name"]
+                new_name = original + "_" + str(int(time.time()))
+                sub_alloc_info["storage_name"] = new_name
                 
             sub_alloc_info["storage_quota"] = int(parent_allocation.get_attribute("storage_quota"))
             sub_alloc_info["protocols"] = []
