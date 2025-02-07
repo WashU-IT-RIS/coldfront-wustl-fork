@@ -8,6 +8,7 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     Project,
     User,
+    AllocationLinkage,
 )
 
 from coldfront.core.project.models import (
@@ -21,6 +22,7 @@ from coldfront.core.project.models import (
 )
 
 from coldfront.plugins.qumulo.services.itsm.itsm_client import ItsmClient
+import json
 
 from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_factory import (
     ItsmToColdfrontFieldsFactory,
@@ -39,9 +41,71 @@ class MigrateToColdfront:
         result = self.__create_by(fileset_name, itsm_result)
         return result
 
+    def create_sub_allocations(self, parent_allocation_id: str, sub_allocs_to_create: dict, dry_run: bool=True):
+        import pdb
+        pdb.set_trace()
+        if not Allocation.objects.filter(pk=parent_allocation_id).exists():
+            raise Exception(f"Parent allocation with id {parent_allocation_id} does not exist.")
+        
+        # confirm that the parent allocation is active
+        parent_allocation = Allocation.objects.get(pk=parent_allocation_id)
+
+        if parent_allocation.status.name != "Active":
+            raise Exception(f"Parent allocation with id {parent_allocation_id} is not active.")
+
+        try:
+            linkage = AllocationLinkage.objects.filter(parent=parent_allocation)
+        except:
+            raise Exception(f"Parent allocation {parent_allocation_id} has no linkage")
+
+        existing_child_allocs = linkage.children.all()
+        if len(existing_child_allocs) > 0:
+            raise Exception(f"Parent allocation {parent_allocation_id} already has child sub-allocations.")
+
+        parent_pi_user = parent_allocation.project.pi
+        pdb.set_trace()
+        if dry_run:
+            print("Not creating sub-allocations due to dry-run mode.")
+            return
+
+        num_sub_allocs_expected = len(sub_allocs_to_create)
+
+        pdb.set_trace()
+        for entry in sub_allocs_to_create:
+             
+            sub_alloc_info = dict()
+            sub_alloc_info["project_pk"] = parent_allocation.project.id
+            sub_alloc_info["parent_allocation_name"] = parent_allocation.name
+            sub_alloc_info["storage_filesystem_path"] =  entry["project_dir_name"]
+            sub_alloc_info["storage_export_path"] = []
+            sub_alloc_info["storage_ticket"] = parent_allocation.get_attribute("storage_ticket")
+            sub_alloc_info["storage_name"] = entry["project_dir_name"]
+            sub_alloc_info["storage_quota"] = int(parent_allocation.get_attribute("storage_quota"))
+            sub_alloc_info["protocols"] = []
+            sub_alloc_info["rw_users"] = entry["rw"]
+            sub_alloc_info["ro_users"] = entry["ro"]
+            sub_alloc_info["cost_center"] = parent_allocation.get_attribute("cost_center")
+            sub_alloc_info["department_number"] = parent_allocation.get_attribute("department_number")
+            sub_alloc_info["service_rate"] = parent_allocation.get_attribute("service_rate")
+
+            # create a sub-allocation
+            _ = AllocationService.create_new_allocation(
+                sub_alloc_info, parent_pi_user, parent_allocation=parent_allocation
+            )
+        
+        pdb.set_trace()
+        linkage.refresh_from_db()
+        if num_sub_allocs_expected != linkage.children.count():
+            raise Exception(f"Expected {num_sub_allocs_expected} sub-allocations, but found {linkage.children.count()}")
+
+
     # Private Methods
     def __create_by(self, fileset_key: str, itsm_result: str) -> str:
         self.__validate_itsm_result_set(fileset_key, itsm_result)
+        return self.__create_by_implementation(fileset_key, itsm_result)
+    
+    def __create_by_implementation(self, fileset_key: str, itsm_result: str) -> str:
+        # self.__validate_itsm_result_set(fileset_key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
 
