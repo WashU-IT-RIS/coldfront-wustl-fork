@@ -175,7 +175,7 @@ class MigrateToColdfront:
         for field in list(attributes_for_allocation):
             allocation_data.update(field.entity_item)
 
-        if os.environ.get("ENVIRONMENT") == "qa":
+        if os.environ.get("ENVIRONMENT") != "qa":
             allocation_data["storage_name"] = allocation_data["storage_name"]
         else:
             allocation_data["storage_name"] = (

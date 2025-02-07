@@ -51,7 +51,7 @@ class MigrateSubAllocationsImplementation:
             sub_alloc_info["storage_export_path"] = []
             sub_alloc_info["storage_ticket"] = parent_allocation.get_attribute("storage_ticket")
             
-            if os.environ.get("ENVIRONMENT") == "qa":
+            if os.environ.get("ENVIRONMENT") != "qa":
                 sub_alloc_info["storage_name"] = entry["project_dir_name"]
             else:
                 sub_alloc_info["storage_name"] = f"{entry["project_dir_name"]}_{int(time.time())}"
