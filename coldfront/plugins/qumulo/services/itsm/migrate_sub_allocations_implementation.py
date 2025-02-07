@@ -58,17 +58,11 @@ class MigrateSubAllocationsImplementation:
             sub_alloc_info["cost_center"] = parent_allocation.get_attribute("cost_center")
             sub_alloc_info["department_number"] = parent_allocation.get_attribute("department_number")
             sub_alloc_info["service_rate"] = parent_allocation.get_attribute("service_rate")
+            sub_alloc_info["billing_cycle"] = parent_allocation.get_attribute("billing_cycle")
+            sub_alloc_info["technical_contact"] = parent_allocation.get_attribute("technical_contact")
+            sub_alloc_info["billing_contact"] = parent_allocation.get_attribute("billing_contact")
 
             # create a sub-allocation
-            pdb.set_trace()
             _ = AllocationService.create_new_allocation(
                 sub_alloc_info, parent_pi_user, parent_allocation=parent_allocation
             )
-            pdb.set_trace()
-        
-        # pdb.set_trace()
-        linkage.refresh_from_db()
-        if num_sub_allocs_expected != linkage.children.count():
-            raise Exception(f"Expected {num_sub_allocs_expected} sub-allocations, but found {linkage.children.count()}")
-
-    
