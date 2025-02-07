@@ -23,6 +23,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         import pdb
+
+        pdb.set_trace()
         
         sub_alloc_list_str = options["sub_alloc_list"]
         dry_run = options["dry_run"]
