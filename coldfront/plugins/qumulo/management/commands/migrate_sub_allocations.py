@@ -17,9 +17,8 @@ class Command(BaseCommand):
 
         parser.add_argument(
             "--dry-run",
-            type=bool,
             action="store_true",
-            help="Run the migration in dry run mode without making any changes",
+            help="Dry run the sub-alloc migration",
         )
 
     def handle(self, *args, **options) -> None:
