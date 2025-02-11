@@ -9,14 +9,21 @@ from coldfront.core.service.models import (
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", "description")
 
 
 @admin.register(ServiceRateCategory)
 class ServiceRateCategoryAdmin(admin.ModelAdmin):
-    list_display = ("model_name",)
+    list_display = ("service", "model_name", "description", "start_date", "end_date")
 
 
 @admin.register(ServiceRateCategoryTier)
 class ServiceRateCategoryTierAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = (
+        "name",
+        "service_rate_category",
+        "rate",
+        "unit_rate",
+        "unit",
+        "cycle",
+    )
