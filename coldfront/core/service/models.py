@@ -1,6 +1,7 @@
 from datetime import date
 from django.db import models
 from model_utils.models import TimeStampedModel
+from simple_history.models import HistoricalRecords
 
 
 class CurrentRatesManager(models.Manager):
@@ -24,6 +25,7 @@ class ServiceRateCategory(TimeStampedModel):
 
     objects = models.Manager()
     current = CurrentRatesManager()
+    history = HistoricalRecords()
 
 
 class ServiceRateCategoryTier(TimeStampedModel):
@@ -35,3 +37,4 @@ class ServiceRateCategoryTier(TimeStampedModel):
     unit_rate = models.IntegerField()
     unit = models.CharField(max_length=255)
     cycle = models.CharField(max_length=255)
+    history = HistoricalRecords()
