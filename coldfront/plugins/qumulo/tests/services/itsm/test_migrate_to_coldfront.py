@@ -150,6 +150,50 @@ class TestMigrateToColdfront(TestCase):
         )
         self.assertEqual(len(project_attributes), 3)
 
+    def test_migrate_to_coldfront_by_service_provision_name(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_name.return_value = mock_response
+            mock_itsm_client.return_value = itsm_client
+
+        name = "mocker"
+        result = self.migrate.by_storage_provsion_name(f"{name}")
+        self.assertDictEqual(
+            result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
+        )
+
+        allocation = Allocation.objects.get(id=result["allocation_id"])
+        project = Project.objects.get(id=result["project_id"])
+        self.assertEqual(allocation.id, result["allocation_id"])
+        self.assertEqual(allocation.project, project)
+        self.assertEqual(allocation.project.title, name)
+
+        allocation_attributes = AllocationAttribute.objects.filter(
+            allocation=result["allocation_id"]
+        )
+        allocation_attribute_values = allocation_attributes.values_list(
+            "allocation_attribute_type__name", "value"
+        )
+
+        for attribute_value in self.expected_allocation_attributes:
+            self.assertIn(attribute_value, allocation_attribute_values)
+
+        self.assertEqual(allocation_attributes.count(), 21)
+
+        project_attributes = ProjectAttribute.objects.filter(
+            project=result["project_id"]
+        )
+        self.assertEqual(len(project_attributes), 3)
+
     @mock.patch(
         "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
     )
