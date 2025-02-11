@@ -150,6 +150,13 @@ class TestMigrateToColdfront(TestCase):
         )
         self.assertEqual(len(project_attributes), 3)
 
+    @mock.patch(
+        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
+    )
+    @mock.patch(
+        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
+    )
+    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_by_service_provision_name(
         self,
         mock_async_task: mock.MagicMock,
