@@ -198,10 +198,12 @@ class AllocationService:
             "cost_center",
             "billing_exempt",
             "department_number",
-            "billing_cycle",
             "technical_contact",
             "billing_contact",
             "service_rate",
+            "billing_cycle",
+            "prepaid_time",
+            "prepaid_billing_date",
         ]
 
         # some of the above are optional
