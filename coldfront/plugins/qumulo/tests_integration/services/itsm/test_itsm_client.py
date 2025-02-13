@@ -71,3 +71,17 @@ class TestItsmClient(TestCase):
         itsm_client = self.itsm_client
         self.assertRaises(TypeError, itsm_client.get_fs1_allocation_by_fileset_alias)
         # TypeError: get_fs1_allocation_by_fileset_alias() missing 1 required positional argument: 'fileset_alias'
+
+    @tag("integration")
+    def test_itsm_client_when_service_provision_is_found_by_storage_provision_name(
+        self,
+    ):
+        itsm_client = self.itsm_client
+        empty_list = []
+        storage_name = "wexler"
+        data = itsm_client.get_fs1_allocation_by_name(storage_name)
+        self.assertIsNot(data, empty_list)
+        service_provision = data[0]
+        self.assertIsInstance(service_provision, dict)
+        self.assertIn("name", service_provision.keys())
+        self.assertEqual(storage_name, service_provision.get("name"))
