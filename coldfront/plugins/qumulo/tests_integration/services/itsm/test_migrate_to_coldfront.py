@@ -6,6 +6,7 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
 
 from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
 
+
 class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
@@ -22,6 +23,20 @@ class TestMigrateToColdfront(TestCase):
         self.assertRaises(
             Exception,
             self.migrate.by_fileset_name,
+            fileset_key,
+            msg=(f'ITSM allocation was not found for "{fileset_key}"'),
+        )
+
+    @tag("integration")
+    def test_migrate_to_coldfront_by_storage_provision_name_found(self):
+        self.migrate.by_storage_provsion_name("ysjun")
+
+    @tag("integration")
+    def test_migrate_to_coldfront_by_by_storage_provsion_name_not_found(self):
+        fileset_key = "not_going_to_be_found"
+        self.assertRaises(
+            Exception,
+            self.migrate.by_storage_provsion_name,
             fileset_key,
             msg=(f'ITSM allocation was not found for "{fileset_key}"'),
         )

@@ -85,3 +85,21 @@ class TestItsmClient(TestCase):
         self.assertIsInstance(service_provision, dict)
         self.assertIn("name", service_provision.keys())
         self.assertEqual(storage_name, service_provision.get("name"))
+
+    @tag("integration")
+    def test_itsm_client_when_service_provision_is_not_found_by_storage_provision_name(
+        self,
+    ):
+        itsm_client = self.itsm_client
+        empty_list = []
+        self.assertListEqual(
+            itsm_client.get_fs1_allocation_by_name("not_going_to_be_found"),
+            empty_list,
+        )
+        self.assertListEqual(itsm_client.get_fs1_allocation_by_name(None), empty_list)
+
+    @tag("integration")
+    def test_itsm_client_when_the_storage_provision_name_is_missing(self):
+        itsm_client = self.itsm_client
+        self.assertRaises(TypeError, itsm_client.get_fs1_allocation_by_name)
+        # TypeError: get_fs1_allocation_by_fileset_name() missing 1 required positional argument: 'name'
