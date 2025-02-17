@@ -40,7 +40,7 @@ class MigrateToColdfront:
         return result
 
     def by_storage_provision_name(self, name: str) -> str:
-        itsm_result = self.__get_itsm_allocation_by_name(name)
+        itsm_result = self.__get_itsm_allocation_by_storage_provision_name(name)
         result = self.__create_by(name, itsm_result)
         return result
 
@@ -86,9 +86,9 @@ class MigrateToColdfront:
         itsm_allocation = itsm_client.get_fs1_allocation_by_fileset_alias(fileset_alias)
         return itsm_allocation
 
-    def __get_itsm_allocation_by_name(self, name: str) -> list:
+    def __get_itsm_allocation_by_storage_provision_name(self, name: str) -> list:
         itsm_client = ItsmClient()
-        itsm_allocation = itsm_client.get_fs1_allocation_by_name(name)
+        itsm_allocation = itsm_client.get_fs1_allocation_by_storage_provision_name(name)
         return itsm_allocation
 
     def __validate_itsm_result_set(self, fileset_key: str, itsm_result: list) -> bool:

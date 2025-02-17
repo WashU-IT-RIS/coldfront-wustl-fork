@@ -169,7 +169,9 @@ class TestMigrateToColdfront(TestCase):
         ) as file:
             mock_response = json.load(file)["data"]
             itsm_client = mock.MagicMock()
-            itsm_client.get_fs1_allocation_by_name.return_value = mock_response
+            itsm_client.get_fs1_allocation_by_storage_provision_name.return_value = (
+                mock_response
+            )
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker"
