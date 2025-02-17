@@ -45,8 +45,8 @@ class MigrateToColdfront:
         return result
 
     # Private Methods
-    def __create_by(self, fileset_key: str, itsm_result: str) -> str:
-        self.__validate_itsm_result_set(fileset_key, itsm_result)
+    def __create_by(self, key: str, itsm_result: str) -> str:
+        self.__validate_itsm_result_set(key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
 
