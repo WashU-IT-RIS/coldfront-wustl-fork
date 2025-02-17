@@ -78,13 +78,13 @@ class TestItsmClient(TestCase):
     ):
         itsm_client = self.itsm_client
         empty_list = []
-        storage_name = "wexler"
+        storage_name = "/vol/rdcw-fs1/wexler"
+        fileset_alias = "wexler_active"
         data = itsm_client.get_fs1_allocation_by_name(storage_name)
         self.assertIsNot(data, empty_list)
         service_provision = data[0]
         self.assertIsInstance(service_provision, dict)
-        self.assertIn("name", service_provision.keys())
-        self.assertEqual(storage_name, service_provision.get("name"))
+        self.assertEqual(fileset_alias, service_provision.get("fileset_alias"))
 
     @tag("integration")
     def test_itsm_client_when_service_provision_is_not_found_by_storage_provision_name(

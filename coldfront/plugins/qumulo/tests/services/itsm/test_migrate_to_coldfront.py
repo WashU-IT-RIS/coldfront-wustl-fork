@@ -173,7 +173,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker"
-        result = self.migrate.by_storage_provsion_name(f"{name}")
+        result = self.migrate.by_storage_provision_name(f"{name}")
         self.assertDictEqual(
             result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
         )
