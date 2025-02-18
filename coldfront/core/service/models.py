@@ -28,7 +28,7 @@ class ServiceRateCategory(TimeStampedModel):
     history = HistoricalRecords()
 
     class Meta:
-        verbose_name_plural = "service_rate_categories"
+        verbose_name_plural = "service rate categories"
 
 
 class ServiceRateCategoryTier(TimeStampedModel):
