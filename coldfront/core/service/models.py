@@ -27,6 +27,9 @@ class ServiceRateCategory(TimeStampedModel):
     current = CurrentRatesManager()
     history = HistoricalRecords()
 
+    class Meta:
+        verbose_name_plural = "service_rate_categories"
+
 
 class ServiceRateCategoryTier(TimeStampedModel):
     service_rate_category = models.ForeignKey(
