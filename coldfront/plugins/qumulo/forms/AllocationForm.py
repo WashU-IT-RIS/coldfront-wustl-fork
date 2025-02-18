@@ -11,6 +11,7 @@ from coldfront.plugins.qumulo.validators import (
     validate_single_ad_user,
     validate_ticket,
     validate_storage_name,
+    validate_prepaid_start_date,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -57,10 +58,21 @@ class AllocationForm(forms.Form):
         required=False,
     )
     billing_cycle = forms.ChoiceField(
-        help_text="The billing cycle of the allocation",
-        label="Billing Cycle",
         choices=BILLING_CYCLE_OPTIONS,
+        label="Billing Cycle Options",
+        help_text="Choose one billing cycle option from the above list",
         required=True,
+    )
+    prepaid_time = forms.IntegerField(
+        help_text="Prepaid Time in Months",
+        label="Prepaid Time",
+        required=False,
+    )
+    prepaid_billing_date = forms.DateField(
+        help_text="Start Date Date of Prepaid Billing",
+        label="Prepaid Billing Start Date",
+        validators=[validate_prepaid_start_date],
+        required=False,
     )
     service_rate = forms.ChoiceField(
         help_text="Service rate option for the Storage2 allocation",
@@ -77,7 +89,7 @@ class AllocationForm(forms.Form):
         widget=forms.CheckboxSelectMultiple(),
         choices=PROTOCOL_OPTIONS,
         label="Protocols",
-        help_text="Choose one or more protocols from the above list",
+        help_text="Choose protocols from the above list (or leave blank to configure no protocol)",
         initial=["smb"],
         required=False,
     )
