@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django_q.tasks import async_task
 
 from typing import Union, Optional
+from datetime import datetime
 
 import json
 import logging
@@ -76,6 +77,10 @@ class UpdateAllocationView(AllocationView):
             "technical_contact",
             "billing_contact",
             "service_rate",
+            "billing_cycle",
+            "prepaid_time",
+            "prepaid_billing_date",
+            "prepaid_expiration",
         ]
         for key in allocation_attribute_keys:
             form_data[key] = self.get_allocation_attribute(
@@ -226,7 +231,10 @@ class UpdateAllocationView(AllocationView):
         ]
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
-        async_task(addMembersToADGroup, users_to_add, access_allocation)
+        create_group_time = datetime.now()
+        async_task(
+            addMembersToADGroup, users_to_add, access_allocation, create_group_time
+        )
 
         users_to_remove = set(allocation_usernames) - set(access_users)
         for allocation_username in users_to_remove:
