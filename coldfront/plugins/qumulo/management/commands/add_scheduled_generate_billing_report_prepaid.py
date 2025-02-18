@@ -5,6 +5,8 @@ from django_q.tasks import schedule
 
 from django_q.models import Schedule
 
+from datetime import datetime, timezone
+
 from coldfront.plugins.qumulo.utils.prepaid_billing import PrepaidBilling
 
 SCHEDULED_FOR_28TH_DAY_OF_MONTH_AT_6_30_AM = (
@@ -25,5 +27,5 @@ class Command(BaseCommand):
 
 
 def generate_storage2_prepaid_billing_report() -> None:
-    prepaid_billing = PrepaidBilling("prepaid")
+    prepaid_billing = PrepaidBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
     prepaid_billing.generate_prepaid_billing_report()
