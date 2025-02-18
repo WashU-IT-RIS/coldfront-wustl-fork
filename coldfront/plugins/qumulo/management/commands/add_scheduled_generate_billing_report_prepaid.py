@@ -17,13 +17,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Scheduling generating storage2 monthly prepaid billing report")
         schedule(
-            "coldfront.plugins.qumulo.management.utils.prepaid_billing.PrepaidBilling",
+            func="coldfront.plugins.qumulo.management.commands.add_scheduled_generate_billing_report_prepaid.generate_storage2_prepaid_billing_report",
             name="Generate Prepaid Billing Report",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_28TH_DAY_OF_MONTH_AT_6_30_AM,
         )
 
 
-def generate_prepaid_billing_report() -> None:
+def generate_storage2_prepaid_billing_report() -> None:
     prepaid_billing = PrepaidBilling("prepaid")
     prepaid_billing.generate_prepaid_billing_report()
