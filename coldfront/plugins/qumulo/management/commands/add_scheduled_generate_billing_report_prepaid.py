@@ -5,7 +5,7 @@ from django_q.tasks import schedule
 
 from django_q.models import Schedule
 
-from coldfront.plugins.qumulo.utils.eib_billing import PrepaidBilling
+from coldfront.plugins.qumulo.utils.prepaid_billing import PrepaidBilling
 
 SCHEDULED_FOR_28TH_DAY_OF_MONTH_AT_6_30_AM = (
     arrow.utcnow().replace(day=28, hour=6, minute=30).format(arrow.FORMAT_RFC3339)
