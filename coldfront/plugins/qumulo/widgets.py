@@ -29,6 +29,9 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
     columns = []
     allow_multiple_selected = True
 
+    def init(self, initial_filter=None):
+        self.initial_filter = initial_filter
+
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
 
@@ -36,6 +39,7 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
             map(lambda element: element[1][0], context["widget"]["optgroups"])
         )
         context["widget"]["columns"] = self.columns
+        context["widget"]["initial_filter"] = self.initial_filter
 
         return context
 

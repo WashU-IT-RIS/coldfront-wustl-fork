@@ -34,9 +34,10 @@ class StorageFileSystemPathField(forms.CharField):
     ]
 
 
-# class FilterableCheckBoxTableField(forms.TypedMultipleChoiceField):
-#     widget = FilterableCheckBoxTableInput
+class FilterableCheckBoxTableField(forms.TypedMultipleChoiceField):
+    widget = FilterableCheckBoxTableInput
 
-#     def __init__(self, *, choices=(), **kwargs):
-#         super().__init__(**kwargs)
-#         self.columns = []
+    def __init__(self, *, initial_filter, **kwargs):
+        super().__init__(**kwargs)
+
+        self.widget.init(initial_filter=initial_filter)

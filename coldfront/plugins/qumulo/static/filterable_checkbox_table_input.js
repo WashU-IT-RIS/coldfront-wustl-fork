@@ -8,9 +8,16 @@ class FilterableCheckboxTableInput {
     this.columns = JSON.parse(
       document.getElementById("checkbox-table-columns").textContent
     );
+    this.currentFilter =
+      document.getElementById("initial-filter").textContent || undefined;
 
     this.populateOptions();
+    this.applyFilter(this);
   }
+
+  applyFilter = (foo) => {
+    console.log(this.currentFilter, foo.currentFilter);
+  };
 
   populateOptions = () => {
     const tbody = document.getElementById(`${this.widgetName}-options-tbody`);
@@ -66,13 +73,7 @@ class FilterableCheckboxTableInput {
     const newTable = document.getElementById(
       `${this.widgetName}-${isChecked ? "values" : "options"}-tbody`
     );
-    console.log({
-      this: this,
-      newTable,
-      newTableId: `${this.widgetName}-${
-        isChecked ? "values" : "options"
-      }-tbody`,
-    });
+
     newTable.appendChild(optionRow);
   };
 }

@@ -1,9 +1,8 @@
 from django import forms
 
-from coldfront.core.field_of_science.models import FieldOfScience
 from coldfront.core.allocation.models import Allocation
 
-from coldfront.plugins.qumulo.fields import ADUserField
+from coldfront.plugins.qumulo.fields import ADUserField, FilterableCheckBoxTableField
 from coldfront.plugins.qumulo.widgets import FilterableCheckBoxTableInput
 
 
@@ -23,9 +22,10 @@ class UserManagementForm(forms.Form):
         initial="",
     )
 
-    allocations = forms.TypedMultipleChoiceField(
+    allocations = FilterableCheckBoxTableField(
         label="Allocations",
         widget=FilterableCheckBoxTableInput,
+        initial_filter="id",
     )
 
     def build_allocation_choice(self, allocation: Allocation):
