@@ -15,7 +15,13 @@ class TestMigrateToColdfront(TestCase):
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name_found(self):
-        self.migrate.by_fileset_name("ysjun_active")
+        raised = False
+        try:
+            breakpoint()
+            self.migrate.by_fileset_name("ysjun_active")
+        except Exception:
+            raised = True
+        self.assertFalse(raised)
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name_not_found(self):
