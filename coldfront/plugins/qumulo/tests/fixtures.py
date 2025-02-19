@@ -49,6 +49,8 @@ def create_allocation_assets() -> None:
         ("subsidized", "Yes/No"),
         ("allow_nonfaculty", "Yes/No"),
         ("sla_name", "Text"),
+        ("prepaid_time", "Date"),
+        ("prepaid_billing_date", "Date"),
     ]
     for (
         allocation_attribute_name,
@@ -57,9 +59,7 @@ def create_allocation_assets() -> None:
 
         AllocationAttributeTypeFactory(
             name=allocation_attribute_name,
-            attribute_type=AAttributeTypeFactory(
-                name=allocation_attribute_type
-            ),
+            attribute_type=AAttributeTypeFactory(name=allocation_attribute_type),
         )
 
     project_attribute_names = [
