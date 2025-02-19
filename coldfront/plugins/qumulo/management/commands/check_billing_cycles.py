@@ -16,7 +16,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 
-def preliminary_billing_cycle_check(allocation):
+def create_billing_cycle_attr_if_not_exists(allocation):
     billing_cycle_attribute = AllocationAttributeType.objects.get(name="billing_cycle")
     try:
         AllocationAttribute.objects.get(
@@ -129,5 +129,5 @@ def check_allocation_billing_cycle_and_prepaid_exp() -> None:
     )
     logger.info(f"Checking billing_cycle in {len(allocations)} qumulo allocations")
     for allocation in allocations:
-        preliminary_billing_cycle_check(allocation)
+        create_billing_cycle_attr_if_not_exists(allocation)
         update_prepaid_exp_and_billing_cycle(allocation)
