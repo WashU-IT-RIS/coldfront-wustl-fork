@@ -80,6 +80,19 @@ class TestBillingCycleTypeUpdates(TestCase):
             "service_rate": "subscription",
             "billing_cycle": "monthly",
         }
+        self.no_billing_cycle_form_data = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "department_number": "Time Travel Services",
+            "service_rate": "subscription",
+        }
 
         self.client.force_login(self.user)
 
@@ -233,6 +246,24 @@ class TestBillingCycleTypeUpdates(TestCase):
 
         new_billing_cycle = AllocationAttribute.objects.get(
             allocation=monthly_allocation,
+            allocation_attribute_type__name="billing_cycle",
+        ).value
+
+        self.assertEqual(new_billing_cycle, "monthly")
+
+    def test_billing_cycle_manager_no_billing_cycle(self):
+        no_billing_cycle_allocation = create_allocation(
+            self.project, self.user, self.no_billing_cycle_form_data
+        )
+        no_billing_cycle_allocation.status = AllocationStatusChoice.objects.get(
+            name="Active"
+        )
+        no_billing_cycle_allocation.save()
+
+        check_allocation_billing_cycle_and_prepaid_exp()
+
+        new_billing_cycle = AllocationAttribute.objects.get(
+            allocation=no_billing_cycle_allocation,
             allocation_attribute_type__name="billing_cycle",
         ).value
 
