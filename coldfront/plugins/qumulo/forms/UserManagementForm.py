@@ -42,6 +42,7 @@ class UserManagementForm(forms.Form):
 
     def get_allocations(self):
         allocations = list(Allocation.objects.filter(resources__name="Storage2"))
+
         allocation_choices = list(
             map(
                 self.build_allocation_choice,

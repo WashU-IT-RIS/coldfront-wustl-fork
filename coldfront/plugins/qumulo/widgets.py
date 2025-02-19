@@ -1,5 +1,4 @@
 from django.forms.widgets import Widget, ChoiceWidget
-import coldfront.plugins.qumulo.templatetags
 
 
 class MultiSelectLookupInput(Widget):
@@ -33,7 +32,9 @@ class FilterableCheckBoxTableInput(ChoiceWidget):
     def get_context(self, name, value, attrs):
         context = super().get_context(name, value, attrs)
 
-        context["widget"]["options"] = context["widget"]["optgroups"][0][1]
+        context["widget"]["options"] = list(
+            map(lambda element: element[1][0], context["widget"]["optgroups"])
+        )
         context["widget"]["columns"] = self.columns
 
         return context
