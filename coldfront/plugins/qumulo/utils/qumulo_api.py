@@ -307,3 +307,12 @@ class QumuloAPI:
             raise Exception("Unable to get_all_quotas_with_status from QUMULO API")
 
         return next(iter(all_quotas_with_usage))
+
+    def get_file_system_capacity(self):
+        return self.rc.fs.read_fs_stats()
+    
+    def get_total_size_bytes(self):
+        return self.get_file_system_capacity(self).get("total_size_bytes")
+
+    def get_free_size_bytes(self):
+        return self.get_file_system_capacity(self).get("free_size_bytes")
