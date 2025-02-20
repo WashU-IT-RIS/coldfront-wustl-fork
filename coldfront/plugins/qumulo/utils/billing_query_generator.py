@@ -143,14 +143,7 @@ class BillingGenerator:
                     data.sponsor,
                     CASE service_rate_category
                         WHEN 'consumption' THEN
-                            CASE subsidized
-                                WHEN TRUE THEN
-                                    CASE (billing_amount_tb - 5) > 0
-                                        WHEN TRUE THEN (billing_amount_tb -5)
-                                        ELSE 0
-                                    END
-                                ELSE billing_amount_tb
-                            END
+                            data.subsidized
                         ELSE billing_amount_tb
                     END billing_amount,
                     data.rate,
@@ -169,7 +162,7 @@ class BillingGenerator:
                         cost_center,
                         {prepaid_custom_columns_from_select_lowest_level}
                         'monthly' billing_cycle,
-                        TRUE subsidized,
+                        subsidized,
                         FALSE exempt,
                         CASE service_rate_category
                             {additional_category_case_monthly}
