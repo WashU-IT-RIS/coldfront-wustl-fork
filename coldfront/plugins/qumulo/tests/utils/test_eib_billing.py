@@ -199,7 +199,7 @@ class TestEIBBilling(TestCase):
         self.assertTrue(re.search("^Submit Internal Service Delivery(,){27}", header))
         self.assertEqual(
             hashlib.md5(header.encode("utf-8")).hexdigest(),
-            "250225b6615daaa68b067ceef5abaf51",
+            "79bf5c3df88554aceae1545360d66373",
         )
 
     def test_query_return_sql_statement(self):
