@@ -20,6 +20,7 @@ from coldfront.core.allocation.models import (
 )
 
 from coldfront.core.user.models import User
+from coldfront.core.utils.mail import send_email, EMAIL_SENDER
 
 from coldfront.plugins.qumulo.forms import UpdateAllocationForm
 from coldfront.plugins.qumulo.hooks import acl_reset_complete_hook
@@ -129,6 +130,7 @@ class UpdateAllocationView(AllocationView):
         # know or learn what they should be.  Testing has shown that the DEV
         # infrastructure can process a directory tree of about 90,500 items in
         # 62 minutes.
+        send_email("TEST", "EMAIL TEST\n IGNORE", EMAIL_SENDER, ["harterj@wustl.edu"])
         task_id = async_task(
             reset_allocation_acls,
             User.objects.get(id=self.request.user.id).email,
