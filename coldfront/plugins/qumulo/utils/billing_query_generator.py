@@ -134,6 +134,7 @@ class BillingGenerator:
                 {monthly_specific_columns}
                 report.rate rate,
                 report.service_unit unit
+                report.subsidized subsidized
             FROM (
                 SELECT
                     '{args["delivery_date"]}' delivery_date,
