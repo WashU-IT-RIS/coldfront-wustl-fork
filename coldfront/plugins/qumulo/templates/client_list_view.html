@@ -1,0 +1,65 @@
++{% extends "common/base.html" %}
+{% load common_tags %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+
+{% block title %}
+Client View
+{% endblock %}
+
+
+{% block content %}
+<h2>Clients</h2>
+<hr>
+
+
+{% if client_list %}
+  <strong>client{{client_count|pluralize}}: {{client_count}}</strong>
+  <a href="{% url 'qumulo:client-export-csv' %}" class="btn btn-primary float-right">Export to CSV</a>
+  <div class="table-responsive">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th scope="col" class="text-nowrap">
+            WUSTL Key
+          </th>
+          <th scope="col" class="text-nowrap">
+            Email Address
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for client in client_list %}
+          <tr class="{% if allocation.is_child %}table-secondary{% endif %} text-nowrap">
+            <td class="text-nowrap">{{ client.wustl_key }}</td>
+            <td class="text-nowrap">{{ client.email }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if is_paginated %} Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      <ul class="pagination float-right mr-3">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&{{filter_parameters_with_order_by}}">Previous</a></li>
+        {% else %}
+          <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+        {% endif %}
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&{{filter_parameters_with_order_by}}">Next</a></li>
+        {% else %}
+          <li class="page-item disabled"><a class="page-link" href="#">Next</a></li>
+        {% endif %}
+      </ul>
+    {% endif %}
+  </div>
+{% elif expand_accordion == "show"%}
+  <div class="alert alert-secondary">
+    No search results!
+  </div>
+{% else %}
+  <div class="alert alert-secondary">
+    No allocations to display!
+  </div>
+{% endif %}
+{% endblock %}
