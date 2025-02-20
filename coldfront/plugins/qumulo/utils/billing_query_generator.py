@@ -139,6 +139,7 @@ class BillingGenerator:
                 SELECT
                     '{args["delivery_date"]}' delivery_date,
                     data.service_unit,
+                    data.subsidized,
                     data.storage_name,
                     data.service_name,
                     data.sponsor,
