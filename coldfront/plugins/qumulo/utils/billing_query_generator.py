@@ -141,11 +141,7 @@ class BillingGenerator:
                     data.storage_name,
                     data.service_name,
                     data.sponsor,
-                    CASE service_rate_category
-                        WHEN 'consumption' THEN
-                            data.subsidized
-                        ELSE billing_amount_tb
-                    END billing_amount,
+                    billing_amount_tb billing_amount,
                     data.rate,
                     data.service_rate_category,
                     data.department_number,
