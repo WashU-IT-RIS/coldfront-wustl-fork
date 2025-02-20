@@ -12,11 +12,11 @@ class FilterableCheckboxTableInput {
       document.getElementById("initial-filter").textContent || undefined;
 
     this.populateOptions();
-    this.applyFilter(this);
+    this.applyFilter(this.currentFilter);
   }
 
-  applyFilter = (foo) => {
-    console.log(this.currentFilter, foo.currentFilter);
+  applyFilter = (filter) => {
+    console.log({ filter });
   };
 
   populateOptions = () => {
