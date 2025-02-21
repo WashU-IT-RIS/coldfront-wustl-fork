@@ -7,11 +7,9 @@
 Create Allocation
 {% endblock %}
 
-{% block content %}
+{% block content %}git status
 <div>
-  <div>
-    {{file_system_stats}}
-  </div>
+  {% include 'partials/file_system_stats.html' %}
   {% if is_pending == True %}
   <div class="alert alert-warning" role="alert">
     This allocation is marked as pending, please do not update until the status changes.
