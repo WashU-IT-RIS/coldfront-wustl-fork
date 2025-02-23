@@ -84,10 +84,12 @@ class AllocationView(LoginRequiredMixin, FormView):
 
     def __get_file_system_stats_in_tb(self):
         file_system_stats = QumuloAPI().get_file_system_stats()
-        total_size_tb = bytes_to_terabytes(file_system_stats.get("total_size_bytes"))
-        free_size_tb = bytes_to_terabytes(file_system_stats.get("free_size_bytes"))
+        total_size_tb = bytes_to_terabytes(
+            int(file_system_stats.get("total_size_bytes"))
+        )
+        free_size_tb = bytes_to_terabytes(int(file_system_stats.get("free_size_bytes")))
         snapshot_size_tb = bytes_to_terabytes(
-            file_system_stats.get("snapshot_size_bytes")
+            int(file_system_stats.get("snapshot_size_bytes"))
         )
         return {
             "total_size_tb": total_size_tb,
