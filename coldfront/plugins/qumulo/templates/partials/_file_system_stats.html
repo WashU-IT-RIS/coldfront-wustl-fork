@@ -1,9 +1,9 @@
 <div id="file-system-stats" class="stats-widget">
     <div class="stats-item">
-        Total Size: {% file_system_stats_tb,get("total_size_tb") %}TB
+        Total Size: {% file_system_stats_tb.get("total_size_tb") %}TB
     </div>
     <div class="stats-item">
-        Free Size: {% file_system_stats_tb,get("free_size_tb") %}TB
+        Free Size: {% file_system_stats_tb.get("free_size_tb") %}TB
     </div>
     <div class="stats-item">
         Snapshot Size: {% type(file_system_stats_tb) %}}TB
