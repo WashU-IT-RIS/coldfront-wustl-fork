@@ -8,6 +8,15 @@ from coldfront.plugins.qumulo.views import (
     user_management_view,
 )
 
+from django.http import JsonResponse, HttpResponse
+
+response = JsonResponse({"foo": "bar"})
+
+
+def request_handler(request):
+    return response
+
+
 app_name = "qumulo"
 urlpatterns = [
     path("allocation", allocation_view.AllocationView.as_view(), name="allocation"),
@@ -31,4 +40,5 @@ urlpatterns = [
         user_management_view.UserManagementView.as_view(),
         name="userManagement",
     ),
+    path("json-test", request_handler, name="jsonTest"),
 ]
