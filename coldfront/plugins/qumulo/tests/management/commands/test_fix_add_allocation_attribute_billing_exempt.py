@@ -42,8 +42,9 @@ class TestAddBillingExempt(TestCase):
             "no",
             stdout=out,
         )
-        self.assertIn("[Error] Invalid: ", out.getvalue())
-        self.assertIn("Invalid Value", out.getvalue())
+        output = out.getvalue()
+        self.assertIn("[Error] Invalid: ", output)
+        self.assertIn("Invalid Value", output)
 
     def test_invalid_to_add_billing_exempt(self):
         out = StringIO()
@@ -60,9 +61,10 @@ class TestAddBillingExempt(TestCase):
             "fix_add_allocation_attribute_billing_exempt",
             stdout=out,
         )
-        self.assertIn("[Error] Invalid: ", out.getvalue())
-        self.assertIn("Allocation Attribute Types conflict", out.getvalue())
-        self.assertNotIn("Successfully added", out.getvalue())
+        output = out.getvalue()
+        self.assertIn("[Error] Invalid: ", output)
+        self.assertIn("Allocation Attribute Types conflict", output)
+        self.assertNotIn("Successfully added", output)
 
     def test_successfully_added(self):
         out = StringIO()
@@ -70,8 +72,9 @@ class TestAddBillingExempt(TestCase):
             "fix_add_allocation_attribute_billing_exempt",
             stdout=out,
         )
-        self.assertIn("[Info] Validation Pass", out.getvalue())
-        self.assertIn("[Info] Successfully added billing_exempt", out.getvalue())
+        output = out.getvalue()
+        self.assertIn("[Info] Validation Pass", output)
+        self.assertIn("[Info] Successfully added", output)
 
     def test_set_default_value(self):
         out = StringIO()
@@ -81,6 +84,7 @@ class TestAddBillingExempt(TestCase):
             "Yes",
             stdout=out,
         )
-        self.assertIn("[Info] Validation Pass", out.getvalue())
-        self.assertIn("[Info] Successfully added billing_exempt", out.getvalue())
-        self.assertNotIn("[Error] Failed to add", out.getvalue())
+        output = out.getvalue()
+        self.assertIn("[Info] Validation Pass", output)
+        self.assertIn("[Info] Successfully added", output)
+        self.assertNotIn("[Error] Failed to add", output)

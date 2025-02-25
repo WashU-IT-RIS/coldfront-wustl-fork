@@ -99,6 +99,7 @@ class Command(BaseCommand):
                     value=self.default_value,
                 )
                 allocation_attribute.save()
+                self.counter += 1
             except Exception as e:
                 raise CommandError(
                     self.style.ERROR(f"[Error] Failed to add billing_exempt: {e}")
@@ -106,6 +107,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         self.default_value = options["default_value"]
+        self.counter = 0
 
         attr_validator = AttributeValidator(self.default_value)
         try:
@@ -114,7 +116,7 @@ class Command(BaseCommand):
             self._add_billing_exempt()
             self.stdout.write(
                 self.style.SUCCESS(
-                    "[Info] Successfully added billing_exempt as an allocation attribute to pre-existing allocations."
+                    f"[Info] Successfully added {self.counter} billing_exempt as an allocation attribute to pre-existing allocations."
                 )
             )
         except CommandError as e:
