@@ -7,7 +7,6 @@ from unittest import mock
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils import (
     print_all_quotas_with_usage,
-    print_quotas_exceeding_usages,
 )
 
 BLANK = ""
@@ -76,3 +75,4 @@ class TestGetAllQuotasWithStatus(TestCase):
         size_bytes_keys = file_system_capacity_stats.keys()
         self.assertIn("total_size_bytes", size_bytes_keys)
         self.assertIn("free_size_bytes", size_bytes_keys)
+        self.assertIn("snapshot_size_bytes", size_bytes_keys)
