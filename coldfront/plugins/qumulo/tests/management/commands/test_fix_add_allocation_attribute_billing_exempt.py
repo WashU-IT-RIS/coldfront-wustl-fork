@@ -75,6 +75,7 @@ class TestAddBillingExempt(TestCase):
         output = out.getvalue()
         self.assertIn("[Info] Validation Pass", output)
         self.assertIn("[Info] Successfully added", output)
+        self.assertNotIn("[Error] Failed to add", output)
 
     def test_set_default_value(self):
         out = StringIO()
@@ -87,4 +88,3 @@ class TestAddBillingExempt(TestCase):
         output = out.getvalue()
         self.assertIn("[Info] Validation Pass", output)
         self.assertIn("[Info] Successfully added", output)
-        self.assertNotIn("[Error] Failed to add", output)

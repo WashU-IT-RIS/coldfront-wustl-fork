@@ -73,7 +73,7 @@ class Command(BaseCommand):
             if not has_billing_exempt:
                 raise Exception(
                     self.style.WARNING(
-                        "Warning: Allocation Attribute Type missing: Run coldfront command 'add_qumulo_allocation_attribute_type'."
+                        "Allocation Attribute Type missing: Run coldfront command 'add_qumulo_allocation_attribute_type'."
                     )
                 )
             else:  # not has_exempt:
@@ -102,7 +102,7 @@ class Command(BaseCommand):
                 self.counter += 1
             except Exception as e:
                 raise CommandError(
-                    self.style.ERROR(f"[Error] Failed to add billing_exempt: {e}")
+                    self.style.ERROR(f"Failed to add billing_exempt: {e}")
                 )
 
     def handle(self, *args, **options) -> None:
