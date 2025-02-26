@@ -3,7 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '../../public/vite.svg'
 import './UserManagement.css'
 
-function App() {
+function UserManagement() {
   const [count, setCount] = useState(0)
 
   return (
@@ -32,4 +32,4 @@ function App() {
   )
 }
 
-export default App
+export default UserManagement

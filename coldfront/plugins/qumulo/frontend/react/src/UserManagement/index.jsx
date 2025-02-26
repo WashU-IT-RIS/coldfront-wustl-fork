@@ -1,10 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './UserManagment.jsx'
+import UserManagement from './UserManagment.jsx'
 
-createRoot(document.getElementById('user_management')).render(
+createRoot(document.getElementById('user-management')).render(
   <StrictMode>
-    <App />
+    <UserManagement />
   </StrictMode>,
 )
