@@ -9,7 +9,10 @@ import os
 from coldfront.core.allocation.models import Allocation
 
 from coldfront.plugins.qumulo.forms import AllocationForm
+from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.validators import validate_filesystem_path_unique
+from coldfront.plugins.qumulo.utils.math_helper import bytes_to_terabytes
+
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 
@@ -22,6 +25,11 @@ class AllocationView(LoginRequiredMixin, FormView):
     template_name = "allocation.html"
     new_allocation = None
     success_id = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["file_system_stats"] = self.__get_file_system_stats_in_tb()
+        return context
 
     def get_form_kwargs(self):
         kwargs = super(AllocationView, self).get_form_kwargs()
@@ -73,3 +81,20 @@ class AllocationView(LoginRequiredMixin, FormView):
                 kwargs={"allocation_id": self.success_id},
             )
         return super().get_success_url()
+
+    def __get_file_system_stats_in_tb(self):
+        file_system_stats = QumuloAPI().get_file_system_stats()
+        total_size_tb = round(
+            bytes_to_terabytes(int(file_system_stats.get("total_size_bytes"))), 2
+        )
+        free_size_tb = round(
+            bytes_to_terabytes(int(file_system_stats.get("free_size_bytes"))), 2
+        )
+        snapshot_size_tb = round(
+            bytes_to_terabytes(int(file_system_stats.get("snapshot_size_bytes"))), 2
+        )
+        return {
+            "total_size_tb": total_size_tb,
+            "free_size_tb": free_size_tb,
+            "snapshot_size_tb": snapshot_size_tb,
+        }
