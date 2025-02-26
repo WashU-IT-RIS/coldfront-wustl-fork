@@ -6,6 +6,7 @@ from coldfront.plugins.qumulo.views import (
     create_sub_allocation_view,
     allocation_table_view,
     user_management_view,
+    progress_view,
 )
 
 from django.http import JsonResponse, HttpResponse
@@ -41,4 +42,9 @@ urlpatterns = [
         name="userManagement",
     ),
     path("json-test", request_handler, name="jsonTest"),
+    path(
+        "progress-bar",
+        progress_view.ProgressView.as_view(),
+        name="progress-bar",
+    ),
 ]
