@@ -28,7 +28,7 @@ class AllocationView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["file_system_stats_tb"] = self.__get_file_system_stats_in_tb()
+        context["file_system_stats"] = self.__get_file_system_stats_in_tb()
         return context
 
     def get_form_kwargs(self):
