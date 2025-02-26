@@ -2,25 +2,14 @@ import os
 from io import StringIO
 
 from django.test import TestCase
-from unittest.mock import MagicMock
 
+from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
+from django.core.management import call_command
 from coldfront.core.allocation.models import (
-    Allocation,
-    AllocationStatusChoice,
     AttributeType,
     AllocationAttributeType,
-    AllocationLinkage,
-)
-from coldfront.plugins.qumulo.tests.utils.mock_data import (
-    build_models,
-    create_allocation,
 )
 
-from django.core.management import call_command
-
-from coldfront.plugins.qumulo.management.commands.fix_add_allocation_attribute_billing_exempt import (
-    Command,
-)
 
 STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
 

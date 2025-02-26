@@ -1,29 +1,3 @@
-"""
-    This is a patch.
-    The assumption is the allocation_attribute_type has been created.
-    This is to add the required allocation_attribute to each allocations
-        if the allocation doesn't have the allocation_attibute.
-    This is re-runable in production.
-    This is designed only for billing_exempt with its default value, "No".
-
-    1. Confirm there is no concurrent existence of exempt and billing_exempt
-        in the allocation_attribute_type table.
-    2. Confirm billing_exempt is an allocation_attribute_type in Coldfront.
-
-        If both exempt and billing_exempt are exist, 
-            Prompt for a system error. Require AppEng to intervene for resolution:
-                Copy the value of allocation_attirbute exempt to billing_exempt for all allocations
-                Delete the allocation_attribute exempt for all allocations
-            Fail and report error.
-        Else If billing_exempt not exist,
-            Prompt to run coldfront command "add_qumulo_allocation_attribute_type"
-            Exit
-
-    3. Loop to each allocation and
-        set billing_exempt to default "No" if there is no such allocation_attribute. 
-"""
-
-import sys
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from coldfront.core.utils.validate import AttributeValidator
@@ -37,7 +11,7 @@ from coldfront.core.allocation.models import (
 class Command(BaseCommand):
     help = """
         Run this command will ensure the required allocation attribute billing_exempt in each allocations.
-        The default values are "Yes" or "No", and case-sensitive.
+        The default value is "Yes" or "No", and case-sensitive.
     """
 
     def add_arguments(self, parser) -> None:
@@ -71,8 +45,8 @@ class Command(BaseCommand):
 
         except ObjectDoesNotExist:
             if not has_billing_exempt:
-                raise Exception(
-                    self.style.WARNING(
+                raise ValidationError(
+                    self.style.ERROR(
                         "Allocation Attribute Type missing: Run coldfront command 'add_qumulo_allocation_attribute_type'."
                     )
                 )
