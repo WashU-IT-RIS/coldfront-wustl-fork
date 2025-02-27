@@ -18,7 +18,7 @@ class TestMigrateToColdfront(TestCase):
         raised = False
         try:
             breakpoint()
-            self.migrate.by_fileset_name("jsyun_active")
+            self.migrate.by_fileset_name("ysjun_active")
         except Exception:
             raised = True
         self.assertFalse(raised)
