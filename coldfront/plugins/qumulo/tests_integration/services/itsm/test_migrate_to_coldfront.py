@@ -35,7 +35,12 @@ class TestMigrateToColdfront(TestCase):
 
     @tag("integration")
     def test_migrate_to_coldfront_by_storage_provision_name_found(self):
-        self.migrate.by_storage_provision_name("/vol/rdcw-fs1/ysjun")
+        raised = False
+        try:
+            self.migrate.by_storage_provision_name("/vol/rdcw-fs1/ysjun")
+        except Exception:
+            raised = True
+        self.assertFalse(raised)
 
     @tag("integration")
     def test_migrate_to_coldfront_by_by_storage_provision_name_not_found(self):
