@@ -1,33 +1,20 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '../../public/vite.svg'
+
+import UserSelector from '../UserSelector/UserSelector'
+import AllocationSelector from '../AllocationSelector/AllocationSelector'
+
 import './UserManagement.css'
 
 function UserManagement() {
-  const [count, setCount] = useState(0)
+  const [users, setUsers] = useState(['foo', 'bar'])
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <UserSelector name="user-selector" users={users} setUsers={setUsers} />
+      <AllocationSelector />
+      <div className="d-flex justify-content-end">
+        <button type="submit" className="btn btn-primary mr-2" id="user_management_form_submit">Submit</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
