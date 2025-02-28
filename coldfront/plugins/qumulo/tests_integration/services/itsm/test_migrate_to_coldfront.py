@@ -17,7 +17,6 @@ class TestMigrateToColdfront(TestCase):
     def test_migrate_to_coldfront_by_fileset_name_found(self):
         raised = False
         try:
-            breakpoint()
             self.migrate.by_fileset_name("kchoi_active")
         except Exception:
             raised = True
