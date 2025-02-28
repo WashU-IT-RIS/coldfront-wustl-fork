@@ -8,7 +8,7 @@ const components = ["UserManagement"];
 
 for (const component of components) {
   console.log("Building", component);
-  const componentRoot = path.resolve(dirname, `./src/${component}`);
+  const componentRoot = path.resolve(dirname, `./src/views/${component}`);
   const outDir = path.resolve(dirname, `./dist/${component}`);
 
   baseConfig.root = componentRoot;

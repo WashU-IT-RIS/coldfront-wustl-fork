@@ -5,10 +5,10 @@ const dirname = import.meta.dirname;
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  publicDir: `${dirname}/../../public/`,
+  publicDir: `${dirname}/../../../public/`,
   base: "/static/UserManagement",
   build: {
     emptyOutDir: true,
-    outDir: `${dirname}/../../dist/UserManagement`,
+    outDir: `${dirname}/../../../dist/UserManagement`,
   },
 });
