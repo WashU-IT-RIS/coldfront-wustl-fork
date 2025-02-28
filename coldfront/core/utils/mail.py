@@ -8,6 +8,8 @@ from django.urls import reverse
 
 from coldfront.core.utils.common import import_from_settings
 
+import pprint
+
 logger = logging.getLogger(__name__)
 EMAIL_ENABLED = import_from_settings("EMAIL_ENABLED", False)
 EMAIL_SUBJECT_PREFIX = import_from_settings("EMAIL_SUBJECT_PREFIX")
@@ -76,6 +78,7 @@ def send_email(subject, body, sender, receiver_list, cc=[]):
             ",".join(receiver_list),
             subject,
         )
+        logger.error(pprint.pformat(e))
 
 
 def send_email_template(
