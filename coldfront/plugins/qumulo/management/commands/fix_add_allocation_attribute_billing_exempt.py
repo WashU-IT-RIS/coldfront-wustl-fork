@@ -36,9 +36,10 @@ class Command(BaseCommand):
                 raise ValidationError(
                     self.style.ERROR(
                         """
-                        Allocation Attribute Types conflict: Require AppEng to migrate exempt to billing_exempt
+                        Allocation Attribute Types conflict: Require AppEng to migrate exempt to billing_exempt.
                             1. Copy the value of allocation_attirbute exempt to billing_exempt for all allocations
-                            2. Delete the allocation_attribute exempt for all allocations
+                            2. Delete the allocation_attribute exempt from all allocations.
+                            3. Delete the allocation_attribute_type exempt.
                         """
                     )
                 )
