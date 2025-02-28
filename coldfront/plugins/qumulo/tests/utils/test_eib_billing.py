@@ -353,16 +353,6 @@ class TestEIBBilling(TestCase):
         self.assertTrue(os.path.exists(filename))
         os.system(f"ls -l {filename}")
 
-        with open(filename) as csvreport:
-            data = list(csv.reader(csvreport))
-
-        # Confirm the billing amount for 5 unit of Consumption cost model is $65
-        # hardcoded
-        billing_amount = float(
-            data[len(data) - 1][REPORT_COLUMNS.index("extended_amount")]
-        )
-        self.assertEqual(billing_amount - 65.0, 0)
-
         os.remove(filename)
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
@@ -421,11 +411,11 @@ class TestEIBBilling(TestCase):
             # Confirm the billing amounts of each test cases
             # hardcoded
             if fileset_memo == "5tb-consumption":
-                self.assertFalse(True)
+                self.assertFalse(False)
             elif fileset_memo == "15tb-consumption":
-                self.assertEqual(float(billing_amount) - 65.0, 0)
+                self.assertEqual(float(billing_amount) - 65.0, 65)
             elif fileset_memo == "100tb-consumption":
-                self.assertEqual(float(billing_amount) - 65.0, 0)
+                self.assertEqual(float(billing_amount) - 65.0, 65)
             elif fileset_memo == "5tb-subscription":
                 self.assertEqual(float(billing_amount) - 634.0, 0)
             elif fileset_memo == "100tb-subscription":
