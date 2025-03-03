@@ -43,13 +43,13 @@ def create_allocation_assets() -> None:
         ("sponsor_department_number", "Text"),
         ("fileset_name", "Text"),
         ("fileset_alias", "Text"),
-        ("exempt", "Yes/No"),
+        ("billing_exempt", "Yes/No"),
         ("itsm_comment", "JSON"),
         ("billing_cycle", "Text"),
         ("subsidized", "Yes/No"),
         ("allow_nonfaculty", "Yes/No"),
         ("sla_name", "Text"),
-        ("prepaid_time", "Date"),
+        ("prepaid_time", "Int"),
         ("prepaid_billing_date", "Date"),
     ]
     for (
