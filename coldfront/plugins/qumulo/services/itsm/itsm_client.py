@@ -27,8 +27,12 @@ class ItsmClient:
     def get_fs1_allocation_by_fileset_alias(self, fileset_alias) -> str:
         return self.__get_fs1_allocation_by("fileset_alias", fileset_alias)
 
-    def get_fs1_allocation_by_storage_provision_name(self, name) -> str:
-        return self.__get_fs1_allocation_by("name", name)
+    def get_fs1_allocation_by_storage_provision_name(
+        self, storage_provision_name
+    ) -> str:
+        return self.__get_fs1_allocation_by(
+            "storage_provision_name", storage_provision_name
+        )
 
     # TODO is there a way to get the name of the environment such as prod, qa, or localhost?
     def __is_itsm_localhost(self):
@@ -44,9 +48,9 @@ class ItsmClient:
         session.close()
         return data
 
-    def __get_filtered_url(self, key, value) -> str:
+    def __get_filtered_url(self, fileset_key, fileset_value) -> str:
         itsm_active_allocation_service_id = 1
-        filters = f'filter={{"{key}":"{value}","status":"active","service_id":{itsm_active_allocation_service_id}}}'
+        filters = f'filter={{"{fileset_key}":"{fileset_value}","status":"active","service_id":{itsm_active_allocation_service_id}}}'
         return f"{self.url}&{filters}"
 
     def __get_session(self) -> requests.Session:

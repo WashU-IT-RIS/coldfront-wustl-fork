@@ -39,9 +39,11 @@ class MigrateToColdfront:
         result = self.__create_by(fileset_name, itsm_result)
         return result
 
-    def by_storage_provision_name(self, name: str) -> str:
-        itsm_result = self.__get_itsm_allocation_by_storage_provision_name(name)
-        result = self.__create_by(name, itsm_result)
+    def by_storage_provision_name(self, storage_provision_name: str) -> str:
+        itsm_result = self.__get_itsm_allocation_by_storage_provision_name(
+            storage_provision_name
+        )
+        result = self.__create_by(storage_provision_name, itsm_result)
         return result
 
     # Private Methods

@@ -21,7 +21,7 @@ class Command(BaseCommand):
             help="Queries by fileset_alias instead of by fileset_name",
         )
         parser.add_argument(
-            "--name",
+            "--storage_provision_name",
             action="store_true",
             help="Queries by name instead of by fileset_name",
         )
