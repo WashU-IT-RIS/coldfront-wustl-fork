@@ -49,6 +49,8 @@ def create_allocation_assets() -> None:
         ("subsidized", "Yes/No"),
         ("allow_nonfaculty", "Yes/No"),
         ("sla_name", "Text"),
+        {"prepaid_billing_date", "Date"},
+        {"prepaid_time", "Date"},
     ]
     for (
         allocation_attribute_name,
