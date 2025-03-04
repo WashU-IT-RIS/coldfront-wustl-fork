@@ -8,6 +8,9 @@ Update Allocation
 {% endblock %}
 
 {% block content %}
+
+{% include "partials/_file_system_stats.html" %}
+
 <div>
   <form method="post" id="allocation_form">
     {% csrf_token %}
