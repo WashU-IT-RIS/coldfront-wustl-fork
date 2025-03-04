@@ -13,8 +13,8 @@ function UserManagement() {
     <>
       <UserSelector name="user-selector" users={users} setUsers={setUsers} />
       <AllocationSelector
-        setAllocations={setAllocations}
-        allocations={allocations}
+        setSelectedAllocations={setAllocations}
+        selectedAllocations={allocations}
       />
       <div className="d-flex justify-content-end">
         <button

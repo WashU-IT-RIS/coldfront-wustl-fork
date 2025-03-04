@@ -8,14 +8,7 @@ from coldfront.plugins.qumulo.views import (
     user_management_view,
     progress_view,
 )
-
-from django.http import JsonResponse, HttpResponse
-
-response = JsonResponse({"foo": "bar"})
-
-
-def request_handler(request):
-    return response
+from coldfront.plugins.qumulo.api.allocations import Allocations
 
 
 app_name = "qumulo"
@@ -41,7 +34,7 @@ urlpatterns = [
         user_management_view.UserManagementView.as_view(),
         name="userManagement",
     ),
-    path("json-test", request_handler, name="jsonTest"),
+    path("api/allocations", Allocations.as_view(), name="getAllocations"),
     path(
         "progress-bar",
         progress_view.ProgressView.as_view(),
