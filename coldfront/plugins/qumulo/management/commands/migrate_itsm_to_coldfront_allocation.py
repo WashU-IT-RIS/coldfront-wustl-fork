@@ -29,14 +29,14 @@ class Command(BaseCommand):
         ic(fileset)
         find_by_alias = options["fileset_alias"]
         ic(find_by_alias)
-        find_by_name = options["name"]
-        ic(find_by_name)
+        find_by_storage_provision_name = options["storage_provision_name"]
+        ic(find_by_storage_provision_name)
 
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
         if find_by_alias:
             result = migrate_from_itsm_to_coldfront.by_fileset_alias(fileset)
-        elif find_by_name:
-            result = migrate_from_itsm_to_coldfront.by_fileset_storage_name(fileset)
+        elif find_by_storage_provision_name:
+            result = migrate_from_itsm_to_coldfront.by_storage_provision_name(fileset)
         else:
             result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset)
 
