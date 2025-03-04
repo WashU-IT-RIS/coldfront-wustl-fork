@@ -16,10 +16,9 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
   const columns = ["id", "resource_name", "allocation_status", "file_path"];
   const [allocations, setAllocations] = useState([]);
 
-  useEffect(
-    () => onGetAllocations().then((allocations) => setAllocations(allocations)),
-    []
-  );
+  useEffect(() => {
+    onGetAllocations().then((allocations) => setAllocations(allocations));
+  }, []);
 
   const renderHeader = () => {
     return columns.map((column) => (

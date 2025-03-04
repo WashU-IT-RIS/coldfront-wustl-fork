@@ -1,11 +1,12 @@
 from django.http import JsonResponse
 from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
 
 from coldfront.core.allocation.models import Allocation, AllocationAttribute
 
 
-class Allocations(View):
+class Allocations(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         allocations = list(Allocation.objects.filter(resources__name="Storage2"))
 
