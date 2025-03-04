@@ -1,12 +1,13 @@
 <div id="file-system-stats" class="stats-widget">
     <div class="stats-heading">Storage2 Stats</div>
     <div class="stats-item">
-        Total Size: {{ file_system_stats.total_size_tb }}TB
+        Total Size: {{ file_system_stats.total_size_tb }}PB
+    </div>
+    <hr/>
+    <div class="stats-item">
+        Free Size: {{ file_system_stats.free_size_tb }}PB
     </div>
     <div class="stats-item">
-        Free Size: {{ file_system_stats.free_size_tb }}TB
-    </div>
-    <div class="stats-item">
-        Snapshot Size: {{ file_system_stats.spanshot_size_tb }}TB
+        Snapshot Size: {{ file_system_stats.spanshot_size_tb }}PB
     </div>
 </div>
