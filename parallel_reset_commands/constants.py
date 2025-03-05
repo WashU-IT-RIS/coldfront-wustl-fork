@@ -1,0 +1,1 @@
+STORAGE_2_PREFIX = "/storage1/fs1"
