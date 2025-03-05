@@ -10,4 +10,4 @@ class TriggerMigrationsView(LoginRequiredMixin, View):
     template_name = "templates/trigger_migrations.html"
 
     def get_success_url(self):
-        return reverse("trigger-migrations")
+        return reverse("qumulo:trigger-migrations")
