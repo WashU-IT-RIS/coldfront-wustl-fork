@@ -1,0 +1,10 @@
+
+.stats-widget {
+    font-size: smaller;
+
+    .stats-heading {
+        font-weight: bold;
+        padding-bottom: 10px;
+    }
+
+}
