@@ -61,7 +61,8 @@ class ArgumentParser:
                 sub_alloc_paths.append(path)
             return all(os.path.exists(path) and os.path.isdir(path) for path in sub_alloc_paths)
         sub_allocations = self._retrieve_arg('sub-allocation names', "Enter the sub-allocation names (comma-separated): ", lambda x: validate_sub_allocation_names(x, allocation_root)).split(',')
-
+        print(f"Sub-allocations: {sub_allocations}")
+        return
         # all right, what else do I need *functionally*?
         # I think nothing, so what remains is stuff like workers
 
