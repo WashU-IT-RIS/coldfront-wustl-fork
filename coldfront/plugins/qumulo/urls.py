@@ -27,7 +27,7 @@ urlpatterns = [
         name="allocation-table-list",
     ),
     path(
-        "trigger-migrations/",
+        "trigger-migrations",
         trigger_migrations_view.TriggerMigrationsView.as_view(),
         name="trigger-migrations",
     ),
