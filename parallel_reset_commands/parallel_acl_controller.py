@@ -46,7 +46,7 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
         walker = DirectoryWalker()
         builder = ACL_SpecBuilder()
         builder.build_specs(alloc_name, sub_alloc_names)
-        print("THIS IS WHAT SUB_ALLOC_NAMES LOOKS LIKE")
+        print(f"THIS IS WHAT SUB_ALLOC_NAMES LOOKS LIKE {sub_alloc_names}")
         return
         count = 0
         for path, path_type in walker.walk_recursive(target_directory):
