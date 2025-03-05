@@ -34,8 +34,10 @@ class AllocationViewTests(TestCase):
             "rw_users": ["test"],
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
     def test_create_new_allocation_create_allocation(
@@ -59,7 +61,7 @@ class AllocationViewTests(TestCase):
         allocation_defaults = {
             "secure": "No",
             "audit": "No",
-            "exempt": "No",
+            "billing_exempt": "No",
             "subsidized": "No",
         }
         for attr, value in allocation_defaults.items():

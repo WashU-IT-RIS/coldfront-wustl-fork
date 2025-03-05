@@ -49,8 +49,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test"],
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
             "technical_contact": "it.guru",
             "billing_contact": "finance.guru",
         }
@@ -72,8 +74,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test"],
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -95,8 +99,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test", "foo", "bar"],
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -118,8 +124,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test", "foo", "bar"],
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -142,8 +150,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test", "foo", "bar"],
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -170,8 +180,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test", "foo", "bar"],
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -208,8 +220,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test", "foo", "bar"],
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -247,7 +261,9 @@ class UpdateAllocationViewTests(TestCase):
         # NOTE - "storage_protocols" will have special handling
         attributes_to_check = [
             "cost_center",
+            "billing_exempt",
             "department_number",
+            "billing_cycle",
             "technical_contact",
             "billing_contact",
             "service_rate_category",
@@ -315,8 +331,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test"],
             "ro_users": [],
             "cost_center": "Internation Monetary Fund",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         storage_allocation_missing_contacts = create_allocation(
@@ -325,7 +343,9 @@ class UpdateAllocationViewTests(TestCase):
 
         attributes_to_check = [
             "cost_center",
+            "billing_exempt",
             "department_number",
+            "billing_cycle",
             "technical_contact",
             "billing_contact",
             "service_rate_category",
@@ -418,8 +438,10 @@ class UpdateAllocationViewTests(TestCase):
             "rw_users": ["test"],
             "ro_users": [],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
             "technical_contact": "it.guru",
             "billing_contact": "finance.guru",
         }
