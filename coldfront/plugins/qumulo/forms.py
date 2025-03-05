@@ -313,3 +313,12 @@ class AllocationTableSearchForm(forms.Form):
         initial=False,
         required=False,
     )
+
+
+class TriggerMigrationsForm(forms.Form):
+    allocation_name_search = forms.CharField(
+        label="Allocation Name",
+        min_length=2,
+        widget=forms.Textarea(attrs={"rows": 4}),
+        help_text="Type the allocation name here!",
+    )
