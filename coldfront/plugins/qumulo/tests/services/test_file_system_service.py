@@ -10,7 +10,7 @@ from django.test import TestCase
 class TestFileSystemService(TestCase):
 
     def setUp(self) -> None:
-        self.mock_quota_response_successful = {
+        self.mock_file_system_response_successful = {
             "block_size_bytes": 4096,
             "total_size_bytes": "5498921790996480",
             "free_size_bytes": "1449206347350016",
@@ -23,7 +23,7 @@ class TestFileSystemService(TestCase):
             "snapshot_size": 0.1815,
         }
 
-        self.mock_quota_response_unsuccessful = {}
+        self.mock_file_system_response_unsuccessful = {}
 
         self.expected_result_unsuccessful =  {
             "total_size": None,
@@ -39,7 +39,7 @@ class TestFileSystemService(TestCase):
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_file_system_stats.return_value = (
-            self.mock_quota_response_successful
+            self.mock_file_system_response_successful
         )
         qumulo_api_mock.return_value = qumulo_api
 
@@ -52,7 +52,7 @@ class TestFileSystemService(TestCase):
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_file_system_stats.return_value = (
-            self.mock_quota_response_unsuccessful
+            self.mock_file_system_response_unsuccessful
         )
         qumulo_api_mock.return_value = qumulo_api
 

@@ -26,7 +26,7 @@ class FileSystemService:
     @staticmethod
     def _get_size_in_pt(size_in_bytes: int) -> float:
         if size_in_bytes is None:
-            return
+            return None
 
         return round(FileSystemService._bytes_to_petabytes(int(size_in_bytes)), 4)
 
