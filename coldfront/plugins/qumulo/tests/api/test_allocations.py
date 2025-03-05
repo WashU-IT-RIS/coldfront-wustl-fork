@@ -143,7 +143,7 @@ class TestAllocationsGet(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(json.loads(response.content)), 10)
 
-    def test_sorts_by_id(self, _, __) -> None:
+    def test_sorts_by_basic_keys(self, _, __) -> None:
         num_allocations = 3
         id_map = []
         for i in range(num_allocations):
@@ -186,8 +186,6 @@ class TestAllocationsGet(TestCase):
         request.GET = {"sort": "status"}
         response = allocations.get(request)
 
-        import pprint
-
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
         self.assertEqual(response_data[2]["id"], id_map[1])
@@ -197,3 +195,13 @@ class TestAllocationsGet(TestCase):
         self.assertEqual(response.status_code, 200)
         response_data = json.loads(response.content)
         self.assertEqual(response_data[0]["id"], id_map[1])
+
+    def test_throws_error_on_invalid_sort_key(self, _, __) -> None:
+        allocations = Allocations()
+
+        request = HttpRequest()
+        request.method = "GET"
+        request.GET = {"sort": "storage_filesystem_path"}
+        response = allocations.get(request)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content.decode(), "Invalid sort key")

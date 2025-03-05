@@ -1,7 +1,8 @@
-from django.http import JsonResponse, HttpRequest
+from django.http import JsonResponse, HttpRequest, HttpResponseBadRequest
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
+from django.core.exceptions import FieldError
 
 from coldfront.core.allocation.models import Allocation, AllocationAttribute
 
@@ -17,11 +18,14 @@ class Allocations(LoginRequiredMixin, View):
 
         sort = request.GET.get("sort", "id")
 
-        allocations = list(
-            Allocation.objects.filter(resources__name="Storage2").order_by(sort)[
-                start_index:stop_index
-            ]
-        )
+        try:
+            allocations = list(
+                Allocation.objects.filter(resources__name="Storage2").order_by(sort)[
+                    start_index:stop_index
+                ]
+            )
+        except FieldError:
+            return HttpResponseBadRequest("Invalid sort key")
 
         allocations_dicts = list(
             map(
@@ -30,7 +34,6 @@ class Allocations(LoginRequiredMixin, View):
             )
         )
 
-        # pprint.pprint(allocations_dicts)
         return JsonResponse(allocations_dicts, safe=False)
 
     def _sanitize_allocation(self, allocation: Allocation):
