@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
@@ -7,8 +7,17 @@ from coldfront.core.allocation.models import Allocation, AllocationAttribute
 
 
 class Allocations(LoginRequiredMixin, View):
-    def get(self, request, *args, **kwargs):
-        allocations = list(Allocation.objects.filter(resources__name="Storage2"))
+    def get(self, request: HttpRequest, *args, **kwargs):
+        page = request.GET.get("page", 1)
+        limit = request.GET.get("limit", 100)
+        start_index = (page - 1) * limit
+        stop_index = start_index + limit
+
+        allocations = list(
+            Allocation.objects.filter(resources__name="Storage2")[
+                start_index:stop_index
+            ]
+        )
 
         allocations_dicts = list(
             map(
