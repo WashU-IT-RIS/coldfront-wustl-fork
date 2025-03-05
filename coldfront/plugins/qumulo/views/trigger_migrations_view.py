@@ -12,4 +12,9 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, TemplateVie
         return context
 
     def test_func(self):
-        return self.request.user.is_staff
+        # TODO: chnage superuser to reflect user support role when present in prod
+        return (
+            self.request.user.is_staff
+            or self.request.user.is_superuser
+            or self.request.user.has_perm("allocation.can_add_allocation")
+        )
