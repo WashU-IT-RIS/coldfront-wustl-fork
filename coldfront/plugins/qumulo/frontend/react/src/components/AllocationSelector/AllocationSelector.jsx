@@ -6,7 +6,7 @@ const onGetAllocations = async () => {
 
   return response.data.map((allocation) => ({
     id: allocation.id,
-    resource_name: allocation.resources[-1],
+    resource_name: allocation.resources[allocation.resources.length - 1],
     allocation_status: allocation.status,
     file_path: allocation.attributes.storage_filesystem_path,
   }));

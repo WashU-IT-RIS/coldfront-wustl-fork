@@ -5,6 +5,8 @@ from django.forms.models import model_to_dict
 
 from coldfront.core.allocation.models import Allocation, AllocationAttribute
 
+import pprint
+
 
 class Allocations(LoginRequiredMixin, View):
     def get(self, request: HttpRequest, *args, **kwargs):
@@ -13,8 +15,10 @@ class Allocations(LoginRequiredMixin, View):
         start_index = (page - 1) * limit
         stop_index = start_index + limit
 
+        sort = request.GET.get("sort", "id")
+
         allocations = list(
-            Allocation.objects.filter(resources__name="Storage2")[
+            Allocation.objects.filter(resources__name="Storage2").order_by(sort)[
                 start_index:stop_index
             ]
         )
@@ -26,6 +30,7 @@ class Allocations(LoginRequiredMixin, View):
             )
         )
 
+        # pprint.pprint(allocations_dicts)
         return JsonResponse(allocations_dicts, safe=False)
 
     def _sanitize_allocation(self, allocation: Allocation):
