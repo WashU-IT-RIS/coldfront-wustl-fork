@@ -104,9 +104,4 @@ urlpatterns = [
         allocation_views.AllocationAccountListView.as_view(),
         name="allocation-account-list",
     ),
-    path(
-        "trigger-migrations/",
-        allocation_views.TriggerMigrationsView.as_view(),
-        name="trigger-migrations",
-    ),
 ]

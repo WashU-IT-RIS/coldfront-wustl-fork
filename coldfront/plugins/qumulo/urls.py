@@ -5,6 +5,7 @@ from coldfront.plugins.qumulo.views import (
     update_allocation_view,
     create_sub_allocation_view,
     allocation_table_view,
+    trigger_migrations_view,
 )
 
 app_name = "qumulo"
@@ -24,5 +25,10 @@ urlpatterns = [
         "allocation-table-list",
         allocation_table_view.AllocationTableView.as_view(),
         name="allocation-table-list",
+    ),
+    path(
+        "trigger-migrations/",
+        trigger_migrations_view.TriggerMigrationsView.as_view(),
+        name="trigger-migrations",
     ),
 ]
