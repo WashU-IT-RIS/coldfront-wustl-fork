@@ -3,7 +3,7 @@ from django.views.generic import TemplateView
 
 
 class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
-    template_name = "templates/trigger_migrations.html"
+    template_name = "trigger_migrations.html"
 
     def test_func(self):
         return self.request.user.is_staff
