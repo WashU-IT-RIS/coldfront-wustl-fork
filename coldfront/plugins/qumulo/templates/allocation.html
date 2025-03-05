@@ -1,7 +1,12 @@
 {% extends "common/base.html" %}
 {% load crispy_forms_tags %}
 {% load common_tags %}
+{% block htmlhead %}
+{% load crispy_forms_tags %}
+{% load common_tags %}
 {% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'stats_cheatsheet.css' %}">     
+{% endblock htmlhead %}
 
 {% block title %}
 Create Allocation
