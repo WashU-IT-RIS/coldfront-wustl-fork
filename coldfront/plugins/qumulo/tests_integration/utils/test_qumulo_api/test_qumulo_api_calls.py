@@ -12,7 +12,7 @@ from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils impo
 BLANK = ""
 
 
-class TestGetAllQuotasWithStatus(TestCase):
+class TestQumuloApiCalls(TestCase):
 
     @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
     @tag("integration")
@@ -69,7 +69,7 @@ class TestGetAllQuotasWithStatus(TestCase):
         self.assertIn(limit_param, next)
 
     @tag("integration")
-    def test_get_file_system_capacity(self):
+    def test_get_file_system_capacity(self) -> None:
         qumulo_api = QumuloAPI()
         file_system_capacity_stats = qumulo_api.get_file_system_stats()
         size_bytes_keys = file_system_capacity_stats.keys()

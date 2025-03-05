@@ -6,7 +6,7 @@ PETABYTE_IN_BYTES = 1e15
 class FileSystemService:
 
     @staticmethod
-    def get_file_system_stats():
+    def get_file_system_stats() -> dict:
         file_system_stats = QumuloAPI().get_file_system_stats()
         total_size = FileSystemService._get_size_in_pt(
             file_system_stats.get("total_size_bytes")
@@ -24,7 +24,7 @@ class FileSystemService:
         }
 
     @staticmethod
-    def _get_size_in_pt(size_in_bytes):
+    def _get_size_in_pt(size_in_bytes: int) -> float:
         if size_in_bytes is None:
             return
 
