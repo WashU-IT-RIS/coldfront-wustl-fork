@@ -9,8 +9,15 @@ Trigger Migrations
 
 {% block content %}
 <div>
-  {% csrf_token %}
-  bare bones
+  <div class="row">
+    <div class="col">
+      <form method="post" action="/search-ldap" id="post-form">
+      {% csrf_token %}
+      {{ trigger_migrations_form|crispy }}
+      <button id="search-button" type="submit" class="btn btn-success btn-block"><i class="fas fa-search" aria-hidden="true"></i> Search</button>
+      </form>
+    </div>
+  </div>
 </div>
 {% endblock content %}
 
