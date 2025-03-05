@@ -1,13 +1,9 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import View
-from django.http import (
-    HttpResponse,
-)
-from django.urls import reverse
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.views.generic import TemplateView
 
 
-class TriggerMigrationsView(LoginRequiredMixin, View):
+class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = "templates/trigger_migrations.html"
 
-    def get_success_url(self):
-        return reverse("qumulo:trigger-migrations")
+    def test_func(self):
+        return self.request.user.is_staff
