@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from coldfront.plugins.qumulo.api.allocations import Allocations
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
-from coldfront.core.allocation.models import AllocationStatusChoice, Allocation
+from coldfront.core.allocation.models import AllocationStatusChoice, Allocation, Project
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
@@ -22,7 +22,7 @@ class TestAllocationsGet(TestCase):
         build_data = build_models()
 
         self.user = build_data["user"]
-        self.project = build_data["project"]
+        self.project: Project = build_data["project"]
 
         return super().setUp()
 
@@ -236,3 +236,90 @@ class TestAllocationsGet(TestCase):
             response_data[1]["attributes"]["storage_filesystem_path"],
             response_data[2]["attributes"]["storage_filesystem_path"],
         )
+
+    def test_filters_on_basic_keys(self, _, __) -> None:
+        num_allocations = 3
+        id_map = []
+        for i in range(num_allocations):
+            form_data = default_form_data.copy()
+            form_data["project_pk"] = self.project.pk
+            form_data["storage_filesystem_path"] = f"test_path_{i}"
+
+            allocation_data = AllocationService.create_new_allocation(
+                form_data, self.user
+            )
+            allocation: Allocation = allocation_data.get("allocation")
+
+            id_map.append(allocation.id)
+
+            if i == 1:
+                active_status = AllocationStatusChoice.objects.get_or_create(
+                    name="TestStatus"
+                )[0]
+                allocation.status = active_status
+                allocation.save()
+
+        allocations = Allocations()
+
+        request = HttpRequest()
+        request.method = "GET"
+        request.GET = {"search": [{"key": "id", "value": 1}]}
+        response = allocations.get(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(len(response_data), 1)
+        self.assertEqual(response_data[0]["id"], 1)
+
+        request.GET = {"search": [{"key": "status__name", "value": "TestStatus"}]}
+        response = allocations.get(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(len(response_data), 1)
+        self.assertEqual(response_data[0]["id"], id_map[1])
+
+    def test_filters_on_multiple_basic_keys(self, _, __) -> None:
+        num_allocations = 3
+        id_map = []
+        for i in range(num_allocations):
+            form_data = default_form_data.copy()
+            form_data["project_pk"] = self.project.pk
+            form_data["storage_filesystem_path"] = f"test_path_{i}"
+
+            if i == 2:
+                new_project = Project.objects.create(
+                    title="TestProject2",
+                    pi=self.user,
+                    status=self.project.status,
+                    field_of_science=self.project.field_of_science,
+                )
+                form_data["project_pk"] = new_project.pk
+
+            allocation_data = AllocationService.create_new_allocation(
+                form_data, self.user
+            )
+            allocation: Allocation = allocation_data.get("allocation")
+
+            id_map.append(allocation.id)
+
+            if i == 1:
+                active_status = AllocationStatusChoice.objects.get_or_create(
+                    name="TestStatus"
+                )[0]
+                allocation.status = active_status
+                allocation.save()
+
+        allocations = Allocations()
+
+        request = HttpRequest()
+        request.method = "GET"
+        request.GET = {
+            "search": [
+                {"key": "project__pk", "value": self.project.pk},
+                {"key": "status__name", "value": "Pending"},
+            ]
+        }
+        response = allocations.get(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(len(response_data), 1)
+        self.assertEqual(response_data[0]["id"], id_map[0])

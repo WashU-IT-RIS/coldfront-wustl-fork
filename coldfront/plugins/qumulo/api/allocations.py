@@ -1,14 +1,18 @@
+from typing import Tuple
+
 from django.http import JsonResponse, HttpRequest, HttpResponseBadRequest
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
-from django.db.models import OuterRef
+from django.db.models import OuterRef, QuerySet
 from django.core.exceptions import FieldError
 
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
 )
+
+import pprint
 
 
 class Allocations(LoginRequiredMixin, View):
@@ -23,29 +27,24 @@ class Allocations(LoginRequiredMixin, View):
 
         allocations_queryset = Allocation.objects.filter(resources__name="Storage2")
         try:
-            if is_attribute_sort:
-                attribute_sort = request.GET.get("attribute_sort")
+            search = request.GET.get("search", [])
 
-                if attribute_sort is None:
-                    return HttpResponseBadRequest("Attribute sort key not provided")
+            for search_param in search:
+                key = search_param["key"]
+                value = search_param["value"]
 
-                sort = "selected_attr"
-                if attribute_sort["order"] == "desc":
-                    sort = "-selcted_attr"
-
-                allocation_attributes = AllocationAttribute.objects.filter(
-                    allocation=OuterRef("id"),
-                    allocation__resources__name="Storage2",
-                    allocation_attribute_type__name=attribute_sort["key"],
-                ).values("value")
-
-                allocations_queryset = allocations_queryset.annotate(
-                    selected_attr=allocation_attributes
+                allocations_queryset = allocations_queryset.filter(
+                    **{f"{key}__icontains": value}
                 )
 
-            allocations_queryset = allocations_queryset.filter(
-                resources__name="Storage2"
-            ).order_by(sort)[start_index:stop_index]
+            if is_attribute_sort:
+                (sort, allocations_queryset) = self._handle_attribute_sort(
+                    request, allocations_queryset
+                )
+
+            allocations_queryset = allocations_queryset.order_by(sort)[
+                start_index:stop_index
+            ]
 
         except FieldError:
             return HttpResponseBadRequest("Invalid sort key")
@@ -58,6 +57,29 @@ class Allocations(LoginRequiredMixin, View):
         )
 
         return JsonResponse(allocations_dicts, safe=False)
+
+    def _handle_attribute_sort(
+        self, request: HttpRequest, allocations_queryset: QuerySet
+    ) -> Tuple[str, QuerySet]:
+        attribute_sort = request.GET.get("attribute_sort")
+
+        if attribute_sort is None:
+            return HttpResponseBadRequest("Attribute sort key not provided")
+
+        sort = "selected_attr"
+        if attribute_sort["order"] == "desc":
+            sort = "-selcted_attr"
+
+        allocation_attributes = AllocationAttribute.objects.filter(
+            allocation=OuterRef("id"),
+            allocation_attribute_type__name=attribute_sort["key"],
+        ).values("value")
+
+        allocations_queryset = allocations_queryset.annotate(
+            selected_attr=allocation_attributes
+        )
+
+        return (sort, allocations_queryset)
 
     def _sanitize_allocation(self, allocation: Allocation):
         allocation_dict = model_to_dict(allocation)
