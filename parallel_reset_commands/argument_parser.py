@@ -53,8 +53,8 @@ class ArgumentParser:
         
         allocation_root = STORAGE_2_PREFIX + "/prewitt"
         def validate_sub_allocation_names(value, allocation_root):
-            import pdb
-            pdb.set_trace()
+            if value == '':
+                return True
             sub_alloc_names = value.split(',')
             sub_alloc_paths = []
             for name in sub_alloc_names:
