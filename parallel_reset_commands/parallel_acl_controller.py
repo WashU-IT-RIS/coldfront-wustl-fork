@@ -61,7 +61,8 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
                 # print(f'Number pending tasks: {executor._work_queue.qsize()}')
                 print(f'Processed {count} paths')
             count += 1
-            executor.submit(set_acl, path, path_type, builder)
+            # executor.submit(set_acl, path, path_type, builder)
+            set_acl(path, path_type, builder)
 
 
 
