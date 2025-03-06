@@ -46,8 +46,6 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
         walker = DirectoryWalker()
         builder = ACL_SpecBuilder()
         builder.build_specs(alloc_name, sub_alloc_names)
-        # print(f"THIS IS WHAT SUB_ALLOC_NAMES LOOKS LIKE {sub_alloc_names}")
-        # return
         count = 0
         for path, path_type in walker.walk_recursive(target_directory):
             if count % 1000 == 0:
@@ -62,9 +60,6 @@ def main():
     # get the arguments from the user using ArgumentParser
     parser = ArgumentParser()
     parser.retrieve_args()
-    import pdb
-    pdb.set_trace()
-    return
 
 
     # at this point, I think I can call the reset_acls_recursive function

@@ -1,1 +1,1 @@
-STORAGE_2_PREFIX = "/storage1/fs1"
+STORAGE_2_PREFIX = "/storage2/fs1"
