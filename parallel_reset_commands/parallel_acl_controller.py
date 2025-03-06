@@ -11,7 +11,7 @@ from argument_parser import ArgumentParser
 from typing import List
 
 
-def process_path(self, result):
+def process_path(result):
     result = result.replace("\\", "\\\\")
     result = result.replace("@", "\\@")
     result = result.replace("=", "\\=")
