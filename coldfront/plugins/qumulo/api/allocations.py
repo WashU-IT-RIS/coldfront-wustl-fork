@@ -2,15 +2,13 @@ from django.http import JsonResponse, HttpRequest, HttpResponseBadRequest
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
+from django.db.models import OuterRef
 from django.core.exceptions import FieldError
 
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
-    AllocationAttributeType,
 )
-
-import pprint
 
 
 class Allocations(LoginRequiredMixin, View):
@@ -23,37 +21,39 @@ class Allocations(LoginRequiredMixin, View):
         sort = request.GET.get("sort", "id")
         is_attribute_sort = sort == "attributes"
 
+        allocations_queryset = Allocation.objects.filter(resources__name="Storage2")
         try:
             if is_attribute_sort:
                 attribute_sort = request.GET.get("attribute_sort")
 
                 if attribute_sort is None:
                     return HttpResponseBadRequest("Attribute sort key not provided")
-                order_by_arg = "value"
 
+                sort = "selected_attr"
                 if attribute_sort["order"] == "desc":
-                    order_by_arg = "-value"
+                    sort = "-selcted_attr"
 
-                allocation_attributes = list(
-                    AllocationAttribute.objects.filter(
-                        allocation_attribute_type__name=attribute_sort["key"]
-                    ).order_by(order_by_arg)
-                )
-                allocations = list(map(lambda x: x.allocation, allocation_attributes))
+                allocation_attributes = AllocationAttribute.objects.filter(
+                    allocation=OuterRef("id"),
+                    allocation__resources__name="Storage2",
+                    allocation_attribute_type__name=attribute_sort["key"],
+                ).values("value")
 
-            else:
-                allocations = list(
-                    Allocation.objects.filter(resources__name="Storage2").order_by(
-                        sort
-                    )[start_index:stop_index]
+                allocations_queryset = allocations_queryset.annotate(
+                    selected_attr=allocation_attributes
                 )
+
+            allocations_queryset = allocations_queryset.filter(
+                resources__name="Storage2"
+            ).order_by(sort)[start_index:stop_index]
+
         except FieldError:
             return HttpResponseBadRequest("Invalid sort key")
 
         allocations_dicts = list(
             map(
                 self._sanitize_allocation,
-                allocations,
+                allocations_queryset,
             )
         )
 
