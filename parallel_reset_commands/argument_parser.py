@@ -29,27 +29,27 @@ class ArgumentParser:
     def retrieve_args(self):
         print("Retrieving args")
 
-        # # first, retrieve a file and confirm it exists in 
-        # # a passed-in validator
-        # # enter the root directory of the allocation
-        # def validate_allocation_root(value):
-        #     # check that there is only a single part after the prefix
-        #     # and that the path exists
-        #     if not value.startswith(STORAGE_2_PREFIX):
-        #         print(f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'.")
-        #         return False
-        #     # check that there is only a single part after the prefix
-        #     allocation_root_name = value.replace(STORAGE_2_PREFIX, '').strip('/')
-        #     if '/' in allocation_root_name:
-        #         print(f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'.")
-        #         return False
-        #     if not (os.path.exists(value) and os.path.isdir(value)):
-        #         print(f"Root path does not exist: {value}")
-        #         return False
-        #     return True
-        # allocation_root = self._retrieve_arg('allocation root', "Enter the root directory of the allocation: ", validate_allocation_root)
-        # # get the target directory (where to start the walk)
-        # target_dir = self._retrieve_arg('target directory', "Enter the target directory: ", lambda x: os.path.exists(x) and os.path.isdir(x) and x.startswith(allocation_root))
+        # first, retrieve a file and confirm it exists in 
+        # a passed-in validator
+        # enter the root directory of the allocation
+        def validate_allocation_root(value):
+            # check that there is only a single part after the prefix
+            # and that the path exists
+            if not value.startswith(STORAGE_2_PREFIX):
+                print(f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'.")
+                return False
+            # check that there is only a single part after the prefix
+            allocation_root_name = value.replace(STORAGE_2_PREFIX, '').strip('/')
+            if '/' in allocation_root_name:
+                print(f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'.")
+                return False
+            if not (os.path.exists(value) and os.path.isdir(value)):
+                print(f"Root path does not exist: {value}")
+                return False
+            return True
+        allocation_root = self._retrieve_arg('allocation root', "Enter the root directory of the allocation: ", validate_allocation_root)
+        # get the target directory (where to start the walk)
+        target_dir = self._retrieve_arg('target directory', "Enter the target directory: ", lambda x: os.path.exists(x) and os.path.isdir(x) and x.startswith(allocation_root))
         
         allocation_root = STORAGE_2_PREFIX + "/prewitt"
         def validate_sub_allocation_names(value, allocation_root):
