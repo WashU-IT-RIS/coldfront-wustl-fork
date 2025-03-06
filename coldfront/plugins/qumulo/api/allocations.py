@@ -4,7 +4,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
 from django.core.exceptions import FieldError
 
-from coldfront.core.allocation.models import Allocation, AllocationAttribute
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationAttributeType,
+)
 
 import pprint
 
@@ -17,13 +21,32 @@ class Allocations(LoginRequiredMixin, View):
         stop_index = start_index + limit
 
         sort = request.GET.get("sort", "id")
+        is_attribute_sort = sort == "attributes"
 
         try:
-            allocations = list(
-                Allocation.objects.filter(resources__name="Storage2").order_by(sort)[
-                    start_index:stop_index
-                ]
-            )
+            if is_attribute_sort:
+                attribute_sort = request.GET.get("attribute_sort")
+
+                if attribute_sort is None:
+                    return HttpResponseBadRequest("Attribute sort key not provided")
+                order_by_arg = "value"
+
+                if attribute_sort["order"] == "desc":
+                    order_by_arg = "-value"
+
+                allocation_attributes = list(
+                    AllocationAttribute.objects.filter(
+                        allocation_attribute_type__name=attribute_sort["key"]
+                    ).order_by(order_by_arg)
+                )
+                allocations = list(map(lambda x: x.allocation, allocation_attributes))
+
+            else:
+                allocations = list(
+                    Allocation.objects.filter(resources__name="Storage2").order_by(
+                        sort
+                    )[start_index:stop_index]
+                )
         except FieldError:
             return HttpResponseBadRequest("Invalid sort key")
 

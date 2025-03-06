@@ -205,3 +205,34 @@ class TestAllocationsGet(TestCase):
         response = allocations.get(request)
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content.decode(), "Invalid sort key")
+
+    def test_sorts_by_attribute(self, _, __) -> None:
+        num_allocations = 3
+        for i in range(num_allocations):
+            form_data = default_form_data.copy()
+            form_data["project_pk"] = self.project.pk
+            form_data["storage_filesystem_path"] = f"test_path_{i}"
+
+            if i == 1:
+                form_data["storage_filesystem_path"] = "zzz"
+            AllocationService.create_new_allocation(form_data, self.user)
+
+        allocations = Allocations()
+
+        request = HttpRequest()
+        request.method = "GET"
+        request.GET = {
+            "sort": "attributes",
+            "attribute_sort": {"key": "storage_filesystem_path", "order": "asc"},
+        }
+        response = allocations.get(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertLessEqual(
+            response_data[0]["attributes"]["storage_filesystem_path"],
+            response_data[1]["attributes"]["storage_filesystem_path"],
+        )
+        self.assertLessEqual(
+            response_data[1]["attributes"]["storage_filesystem_path"],
+            response_data[2]["attributes"]["storage_filesystem_path"],
+        )
