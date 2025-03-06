@@ -3,6 +3,7 @@ from typing import List
 import os
 
 from constants import STORAGE_2_PREFIX
+
 class ACL_SpecBuilder:
     def __init__(self):
         self.base_folder_spec = ""
@@ -93,7 +94,7 @@ class ACL_SpecBuilder:
     def get_sub_alloc_file_spec(self, sub_alloc_name: str):
         return self.sub_alloc_file_specs.get(sub_alloc_name, "")
     
-    def get_spec_by_path(self, path: str, item_type: str, target: str):
+    def get_spec_by_path(self, target: str, item_type: str):
         # jprew - TODO - this is a stub
         allocation_root = f"{STORAGE_2_PREFIX}/{self.allocation_name}"
         allocation_root_active = f"{allocation_root}/Active"
