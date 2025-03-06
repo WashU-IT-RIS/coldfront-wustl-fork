@@ -4,7 +4,7 @@ from django.http import JsonResponse, HttpRequest, HttpResponseBadRequest
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
-from django.db.models import OuterRef, QuerySet
+from django.db.models import OuterRef, QuerySet, Q
 from django.core.exceptions import FieldError
 
 from coldfront.core.allocation.models import (
@@ -33,9 +33,16 @@ class Allocations(LoginRequiredMixin, View):
                 key = search_param["key"]
                 value = search_param["value"]
 
-                allocations_queryset = allocations_queryset.filter(
-                    **{f"{key}__icontains": value}
-                )
+                if key.startswith("attributes__"):
+                    key = key.replace("attributes__", "")
+                    query = Q(allocationattribute__allocation_attribute_type__name=key)
+                    query &= Q(allocationattribute__value__icontains=value)
+
+                    allocations_queryset = allocations_queryset.filter(query)
+                else:
+                    allocations_queryset = allocations_queryset.filter(
+                        **{f"{key}__icontains": value}
+                    )
 
             if is_attribute_sort:
                 (sort, allocations_queryset) = self._handle_attribute_sort(
