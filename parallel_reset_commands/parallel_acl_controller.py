@@ -35,6 +35,8 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder):
     print(f"Calling process_path on {path}")
     path = process_path(path)
     print(f"Processed path: {path}")
+    import pdb
+    pdb.set_trace()
     spec = builder.get_spec_by_path(path)
     print(f"Spec: {spec}")
     command = f'nfs4_setfacl -s {spec} {path}'
