@@ -62,6 +62,8 @@ def main():
     # get the arguments from the user using ArgumentParser
     parser = ArgumentParser()
     parser.retrieve_args()
+    import pdb
+    pdb.set_trace()
     return
 
 
