@@ -32,12 +32,14 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder):
     if os.path.islink(path):
         print(f"Skipping link: {path}")
         return
+    print(f"Calling process_path on {path}")
     path = process_path(path)
     print(f"Processed path: {path}")
     spec = builder.get_spec_by_path(path)
     print(f"Spec: {spec}")
     command = f'nfs4_setfacl -s {spec} {path}'
     print(f"Command: {command}")
+    return
     try:
         subprocess.run(command, check=True, shell=True)
         # print(f"Should run command: {command}")
