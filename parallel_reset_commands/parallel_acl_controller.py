@@ -30,6 +30,7 @@ def process_path(self, result):
 def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder):
     print(f"Setting ACL for {path_type}: {path}")
     if os.path.islink(path):
+        print(f"Skipping link: {path}")
         return
     path = process_path(path)
     print(f"Processed path: {path}")
