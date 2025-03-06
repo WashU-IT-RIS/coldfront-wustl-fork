@@ -222,8 +222,7 @@ class TestAllocationsGet(TestCase):
         request = HttpRequest()
         request.method = "GET"
         request.GET = {
-            "sort": "attributes",
-            "attribute_sort": {"key": "storage_filesystem_path", "order": "asc"},
+            "sort": "attributes__storage_filesystem_path",
         }
         response = allocations.get(request)
         self.assertEqual(response.status_code, 200)
@@ -235,6 +234,21 @@ class TestAllocationsGet(TestCase):
         self.assertLessEqual(
             response_data[1]["attributes"]["storage_filesystem_path"],
             response_data[2]["attributes"]["storage_filesystem_path"],
+        )
+
+        request.GET = {
+            "sort": "-attributes__storage_filesystem_path",
+        }
+        response = allocations.get(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertLessEqual(
+            response_data[2]["attributes"]["storage_filesystem_path"],
+            response_data[1]["attributes"]["storage_filesystem_path"],
+        )
+        self.assertLessEqual(
+            response_data[1]["attributes"]["storage_filesystem_path"],
+            response_data[0]["attributes"]["storage_filesystem_path"],
         )
 
     def test_filters_on_basic_keys(self, _, __) -> None:

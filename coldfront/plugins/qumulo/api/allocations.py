@@ -21,9 +21,7 @@ class Allocations(LoginRequiredMixin, View):
         limit = request.GET.get("limit", 100)
         start_index = (page - 1) * limit
         stop_index = start_index + limit
-
         sort = request.GET.get("sort", "id")
-        is_attribute_sort = sort == "attributes"
 
         allocations_queryset = Allocation.objects.filter(resources__name="Storage2")
         try:
@@ -44,7 +42,7 @@ class Allocations(LoginRequiredMixin, View):
                         **{f"{key}__icontains": value}
                     )
 
-            if is_attribute_sort:
+            if sort.removeprefix("-").startswith("attributes__"):
                 (sort, allocations_queryset) = self._handle_attribute_sort(
                     request, allocations_queryset
                 )
@@ -68,25 +66,23 @@ class Allocations(LoginRequiredMixin, View):
     def _handle_attribute_sort(
         self, request: HttpRequest, allocations_queryset: QuerySet
     ) -> Tuple[str, QuerySet]:
-        attribute_sort = request.GET.get("attribute_sort")
+        raw_sort = request.GET.get("sort")
+        sort_key = raw_sort.removeprefix("-").removeprefix("attributes__")
 
-        if attribute_sort is None:
-            return HttpResponseBadRequest("Attribute sort key not provided")
-
-        sort = "selected_attr"
-        if attribute_sort["order"] == "desc":
-            sort = "-selcted_attr"
+        attr = "selected_attr"
+        if raw_sort.startswith("-"):
+            attr = "-selected_attr"
 
         allocation_attributes = AllocationAttribute.objects.filter(
             allocation=OuterRef("id"),
-            allocation_attribute_type__name=attribute_sort["key"],
+            allocation_attribute_type__name=sort_key,
         ).values("value")
 
         allocations_queryset = allocations_queryset.annotate(
             selected_attr=allocation_attributes
         )
 
-        return (sort, allocations_queryset)
+        return (attr, allocations_queryset)
 
     def _sanitize_allocation(self, allocation: Allocation):
         allocation_dict = model_to_dict(allocation)

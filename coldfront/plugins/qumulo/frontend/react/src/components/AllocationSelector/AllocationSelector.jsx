@@ -1,36 +1,51 @@
-import { useActionState, useEffect, useState } from "react";
+import { lazy, useActionState, useEffect, useState } from "react";
 import axios from "axios";
 
-const onGetAllocations = async () => {
-  const response = await axios.get("/qumulo/api/allocations");
+const onGetAllocations = async (params) => {
+  const response = await axios.get("/qumulo/api/allocations", { params });
 
   return response.data.map((allocation) => ({
     id: allocation.id,
-    resource_name: allocation.resources[allocation.resources.length - 1],
-    allocation_status: allocation.status,
-    file_path: allocation.attributes.storage_filesystem_path,
+    resource__name: allocation.resources[allocation.resources.length - 1],
+    status__name: allocation.status,
+    attributes__storage_filesystem_path:
+      allocation.attributes.storage_filesystem_path,
   }));
 };
 
 function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
-  const columns = ["id", "resource_name", "allocation_status", "file_path"];
+  const columns = [
+    { key: "id", label: "ID" },
+    { key: "resource__name", label: "Resource" },
+    { key: "status__name", label: "Status" },
+    { key: "attributes__storage_filesystem_path", label: "File Path" },
+  ];
   const [allocations, setAllocations] = useState([]);
 
   useEffect(() => {
     onGetAllocations().then((allocations) => setAllocations(allocations));
   }, []);
 
+  const getAllocations = async (params) => {
+    const allocations = await onGetAllocations(params);
+
+    setAllocations(allocations);
+  };
+
   const renderHeader = () => {
-    return columns.map((column) => (
-      <th key={column} scope="col" className="text-nowrap">
-        {column}
-        <a className="sort-asc">
+    return columns.map(({ key, label }) => (
+      <th key={key} scope="col" className="text-nowrap">
+        {label}
+        <a className="sort-asc" onClick={() => getAllocations({ sort: key })}>
           <i className="fas fa-sort-up" aria-hidden="true"></i>
-          <span className="sr-only">Sort {column} asc</span>
+          <span className="sr-only">Sort {label} asc</span>
         </a>
-        <a className="sort-desc">
+        <a
+          className="sort-desc"
+          onClick={() => getAllocations({ sort: `-${key}` })}
+        >
           <i className="fas fa-sort-down" aria-hidden="true"></i>
-          <span className="sr-only">Sort {column} desc</span>
+          <span className="sr-only">Sort {label} desc</span>
         </a>
       </th>
     ));
@@ -46,9 +61,9 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
             value={allocation.id}
           />
         </td>
-        {columns.map((column) => (
-          <td key={column} className="text-nowrap">
-            {allocation[column]}
+        {columns.map(({ key, label }) => (
+          <td key={key} className="text-nowrap">
+            {allocation[key]}
           </td>
         ))}
       </tr>
