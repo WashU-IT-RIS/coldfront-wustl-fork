@@ -13,11 +13,6 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, TemplateVie
     template_name = "trigger_migrations.html"
     form_class = TriggerMigrationsForm
 
-    # def get_context_data(self, *args, **kwargs):
-    #     context = super().get_context_data(*args, **kwargs)
-    #     context["trigger_migrations_form"] = TriggerMigrationsForm()
-    #     return context
-
     def test_func(self):
         # TODO: chnage superuser to reflect user support role when present in prod
         return (
@@ -25,6 +20,11 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, TemplateVie
             or self.request.user.is_superuser
             or self.request.user.has_perm("allocation.can_add_allocation")
         )
+
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        context["trigger_migrations_form"] = TriggerMigrationsForm()
+        return context
 
     def form_valid(self, form):
         form_data = form.cleaned_data
