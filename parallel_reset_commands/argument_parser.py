@@ -81,6 +81,8 @@ class ArgumentParser:
                 return False
         num_workers = int(self._retrieve_arg('number of workers', "Enter the number of worker threads: ", _validate_num_workers))
 
+        import pdb
+        pdb.set_trace()
         self.allocation_root = allocation_root
         self.allocation_name = allocation_root.replace(STORAGE_2_PREFIX, '').strip('/')
         self.target_dir = target_dir
