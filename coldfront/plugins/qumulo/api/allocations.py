@@ -13,6 +13,7 @@ from coldfront.core.allocation.models import (
 )
 
 import pprint
+import logging
 
 
 class Allocations(LoginRequiredMixin, View):
@@ -25,11 +26,13 @@ class Allocations(LoginRequiredMixin, View):
 
         allocations_queryset = Allocation.objects.filter(resources__name="Storage2")
         try:
-            search = request.GET.get("search", [])
+            search = request.GET.getlist("search[]", [])
 
             for search_param in search:
-                key = search_param["key"]
-                value = search_param["value"]
+                if len(search_param.split(":")) != 2:
+                    return HttpResponseBadRequest("Invalid search parameter")
+
+                [key, value] = search_param.split(":")
 
                 if key.startswith("attributes__"):
                     key = key.replace("attributes__", "")

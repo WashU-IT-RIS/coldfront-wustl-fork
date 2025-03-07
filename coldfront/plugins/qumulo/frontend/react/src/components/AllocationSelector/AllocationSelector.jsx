@@ -1,12 +1,14 @@
-import { lazy, useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import axios from "axios";
+
+import InputLabel from "../InputLabel/InputLabel";
 
 const onGetAllocations = async (params) => {
   const response = await axios.get("/qumulo/api/allocations", { params });
 
   return response.data.map((allocation) => ({
     id: allocation.id,
-    resource__name: allocation.resources[allocation.resources.length - 1],
+    resources__name: allocation.resources[allocation.resources.length - 1],
     status__name: allocation.status,
     attributes__storage_filesystem_path:
       allocation.attributes.storage_filesystem_path,
@@ -16,15 +18,38 @@ const onGetAllocations = async (params) => {
 function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
   const columns = [
     { key: "id", label: "ID" },
-    { key: "resource__name", label: "Resource" },
+    { key: "resources__name", label: "Resource" },
     { key: "status__name", label: "Status" },
     { key: "attributes__storage_filesystem_path", label: "File Path" },
   ];
+
+  const onQueryChange = (state, { action, key, value }) => {
+    switch (action) {
+      case "filter":
+        return {
+          ...state,
+          filters: { ...state.filters, [key]: value },
+        };
+      default:
+        return state;
+    }
+  };
+
   const [allocations, setAllocations] = useState([]);
+  const [queryState, queryDispatch] = useActionState(onQueryChange, {
+    filters: {},
+  });
 
   useEffect(() => {
-    onGetAllocations().then((allocations) => setAllocations(allocations));
-  }, []);
+    const params = { search: [] };
+
+    for (const [key, value] of Object.entries(queryState.filters)) {
+      console.log(key, value);
+      params.search.push(`${key}:${value}`);
+    }
+
+    onGetAllocations(params).then((allocations) => setAllocations(allocations));
+  }, [queryState]);
 
   const getAllocations = async (params) => {
     const allocations = await onGetAllocations(params);
@@ -35,15 +60,19 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
   const renderHeader = () => {
     return columns.map(({ key, label }) => (
       <th key={key} scope="col" className="text-nowrap">
-        {label}
-        <a className="sort-asc" onClick={() => getAllocations({ sort: key })}>
+        <InputLabel
+          label={label}
+          value={queryState.filters[key]}
+          onChange={(value) => queryDispatch({ action: "filter", key, value })}
+        />
+        <a
+          className="sort-asc"
+          onClick={() => getAllocations({ sort: `-${key}` })}
+        >
           <i className="fas fa-sort-up" aria-hidden="true"></i>
           <span className="sr-only">Sort {label} asc</span>
         </a>
-        <a
-          className="sort-desc"
-          onClick={() => getAllocations({ sort: `-${key}` })}
-        >
+        <a className="sort-desc" onClick={() => getAllocations({ sort: key })}>
           <i className="fas fa-sort-down" aria-hidden="true"></i>
           <span className="sr-only">Sort {label} desc</span>
         </a>
