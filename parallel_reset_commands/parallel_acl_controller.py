@@ -70,8 +70,6 @@ def main():
     # get the arguments from the user using ArgumentParser
     parser = ArgumentParser()
     parser.retrieve_args()
-    import pdb
-    pdb.set_trace()
 
 
     # at this point, I think I can call the reset_acls_recursive function

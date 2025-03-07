@@ -51,7 +51,6 @@ class ArgumentParser:
         # get the target directory (where to start the walk)
         target_dir = self._retrieve_arg('target directory', "Enter the target directory: ", lambda x: os.path.exists(x) and os.path.isdir(x) and x.startswith(allocation_root))
         
-        allocation_root = STORAGE_2_PREFIX + "/prewitt"
         def validate_sub_allocation_names(value, allocation_root):
             if value == '':
                 return True
@@ -81,8 +80,6 @@ class ArgumentParser:
                 return False
         num_workers = int(self._retrieve_arg('number of workers', "Enter the number of worker threads: ", _validate_num_workers))
 
-        import pdb
-        pdb.set_trace()
         self.allocation_root = allocation_root
         self.allocation_name = allocation_root.replace(STORAGE_2_PREFIX, '').strip('/')
         self.target_dir = target_dir
