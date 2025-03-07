@@ -35,6 +35,7 @@ def check_acl(original_path, processed_path, expected_spec):
     # even though the whole script is run as `sudo` and that
     # elevated status *should* be inherited by the spawned
     # subprocesses
+    # getfacl_command = f"sudo nfs4_getfacl {processed_path}"
     getfacl_command = f"sudo nfs4_getfacl {processed_path}"
     try:
         result = subprocess.check_output(getfacl_command, shell=True)
@@ -53,8 +54,8 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     print(f"Calling process_path on {path}")
     processed_path = process_path(path)
     print(f"Processed path: {processed_path}")
-    import pdb
-    pdb.set_trace()
+    # import pdb
+    # pdb.set_trace()
     spec = builder.get_spec_by_path(path, path_type)
     print(f"Spec: {spec}")
     command = f'nfs4_setfacl -s {spec} {processed_path}'
