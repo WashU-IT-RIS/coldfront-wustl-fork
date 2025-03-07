@@ -31,7 +31,7 @@ def _piece_out_acl(acl_info: str) -> Set[str]:
     acl_lines = acl_info.splitlines()
     acl_set = set()
     for line in acl_lines:
-        if "#" in line:
+        if "#" in line or line.strip() == "":
             continue
         acl_set.add(line)
     return acl_set
