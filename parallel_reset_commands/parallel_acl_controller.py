@@ -10,6 +10,7 @@ from argument_parser import ArgumentParser
 
 from typing import List, Set
 
+from constants import BATCH_SIZE
 
 def process_path(result):
     result = result.replace("\\", "\\\\")
@@ -51,8 +52,9 @@ def check_acl(original_path, processed_path, expected_spec):
         acl_info = str(result, 'utf-8')
         result_set = _piece_out_acl(acl_info)
         expected_set = _piece_out_acl(expected_spec)
-        import pdb
-        pdb.set_trace()
+        if result_set != expected_set:
+            return False
+        return True
     except subprocess.CalledProcessError as e:
         return False
         # print(f'Failed to get ACL: {path}, Error: {e}')
@@ -61,12 +63,10 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     print(f"Setting ACL for {path_type}: {path}")
     if os.path.islink(path):
         print(f"Skipping link: {path}")
-        return
+        return True
     print(f"Calling process_path on {path}")
     processed_path = process_path(path)
     print(f"Processed path: {processed_path}")
-    # import pdb
-    # pdb.set_trace()
     spec = builder.get_spec_by_path(path, path_type)
     print(f"Spec: {spec}")
     command = f'nfs4_setfacl -s "{spec}" {processed_path}'
@@ -74,10 +74,11 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     try:
         subprocess.run(command, check=True, shell=True)
         # print(f"Should run command: {command}")
+        return check_acl(path, processed_path, spec)
     except subprocess.CalledProcessError as e:
         print(f'Failed to set ACL for {path_type}: {path}, Error: {e}')
+        return False
 
-    check_acl(path, processed_path, spec)
 
 
 def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str]):
@@ -87,13 +88,22 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
         builder = ACL_SpecBuilder()
         builder.build_specs(alloc_name, sub_alloc_names)
         count = 0
+        result_futures = []
         for path, path_type in walker.walk_recursive(target_directory):
             if count % 1000 == 0:
                 # print(f'Number pending tasks: {executor._work_queue.qsize()}')
                 print(f'Processed {count} paths')
             count += 1
-            # executor.submit(set_acl, path, path_type, builder)
-            set_acl(path, path_type, builder)
+            ret = executor.submit(set_acl, path, path_type, builder)
+            # ret = set_acl(path, path_type, builder)
+            # isn't this single-threaded for each return?
+            # though of course, so is the submission...
+            result_futures.append(ret)
+            if len(result_futures) == BATCH_SIZE:
+                for future in result_futures:
+                    result = future.result()
+                    print(f"Result: {result}")
+                result_futures = []
 
 
 
