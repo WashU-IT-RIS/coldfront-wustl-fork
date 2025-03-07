@@ -36,7 +36,7 @@ def check_acl(original_path, processed_path, expected_spec):
     # elevated status *should* be inherited by the spawned
     # subprocesses
     # getfacl_command = f"sudo nfs4_getfacl {processed_path}"
-    getfacl_command = f"sudo nfs4_getfacl {processed_path}"
+    getfacl_command = f"nfs4_getfacl {processed_path}"
     try:
         result = subprocess.check_output(getfacl_command, shell=True)
         acl_info = str(result, 'utf-8')
@@ -58,7 +58,7 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     # pdb.set_trace()
     spec = builder.get_spec_by_path(path, path_type)
     print(f"Spec: {spec}")
-    command = f'nfs4_setfacl -s {spec} {processed_path}'
+    command = f'nfs4_setfacl -s "{spec}" {processed_path}'
     print(f"Command: {command}")
     try:
         subprocess.run(command, check=True, shell=True)
