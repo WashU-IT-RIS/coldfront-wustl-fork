@@ -8,7 +8,7 @@ from acl_spec_builder import ACL_SpecBuilder
 
 from argument_parser import ArgumentParser
 
-from typing import List
+from typing import List, Set
 
 
 def process_path(result):
@@ -27,6 +27,15 @@ def process_path(result):
     result = result.replace("`", "\\`")
     return result
 
+def _piece_out_acl(acl_info: str) -> Set[str]:
+    acl_lines = acl_info.splitlines()
+    acl_set = set()
+    for line in acl_lines:
+        if "#" in line:
+            continue
+        acl_set.add(line)
+    return acl_set
+
 def check_acl(original_path, processed_path, expected_spec):
     if os.path.islink(original_path):
         # links don't have ACLs
@@ -40,6 +49,8 @@ def check_acl(original_path, processed_path, expected_spec):
     try:
         result = subprocess.check_output(getfacl_command, shell=True)
         acl_info = str(result, 'utf-8')
+        result_set = _piece_out_acl(acl_info)
+        expected_set = _piece_out_acl(expected_spec)
         import pdb
         pdb.set_trace()
     except subprocess.CalledProcessError as e:
