@@ -86,6 +86,7 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
           (allocation) => allocation.id !== Number(allocationId)
         )
       );
+      setAllChecked(false);
     }
   };
 
