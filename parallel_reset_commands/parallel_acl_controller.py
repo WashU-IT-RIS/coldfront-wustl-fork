@@ -82,6 +82,7 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
         builder = ACL_SpecBuilder()
         builder.build_specs(alloc_name, sub_alloc_names)
         count = 0
+        batch_count = 0
         result_futures = []
         for path, path_type in walker.walk_recursive(target_directory):
             if count % 1000 == 0:
@@ -94,6 +95,8 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
             # though of course, so is the submission...
             result_futures.append(ret)
             if len(result_futures) == BATCH_SIZE:
+                print(f"Batch count: {batch_count}")
+                batch_count += 1
                 for future in result_futures:
                     result = future.result()
                     print(f"Result: {result}")
