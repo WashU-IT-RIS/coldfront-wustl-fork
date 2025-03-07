@@ -41,6 +41,7 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
       params.search.push(`${key}:${value}`);
     }
 
+    setAllChecked(false);
     getAllocations(params).then((allocations) => setAllocations(allocations));
   }, [queryState]);
 
