@@ -92,23 +92,25 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
         count = 0
         batch_count = 0
         result_futures = []
-        for path, path_type in walker.walk_recursive(target_directory):
-            if count % 1000 == 0:
-                # print(f'Number pending tasks: {executor._work_queue.qsize()}')
-                print(f'Processed {count} paths')
-            count += 1
-            ret = executor.submit(set_acl, path, path_type, builder)
-            # ret = set_acl(path, path_type, builder)
-            # isn't this single-threaded for each return?
-            # though of course, so is the submission...
-            result_futures.append(ret)
-            if len(result_futures) == BATCH_SIZE:
-                print(f"Batch count: {batch_count}")
-                batch_count += 1
-                for future in result_futures:
-                    result = future.result()
-                    print(f"Result: {result}")
-                result_futures = []
+        with open(error_file, 'w') as error_log:
+            for path, path_type in walker.walk_recursive(target_directory):
+                if count % 1000 == 0:
+                    # print(f'Number pending tasks: {executor._work_queue.qsize()}')
+                    print(f'Processed {count} paths')
+                count += 1
+                ret = executor.submit(set_acl, path, path_type, builder)
+                # ret = set_acl(path, path_type, builder)
+                # isn't this single-threaded for each return?
+                # though of course, so is the submission...
+                result_futures.append(ret)
+                if len(result_futures) == BATCH_SIZE:
+                    # print(f"Batch count: {batch_count}")
+                    batch_count += 1
+                    for future in result_futures:
+                        success, check_path = future.result()
+                        if not success:
+                            error_log.write(f"{check_path}\n")
+                    result_futures = []
 
 
 def _create_error_file_name(target_dir: str) -> str:
