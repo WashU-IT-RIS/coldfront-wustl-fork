@@ -33,13 +33,13 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder):
         print(f"Skipping link: {path}")
         return
     print(f"Calling process_path on {path}")
-    path = process_path(path)
-    print(f"Processed path: {path}")
+    processed_path = process_path(path)
+    print(f"Processed path: {processed_path}")
     import pdb
     pdb.set_trace()
     spec = builder.get_spec_by_path(path, path_type)
     print(f"Spec: {spec}")
-    command = f'nfs4_setfacl -s {spec} {path}'
+    command = f'nfs4_setfacl -s {spec} {processed_path}'
     print(f"Command: {command}")
     return
     try:
