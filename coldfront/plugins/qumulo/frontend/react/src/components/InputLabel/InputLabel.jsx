@@ -1,4 +1,4 @@
-import { useActionState, useState } from "react";
+import { useState } from "react";
 
 function InputLabel({ label, value = "", onChange }) {
   const [isActive, setIsActive] = useState(false);
@@ -7,12 +7,13 @@ function InputLabel({ label, value = "", onChange }) {
   const onKeyDown = (event) => {
     if (event.key === "Enter") {
       onChange(internalValue);
+      setIsActive(false);
     }
   };
 
   return (
     <>
-      {!isActive ? (
+      {!isActive && !value ? (
         <span onClick={() => setIsActive(true)}>{label}</span>
       ) : (
         <input
@@ -20,6 +21,7 @@ function InputLabel({ label, value = "", onChange }) {
           value={internalValue}
           onChange={(e) => setInternalValue(e.target.value)}
           onKeyDown={onKeyDown}
+          autoFocus
         />
       )}
     </>

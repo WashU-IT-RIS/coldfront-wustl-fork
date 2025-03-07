@@ -366,3 +366,44 @@ class TestAllocationsGet(TestCase):
         response_data = json.loads(response.content)
         self.assertEqual(len(response_data), 1)
         self.assertEqual(response_data[0]["id"], id_map[1])
+
+    def test_sorts_filtered_results(self, _, __) -> None:
+        num_allocations = 3
+        id_map = []
+        for i in range(num_allocations):
+            form_data = default_form_data.copy()
+            form_data["project_pk"] = self.project.pk
+            form_data["storage_filesystem_path"] = f"test_path_{i}"
+
+            allocation_data = AllocationService.create_new_allocation(
+                form_data, self.user
+            )
+            allocation: Allocation = allocation_data.get("allocation")
+
+            id_map.append(allocation.id)
+
+            if i == 1:
+                active_status = AllocationStatusChoice.objects.get_or_create(
+                    name="TestStatus"
+                )[0]
+                allocation.status = active_status
+                allocation.save()
+
+        allocations = Allocations()
+
+        request = HttpRequest()
+        request.method = "GET"
+        request.GET.update({"sort": "id"})
+        request.GET.setlist("search[]", ["status__name:Pending"])
+        response = allocations.get(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(len(response_data), 2)
+        self.assertLessEqual(response_data[0]["id"], response_data[1]["id"])
+
+        request.GET.update({"sort": "-id"})
+        response = allocations.get(request)
+        self.assertEqual(response.status_code, 200)
+        response_data = json.loads(response.content)
+        self.assertEqual(len(response_data), 2)
+        self.assertGreaterEqual(response_data[0]["id"], response_data[1]["id"])

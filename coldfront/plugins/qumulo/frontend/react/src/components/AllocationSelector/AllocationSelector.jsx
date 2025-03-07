@@ -3,18 +3,6 @@ import axios from "axios";
 
 import InputLabel from "../InputLabel/InputLabel";
 
-const onGetAllocations = async (params) => {
-  const response = await axios.get("/qumulo/api/allocations", { params });
-
-  return response.data.map((allocation) => ({
-    id: allocation.id,
-    resources__name: allocation.resources[allocation.resources.length - 1],
-    status__name: allocation.status,
-    attributes__storage_filesystem_path:
-      allocation.attributes.storage_filesystem_path,
-  }));
-};
-
 function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
   const columns = [
     { key: "id", label: "ID" },
@@ -30,6 +18,11 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
           ...state,
           filters: { ...state.filters, [key]: value },
         };
+      case "sort":
+        return {
+          ...state,
+          sort: value,
+        };
       default:
         return state;
     }
@@ -41,21 +34,15 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
   });
 
   useEffect(() => {
-    const params = { search: [] };
+    const params = { search: [], sort: queryState.sort };
 
     for (const [key, value] of Object.entries(queryState.filters)) {
       console.log(key, value);
       params.search.push(`${key}:${value}`);
     }
 
-    onGetAllocations(params).then((allocations) => setAllocations(allocations));
+    getAllocations(params).then((allocations) => setAllocations(allocations));
   }, [queryState]);
-
-  const getAllocations = async (params) => {
-    const allocations = await onGetAllocations(params);
-
-    setAllocations(allocations);
-  };
 
   const renderHeader = () => {
     return columns.map(({ key, label }) => (
@@ -67,12 +54,17 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
         />
         <a
           className="sort-asc"
-          onClick={() => getAllocations({ sort: `-${key}` })}
+          onClick={() =>
+            queryDispatch({ action: "sort", key, value: `-${key}` })
+          }
         >
           <i className="fas fa-sort-up" aria-hidden="true"></i>
           <span className="sr-only">Sort {label} asc</span>
         </a>
-        <a className="sort-desc" onClick={() => getAllocations({ sort: key })}>
+        <a
+          className="sort-desc"
+          onClick={() => queryDispatch({ action: "sort", key, value: key })}
+        >
           <i className="fas fa-sort-down" aria-hidden="true"></i>
           <span className="sr-only">Sort {label} desc</span>
         </a>
@@ -122,6 +114,18 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
       </table>
     </div>
   );
+}
+
+async function getAllocations(params) {
+  const response = await axios.get("/qumulo/api/allocations", { params });
+
+  return response.data.map((allocation) => ({
+    id: allocation.id,
+    resources__name: allocation.resources[allocation.resources.length - 1],
+    status__name: allocation.status,
+    attributes__storage_filesystem_path:
+      allocation.attributes.storage_filesystem_path,
+  }));
 }
 
 export default AllocationSelector;
