@@ -27,7 +27,25 @@ def process_path(result):
     result = result.replace("`", "\\`")
     return result
 
-def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder):
+def check_acl(original_path, processed_path, expected_spec):
+    if os.path.islink(original_path):
+        # links don't have ACLs
+        return True
+    # NOTE: prefixing 'sudo' results in different behavior
+    # even though the whole script is run as `sudo` and that
+    # elevated status *should* be inherited by the spawned
+    # subprocesses
+    getfacl_command = f"sudo nfs4_getfacl {processed_path}"
+    try:
+        result = subprocess.check_output(getfacl_command, shell=True)
+        acl_info = str(result, 'utf-8')
+        import pdb
+        pdb.set_trace()
+    except subprocess.CalledProcessError as e:
+        return False
+        # print(f'Failed to get ACL: {path}, Error: {e}')
+
+def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     print(f"Setting ACL for {path_type}: {path}")
     if os.path.islink(path):
         print(f"Skipping link: {path}")
@@ -41,12 +59,13 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder):
     print(f"Spec: {spec}")
     command = f'nfs4_setfacl -s {spec} {processed_path}'
     print(f"Command: {command}")
-    return
     try:
         subprocess.run(command, check=True, shell=True)
         # print(f"Should run command: {command}")
     except subprocess.CalledProcessError as e:
         print(f'Failed to set ACL for {path_type}: {path}, Error: {e}')
+
+    check_acl(path, processed_path, spec)
 
 
 def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str]):
