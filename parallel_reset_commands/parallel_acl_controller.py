@@ -11,6 +11,7 @@ from argument_parser import ArgumentParser
 from typing import List, Set
 
 from constants import BATCH_SIZE
+import datetime
 
 def process_path(result):
     result = result.replace("\\", "\\\\")
@@ -60,6 +61,13 @@ def check_acl(original_path, processed_path, expected_spec):
         # print(f'Failed to get ACL: {path}, Error: {e}')
 
 def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
+
+    # jprew - NOTE: this is test code to exercise the error logs
+    # it will make this method fail at random
+    import random
+
+    if random.random() < 0.3:
+        return False, path
     if os.path.islink(path):
         return True
     processed_path = process_path(path)
@@ -75,7 +83,7 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
 
 
 
-def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str]):
+def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str], error_file: str):
     print(f"Resetting ACLs recursively in {target_directory} with {num_workers} workers.")
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         walker = DirectoryWalker()
@@ -103,6 +111,11 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
                 result_futures = []
 
 
+def _create_error_file_name(target_dir: str) -> str:
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    base_name = os.path.basename(target_dir.rstrip('/'))
+    return f"{base_name}_errors_{timestamp}.log"
+
 
 def main():
     # get the arguments from the user using ArgumentParser
@@ -115,7 +128,8 @@ def main():
         parser.get_target_dir(),
         parser.get_num_workers(),
         parser.get_allocation_name(),
-        parser.get_sub_allocations()
+        parser.get_sub_allocations(),
+        _create_error_file_name(parser.get_target_dir())
     )
 
 
