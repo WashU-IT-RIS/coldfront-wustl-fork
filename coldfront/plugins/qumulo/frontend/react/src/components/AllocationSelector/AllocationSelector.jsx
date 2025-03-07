@@ -29,6 +29,7 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
   };
 
   const [allocations, setAllocations] = useState([]);
+  const [allChecked, setAllChecked] = useState(false);
   const [queryState, queryDispatch] = useActionState(onQueryChange, {
     filters: {},
   });
@@ -88,6 +89,18 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
     }
   };
 
+  const onCheckAll = (event) => {
+    if (event.target.checked) {
+      setSelectedAllocations([
+        ...new Set([...selectedAllocations, ...allocations]),
+      ]);
+      setAllChecked(true);
+    } else {
+      setSelectedAllocations([]);
+      setAllChecked(false);
+    }
+  };
+
   const isChecked = (allocation) => {
     return selectedAllocations
       .map((allocation) => allocation.id)
@@ -132,12 +145,13 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
         <thead>
           <tr>
             <th key="checkbox" scope="col" className="text-nowrap">
-              {/* <input
+              <input
                 type="checkbox"
-                id="select_all"
                 name="select_all"
+                onChange={onCheckAll}
                 value="select_all"
-              /> */}
+                checked={allChecked}
+              />
             </th>
             {renderHeader()}
           </tr>
