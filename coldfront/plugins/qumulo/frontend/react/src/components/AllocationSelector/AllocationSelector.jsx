@@ -37,7 +37,6 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
     const params = { search: [], sort: queryState.sort };
 
     for (const [key, value] of Object.entries(queryState.filters)) {
-      console.log(key, value);
       params.search.push(`${key}:${value}`);
     }
 
@@ -72,7 +71,30 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
     ));
   };
 
-  const renderOptions = () => {
+  const onAllocationCheck = (event) => {
+    const allocationId = event.target.value;
+
+    if (event.target.checked) {
+      const allocation = allocations.find(
+        (allocation) => allocation.id === Number(allocationId)
+      );
+      setSelectedAllocations([...selectedAllocations, allocation]);
+    } else {
+      setSelectedAllocations(
+        selectedAllocations.filter(
+          (allocation) => allocation.id !== Number(allocationId)
+        )
+      );
+    }
+  };
+
+  const isChecked = (allocation) => {
+    return selectedAllocations
+      .map((allocation) => allocation.id)
+      .includes(allocation.id);
+  };
+
+  const renderRows = (allocations) => {
     return allocations.map((allocation) => (
       <tr key={allocation.id} className="text-nowrap">
         <td key="checkbox">
@@ -80,6 +102,8 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
             type="checkbox"
             id={`allocation-${allocation.id}`}
             value={allocation.id}
+            checked={isChecked(allocation)}
+            onChange={onAllocationCheck}
           />
         </td>
         {columns.map(({ key, label }) => (
@@ -89,6 +113,17 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
         ))}
       </tr>
     ));
+  };
+
+  const renderOptions = () => {
+    const unCheckedAllocations = allocations.filter(
+      (allocation) =>
+        !selectedAllocations
+          .map((selecatedAllocation) => selecatedAllocation.id)
+          .includes(allocation.id)
+    );
+
+    return renderRows(unCheckedAllocations);
   };
 
   return (
@@ -108,7 +143,7 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
           </tr>
         </thead>
         <tbody name="table-values-tbody">
-          {/* {% comment %} JS populate this {% endcomment %} */}
+          {renderRows(selectedAllocations)}
         </tbody>
         <tbody name="table-options-tbody">{renderOptions()}</tbody>
       </table>
