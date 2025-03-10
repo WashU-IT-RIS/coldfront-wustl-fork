@@ -9,21 +9,22 @@ import axios from "axios";
 import Cookies from "universal-cookie";
 
 function UserManagement() {
-  const [users, setUsers] = useState(["foo", "bar"]);
+  const [rwUsers, setRwUsers] = useState([]);
+  const [roUsers, setRoUsers] = useState([]);
   const [allocations, setAllocations] = useState([]);
   const cookies = new Cookies();
   const csrfToken = cookies.get("csrftoken");
 
   const onSubmit = () => {
-    console.log(users, allocations);
     const allocationIds = allocations.map((allocation) => allocation.id);
 
     axios
       .post(
         "user-management",
         {
-          users,
-          allocaitons: allocationIds,
+          rwUsers,
+          roUsers,
+          allocationIds: allocationIds,
         },
         {
           headers: {
@@ -41,7 +42,16 @@ function UserManagement() {
 
   return (
     <>
-      <UserSelector name="user-selector" users={users} setUsers={setUsers} />
+      <UserSelector
+        name="rw-user-selector"
+        users={rwUsers}
+        setUsers={setRwUsers}
+      />
+      <UserSelector
+        name="ro-user-selector"
+        users={roUsers}
+        setUsers={setRoUsers}
+      />
       <AllocationSelector
         setSelectedAllocations={setAllocations}
         selectedAllocations={allocations}
