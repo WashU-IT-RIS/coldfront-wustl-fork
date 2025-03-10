@@ -1037,7 +1037,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.first().value, usage)
             self.assertGreater(allocation_attribute_usage.history.count(), 1)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_doesnt_ingest_sub_allocation_data(
         self, qumulo_api_mock: MagicMock
     ) -> None:

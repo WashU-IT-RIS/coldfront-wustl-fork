@@ -1,5 +1,8 @@
+import os
+
 from datetime import datetime
 from coldfront.core.allocation.models import (
+    Allocation,
     AllocationAttribute,
     AllocationAttributeType,
     AllocationAttributeUsage,
@@ -13,61 +16,70 @@ class FileQuotaService:
 
     @staticmethod
     def ingest_quotas_with_daily_usage(logger) -> None:
-        base_allocation_quota_usages = FileQuotaService._get_allocation_file_quotas()
+        filtering_by = lambda quota_usage: AclAllocations.is_base_allocation(
+            quota_usage["path"]
+        )
+        base_allocation_quota_usages = FileQuotaService._get_allocation_file_quotas(
+            filtering_by
+        )
         FileQuotaService._set_daily_quota_usages(base_allocation_quota_usages, logger)
         FileQuotaService._validate_results(base_allocation_quota_usages, logger)
 
     @staticmethod
-    def _get_allocation_file_quotas() -> list:
+    def get_file_systems_near_limit() -> None:
+        filtering_by = lambda quota_usage: AclAllocations.is_base_allocation(
+            quota_usage["path"]
+        ) and FileQuotaService._is_near_limit(
+            quota_usage["capacity_usage"], quota_usage["limit"]
+        )
+        allocations_over_threshold = FileQuotaService._get_allocation_file_quotas(
+            filtering_by
+        )
+        return allocations_over_threshold
+
+    @staticmethod
+    def _get_allocation_file_quotas(filtering_by: callable) -> list:
         qumulo_api = QumuloAPI()
         quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
-        base_allocation_quota_usages = list(
+        file_system_allocations = list(
             filter(
-                lambda quota_usage: AclAllocations.is_base_allocation(
-                    quota_usage["path"]
-                ),
+                filtering_by,
                 quota_usages,
             )
         )
-        return base_allocation_quota_usages
+        return file_system_allocations
 
     @staticmethod
     def _set_daily_quota_usages(quotas, logger) -> None:
-        # Iterate and populate allocation_attribute_usage records
-        storage_filesystem_path_attribute_type = AllocationAttributeType.objects.get(
-            name="storage_filesystem_path"
-        )
-        active_status = AllocationStatusChoice.objects.get(name="Active")
-
         for quota in quotas:
-            path = quota.get("path")
 
-            allocation = FileQuotaService._get_allocation_by_attribute(
-                storage_filesystem_path_attribute_type, path, active_status, logger
-            )
+            allocation = FileQuotaService._get_allocation(quota, logger)
             if allocation is None:
-                if path[-1] != "/":
-                    continue
-
-                value = path[:-1]
-                logger.warn(
-                    f"Attempting to find allocation without the trailing slash..."
-                )
-                allocation = FileQuotaService._get_allocation_by_attribute(
-                    storage_filesystem_path_attribute_type, value, active_status, logger
-                )
-                if allocation is None:
-                    continue
-
+                continue
             allocation.set_usage("storage_quota", quota.get("capacity_usage"))
 
     @staticmethod
-    def _get_allocation_by_attribute(attribute_type, value, for_status, logger):
+    def _get_allocation(quota, logger) -> Allocation:
+        path = quota.get("path")
+
+        allocation = FileQuotaService._get_allocation_by_attribute(path, logger)
+        if allocation is None:
+            if path[-1] != "/":
+                return None
+
+            value = path[:-1]
+            logger.warn(f"Attempting to find allocation without the trailing slash...")
+            allocation = FileQuotaService._get_allocation_by_attribute(value, logger)
+
+        return allocation
+
+    @staticmethod
+    def _get_allocation_by_attribute(value, logger):
         try:
             attribute = AllocationAttribute.objects.select_related("allocation").get(
                 value=value,
-                allocation_attribute_type=attribute_type,
-                allocation__status=for_status,
+                allocation_attribute_type__name="storage_filesystem_path",
+                allocation__status=AllocationStatusChoice.objects.get(name="Active"),
             )
         except AllocationAttribute.DoesNotExist:
             logger.warn(f"Allocation record for {value} path was not found")
@@ -99,3 +111,12 @@ class FileQuotaService:
             logger.warn(f"Usages ingested for today: {daily_usage_ingested}")
 
         return success
+
+    def _is_near_limit(usage: str, limit: str) -> bool:
+        usage = int(usage)
+        limit = int(limit)
+        return (usage / limit) > FileQuotaService._get_limit_threshold()
+
+    def _get_limit_threshold() -> float:
+        limit_threshold = os.environ["LIMIT_THRESHOLD"] or 0.9
+        return limit_threshold

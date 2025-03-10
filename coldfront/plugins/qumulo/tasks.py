@@ -101,10 +101,10 @@ def conditionally_update_storage_allocation_statuses() -> None:
         conditionally_update_storage_allocation_status(allocation)
 
 
-# TODO: refactor the following methods to a service class
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
     FileQuotaService.ingest_quotas_with_daily_usage(logger)
+
 
 def addMembersToADGroup(
     wustlkeys: list[str],
