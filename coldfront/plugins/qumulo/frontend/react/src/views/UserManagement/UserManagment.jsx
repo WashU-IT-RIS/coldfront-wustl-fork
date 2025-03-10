@@ -5,9 +5,39 @@ import AllocationSelector from "../../components/AllocationSelector/AllocationSe
 
 import "./UserManagement.css";
 
+import axios from "axios";
+import Cookies from "universal-cookie";
+
 function UserManagement() {
   const [users, setUsers] = useState(["foo", "bar"]);
   const [allocations, setAllocations] = useState([]);
+  const cookies = new Cookies();
+  const csrfToken = cookies.get("csrftoken");
+
+  const onSubmit = () => {
+    console.log(users, allocations);
+    const allocationIds = allocations.map((allocation) => allocation.id);
+
+    axios
+      .post(
+        "user-management",
+        {
+          users,
+          allocaitons: allocationIds,
+        },
+        {
+          headers: {
+            "X-CSRFToken": csrfToken,
+          },
+        }
+      )
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   return (
     <>
@@ -21,6 +51,7 @@ function UserManagement() {
           type="submit"
           className="btn btn-primary mr-2"
           id="user_management_form_submit"
+          onClick={onSubmit}
         >
           Submit
         </button>
