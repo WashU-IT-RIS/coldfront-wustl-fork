@@ -106,6 +106,11 @@ def ingest_quotas_with_daily_usage() -> None:
     FileQuotaService.ingest_quotas_with_daily_usage(logger)
 
 
+def notify_users_with_allocations_near_limit() -> None:
+    logger = logging.getLogger("notify_users_with_allocations_near_limit")
+    allocations = FileQuotaService.get_file_systems_near_limit()
+
+
 def addMembersToADGroup(
     wustlkeys: list[str],
     acl_allocation: Allocation,
