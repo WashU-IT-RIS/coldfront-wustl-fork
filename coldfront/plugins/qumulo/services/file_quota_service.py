@@ -4,10 +4,10 @@ from datetime import datetime
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
-    AllocationAttributeType,
     AllocationAttributeUsage,
     AllocationStatusChoice,
 )
+
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 
@@ -26,7 +26,7 @@ class FileQuotaService:
         FileQuotaService._validate_results(base_allocation_quota_usages, logger)
 
     @staticmethod
-    def get_file_systems_near_limit() -> None:
+    def get_file_system_allocations_near_limit() -> None:
         filtering_by = lambda quota_usage: AclAllocations.is_base_allocation(
             quota_usage["path"]
         ) and FileQuotaService._is_near_limit(
@@ -118,5 +118,5 @@ class FileQuotaService:
         return (usage / limit) > FileQuotaService._get_limit_threshold()
 
     def _get_limit_threshold() -> float:
-        limit_threshold = os.environ["LIMIT_THRESHOLD"] or 0.9
-        return limit_threshold
+        limit_threshold = os.environ.get("ALLOCATION_LIMIT_THRESHOLD") or 0.9
+        return float(limit_threshold)
