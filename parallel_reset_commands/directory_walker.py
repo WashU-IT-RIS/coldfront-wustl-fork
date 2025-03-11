@@ -18,9 +18,9 @@ class DirectoryWalker:
                 print(f"Root contains: {dirs} {files}")
             for name in files:
                 next_path = os.path.join(root, name)
-                print(f"Yielding file: {next_path}")
+                # print(f"Yielding file: {next_path}")
                 yield next_path, 'file'
             for name in dirs:
                 next_path = os.path.join(root, name)
-                print(f"Yielding directory: {next_path}")
+                # print(f"Yielding directory: {next_path}")
                 yield next_path, 'directory'

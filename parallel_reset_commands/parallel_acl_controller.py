@@ -88,6 +88,7 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
         result_futures = []
         with open(error_file, 'w') as error_log:
             for path, path_type in walker.walk_recursive(target_directory):
+                print(f"Processing *this* path: {path}")
                 if count % 1000 == 0:
                     # print(f'Number pending tasks: {executor._work_queue.qsize()}')
                     print(f'Processed {count} paths')
