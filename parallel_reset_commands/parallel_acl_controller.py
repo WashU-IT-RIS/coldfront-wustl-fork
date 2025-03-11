@@ -114,7 +114,7 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
 
 
 def _create_error_file_name(target_dir: str) -> str:
-    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     base_name = os.path.basename(target_dir.rstrip('/'))
     return f"{base_name}_errors_{timestamp}.log"
 
