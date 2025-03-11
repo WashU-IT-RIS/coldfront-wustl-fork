@@ -13,7 +13,7 @@ jobs:
         env:
           REPO_NAME: coldfront
           REPO_OWNER: washu-it-ris
-          ACCESS_TOKEN: ${{ secret.COLDFRONT_REPO_ACCESS_TOKEN }}
+          ACCESS_TOKEN: ${{ secrets.COLDFRONT_REPO_ACCESS_TOKEN }}
         run: |
           curl -L \
             -X POST \
