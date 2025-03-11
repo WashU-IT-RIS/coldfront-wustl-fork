@@ -61,13 +61,6 @@ def check_acl(original_path, processed_path, expected_spec):
         # print(f'Failed to get ACL: {path}, Error: {e}')
 
 def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
-
-    # jprew - NOTE: this is test code to exercise the error logs
-    # it will make this method fail at random
-    import random
-
-    if random.random() < 0.3:
-        return False, path
     if os.path.islink(path):
         return True, path
     processed_path = process_path(path)
