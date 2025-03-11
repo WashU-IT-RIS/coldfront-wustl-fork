@@ -104,7 +104,7 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
                 # though of course, so is the submission...
                 result_futures.append(ret)
                 if len(result_futures) == BATCH_SIZE:
-                    # print(f"Batch count: {batch_count}")
+                    print(f"Batch count: {batch_count}")
                     batch_count += 1
                     for future in result_futures:
                         success, check_path = future.result()
