@@ -60,7 +60,7 @@ def check_acl(original_path, processed_path, expected_spec):
         return False
         # print(f'Failed to get ACL: {path}, Error: {e}')
 
-def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
+def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
 
     # jprew - NOTE: this is test code to exercise the error logs
     # it will make this method fail at random
@@ -69,12 +69,13 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     if random.random() < 0.3:
         return False, path
     if os.path.islink(path):
-        return True
+        return True, path
     processed_path = process_path(path)
     spec = builder.get_spec_by_path(path, path_type)
-    command = f'nfs4_setfacl -s "{spec}" {processed_path}'
     try:
-        subprocess.run(command, check=True, shell=True)
+        if perform_reset:
+            reset_command = f'nfs4_setfacl -s "{spec}" {processed_path}'
+            subprocess.run(reset_command, check=True, shell=True)
         # print(f"Should run command: {command}")
         return check_acl(path, processed_path, spec), path
     except subprocess.CalledProcessError as e:
@@ -83,8 +84,8 @@ def set_acl(path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
 
 
 
-def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str], error_file: str):
-    print(f"Resetting ACLs recursively in {target_directory} with {num_workers} workers.")
+def process_acls_recursive(perform_reset: bool, target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str], error_file: str):
+    print(f"Processing ACLs recursively in {target_directory} with {num_workers} workers.")
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         walker = DirectoryWalker()
         builder = ACL_SpecBuilder()
@@ -98,7 +99,7 @@ def reset_acls_recursive(target_directory: str, num_workers: int, alloc_name: st
                     # print(f'Number pending tasks: {executor._work_queue.qsize()}')
                     print(f'Processed {count} paths')
                 count += 1
-                ret = executor.submit(set_acl, path, path_type, builder)
+                ret = executor.submit(process_acl, perform_reset, path, path_type, builder)
                 # ret = set_acl(path, path_type, builder)
                 # isn't this single-threaded for each return?
                 # though of course, so is the submission...
@@ -126,7 +127,8 @@ def main():
 
 
     # at this point, I think I can call the reset_acls_recursive function
-    reset_acls_recursive(
+    process_acls_recursive(
+        parser.get_perform_reset(),
         parser.get_target_dir(),
         parser.get_num_workers(),
         parser.get_allocation_name(),

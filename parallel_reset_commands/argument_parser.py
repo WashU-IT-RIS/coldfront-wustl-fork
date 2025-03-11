@@ -5,11 +5,15 @@ from constants import STORAGE_2_PREFIX
 class ArgumentParser:
 
     def __init__(self):
+        self.perform_reset = False
         self.allocation_name = ""
         self.allocation_root = ""
         self.num_workers = 0
         self.target_dir = ""
         self.sub_allocations = []
+    
+    def get_perform_reset(self):
+        return self.perform_reset
     
     def get_allocation_name(self):
         return self.allocation_name
@@ -28,6 +32,14 @@ class ArgumentParser:
     
     def retrieve_args(self):
         print("Retrieving args")
+
+        def validate_perform_reset(value):
+            if value.lower() not in ['y', 'n']:
+                print("Invalid input. Please enter 'y' or 'n'.")
+                return False
+            return True
+        perform_reset_y_n = self._retrieve_arg('perform reset', "Perform reset? (y/n): ", validate_perform_reset)
+        self.perform_reset = (perform_reset_y_n == 'y')
 
         # first, retrieve a file and confirm it exists in 
         # a passed-in validator
