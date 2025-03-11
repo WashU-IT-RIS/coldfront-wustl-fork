@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import "./UserSelector.css";
 
-function UserSelector({ name, users, setUsers }) {
+function UserSelector({ name, users, setUsers, label, errorMessage }) {
   const [inputText, setInputText] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
 
@@ -37,9 +37,16 @@ function UserSelector({ name, users, setUsers }) {
 
   return (
     <>
-      <p id={`${name}-error-message`} className="invalid-feedback">
-        <strong></strong>
+      <p
+        id={`${name}-error-message`}
+        className="invalid-feedback"
+        style={{ display: errorMessage ? "block" : "none" }}
+      >
+        {errorMessage}
       </p>
+      <label htmlFor={`${name}-textarea`} className="form-label">
+        {label}:
+      </label>
       <div className="d-flex flex-row justify-content-between">
         <textarea
           id={`${name}-textarea`}

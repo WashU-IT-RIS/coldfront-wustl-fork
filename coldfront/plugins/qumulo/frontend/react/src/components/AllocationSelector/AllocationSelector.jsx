@@ -3,7 +3,11 @@ import axios from "axios";
 
 import InputLabel from "../InputLabel/InputLabel";
 
-function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
+function AllocationSelector({
+  setSelectedAllocations,
+  selectedAllocations,
+  label,
+}) {
   const columns = [
     { key: "id", label: "ID" },
     { key: "resources__name", label: "Resource" },
@@ -143,6 +147,7 @@ function AllocationSelector({ setSelectedAllocations, selectedAllocations }) {
 
   return (
     <div className="table-responsive">
+      <p className="form-label">{label}:</p>
       <table className="table table-sm">
         <thead>
           <tr>

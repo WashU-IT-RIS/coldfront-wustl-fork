@@ -46,15 +46,18 @@ function UserManagement() {
         name="rw-user-selector"
         users={rwUsers}
         setUsers={setRwUsers}
+        label={"Read/Write Users"}
       />
       <UserSelector
         name="ro-user-selector"
         users={roUsers}
         setUsers={setRoUsers}
+        label={"Read-Only Users"}
       />
       <AllocationSelector
         setSelectedAllocations={setAllocations}
         selectedAllocations={allocations}
+        label={"Allocations"}
       />
       <div className="d-flex justify-content-end">
         <button

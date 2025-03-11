@@ -8,9 +8,8 @@ User Management
 {% endblock %}
 
 {% block content %}
-{% csrf_token %}
+{% comment %} {% csrf_token %} {% endcomment %}
 
-{% comment %} <script type="text/html" src="/static/UserManagement/index.html"></script> {% endcomment %}
 <div jquery-include="/static/UserManagement/index.html"></div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script> 
