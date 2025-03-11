@@ -10,6 +10,8 @@ class DirectoryWalker:
         # need to fix
         if verbose:
             print(f'Processing directory starting at: {directory}')
+        
+        yield directory, 'directory'
         for root, dirs, files in os.walk(directory):
             if verbose:
                 print(f'Processing directory: {root}')
