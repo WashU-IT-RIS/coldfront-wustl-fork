@@ -32,8 +32,11 @@ class TestAllocationsGet(TestCase):
         request = HttpRequest()
         request.method = "GET"
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(json.loads(response.content), [])
+        self.assertEqual(content["totalPages"], 0)
+        self.assertEqual(content["allocations"], [])
 
     def test_returns_all_allocations(self, _, __) -> None:
         num_allocations = 3
@@ -49,8 +52,11 @@ class TestAllocationsGet(TestCase):
         request = HttpRequest()
         request.method = "GET"
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)), num_allocations)
+        self.assertEqual(content["totalPages"], 1)
+        self.assertEqual(len(content["allocations"]), num_allocations)
 
     def test_returns_allocations_with_correct_data(self, _, __) -> None:
         expected_keys = [
@@ -79,10 +85,12 @@ class TestAllocationsGet(TestCase):
         request = HttpRequest()
         request.method = "GET"
         response = allocations.get(request)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)), 1)
+        content = json.loads(response.content)
 
-        response_allocation = json.loads(response.content)[0]
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(content["allocations"]), 1)
+
+        response_allocation = content["allocations"][0]
         self.assertEqual(set(response_allocation.keys()), set(expected_keys))
 
     def test_returns_max_100_results(self, _, __) -> None:
@@ -99,8 +107,11 @@ class TestAllocationsGet(TestCase):
         request = HttpRequest()
         request.method = "GET"
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)), 100)
+        self.assertEqual(len(content["allocations"]), 100)
+        self.assertEqual(content["totalPages"], 2)
 
     def test_returns_next_100_results(self, _, __) -> None:
         num_allocations = 105
@@ -117,8 +128,10 @@ class TestAllocationsGet(TestCase):
         request.method = "GET"
         request.GET.update({"page": 2})
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)), 5)
+        self.assertEqual(len(content["allocations"]), 5)
 
     def test_allows_specific_result_count(self, _, __) -> None:
         num_allocations = 30
@@ -135,13 +148,17 @@ class TestAllocationsGet(TestCase):
         request.method = "GET"
         request.GET.update({"page": 1, "limit": 20})
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)), 20)
+        self.assertEqual(len(content["allocations"]), 20)
 
         request.GET.update({"page": 2, "limit": 20})
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(json.loads(response.content)), 10)
+        self.assertEqual(len(content["allocations"]), 10)
 
     def test_sorts_by_basic_keys(self, _, __) -> None:
         num_allocations = 3
@@ -171,29 +188,36 @@ class TestAllocationsGet(TestCase):
         request.method = "GET"
         request.GET.update({"sort": "id"})
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertLessEqual(response_data[0]["id"], response_data[1]["id"])
         self.assertLessEqual(response_data[1]["id"], response_data[2]["id"])
 
         request.GET.update({"sort": "-id"})
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertGreaterEqual(response_data[0]["id"], response_data[1]["id"])
         self.assertGreaterEqual(response_data[1]["id"], response_data[2]["id"])
 
         request.GET.update({"sort": "status"})
         response = allocations.get(request)
+        content = json.loads(response.content)
 
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertEqual(response_data[2]["id"], id_map[1])
 
         request.GET.update({"sort": "-status"})
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertEqual(response_data[0]["id"], id_map[1])
 
     def test_throws_error_on_invalid_sort_key(self, _, __) -> None:
@@ -203,6 +227,7 @@ class TestAllocationsGet(TestCase):
         request.method = "GET"
         request.GET.update({"sort": "storage_filesystem_path"})
         response = allocations.get(request)
+
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.content.decode(), "Invalid sort key")
 
@@ -227,8 +252,10 @@ class TestAllocationsGet(TestCase):
             }
         )
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertLessEqual(
             response_data[0]["attributes"]["storage_filesystem_path"],
             response_data[1]["attributes"]["storage_filesystem_path"],
@@ -244,8 +271,10 @@ class TestAllocationsGet(TestCase):
             }
         )
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertLessEqual(
             response_data[2]["attributes"]["storage_filesystem_path"],
             response_data[1]["attributes"]["storage_filesystem_path"],
@@ -283,15 +312,19 @@ class TestAllocationsGet(TestCase):
         request.method = "GET"
         request.GET.setlist("search[]", ["id:1"])
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertEqual(len(response_data), 1)
         self.assertEqual(response_data[0]["id"], 1)
 
         request.GET.setlist("search[]", ["status__name:TestStatus"])
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertEqual(len(response_data), 1)
         self.assertEqual(response_data[0]["id"], id_map[1])
 
@@ -334,8 +367,10 @@ class TestAllocationsGet(TestCase):
             "search[]", [f"project__pk:{self.project.pk}", "status__name:Pending"]
         )
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertEqual(len(response_data), 1)
         self.assertEqual(response_data[0]["id"], id_map[0])
 
@@ -362,8 +397,10 @@ class TestAllocationsGet(TestCase):
             "search[]", ["attributes__storage_filesystem_path:test_path_1"]
         )
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertEqual(len(response_data), 1)
         self.assertEqual(response_data[0]["id"], id_map[1])
 
@@ -396,14 +433,18 @@ class TestAllocationsGet(TestCase):
         request.GET.update({"sort": "id"})
         request.GET.setlist("search[]", ["status__name:Pending"])
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertEqual(len(response_data), 2)
         self.assertLessEqual(response_data[0]["id"], response_data[1]["id"])
 
         request.GET.update({"sort": "-id"})
         response = allocations.get(request)
+        content = json.loads(response.content)
+
         self.assertEqual(response.status_code, 200)
-        response_data = json.loads(response.content)
+        response_data = content["allocations"]
         self.assertEqual(len(response_data), 2)
         self.assertGreaterEqual(response_data[0]["id"], response_data[1]["id"])

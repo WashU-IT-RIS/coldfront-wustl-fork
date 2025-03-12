@@ -2,6 +2,9 @@ import { useActionState, useEffect, useState } from "react";
 import axios from "axios";
 
 import InputLabel from "../InputLabel/InputLabel";
+import PageSelector from "../PageSelector/PageSelector";
+
+import "./AllocationSelector.css";
 
 function AllocationSelector({
   setSelectedAllocations,
@@ -27,26 +30,37 @@ function AllocationSelector({
           ...state,
           sort: value,
         };
+      case "page":
+        return {
+          ...state,
+          page: value,
+        };
       default:
         return state;
     }
   };
 
   const [allocations, setAllocations] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
   const [allChecked, setAllChecked] = useState(false);
   const [queryState, queryDispatch] = useActionState(onQueryChange, {
     filters: {},
+    page: 1,
+    sort: "id",
   });
 
   useEffect(() => {
-    const params = { search: [], sort: queryState.sort };
+    const params = { search: [], sort: queryState.sort, page: queryState.page };
 
     for (const [key, value] of Object.entries(queryState.filters)) {
       params.search.push(`${key}:${value}`);
     }
 
     setAllChecked(false);
-    getAllocations(params).then((allocations) => setAllocations(allocations));
+    getAllocations(params).then(({ allocations, totalPages }) => {
+      setAllocations(allocations);
+      setTotalPages(totalPages);
+    });
   }, [queryState]);
 
   const renderHeader = () => {
@@ -163,25 +177,38 @@ function AllocationSelector({
             {renderHeader()}
           </tr>
         </thead>
-        <tbody name="table-values-tbody">
+        <tbody name="table-values-tbody" className="table-values-tbody">
           {renderRows(selectedAllocations)}
         </tbody>
         <tbody name="table-options-tbody">{renderOptions()}</tbody>
       </table>
+      <PageSelector
+        totalPages={totalPages}
+        currentPage={queryState.page}
+        setCurrentPage={(value) =>
+          queryDispatch({ action: "page", key: "page", value })
+        }
+      />
     </div>
   );
 }
 
 async function getAllocations(params) {
-  const response = await axios.get("/qumulo/api/allocations", { params });
+  const PAGE_SIZE = 50;
 
-  return response.data.map((allocation) => ({
+  const response = await axios.get("/qumulo/api/allocations", {
+    params: { ...params, limit: PAGE_SIZE },
+  });
+
+  const allocations = response.data.allocations.map((allocation) => ({
     id: allocation.id,
     resources__name: allocation.resources[allocation.resources.length - 1],
     status__name: allocation.status,
     attributes__storage_filesystem_path:
       allocation.attributes.storage_filesystem_path,
   }));
+
+  return { allocations, totalPages: response.data.totalPages };
 }
 
 export default AllocationSelector;

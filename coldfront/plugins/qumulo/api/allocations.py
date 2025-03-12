@@ -12,14 +12,11 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
 )
 
-import pprint
-import logging
-
 
 class Allocations(LoginRequiredMixin, View):
     def get(self, request: HttpRequest, *args, **kwargs):
-        page = request.GET.get("page", 1)
-        limit = request.GET.get("limit", 100)
+        page = int(request.GET.get("page", 1))
+        limit = int(request.GET.get("limit", 100))
         start_index = (page - 1) * limit
         stop_index = start_index + limit
         sort = request.GET.get("sort", "id")
@@ -50,6 +47,11 @@ class Allocations(LoginRequiredMixin, View):
                     request, allocations_queryset
                 )
 
+            total_count = allocations_queryset.count()
+            total_pages = -(
+                total_count // -limit
+            )  # Equivalent to ceil(total_count / limit)
+
             allocations_queryset = allocations_queryset.order_by(sort)[
                 start_index:stop_index
             ]
@@ -64,7 +66,9 @@ class Allocations(LoginRequiredMixin, View):
             )
         )
 
-        return JsonResponse(allocations_dicts, safe=False)
+        return JsonResponse(
+            {"totalPages": total_pages, "allocations": allocations_dicts}, safe=False
+        )
 
     def _handle_attribute_sort(
         self, request: HttpRequest, allocations_queryset: QuerySet
