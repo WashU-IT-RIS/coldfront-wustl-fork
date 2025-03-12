@@ -194,7 +194,7 @@ function AllocationSelector({
 }
 
 async function getAllocations(params) {
-  const PAGE_SIZE = 50;
+  const PAGE_SIZE = 2;
 
   const response = await axios.get("/qumulo/api/allocations", {
     params: { ...params, limit: PAGE_SIZE },

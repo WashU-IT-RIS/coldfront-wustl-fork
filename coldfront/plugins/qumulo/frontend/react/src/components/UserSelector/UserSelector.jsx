@@ -57,22 +57,20 @@ function UserSelector({ name, users, setUsers, label, errorMessage }) {
         ></textarea>
         <div>
           <button
-            id={`${name}-add-button`}
-            type="button"
-            className="btn btn-outline-primary btn-sm align-self-start"
-            onClick={handleAddButtonClick}
-          >
-            {">"}
-            {">"}
-          </button>
-          <button
             id={`${name}-remove-button`}
             type="button"
             className="btn btn-outline-primary btn-sm align-self-start"
             onClick={handleRemoveButtonClick}
           >
-            {"<"}
-            {"<"}
+            &laquo;
+          </button>
+          <button
+            id={`${name}-add-button`}
+            type="button"
+            className="btn btn-outline-primary btn-sm align-self-start"
+            onClick={handleAddButtonClick}
+          >
+            &raquo;
           </button>
         </div>
         <ul
