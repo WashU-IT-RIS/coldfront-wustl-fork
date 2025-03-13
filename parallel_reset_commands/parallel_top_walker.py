@@ -56,7 +56,7 @@ def main(root, depth):
 
 if __name__ == "__main__":
     target = '/storage2/fs1/prewitt_test/Active'
-    sub_dir_threshold = 4
+    sub_dir_threshold = 10
     # find threshold depth
     result = count_directories_at_depth(target, sub_dir_threshold)
     if result:
