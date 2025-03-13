@@ -30,5 +30,5 @@ def main(root, depth):
 
 if __name__ == "__main__":
     root_directory = "/storage2/fs1/prewitt_test"
-    depth = 2  # Adjust the depth as needed
+    depth = 1  # Adjust the depth as needed
     main(root_directory, depth)
