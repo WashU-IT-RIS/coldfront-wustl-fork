@@ -111,9 +111,19 @@ function AllocationSelector({
 
   const onCheckAll = (event) => {
     if (event.target.checked) {
-      setSelectedAllocations([
-        ...new Set([...selectedAllocations, ...allocations]),
-      ]);
+      const newAllocations = [...selectedAllocations];
+
+      for (const allocation of allocations) {
+        if (
+          !selectedAllocations
+            .map((allocation) => allocation.id)
+            .includes(allocation.id)
+        ) {
+          newAllocations.push(allocation);
+        }
+      }
+
+      setSelectedAllocations(newAllocations);
       setAllChecked(true);
     } else {
       setSelectedAllocations([]);
@@ -194,7 +204,7 @@ function AllocationSelector({
 }
 
 async function getAllocations(params) {
-  const PAGE_SIZE = 2;
+  const PAGE_SIZE = 50;
 
   const response = await axios.get("/qumulo/api/allocations", {
     params: { ...params, limit: PAGE_SIZE },
