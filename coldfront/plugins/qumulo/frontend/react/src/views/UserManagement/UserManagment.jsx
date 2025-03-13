@@ -2,16 +2,19 @@ import { useState } from "react";
 
 import UserSelector from "../../components/UserSelector/UserSelector";
 import AllocationSelector from "../../components/AllocationSelector/AllocationSelector";
-
-import "./UserManagement.css";
+import GenericModal from "../../components/GenericModal/GenericModal";
 
 import axios from "axios";
 import Cookies from "universal-cookie";
+
+import "./UserManagement.css";
 
 function UserManagement() {
   const [rwUsers, setRwUsers] = useState([]);
   const [roUsers, setRoUsers] = useState([]);
   const [allocations, setAllocations] = useState([]);
+  const [renderModal, setRenderModal] = useState(false);
+
   const cookies = new Cookies();
   const csrfToken = cookies.get("csrftoken");
 
@@ -33,7 +36,7 @@ function UserManagement() {
         }
       )
       .then((response) => {
-        console.log(response);
+        setRenderModal(true);
       })
       .catch((error) => {
         console.error(error);
@@ -69,6 +72,12 @@ function UserManagement() {
           Submit
         </button>
       </div>
+      <GenericModal
+        title="Update Sumbitted"
+        text="Permissions changes have been submitted and will be applied shortly."
+        onClose={() => window.location.reload()}
+        show={renderModal}
+      />
     </>
   );
 }
