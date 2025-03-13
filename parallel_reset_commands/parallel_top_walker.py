@@ -10,7 +10,7 @@ def walk_directory(root):
             # print(os.path.join(dirpath, filename))
     return all_paths
 
-def find_subdirectories(root, depth):
+def find_subdirectories_helper(root, depth):
     subdirs = []
     for dirpath, dirnames, _ in os.walk(root):
         current_depth = dirpath[len(root):].count(os.sep)
@@ -20,8 +20,18 @@ def find_subdirectories(root, depth):
             break
     return subdirs
 
+def count_directories_at_depth(root, depth):
+    count = 0
+    for dirpath, dirnames, _ in os.walk(root):
+        current_depth = dirpath[len(root):].count(os.sep)
+        if current_depth == depth:
+            count += len(dirnames)
+        elif current_depth > depth:
+            break
+    return count
+
 def main(root, depth):
-    subdirs = find_subdirectories(root, depth)
+    subdirs = find_subdirectories_helper(root, depth)
     print(f"Initial subdirs: {subdirs}")
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [executor.submit(walk_directory, subdir) for subdir in subdirs]
@@ -29,6 +39,5 @@ def main(root, depth):
             print(future.result())
 
 if __name__ == "__main__":
-    root_directory = "/storage2/fs1/prewitt_test"
-    depth = 1  # Adjust the depth as needed
-    main(root_directory, depth)
+    for i in range(4):
+        print(f"Depth {i}: {count_directories_at_depth('.', i)}")
