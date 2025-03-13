@@ -45,6 +45,8 @@ function UserManagement() {
 
   return (
     <>
+      <h2>User Management</h2>
+      <hr />
       <UserSelector
         name="rw-user-selector"
         users={rwUsers}

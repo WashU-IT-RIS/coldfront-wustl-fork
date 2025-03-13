@@ -32,7 +32,7 @@ urlpatterns = [
     path(
         "allocation-admin/user-management",
         user_management_view.UserManagementView.as_view(),
-        name="userManagement",
+        name="user-management",
     ),
     path("api/allocations", Allocations.as_view(), name="getAllocations"),
     path(
