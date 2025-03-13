@@ -25,6 +25,7 @@ def count_directories_at_depth(root, sub_dir_threshold):
     dirnames_found = []
     current_level_dirs = [root]
     reached_threshold = False
+    depth = 0
     while not reached_threshold:
         next_level_dirs = []
         for dir in current_level_dirs:
@@ -38,10 +39,11 @@ def count_directories_at_depth(root, sub_dir_threshold):
         if len(current_level_dirs) >= sub_dir_threshold:
             reached_threshold = True
             break
+        depth += 1
     if reached_threshold:
         count = len(current_level_dirs)
         dirnames_found = current_level_dirs
-        return count, dirnames_found
+        return depth, count, dirnames_found
     return None
 
 def main(root, depth):
@@ -58,7 +60,7 @@ if __name__ == "__main__":
     # find threshold depth
     result = count_directories_at_depth(target, sub_dir_threshold)
     if result:
-        count_at_depth, sub_dirs_at_depth = result
-        print(f"Threshold reached at depth {count_at_depth}: {sub_dirs_at_depth}")
+        depth, count_at_depth, sub_dirs_at_depth = result
+        print(f"Threshold reached at depth {depth} subdir_count {count_at_depth} subdir_list {sub_dirs_at_depth}")
     else:
         print(f"Threshold not reached at depth {sub_dir_threshold}")
