@@ -111,19 +111,15 @@ function AllocationSelector({
 
   const onCheckAll = (event) => {
     if (event.target.checked) {
-      const newAllocations = [...selectedAllocations];
+      const uniqueAllocationIds = new Set([
+        ...selectedAllocations.map((allocation) => allocation.id),
+        ...allocations.map((allocation) => allocation.id),
+      ]);
+      const uniqueAllocations = uniqueAllocationIds.map((id) =>
+        allocations.find((allocation) => allocation.id === id)
+      );
 
-      for (const allocation of allocations) {
-        if (
-          !selectedAllocations
-            .map((allocation) => allocation.id)
-            .includes(allocation.id)
-        ) {
-          newAllocations.push(allocation);
-        }
-      }
-
-      setSelectedAllocations(newAllocations);
+      setSelectedAllocations(uniqueAllocations);
       setAllChecked(true);
     } else {
       setSelectedAllocations([]);
