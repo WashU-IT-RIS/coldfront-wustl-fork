@@ -39,5 +39,6 @@ def main(root, depth):
             print(future.result())
 
 if __name__ == "__main__":
+    target = '/storage2/fs1/prewitt_test/Active'
     for i in range(4):
-        print(f"Depth {i}: {count_directories_at_depth('.', i)}")
+        print(f"Depth {i}: {count_directories_at_depth(target, i)}")
