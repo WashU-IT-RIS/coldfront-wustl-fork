@@ -33,12 +33,8 @@ class FileQuotaService:
         allocations_over_threshold = FileQuotaService.get_allocation_file_quotas(
             filtering_by
         )
-        return allocations_over_threshold
 
-    @staticmethod
-    def get_limit_threshold() -> float:
-        limit_threshold = os.environ.get("ALLOCATION_LIMIT_THRESHOLD") or 0.9
-        return float(limit_threshold)
+        return allocations_over_threshold
 
     @staticmethod
     def get_allocation_file_quotas(filtering_by: callable) -> list:
@@ -51,6 +47,11 @@ class FileQuotaService:
             )
         )
         return file_system_allocations
+
+    @staticmethod
+    def get_limit_threshold() -> float:
+        limit_threshold = os.environ.get("ALLOCATION_LIMIT_THRESHOLD") or 0.9
+        return float(limit_threshold)
 
 
 def _set_daily_quota_usages(quotas, logger) -> None:
@@ -77,7 +78,7 @@ def _get_allocation(quota, logger) -> Allocation:
     return allocation
 
 
-def _get_allocation_by_attribute(value, logger):
+def _get_allocation_by_attribute(value, logger) -> Allocation:
     try:
         attribute = AllocationAttribute.objects.select_related("allocation").get(
             value=value,
