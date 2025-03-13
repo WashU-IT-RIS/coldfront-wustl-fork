@@ -28,8 +28,8 @@ def count_directories_at_depth(root, depth):
         if current_depth == depth:
             count += len(dirnames)
             dirnames_found.extend(dirnames)
-        elif current_depth > depth:
-            break
+        # elif current_depth > depth:
+        #     break
     return count, dirnames_found
 
 def main(root, depth):
