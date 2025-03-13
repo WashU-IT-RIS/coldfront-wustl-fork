@@ -23,13 +23,20 @@ def find_subdirectories_helper(root, depth):
 def count_directories_at_depth(root, depth):
     count = 0
     dirnames_found = []
-    for dirpath, dirnames, _ in os.walk(root):
-        current_depth = dirpath[len(root):].count(os.sep)
-        if current_depth == depth:
-            count += len(dirnames)
-            dirnames_found.extend(dirnames)
-        # elif current_depth > depth:
-        #     break
+    current_level_dirs = [root]
+
+    for _ in range(depth):
+        next_level_dirs = []
+        for dir in current_level_dirs:
+            with os.scandir(dir) as it:
+                for entry in it:
+                    if entry.is_dir():
+                        next_level_dirs.append(entry.path)
+        current_level_dirs = next_level_dirs
+
+    count = len(current_level_dirs)
+    dirnames_found = current_level_dirs
+
     return count, dirnames_found
 
 def main(root, depth):
