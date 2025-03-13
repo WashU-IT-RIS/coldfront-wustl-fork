@@ -20,11 +20,11 @@ def find_subdirectories_helper(root, depth):
             break
     return subdirs
 
-def count_directories_at_depth(root, depth):
+def count_directories_at_depth(root, depth, sub_dir_threshold):
     count = 0
     dirnames_found = []
     current_level_dirs = [root]
-
+    reached_threshold = False
     for _ in range(depth):
         next_level_dirs = []
         for dir in current_level_dirs:
@@ -33,11 +33,14 @@ def count_directories_at_depth(root, depth):
                     if entry.is_dir():
                         next_level_dirs.append(entry.path)
         current_level_dirs = next_level_dirs
-
-    count = len(current_level_dirs)
-    dirnames_found = current_level_dirs
-
-    return count, dirnames_found
+        if len(current_level_dirs) >= sub_dir_threshold:
+            reached_threshold = True
+            break
+    if reached_threshold:
+        count = len(current_level_dirs)
+        dirnames_found = current_level_dirs
+        return count, dirnames_found
+    return None
 
 def main(root, depth):
     subdirs = find_subdirectories_helper(root, depth)
@@ -49,5 +52,11 @@ def main(root, depth):
 
 if __name__ == "__main__":
     target = '/storage2/fs1/prewitt_test/Active'
-    for i in range(4):
-        print(f"Depth {i}: {count_directories_at_depth(target, i)}")
+    sub_dir_threshold = 4
+    # find threshold depth
+    result = count_directories_at_depth(target, 4, sub_dir_threshold)
+    if result:
+        count_at_depth, sub_dirs_at_depth = result
+        print(f"Threshold reached at depth {count_at_depth}: {sub_dirs_at_depth}")
+    else:
+        print(f"Threshold not reached at depth {sub_dir_threshold}")
