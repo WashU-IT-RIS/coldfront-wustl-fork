@@ -94,9 +94,6 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
                     print(f'Processed {count} paths')
                 count += 1
                 ret = executor.submit(process_acl, perform_reset, path, path_type, builder)
-                # ret = set_acl(path, path_type, builder)
-                # isn't this single-threaded for each return?
-                # though of course, so is the submission...
                 result_futures.append(ret)
                 if len(result_futures) == BATCH_SIZE:
                     print(f"Batch count: {batch_count}")
