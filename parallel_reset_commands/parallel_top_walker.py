@@ -49,9 +49,10 @@ def count_directories_at_depth(root, sub_dir_threshold):
 def walk_directory_with_scandir(root, max_depth):
     all_paths = []
     stack = [root]
+    depth_at_target = root.count(os.sep)
     while stack:
         current_dir = stack.pop()
-        current_depth = current_dir[len(root):].count(os.sep)
+        current_depth = current_dir.count(os.sep) - depth_at_target
         if current_depth > max_depth:
             break
         with os.scandir(current_dir) as it:
