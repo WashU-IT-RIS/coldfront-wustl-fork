@@ -53,14 +53,13 @@ def walk_directory_with_scandir(root, max_depth):
     while stack:
         current_dir = stack.pop()
         current_depth = current_dir.count(os.sep) - depth_at_target
-        if current_depth > max_depth:
+        if current_depth > (max_depth + 1):
             break
         with os.scandir(current_dir) as it:
             for entry in it:
-                if entry.is_file():
-                    all_paths.append(entry.path)
-                elif entry.is_dir():
+                if entry.is_dir():
                     stack.append(entry.path)
+                all_paths.append(entry.path)
     return all_paths
 
 def main(root, depth):
