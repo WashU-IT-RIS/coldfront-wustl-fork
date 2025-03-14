@@ -76,9 +76,10 @@ if __name__ == "__main__":
     # find threshold depth
     result = count_directories_at_depth(target, sub_dir_threshold)
     import pdb
-    pdb.set_trace()
+    # pdb.set_trace()
     if result:
         depth, count_at_depth, sub_dirs_at_depth = result
+        pdb.set_trace()
         print(f"Threshold reached at depth {depth} subdir_count {count_at_depth} subdir_list {sub_dirs_at_depth}")
     else:
         print(f"Threshold not reached at depth {sub_dir_threshold}")
