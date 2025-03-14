@@ -46,6 +46,22 @@ def count_directories_at_depth(root, sub_dir_threshold):
         return depth, count, dirnames_found
     return None
 
+def walk_directory_with_scandir(root, max_depth):
+    all_paths = []
+    stack = [root]
+    while stack:
+        current_dir = stack.pop()
+        current_depth = current_dir[len(root):].count(os.sep)
+        if current_depth > max_depth:
+            break
+        with os.scandir(current_dir) as it:
+            for entry in it:
+                if entry.is_file():
+                    all_paths.append(entry.path)
+                elif entry.is_dir():
+                    stack.append(entry.path)
+    return all_paths
+
 def main(root, depth):
     subdirs = find_subdirectories_helper(root, depth)
     print(f"Initial subdirs: {subdirs}")
@@ -59,6 +75,8 @@ if __name__ == "__main__":
     sub_dir_threshold = 10
     # find threshold depth
     result = count_directories_at_depth(target, sub_dir_threshold)
+    import pdb
+    pdb.set_trace()
     if result:
         depth, count_at_depth, sub_dirs_at_depth = result
         print(f"Threshold reached at depth {depth} subdir_count {count_at_depth} subdir_list {sub_dirs_at_depth}")
