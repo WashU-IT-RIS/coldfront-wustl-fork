@@ -105,7 +105,7 @@ if __name__ == "__main__":
         for subdir in sub_dirs_at_depth:
             for path, type in walk_directory_and_below(subdir):
                 sub_dir_entries.append(path)
-        top_level_entries = walk_directory_with_scandir(target, depth+1)
+        top_level_entries = walk_directory_with_scandir(target, depth)
 
         check_entries = []
         for path, type in walk_directory_and_below(target):
