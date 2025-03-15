@@ -68,13 +68,13 @@ def walk_directory_with_scandir(root, max_depth):
     all_paths = []
     q = deque([root])
     depth_at_target = root.count(os.sep)
-    pdb.set_trace()
+    # pdb.set_trace()
     while q:
-        pdb.set_trace()
+        # pdb.set_trace()
         current_dir = q.pop()
         current_depth = current_dir.count(os.sep) - depth_at_target
         if current_depth > (max_depth + 1):
-            pdb.set_trace()
+            # pdb.set_trace()
             break
         with os.scandir(current_dir) as it:
             for entry in it:
