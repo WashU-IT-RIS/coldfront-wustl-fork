@@ -2,23 +2,38 @@ import os
 
 import concurrent.futures
 
-def walk_directory(root):
-    all_paths = []
-    for dirpath, dirnames, filenames in os.walk(root):
-        for filename in filenames:
-            all_paths.append(os.path.join(dirpath, filename))
-            # print(os.path.join(dirpath, filename))
-    return all_paths
+# def walk_directory(root):
+#     all_paths = []
+#     for dirpath, dirnames, filenames in os.walk(root):
+#         for filename in filenames:
+#             all_paths.append(os.path.join(dirpath, filename))
+#             # print(os.path.join(dirpath, filename))
+#     return all_paths
 
-def find_subdirectories_helper(root, depth):
-    subdirs = []
-    for dirpath, dirnames, _ in os.walk(root):
-        current_depth = dirpath[len(root):].count(os.sep)
-        if current_depth == depth:
-            subdirs.extend([os.path.join(dirpath, d) for d in dirnames])
-        elif current_depth > depth:
-            break
-    return subdirs
+# def find_subdirectories_helper(root, depth):
+#     subdirs = []
+#     for dirpath, dirnames, _ in os.walk(root):
+#         current_depth = dirpath[len(root):].count(os.sep)
+#         if current_depth == depth:
+#             subdirs.extend([os.path.join(dirpath, d) for d in dirnames])
+#         elif current_depth > depth:
+#             break
+#     return subdirs
+def walk_directory_and_below(directory):
+    verbose = False
+    yield directory, 'directory'
+    for root, dirs, files in os.walk(directory):
+        if verbose:
+            print(f'Processing directory: {root}')
+            print(f"Root contains: {dirs} {files}")
+        for name in files:
+            next_path = os.path.join(root, name)
+            # print(f"Yielding file: {next_path}")
+            yield next_path, 'file'
+        for name in dirs:
+            next_path = os.path.join(root, name)
+            # print(f"Yielding directory: {next_path}")
+            yield next_path, 'directory'
 
 def count_directories_at_depth(root, sub_dir_threshold):
     count = 0
@@ -68,13 +83,13 @@ def walk_directory_with_scandir(root, max_depth):
                 all_paths.append(entry.path)
     return all_paths
 
-def main(root, depth):
-    subdirs = find_subdirectories_helper(root, depth)
-    print(f"Initial subdirs: {subdirs}")
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(walk_directory, subdir) for subdir in subdirs]
-        for future in concurrent.futures.as_completed(futures):
-            print(future.result())
+# def main(root, depth):
+#     subdirs = find_subdirectories_helper(root, depth)
+#     print(f"Initial subdirs: {subdirs}")
+#     with concurrent.futures.ThreadPoolExecutor() as executor:
+#         futures = [executor.submit(walk_directory, subdir) for subdir in subdirs]
+#         for future in concurrent.futures.as_completed(futures):
+#             print(future.result())
 
 if __name__ == "__main__":
     target = '/storage2/fs1/prewitt_test/Active'
@@ -85,6 +100,18 @@ if __name__ == "__main__":
     # pdb.set_trace()
     if result:
         depth, count_at_depth, sub_dirs_at_depth = result
+
+        # walk all the subdirs at that depth using walk_directory_and_below
+        # in a for loop
+        sub_dir_entries = []
+        for subdir in sub_dirs_at_depth:
+            for path, type in walk_directory_and_below(subdir):
+                sub_dir_entries.append(path)
+        top_level_entries = walk_directory_with_scandir(target, depth)
+
+        check_entries = []
+        for path, type in walk_directory_and_below(target):
+            check_entries.append(path)
         pdb.set_trace()
         print(f"Threshold reached at depth {depth} subdir_count {count_at_depth} subdir_list {sub_dirs_at_depth}")
     else:
