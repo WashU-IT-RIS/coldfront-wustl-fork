@@ -2,6 +2,8 @@ import os
 
 import concurrent.futures
 
+from collections import deque
+
 # def walk_directory(root):
 #     all_paths = []
 #     for dirpath, dirnames, filenames in os.walk(root):
@@ -64,12 +66,12 @@ def count_directories_at_depth(root, sub_dir_threshold):
 def walk_directory_with_scandir(root, max_depth):
     import pdb
     all_paths = []
-    stack = [root]
+    q = deque([root])
     depth_at_target = root.count(os.sep)
     pdb.set_trace()
-    while stack:
+    while q:
         pdb.set_trace()
-        current_dir = stack.pop()
+        current_dir = q.pop()
         current_depth = current_dir.count(os.sep) - depth_at_target
         if current_depth > (max_depth + 1):
             pdb.set_trace()
@@ -79,7 +81,7 @@ def walk_directory_with_scandir(root, max_depth):
                 if entry.is_dir():
                     # check if it is beyond the max depth
                     if entry.path.count(os.sep) <= (max_depth - depth_at_target):
-                        stack.append(entry.path)
+                        q.append(entry.path)
                 all_paths.append(entry.path)
     return all_paths
 
