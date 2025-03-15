@@ -112,6 +112,10 @@ if __name__ == "__main__":
         check_entries = []
         for path, type in walk_directory_and_below(target):
             check_entries.append(path)
+
+        combined_entries = set(sub_dir_entries).union(set(top_level_entries))
+
+        check_entries = set(check_entries)
         pdb.set_trace()
         print(f"Threshold reached at depth {depth} subdir_count {count_at_depth} subdir_list {sub_dirs_at_depth}")
     else:
