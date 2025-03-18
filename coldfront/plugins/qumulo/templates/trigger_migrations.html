@@ -11,10 +11,10 @@ Trigger Migrations
 <div>
   <div class="row">
     <div class="col">
-      <form method="post" id="post-form">
+      <form method="post">
       {% csrf_token %}
       {{ trigger_migrations_form|crispy }}
-      <button id="search-button" type="submit" class="btn btn-success btn-block"><i class="fas fa-search" aria-hidden="true"></i> Migrate</button>
+      <input class="btn btn-primary" type="submit" value="Migrate" />
       </form>
     </div>
   </div>
