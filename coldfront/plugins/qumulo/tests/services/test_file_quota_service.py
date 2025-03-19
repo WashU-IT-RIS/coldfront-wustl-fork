@@ -25,6 +25,8 @@ class TestFileQuotaService(TestCase):
         self.mock_quota_response = get_mock_quota_response(
             get_mock_quota_data("/storage2-dev/fs1"), "/storage2-dev/fs1"
         )
+        self.qumulo_api = MagicMock()
+        self.qumulo_api.get_all_quotas_with_usage.return_value = self.mock_quota_response
         return super().setUp()
 
     @patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
@@ -33,10 +35,7 @@ class TestFileQuotaService(TestCase):
     def test_get_file_system_allocations_near_limit(
         self, qumulo_api_mock: MagicMock
     ) -> None:
-        qumulo_api = MagicMock()
-        qumulo_api.get_all_quotas_with_usage.return_value = self.mock_quota_response
-        qumulo_api_mock.return_value = qumulo_api
-
+        qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = (
             FileQuotaService.get_file_system_allocations_near_limit()
         )
