@@ -29,7 +29,8 @@ class TestFileQuotaService(TestCase):
         return super().setUp()
 
     @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
-    @mock.patch.dict(os.environ, {"ALLOCATION_LIMIT_THRESHOLD": "0.000000001"})
+    @mock.patch.dict(os.environ, {"ALLOCATION_LIMIT_THRESHOLD": "0.9"})
+    @mock.patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_get_file_system_allocations_near_limit(self):
         allocations_near_limit = (
             FileQuotaService.get_file_system_allocations_near_limit()
