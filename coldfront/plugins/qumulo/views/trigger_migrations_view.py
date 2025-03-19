@@ -26,9 +26,8 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, TemplateVie
         context["trigger_migrations_form"] = TriggerMigrationsForm()
         return context
 
-    def form_valid(self, form):
-        form_data = form.cleaned_data
-        allocation_name = form_data["allocation_name_search"]
+    def form_valid(self, form: TriggerMigrationsForm):
+        allocation_name = form.cleaned_data["allocation_name_search"]
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
 
         migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
