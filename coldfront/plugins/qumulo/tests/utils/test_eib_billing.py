@@ -367,7 +367,7 @@ class TestEIBBilling(TestCase):
 
         os.remove(filename)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_create_multiple_allocations_ingest_usages_generate_billing_report(
         self, qumulo_api_mock: MagicMock
     ) -> None:
@@ -444,7 +444,7 @@ class TestEIBBilling(TestCase):
 
         os.remove(filename)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_create_a_suballocation_ingest_usage_and_generate_billing_report(
         self, qumulo_api_mock: MagicMock
     ) -> None:
