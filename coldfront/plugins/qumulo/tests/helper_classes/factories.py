@@ -11,10 +11,6 @@ from coldfront.core.test_helpers.factories import (
     UserFactory,
 )
 
-from coldfront.core.test_helpers.factories import field_of_science_provider
-
-field_of_science_provider.add_element("Other")
-
 
 class RISProjectFactory(ProjectFactory):
     pi = factory.SubFactory(UserFactory)
@@ -30,8 +26,8 @@ class RISProjectFactory(ProjectFactory):
 
 class RISAllocationFactory(AllocationFactory):
     project = factory.SubFactory(RISProjectFactory)
+    status = factory.SubFactory(AllocationStatusChoiceFactory, name="New")
     justification = ""
-    status = factory.SubFactory(AllocationStatusChoiceFactory)
 
 
 class Storage2Factory(RISAllocationFactory):

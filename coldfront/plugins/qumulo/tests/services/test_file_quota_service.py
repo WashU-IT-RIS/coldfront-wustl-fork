@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
 
-from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
+from coldfront.plugins.qumulo.tests.fixtures import (
+    create_metadata_for_testing,
+)
 
 load_dotenv(override=True)
 
@@ -23,13 +25,12 @@ from coldfront.plugins.qumulo.tests.helper_classes.factories import (
 class TestFileQuotaService(TestCase):
 
     def setUp(self):
-        create_allocation_assets()
+        create_metadata_for_testing()
         return super().setUp()
 
     @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
     @mock.patch.dict(os.environ, {"ALLOCATION_LIMIT_THRESHOLD": "0.000000001"})
     def test_get_file_system_allocations_near_limit(self):
-        breakpoint()
         allocations_near_limit = (
             FileQuotaService.get_file_system_allocations_near_limit()
         )

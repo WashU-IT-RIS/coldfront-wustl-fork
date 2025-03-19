@@ -13,7 +13,9 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
 
-from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
+from coldfront.plugins.qumulo.tests.fixtures import (
+    create_metadata_for_testing,
+)
 
 STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
 
@@ -22,7 +24,7 @@ class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
         self.migrate = MigrateToColdfront()
-        create_allocation_assets()
+        create_metadata_for_testing()
         self.expected_allocation_attributes = [
             ("storage_name", "mocker"),
             ("storage_quota", "200"),

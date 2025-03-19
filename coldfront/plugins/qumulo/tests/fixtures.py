@@ -15,14 +15,39 @@ from coldfront.core.test_helpers.factories import (
 from coldfront.core.test_helpers.factories import field_of_science_provider
 
 
-def create_allocation_assets() -> None:
-    field_of_science_provider.add_element("Other")
-    FieldOfScienceFactory(description="Other")
+def create_metadata_for_testing() -> None:
+    create_attribute_types_for_ris_allocations()
+    create_project_choices()
+    create_allocation_choices()
+    create_ris_resources()
+
+
+def create_project_choices() -> None:
     ProjectStatusChoiceFactory(name="New")
     ProjectUserRoleChoiceFactory(name="Manager")
     ProjectUserStatusChoiceFactory(name="Active")
+
+
+def create_allocation_choices() -> None:
+    FieldOfScienceFactory(description="Other")
     AllocationStatusChoiceFactory(name="Pending")
     AllocationUserStatusChoiceFactory(name="Active")
+
+
+def create_ris_resources() -> None:
+    ResourceFactory(name="Storage2")
+    ResourceFactory(name="rw")
+    ResourceFactory(name="ro")
+
+
+def create_attribute_types_for_ris_allocations() -> None:
+    _add_field_of_science_options_to_provider(["Other"])
+    _create_allocation_attribute_types()
+    _create_project_attribute_types()
+
+
+def _create_allocation_attribute_types() -> None:
+
     allocation_attribute_names = [
         ("storage_name", "Text"),
         ("storage_ticket", "Text"),
@@ -62,6 +87,8 @@ def create_allocation_assets() -> None:
             attribute_type=AAttributeTypeFactory(name=allocation_attribute_type),
         )
 
+
+def _create_project_attribute_types() -> None:
     project_attribute_names = [
         ("is_condo_group", "Yes/No"),
         ("sponsor_department_number", "Text"),
@@ -73,6 +100,7 @@ def create_allocation_assets() -> None:
             attribute_type=PAttributeTypeFactory(name=project_attribute_type),
         )
 
-    ResourceFactory(name="Storage2")
-    ResourceFactory(name="rw")
-    ResourceFactory(name="ro")
+
+def _add_field_of_science_options_to_provider(options: list) -> None:
+    for option in options:
+        field_of_science_provider.add_element(option)
