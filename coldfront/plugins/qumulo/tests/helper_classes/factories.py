@@ -1,9 +1,12 @@
 import factory
 
+from coldfront.core.project.models import ProjectAttribute
+from coldfront.core.resource.models import ResourceType, Resource
 from coldfront.core.test_helpers.factories import (
     AllocationFactory,
     AllocationStatusChoiceFactory,
     FieldOfScienceFactory,
+    ProjectAttributeFactory,
     ProjectFactory,
     ProjectStatusChoiceFactory,
     ResourceFactory,
@@ -26,11 +29,32 @@ class RISProjectFactory(ProjectFactory):
 
 class RISAllocationFactory(AllocationFactory):
     project = factory.SubFactory(RISProjectFactory)
-    status = factory.SubFactory(AllocationStatusChoiceFactory, name="New")
-    justification = ""
+
+    class Params:
+        storage2 = (
+            factory.Trait(
+                justification="",
+                status=factory.SubFactory(
+                    AllocationStatusChoiceFactory, name="Pending"
+                ),
+            ),
+        )
+        read_write_group = (
+            factory.Trait(
+                justification="RW Users",
+                status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
+            ),
+        )
+        read_only_group = (
+            factory.Trait(
+                justification="RO Users",
+                status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
+            ),
+        )
 
 
 class Storage2Factory(RISAllocationFactory):
+    storage2 = True
 
     @factory.post_generation
     def resources(self, create, extracted, **kwargs):
@@ -45,6 +69,7 @@ class Storage2Factory(RISAllocationFactory):
 
 
 class ReadWriteGroupFactory(RISAllocationFactory):
+    read_write_group = True
 
     @factory.post_generation
     def resources(self, create, extracted, **kwargs):
@@ -59,6 +84,7 @@ class ReadWriteGroupFactory(RISAllocationFactory):
 
 
 class ReadOnlyGroupFactory(RISAllocationFactory):
+    read_only_group = True
 
     @factory.post_generation
     def resources(self, create, extracted, **kwargs):
@@ -70,3 +96,4 @@ class ReadOnlyGroupFactory(RISAllocationFactory):
             resource_type=ResourceTypeFactory(name="ACL"),
         )
         self.resources.add(resource)
+

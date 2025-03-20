@@ -6,13 +6,21 @@ from coldfront.core.test_helpers.factories import (
     FieldOfScienceFactory,
     ProjectAttributeTypeFactory,
     ProjectStatusChoiceFactory,
+    ProjectUserFactory,
     ProjectUserRoleChoiceFactory,
     ProjectUserStatusChoiceFactory,
     PAttributeTypeFactory,
     ResourceFactory,
+    ResourceTypeFactory,
 )
 
 from coldfront.core.test_helpers.factories import field_of_science_provider
+from coldfront.plugins.qumulo.tests.helper_classes.factories import (
+    RISProjectFactory,
+    ReadOnlyGroupFactory,
+    ReadWriteGroupFactory,
+    Storage2Factory,
+)
 
 
 def create_metadata_for_testing() -> None:
@@ -31,19 +39,33 @@ def create_project_choices() -> None:
 def create_allocation_choices() -> None:
     FieldOfScienceFactory(description="Other")
     AllocationStatusChoiceFactory(name="Pending")
+    AllocationStatusChoiceFactory(name="Active")
     AllocationUserStatusChoiceFactory(name="Active")
 
 
 def create_ris_resources() -> None:
-    ResourceFactory(name="Storage2")
-    ResourceFactory(name="rw")
-    ResourceFactory(name="ro")
+    ResourceFactory(name="Storage2", resource_type=ResourceTypeFactory(name="Storage"))
+    ResourceFactory(name="rw", resource_type=ResourceTypeFactory(name="ACL"))
+    ResourceFactory(name="ro", resource_type=ResourceTypeFactory(name="ACL"))
 
 
 def create_attribute_types_for_ris_allocations() -> None:
     _add_field_of_science_options_to_provider(["Other"])
     _create_allocation_attribute_types()
     _create_project_attribute_types()
+
+
+def create_allocation() -> None:
+    project = RISProjectFactory()
+    storage2 = Storage2Factory(project=project)
+    rw_group = ReadWriteGroupFactory(project=project)
+    ro_group = ReadOnlyGroupFactory(project=project)
+    ProjectUserFactory(
+        project=project,
+        user=project.pi,
+        role=ProjectUserRoleChoiceFactory(name="Manager"),
+        status=ProjectUserStatusChoiceFactory(name="New"),
+    )
 
 
 def _create_allocation_attribute_types() -> None:
