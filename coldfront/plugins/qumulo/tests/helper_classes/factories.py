@@ -1,5 +1,8 @@
 import factory
 
+from factory.django import DjangoModelFactory
+
+from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import ProjectAttribute
 from coldfront.core.resource.models import ResourceType, Resource
 from coldfront.core.test_helpers.factories import (
@@ -15,7 +18,7 @@ from coldfront.core.test_helpers.factories import (
 )
 
 
-class RISProjectFactory(ProjectFactory):
+class RisProjectFactory(ProjectFactory):
     pi = factory.SubFactory(UserFactory)
     title = factory.LazyAttribute(lambda project: project.pi.username)
     description = factory.LazyAttribute(
@@ -27,33 +30,33 @@ class RISProjectFactory(ProjectFactory):
     requires_review = True
 
 
-class RISAllocationFactory(AllocationFactory):
-    project = factory.SubFactory(RISProjectFactory)
+class RisAllocationFactory(DjangoModelFactory):
+    class Meta:
+        model = Allocation
+
+    justification = factory.Faker("sentence")
+    status = factory.SubFactory(AllocationStatusChoiceFactory)
+    project = factory.SubFactory(RisProjectFactory)
+    is_changeable = True
 
     class Params:
-        storage2 = (
-            factory.Trait(
-                justification="",
-                status=factory.SubFactory(
-                    AllocationStatusChoiceFactory, name="Pending"
-                ),
-            ),
+        storage2 = factory.Trait(
+            justification="",
+            status=factory.SubFactory(AllocationStatusChoiceFactory, name="Pending"),
         )
-        read_write_group = (
-            factory.Trait(
-                justification="RW Users",
-                status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
-            ),
+
+        read_write_group = factory.Trait(
+            justification="RW Users",
+            status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
         )
-        read_only_group = (
-            factory.Trait(
-                justification="RO Users",
-                status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
-            ),
+
+        read_only_group = factory.Trait(
+            justification="RO Users",
+            status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
         )
 
 
-class Storage2Factory(RISAllocationFactory):
+class Storage2Factory(RisAllocationFactory):
     storage2 = True
 
     @factory.post_generation
@@ -61,14 +64,15 @@ class Storage2Factory(RISAllocationFactory):
         if not create:
             return None
 
-        resource = ResourceFactory(
-            name="Storage2",
-            resource_type=ResourceTypeFactory(name="Storage"),
+        resources = extracted or (
+            ResourceFactory(
+                name="Storage2", resource_type=ResourceTypeFactory(name="Storage")
+            ),
         )
-        self.resources.add(resource)
+        self.resources.add(*resources)
 
 
-class ReadWriteGroupFactory(RISAllocationFactory):
+class ReadWriteGroupFactory(RisAllocationFactory):
     read_write_group = True
 
     @factory.post_generation
@@ -76,14 +80,13 @@ class ReadWriteGroupFactory(RISAllocationFactory):
         if not create:
             return None
 
-        resource = ResourceFactory(
-            name="rw",
-            resource_type=ResourceTypeFactory(name="ACL"),
+        resources = extracted or (
+            ResourceFactory(name="rw", resource_type=ResourceTypeFactory(name="ACL")),
         )
-        self.resources.add(resource)
+        self.resources.add(*resources)
 
 
-class ReadOnlyGroupFactory(RISAllocationFactory):
+class ReadOnlyGroupFactory(RisAllocationFactory):
     read_only_group = True
 
     @factory.post_generation
@@ -91,9 +94,7 @@ class ReadOnlyGroupFactory(RISAllocationFactory):
         if not create:
             return None
 
-        resource = ResourceFactory(
-            name="ro",
-            resource_type=ResourceTypeFactory(name="ACL"),
+        resources = extracted or (
+            ResourceFactory(name="rw", resource_type=ResourceTypeFactory(name="ACL")),
         )
-        self.resources.add(resource)
-
+        self.resources.add(*resources)

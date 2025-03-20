@@ -6,10 +6,10 @@ from coldfront.core.test_helpers.factories import (
     ProjectUserRoleChoiceFactory,
     ProjectUserStatusChoiceFactory,
 )
-from coldfront.plugins.qumulo.tests.fixtures import create_allocation, create_metadata_for_testing
+from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing, create_ris_project_and_allocations
 
 from coldfront.plugins.qumulo.tests.helper_classes.factories import (
-    RISProjectFactory,
+    RisProjectFactory,
     ReadOnlyGroupFactory,
     ReadWriteGroupFactory,
     Storage2Factory,
@@ -100,4 +100,7 @@ class TestFileQuotaService(TestCase):
             FileQuotaService.get_file_system_allocations_near_limit()
         )
         for quota in allocations_near_limit:
-            allocations = create_allocation()
+            project, allocations = create_ris_project_and_allocations(path=quota["path"])
+            print(f"{project=}")
+            print(f"{allocations=}")
+
