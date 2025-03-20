@@ -120,4 +120,4 @@ def _validate_results(quota_usages, logger) -> bool:
 def _is_near_limit(usage: str, limit: str) -> bool:
     usage = int(usage)
     limit = int(limit)
-    return (usage / limit) > FileQuotaService.get_limit_threshold()
+    return (usage / limit) >= FileQuotaService.get_limit_threshold()
