@@ -1,12 +1,9 @@
 import os
 from dotenv import load_dotenv
 
-from coldfront.plugins.qumulo.tests.fixtures import (
-    create_metadata_for_testing,
-)
-from coldfront.plugins.qumulo.tests.utils.mock_data import (
-    get_mock_quota_response,
-)
+from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing
+
+from coldfront.plugins.qumulo.tests.utils.mock_data import get_mock_quota_response
 
 load_dotenv(override=True)
 
@@ -21,7 +18,6 @@ class TestFileQuotaService(TestCase):
 
     def setUp(self):
         create_metadata_for_testing()
-        # move to fixtures?
         self.mock_quota_allocations = {
             f"/storage2-dev/fs1/near_limit/": {
                 "id": "42080003",
