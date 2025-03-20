@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import TemplateView
+from django.views.generic import FormView
 from coldfront.plugins.qumulo.forms import TriggerMigrationsForm
+from django.http import HttpResponse
 
 from django.urls import reverse
 
@@ -9,7 +10,7 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
 )
 
 
-class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     template_name = "trigger_migrations.html"
     form_class = TriggerMigrationsForm
 
