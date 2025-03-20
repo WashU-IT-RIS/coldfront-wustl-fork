@@ -29,7 +29,7 @@ class Allocations(LoginRequiredMixin, View):
                 if len(search_param.split(":")) != 2:
                     return HttpResponseBadRequest("Invalid search parameter")
 
-                [key, value] = search_param.split(":")
+                key, value = search_param.split(":")
 
                 if key.startswith("attributes__"):
                     key = key.replace("attributes__", "")
@@ -67,7 +67,7 @@ class Allocations(LoginRequiredMixin, View):
         )
 
         return JsonResponse(
-            {"totalPages": total_pages, "allocations": allocations_dicts}, safe=False
+            {"totalPages": total_pages, "allocations": allocations_dicts}
         )
 
     def _handle_attribute_sort(

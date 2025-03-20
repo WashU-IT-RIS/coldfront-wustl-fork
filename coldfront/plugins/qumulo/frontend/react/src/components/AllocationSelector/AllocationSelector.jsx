@@ -73,16 +73,16 @@ function AllocationSelector({
         />
         <a
           className="sort-asc"
-          onClick={() =>
-            queryDispatch({ action: "sort", key, value: `-${key}` })
-          }
+          onClick={() => queryDispatch({ action: "sort", key, value: key })}
         >
           <i className="fas fa-sort-up" aria-hidden="true"></i>
           <span className="sr-only">Sort {label} asc</span>
         </a>
         <a
           className="sort-desc"
-          onClick={() => queryDispatch({ action: "sort", key, value: key })}
+          onClick={() =>
+            queryDispatch({ action: "sort", key, value: `-${key}` })
+          }
         >
           <i className="fas fa-sort-down" aria-hidden="true"></i>
           <span className="sr-only">Sort {label} desc</span>
@@ -136,7 +136,10 @@ function AllocationSelector({
 
   const renderRows = (allocations) => {
     return allocations.map((allocation) => (
-      <tr key={allocation.id} className="text-nowrap">
+      <tr
+        key={allocation.id}
+        className={`text-nowrap ${isChecked(allocation) ? "checked" : ""}`}
+      >
         <td key="checkbox">
           <input
             type="checkbox"
@@ -155,19 +158,31 @@ function AllocationSelector({
     ));
   };
 
-  const renderOptions = () => {
-    const unCheckedAllocations = allocations.filter(
-      (allocation) =>
-        !selectedAllocations
-          .map((selecatedAllocation) => selecatedAllocation.id)
-          .includes(allocation.id)
-    );
-
-    return renderRows(unCheckedAllocations);
-  };
-
   return (
     <div className="table-responsive">
+      <p className="form-label">Selected {label}:</p>
+      <table className="table table-sm">
+        <thead>
+          <tr>
+            <th></th>
+            {columns.map(({ key, label }) => (
+              <th key={key} scope="col" className="text-nowrap">
+                {label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody name="table-values-tbody" className="table-values-tbody">
+          {renderRows(selectedAllocations.sort((a, b) => a.id - b.id))}
+        </tbody>
+      </table>
+      <PageSelector
+        totalPages={totalPages}
+        currentPage={queryState.page}
+        setCurrentPage={(value) =>
+          queryDispatch({ action: "page", key: "page", value })
+        }
+      />
       <p className="form-label">{label}:</p>
       <table className="table table-sm">
         <thead>
@@ -184,10 +199,7 @@ function AllocationSelector({
             {renderHeader()}
           </tr>
         </thead>
-        <tbody name="table-values-tbody" className="table-values-tbody">
-          {renderRows(selectedAllocations)}
-        </tbody>
-        <tbody name="table-options-tbody">{renderOptions()}</tbody>
+        <tbody className="table-options-tbody">{renderRows(allocations)}</tbody>
       </table>
       <PageSelector
         totalPages={totalPages}

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import "./InputLabel.css";
+
 function InputLabel({ label, value = "", onChange }) {
   const [isActive, setIsActive] = useState(false);
   const [internalValue, setInternalValue] = useState(value);
@@ -14,7 +16,7 @@ function InputLabel({ label, value = "", onChange }) {
   return (
     <>
       {!isActive && !value ? (
-        <span onClick={() => setIsActive(true)}>
+        <span className="pointer" onClick={() => setIsActive(true)}>
           {label}
           <sup>
             <i className="fas fa-search" style={{ color: "blue" }}></i>

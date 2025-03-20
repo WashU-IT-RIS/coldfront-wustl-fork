@@ -1,4 +1,3 @@
-import os
 from django import forms
 
 from coldfront.plugins.qumulo.validators import (
@@ -9,7 +8,6 @@ from coldfront.plugins.qumulo.validators import (
 
 from coldfront.plugins.qumulo.widgets import (
     MultiSelectLookupInput,
-    FilterableCheckBoxTableInput,
 )
 
 
@@ -32,12 +30,3 @@ class StorageFileSystemPathField(forms.CharField):
         validate_parent_directory,
         validate_filesystem_path_unique,
     ]
-
-
-class FilterableCheckBoxTableField(forms.TypedMultipleChoiceField):
-    widget = FilterableCheckBoxTableInput
-
-    def __init__(self, *, initial_filter, **kwargs):
-        super().__init__(**kwargs)
-
-        self.widget.init(initial_filter=initial_filter)

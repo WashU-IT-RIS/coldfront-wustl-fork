@@ -55,22 +55,22 @@ function UserSelector({ name, users, setUsers, label, errorMessage }) {
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
         ></textarea>
-        <div>
-          <button
-            id={`${name}-remove-button`}
-            type="button"
-            className="btn btn-outline-primary btn-sm align-self-start"
-            onClick={handleRemoveButtonClick}
-          >
-            &laquo;
-          </button>
+        <div className="btn-group align-self-start">
           <button
             id={`${name}-add-button`}
             type="button"
-            className="btn btn-outline-primary btn-sm align-self-start"
+            className="btn btn-outline-primary btn-md"
             onClick={handleAddButtonClick}
           >
             &raquo;
+          </button>
+          <button
+            id={`${name}-remove-button`}
+            type="button"
+            className="btn btn-outline-primary btn-md"
+            onClick={handleRemoveButtonClick}
+          >
+            &laquo;
           </button>
         </div>
         <ul
