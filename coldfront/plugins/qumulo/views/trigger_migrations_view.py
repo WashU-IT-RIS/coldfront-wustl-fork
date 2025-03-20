@@ -2,6 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import FormView
 from coldfront.plugins.qumulo.forms import TriggerMigrationsForm
 from django.http import HttpResponse
+from django.contrib import messages
 
 from django.urls import reverse
 
@@ -35,6 +36,7 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
         except Exception as e:
             display_message = str(e)
+        messages.success(self.request, display_message)
 
         return super().form_valid(form)
 
