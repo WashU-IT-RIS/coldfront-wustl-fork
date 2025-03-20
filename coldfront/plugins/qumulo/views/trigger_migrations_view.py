@@ -34,9 +34,10 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         display_message = "Allocation metadata migrated"
         try:
             migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
+            messages.success(self.request, display_message)
         except Exception as e:
             display_message = str(e)
-        messages.success(self.request, display_message)
+            messages.error(self.request, display_message)
 
         return super().form_valid(form)
 
