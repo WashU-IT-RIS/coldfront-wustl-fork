@@ -10,6 +10,11 @@ Trigger Migrations
 {% block content %}
 <div>
   <div class="row">
+    {{ if display_message }}
+      {{ display_message }}
+    {{ endif }}
+  </div>
+  <div class="row">
     <div class="col">
       <form method="post">
       {% csrf_token %}
