@@ -30,8 +30,10 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     def form_valid(self, form: TriggerMigrationsForm):
         allocation_name = form.cleaned_data["allocation_name_search"]
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
-
-        migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
+        try:
+            migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
+        except:
+            return reverse("qumulo:trigger-migrations")
 
         return super().form_valid(form)
 
