@@ -115,7 +115,8 @@ function AllocationSelector({
         ...selectedAllocations.map((allocation) => allocation.id),
         ...allocations.map((allocation) => allocation.id),
       ]);
-      const uniqueAllocations = uniqueAllocationIds.map((id) =>
+
+      const uniqueAllocations = Array.from(uniqueAllocationIds).map((id) =>
         allocations.find((allocation) => allocation.id === id)
       );
 
