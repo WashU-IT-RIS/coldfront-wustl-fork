@@ -39,6 +39,22 @@ class ActiveDirectoryAPI:
 
         return self.conn.response[0]
 
+    def get_users(self, wustlkeys: list[str]):
+        user_filter_base = lambda user: f"(sAMAccountName={user})"
+
+        user_filters = f"(|{''.join(map(user_filter_base, wustlkeys))})"
+
+        self.conn.search(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            f"(&(objectClass=person){user_filters})",
+            attributes=["sAMAccountName", "mail", "givenName", "sn"],
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid wustlkey")
+
+        return self.conn.response
+
     def get_member(self, account_name: str):
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
