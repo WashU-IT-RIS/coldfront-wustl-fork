@@ -9,6 +9,10 @@ from django.urls import reverse
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
+from coldfront.plugins.qumulo.tasks import (
+    __send_successful_metadata_migration_email,
+    __send_failed_metadata_migration_email,
+)
 
 
 class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
@@ -35,9 +39,11 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         try:
             migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
             messages.success(self.request, display_message)
+            __send_successful_metadata_migration_email(allocation_name)
         except Exception as e:
             display_message = str(e)
             messages.error(self.request, display_message)
+            __send_failed_metadata_migration_email(allocation_name, display_message)
 
         return super().form_valid(form)
 
