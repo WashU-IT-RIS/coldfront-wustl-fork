@@ -110,6 +110,7 @@ class ArgumentParser:
         self.allocation_name = allocation_root.replace(STORAGE_2_PREFIX, '').strip('/')
         self.target_dir = target_dir
         self.sub_allocations = sub_allocations
+        self.num_walkers = num_walkers
         self.num_workers_per_walk = num_workers_per_walk
 
     def _retrieve_arg(self, arg_name, prompt, validator=None):
