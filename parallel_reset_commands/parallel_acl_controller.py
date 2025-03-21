@@ -47,8 +47,8 @@ def check_acl(original_path, processed_path, expected_spec):
     # elevated status *should* be inherited by the spawned
     # subprocesses
     # getfacl_command = f"sudo nfs4_getfacl {processed_path}"
-    print("running nfs4_getfacl")
     getfacl_command = f"nfs4_getfacl {processed_path}"
+    print(f"Running on {processed_path}")
     try:
         result = subprocess.check_output(getfacl_command, shell=True)
         acl_info = str(result, 'utf-8')
