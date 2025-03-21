@@ -116,9 +116,17 @@ function AllocationSelector({
         ...allocations.map((allocation) => allocation.id),
       ]);
 
-      const uniqueAllocations = Array.from(uniqueAllocationIds).map((id) =>
-        allocations.find((allocation) => allocation.id === id)
-      );
+      const uniqueAllocations = Array.from(uniqueAllocationIds).map((id) => {
+        let allocation = allocations.find((allocation) => allocation.id === id);
+
+        if (!allocation) {
+          allocation = selectedAllocations.find(
+            (allocation) => allocation.id === id
+          );
+        }
+
+        return allocation;
+      });
 
       setSelectedAllocations(uniqueAllocations);
       setAllChecked(true);
