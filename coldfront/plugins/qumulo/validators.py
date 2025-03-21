@@ -43,7 +43,7 @@ def validate_batch_ad_users(ad_users: list[str]):
 
     bad_users = []
 
-    gotten_users = active_directory_api.get_users(ad_users)
+    gotten_users = active_directory_api.get_members(ad_users)
     gotten_user_names = [user["attributes"]["sAMAccountName"] for user in gotten_users]
 
     for user in ad_users:
