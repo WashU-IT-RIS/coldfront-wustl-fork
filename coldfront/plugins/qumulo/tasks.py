@@ -121,13 +121,9 @@ def addMembersToADGroup(
     wustlkeys: list[str],
     acl_allocation: Allocation,
     create_group_time: datetime,
-    bad_keys: Optional[list[str]] = None,
-    good_keys: Optional[list[dict]] = None,
 ) -> None:
-    if bad_keys is None:
-        bad_keys = []
-    if good_keys is None:
-        good_keys = []
+    bad_keys = []
+    good_keys = []
 
     if len(wustlkeys) == 0:
         return __ad_members_and_handle_errors(
@@ -135,25 +131,18 @@ def addMembersToADGroup(
         )
 
     active_directory_api = ActiveDirectoryAPI()
-    wustlkey = wustlkeys[0]
 
-    try:
-        member = active_directory_api.get_member(wustlkey)
-        is_group = "group" in member["attributes"]["objectClass"]
+    gotten_keys = active_directory_api.get_members(wustlkeys)
+    gotten_user_names = [user["attributes"]["sAMAccountName"] for user in gotten_keys]
 
-        good_keys.append(
-            {"wustlkey": wustlkey, "dn": member["dn"], "is_group": is_group}
-        )
-    except ValueError:
-        bad_keys.append(wustlkey)
+    for user in wustlkeys:
+        if user in gotten_user_names:
+            good_keys.append(user)
+        else:
+            bad_keys.append(user)
 
-    async_task(
-        addMembersToADGroup,
-        wustlkeys[1:],
-        acl_allocation,
-        create_group_time,
-        bad_keys,
-        good_keys,
+    return __ad_members_and_handle_errors(
+        wustlkeys, acl_allocation, create_group_time, good_keys, bad_keys
     )
 
 
