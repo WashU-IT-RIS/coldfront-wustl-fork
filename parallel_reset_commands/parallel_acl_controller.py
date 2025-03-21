@@ -164,6 +164,15 @@ def main():
             lambda x: walk_to_max_depth(x, dir_depth)
         )
 
+    total_files = 0
+    total_dirs = 0
+
+    for root, dirs, files in os.walk(parser.get_target_dir()):
+        total_files += len(files)
+        total_dirs += len(dirs)
+
+    print(f"Total number of files: {total_files}")
+    print(f"Total number of directories: {total_dirs}")
 
 if __name__ == "__main__":
     main()
