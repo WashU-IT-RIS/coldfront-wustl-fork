@@ -8,7 +8,8 @@ class ArgumentParser:
         self.perform_reset = False
         self.allocation_name = ""
         self.allocation_root = ""
-        self.num_workers = 0
+        self.num_walkers = 0
+        self.num_workers_per_walk = 0
         self.target_dir = ""
         self.sub_allocations = []
     
@@ -20,9 +21,12 @@ class ArgumentParser:
     
     def get_allocation_root(self):
         return self.allocation_root
+
+    def get_num_walkers(self):
+        return self.num_walkers
     
-    def get_num_workers(self):
-        return self.num_workers
+    def get_num_workers_per_walk(self):
+        return self.num_workers_per_walk
     
     def get_target_dir(self):
         return self.target_dir
@@ -76,27 +80,37 @@ class ArgumentParser:
         if len(sub_allocations) == 1 and sub_allocations[0] == '':
             sub_allocations = []
 
-        # all right, what else do I need *functionally*?
-        # I think nothing, so what remains is stuff like workers
-
-        # enter the number of workers
-        def _validate_num_workers(value):
+        # enter the number of walkers
+        def _validate_num_walkers(value):
             try:
                 value = int(value)
                 if value <= 0:
-                    print("Number of workers must be a positive integer.")
+                    print("Number of walkers must be a positive integer.")
                     return False
                 return True
             except ValueError:
                 print("Invalid input. Please enter a valid number.")
                 return False
-        num_workers = int(self._retrieve_arg('number of workers', "Enter the number of worker threads: ", _validate_num_workers))
+        
+        num_walkers = int(self._retrieve_arg('number of walkers', "Enter the number of walkers: ", _validate_num_walkers))
+        # enter the number of workers
+        def _validate_num_workers_per_walk(value):
+            try:
+                value = int(value)
+                if value <= 0:
+                    print("Number of workers per walk must be a positive integer.")
+                    return False
+                return True
+            except ValueError:
+                print("Invalid input. Please enter a valid number.")
+                return False
+        num_workers_per_walk = int(self._retrieve_arg('number of workers per walk', "Enter the number of worker threads per walk: ", _validate_num_workers_per_walk))
 
         self.allocation_root = allocation_root
         self.allocation_name = allocation_root.replace(STORAGE_2_PREFIX, '').strip('/')
         self.target_dir = target_dir
         self.sub_allocations = sub_allocations
-        self.num_workers = num_workers
+        self.num_workers_per_walk = num_workers_per_walk
 
     def _retrieve_arg(self, arg_name, prompt, validator=None):
         while True:

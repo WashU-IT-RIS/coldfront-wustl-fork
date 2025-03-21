@@ -2,13 +2,13 @@ import os
 import subprocess
 from concurrent.futures import ProcessPoolExecutor
 
-from directory_walker import DirectoryWalker
+from directory_walker import walk_recursive_from_target, walk_to_max_depth, find_depth_for_target_dirs
 
 from acl_spec_builder import ACL_SpecBuilder
 
 from argument_parser import ArgumentParser
 
-from typing import List, Set
+from typing import List, Set, Callable
 
 from constants import BATCH_SIZE
 import datetime
@@ -77,17 +77,16 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
 
 
 
-def process_acls_recursive(perform_reset: bool, target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str], error_file: str):
+def process_acls_recursive(perform_reset: bool, target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str], error_file: str, walker_method: Callable):
     print(f"Processing ACLs recursively in {target_directory} with {num_workers} workers.")
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
-        walker = DirectoryWalker()
         builder = ACL_SpecBuilder()
         builder.build_specs(alloc_name, sub_alloc_names)
         count = 0
         batch_count = 0
         result_futures = []
         with open(error_file, 'w') as error_log:
-            for path, path_type in walker.walk_recursive(target_directory):
+            for path, path_type in walker_method(target_directory):
                 print(f"Processing *this* path: {path}")
                 if count % 1000 == 0:
                     # print(f'Number pending tasks: {executor._work_queue.qsize()}')
@@ -116,16 +115,49 @@ def main():
     parser = ArgumentParser()
     parser.retrieve_args()
 
+    # find the depth at which there are >= num_walkers subdirectories to use as parallel targets
+    result = find_depth_for_target_dirs(parser.get_target_dir(), parser.get_num_walkers())
 
-    # at this point, I think I can call the reset_acls_recursive function
-    process_acls_recursive(
-        parser.get_perform_reset(),
-        parser.get_target_dir(),
-        parser.get_num_workers(),
-        parser.get_allocation_name(),
-        parser.get_sub_allocations(),
-        _create_error_file_name(parser.get_target_dir())
-    )
+    if result is None:
+        # if there are not enough subdirectories, just process the whole thing
+        print("Not enough subdirectories found for parallel processing. Processing the entire directory.")
+        process_acls_recursive(
+            parser.get_perform_reset(),
+            parser.get_target_dir(),
+            parser.get_num_workers_per_walk(),
+            parser.get_allocation_name(),
+            parser.get_sub_allocations(),
+            _create_error_file_name(parser.get_target_dir()),
+            walk_recursive_from_target
+        )
+    else:
+        dir_depth, dir_count, dirs_at_depth = result
+        # if there are enough subdirectories, process them in parallel
+        print(f"Processing {len(dirs_at_depth)} subdirectories in parallel.")
+        with ProcessPoolExecutor(max_workers=parser.get_num_walkers()) as walk_executor:
+            for subdir in dirs_at_depth:
+                _ = walk_executor.submit(
+                    process_acls_recursive,
+                    parser.get_perform_reset(),
+                    subdir,
+                    parser.get_num_workers_per_walk(),
+                    parser.get_allocation_name(),
+                    parser.get_sub_allocations(),
+                    _create_error_file_name(subdir),
+                    walk_recursive_from_target
+                )
+                # do I need to inspect the results of these parallel processors?
+                # or just rely on the log files they produce
+        # now, use walk_to_max_depth to pick up the remaining files/directories *above* that parallelization target level
+        process_acls_recursive(
+            parser.get_perform_reset(),
+            parser.get_target_dir(),
+            parser.get_num_workers_per_walk(),
+            parser.get_allocation_name(),
+            parser.get_sub_allocations(),
+            _create_error_file_name(parser.get_target_dir()),
+            lambda x: walk_to_max_depth(x, dir_depth)
+        )
 
 
 if __name__ == "__main__":

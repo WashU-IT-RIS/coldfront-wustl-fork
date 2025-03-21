@@ -65,7 +65,7 @@ def count_directories_at_depth(root, sub_dir_threshold):
 
 def walk_directory_with_scandir(root, max_depth):
     import pdb
-    all_paths = []
+    all_paths = [root]
     q = deque([root])
     depth_at_target = root.count(os.sep)
     # pdb.set_trace()
