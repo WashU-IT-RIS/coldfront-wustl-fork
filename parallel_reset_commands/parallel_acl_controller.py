@@ -83,7 +83,10 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
         count = 0
         batch_count = 0
         result_futures = []
+        import pdb
+        pdb.set_trace()
         with open(error_file, 'w') as error_log:
+            pdb.set_trace()
             for path, path_type in walker_method(target_directory):
                 if count % 1000 == 0:
                     # print(f'Number pending tasks: {executor._work_queue.qsize()}')
@@ -112,15 +115,13 @@ def main():
     parser = ArgumentParser()
     parser.retrieve_args()
     # go ahead and make a directory for the logs
-    import pdb
-    pdb.set_trace()
     if not os.path.exists(parser.get_log_dir()):
         os.makedirs(parser.get_log_dir())
 
     # find the depth at which there are >= num_walkers subdirectories to use as parallel targets
     result = find_depth_for_target_dirs(parser.get_target_dir(), parser.get_num_walkers())
 
-    if result is None:
+    if result is None or True:
         # if there are not enough subdirectories, just process the whole thing
         print("Not enough subdirectories found for parallel processing. Processing the entire directory.")
         process_acls_recursive(
