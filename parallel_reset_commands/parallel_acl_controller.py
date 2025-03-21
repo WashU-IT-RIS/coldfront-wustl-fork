@@ -111,6 +111,9 @@ def main():
     # get the arguments from the user using ArgumentParser
     parser = ArgumentParser()
     parser.retrieve_args()
+    # go ahead and make a directory for the logs
+    if not os.path.exists(parser.get_log_dir()):
+        os.makedirs(parser.get_log_dir())
 
     # find the depth at which there are >= num_walkers subdirectories to use as parallel targets
     result = find_depth_for_target_dirs(parser.get_target_dir(), parser.get_num_walkers())
