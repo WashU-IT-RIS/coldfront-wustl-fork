@@ -4,13 +4,13 @@
 {% load static %}
 
 {% block title %}
-User Management
+User Access Management
 {% endblock %}
 
 {% block content %}
 {% comment %} {% csrf_token %} {% endcomment %}
 
-<div jquery-include="/static/UserManagement/index.html"></div>
+<div jquery-include="/static/UserAccessManagement/index.html"></div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script> 
   $(function(){

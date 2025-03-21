@@ -6,9 +6,9 @@ const dirname = import.meta.dirname;
 export default defineConfig({
   plugins: [react()],
   publicDir: `${dirname}/../../../public/`,
-  base: "/static/UserManagement",
+  base: "/static/UserAccessManagement",
   build: {
     emptyOutDir: true,
-    outDir: `${dirname}/../../../dist/UserManagement`,
+    outDir: `${dirname}/../../../dist/UserAccessManagement`,
   },
 });

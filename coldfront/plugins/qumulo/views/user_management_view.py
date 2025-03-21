@@ -6,11 +6,9 @@ from coldfront.plugins.qumulo.services.allocation_service import AllocationServi
 from coldfront.core.allocation.models import Allocation
 
 import json
-import logging
-import pprint
 
 
-class UserManagementView(LoginRequiredMixin, TemplateView):
+class UserAccessManagementView(LoginRequiredMixin, TemplateView):
     template_name = "user_management.html"
 
     def post(self, request: HttpRequest, *args, **kwargs):

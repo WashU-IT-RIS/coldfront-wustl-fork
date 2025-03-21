@@ -4,7 +4,7 @@ import baseConfig from "./vite.config.js";
 
 const dirname = import.meta.dirname;
 
-const components = ["UserManagement"];
+const components = ["UserAccessManagement"];
 
 for (const component of components) {
   console.log("Building", component);

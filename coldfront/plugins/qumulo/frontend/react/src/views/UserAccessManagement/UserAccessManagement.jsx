@@ -7,9 +7,9 @@ import GenericModal from "../../components/GenericModal/GenericModal";
 import axios from "axios";
 import Cookies from "universal-cookie";
 
-import "./UserManagement.css";
+import "./UserAccessManagement.css";
 
-function UserManagement() {
+function UserAccessManagement() {
   const [rwUsers, setRwUsers] = useState([]);
   const [roUsers, setRoUsers] = useState([]);
   const [allocations, setAllocations] = useState([]);
@@ -23,7 +23,7 @@ function UserManagement() {
 
     axios
       .post(
-        "user-management",
+        "user-access-management",
         {
           rwUsers,
           roUsers,
@@ -45,7 +45,7 @@ function UserManagement() {
 
   return (
     <>
-      <h2>User Management</h2>
+      <h2>User Access Management</h2>
       <hr />
       <UserSelector
         name="rw-user-selector"
@@ -84,4 +84,4 @@ function UserManagement() {
   );
 }
 
-export default UserManagement;
+export default UserAccessManagement;

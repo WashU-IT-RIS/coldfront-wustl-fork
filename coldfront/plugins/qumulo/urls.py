@@ -30,9 +30,9 @@ urlpatterns = [
         name="allocation-table-list",
     ),
     path(
-        "allocation-admin/user-management",
-        user_management_view.UserManagementView.as_view(),
-        name="user-management",
+        "allocation-admin/user-access-management",
+        user_management_view.UserAccessManagementView.as_view(),
+        name="user-access-management",
     ),
     path("api/allocations", Allocations.as_view(), name="getAllocations"),
     path(
