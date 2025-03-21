@@ -112,6 +112,8 @@ def main():
     parser = ArgumentParser()
     parser.retrieve_args()
     # go ahead and make a directory for the logs
+    import pdb
+    pdb.set_trace()
     if not os.path.exists(parser.get_log_dir()):
         os.makedirs(parser.get_log_dir())
 
