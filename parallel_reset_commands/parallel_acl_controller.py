@@ -83,10 +83,7 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
         count = 0
         batch_count = 0
         result_futures = []
-        import pdb
-        pdb.set_trace()
         with open(error_file, 'w') as error_log:
-            pdb.set_trace()
             for path, path_type in walker_method(target_directory):
                 if count % 1000 == 0:
                     # print(f'Number pending tasks: {executor._work_queue.qsize()}')
