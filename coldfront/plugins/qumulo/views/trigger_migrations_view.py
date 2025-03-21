@@ -3,6 +3,7 @@ from django.views.generic import FormView
 from coldfront.plugins.qumulo.forms import TriggerMigrationsForm
 from django.http import HttpResponse
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 from django.urls import reverse
 
