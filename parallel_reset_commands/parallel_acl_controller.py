@@ -48,7 +48,6 @@ def check_acl(original_path, processed_path, expected_spec):
     # subprocesses
     # getfacl_command = f"sudo nfs4_getfacl {processed_path}"
     getfacl_command = f"nfs4_getfacl {processed_path}"
-    print(f"Running on {processed_path}")
     try:
         result = subprocess.check_output(getfacl_command, shell=True)
         acl_info = str(result, 'utf-8')
@@ -59,22 +58,16 @@ def check_acl(original_path, processed_path, expected_spec):
         return True
     except subprocess.CalledProcessError as e:
         return False
-        # print(f'Failed to get ACL: {path}, Error: {e}')
 
 def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     if os.path.islink(path):
         return True, path
     processed_path = process_path(path)
     spec = builder.get_spec_by_path(path, path_type)
-    if perform_reset:
-        # for now, panic
-        print("AH, I'M NOT INTENDING TO PERFORM A RESET")
-        return
     try:
         if perform_reset:
             reset_command = f'nfs4_setfacl -s "{spec}" {processed_path}'
             subprocess.run(reset_command, check=True, shell=True)
-        # print(f"Should run command: {command}")
         return check_acl(path, processed_path, spec), path
     except subprocess.CalledProcessError as e:
         print(f'Failed to set ACL for {path_type}: {path}, Error: {e}')
@@ -92,7 +85,6 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
         result_futures = []
         with open(error_file, 'w') as error_log:
             for path, path_type in walker_method(target_directory):
-                print(f"Processing *this* path: {path}")
                 if count % 1000 == 0:
                     # print(f'Number pending tasks: {executor._work_queue.qsize()}')
                     print(f'Processed {count} paths')
@@ -109,10 +101,10 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
                     result_futures = []
 
 
-def _create_error_file_name(target_dir: str) -> str:
+def _create_error_file_name(target_dir: str, output_dir: str) -> str:
     timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     base_name = os.path.basename(target_dir.rstrip('/'))
-    return f"{base_name}_errors_{timestamp}.log"
+    return f"{output_dir}/{base_name}_errors_{timestamp}.log"
 
 
 def main():
@@ -132,7 +124,7 @@ def main():
             parser.get_num_workers_per_walk(),
             parser.get_allocation_name(),
             parser.get_sub_allocations(),
-            _create_error_file_name(parser.get_target_dir()),
+            _create_error_file_name(parser.get_target_dir(), parser.get_log_dir()),
             walk_recursive_from_target
         )
     else:
@@ -148,7 +140,7 @@ def main():
                     parser.get_num_workers_per_walk(),
                     parser.get_allocation_name(),
                     parser.get_sub_allocations(),
-                    _create_error_file_name(subdir),
+                    _create_error_file_name(subdir, parser.get_log_dir()),
                     walk_recursive_from_target
                 )
                 # do I need to inspect the results of these parallel processors?
@@ -160,19 +152,9 @@ def main():
             parser.get_num_workers_per_walk(),
             parser.get_allocation_name(),
             parser.get_sub_allocations(),
-            _create_error_file_name(parser.get_target_dir()),
+            _create_error_file_name(parser.get_target_dir(), parser.get_log_dir()),
             lambda x: walk_to_max_depth(x, dir_depth)
         )
-
-    total_files = 0
-    total_dirs = 0
-
-    for root, dirs, files in os.walk(parser.get_target_dir()):
-        total_files += len(files)
-        total_dirs += len(dirs)
-
-    print(f"Total number of files: {total_files}")
-    print(f"Total number of directories: {total_dirs}")
 
 if __name__ == "__main__":
     main()

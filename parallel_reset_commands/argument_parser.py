@@ -12,6 +12,7 @@ class ArgumentParser:
         self.num_workers_per_walk = 0
         self.target_dir = ""
         self.sub_allocations = []
+        self.log_dir = ""
     
     def get_perform_reset(self):
         return self.perform_reset
@@ -32,7 +33,10 @@ class ArgumentParser:
         return self.target_dir
     
     def get_sub_allocations(self):
-        return self.sub_allocations 
+        return self.sub_allocations
+    
+    def get_log_dir(self):
+        return self.log_dir
     
     def retrieve_args(self):
         print("Retrieving args")
@@ -106,6 +110,24 @@ class ArgumentParser:
                 return False
         num_workers_per_walk = int(self._retrieve_arg('number of workers per walk', "Enter the number of worker threads per walk: ", _validate_num_workers_per_walk))
 
+        def _validate_log_dir(value):
+            if os.path.isabs(value):
+                if not os.path.exists(value):
+                    print(f"Absolute log directory does not exist: {value}")
+                    return False
+            # else the path will be built
+            return True
+
+        log_dir = self._retrieve_arg('log directory', "Enter the log directory: ",_validate_log_dir)
+
+        if os.path.isabs(log_dir):
+            self.log_dir = log_dir
+        else:
+            # build the log directory under wherever this script is running
+
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            self.log_dir = os.path.join(current_dir, log_dir)
+        
         self.allocation_root = allocation_root
         self.allocation_name = allocation_root.replace(STORAGE_2_PREFIX, '').strip('/')
         self.target_dir = target_dir
