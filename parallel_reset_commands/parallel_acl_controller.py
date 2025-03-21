@@ -47,6 +47,7 @@ def check_acl(original_path, processed_path, expected_spec):
     # elevated status *should* be inherited by the spawned
     # subprocesses
     # getfacl_command = f"sudo nfs4_getfacl {processed_path}"
+    print("running nfs4_getfacl")
     getfacl_command = f"nfs4_getfacl {processed_path}"
     try:
         result = subprocess.check_output(getfacl_command, shell=True)
@@ -65,6 +66,10 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
         return True, path
     processed_path = process_path(path)
     spec = builder.get_spec_by_path(path, path_type)
+    if perform_reset:
+        # for now, panic
+        print("AH, I'M NOT INTENDING TO PERFORM A RESET")
+        return
     try:
         if perform_reset:
             reset_command = f'nfs4_setfacl -s "{spec}" {processed_path}'
