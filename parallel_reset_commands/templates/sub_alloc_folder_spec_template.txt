@@ -1,0 +1,12 @@
+A:d:OWNER@:rwaDxtTnNcCoy
+A:fi:OWNER@:rwatTnNcCoy
+A:dg:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaDxtTnNcy
+A:fig:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaDtTnNcy
+A:dg:storage-<ALLOC>-rw@accounts.ad.wustl.edu:rwaDxtTnNcy
+A:fig:storage-<ALLOC>-rw@accounts.ad.wustl.edu:rwaDtTnNcy
+A:dg:storage-<ALLOC>-ro@accounts.ad.wustl.edu:rxtncy
+A:fig:storage-<ALLOC>-ro@accounts.ad.wustl.edu:rtncy
+A:dg:storage-<ALLOC>-<SUB_ALLOC>-rw@accounts.ad.wustl.edu:rwaDxtTnNcy
+A:fig:storage-<ALLOC>-<SUB_ALLOC>-rw@accounts.ad.wustl.edu:rwaDtTnNcy
+A:dg:storage-<ALLOC>-<SUB_ALLOC>-ro@accounts.ad.wustl.edu:rxtncy
+A:fig:storage-<ALLOC>-<SUB_ALLOC>-ro@accounts.ad.wustl.edu:rtncy
