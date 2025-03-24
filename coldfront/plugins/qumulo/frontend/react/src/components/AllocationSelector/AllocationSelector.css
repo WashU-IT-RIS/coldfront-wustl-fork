@@ -1,11 +1,3 @@
 tbody.table-options-tbody > tr.checked {
   background: lightblue;
 }
-
-.sort-asc {
-  cursor: pointer;
-}
-
-.sort-desc {
-  cursor: pointer;
-}

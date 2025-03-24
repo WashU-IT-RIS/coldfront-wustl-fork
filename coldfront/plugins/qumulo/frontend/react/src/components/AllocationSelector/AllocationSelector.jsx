@@ -3,6 +3,7 @@ import axios from "axios";
 
 import InputLabel from "../InputLabel/InputLabel";
 import PageSelector from "../PageSelector/PageSelector";
+import SortButtons from "../SortButtons/SortButtons";
 
 import "./AllocationSelector.css";
 
@@ -71,22 +72,13 @@ function AllocationSelector({
           value={queryState.filters[key]}
           onChange={(value) => queryDispatch({ action: "filter", key, value })}
         />
-        <a
-          className="sort-asc"
-          onClick={() => queryDispatch({ action: "sort", key, value: key })}
-        >
-          <i className="fas fa-sort-up" aria-hidden="true"></i>
-          <span className="sr-only">Sort {label} asc</span>
-        </a>
-        <a
-          className="sort-desc"
-          onClick={() =>
-            queryDispatch({ action: "sort", key, value: `-${key}` })
+        <SortButtons
+          onClick={(value) =>
+            queryDispatch({ action: "sort", key, value: value })
           }
-        >
-          <i className="fas fa-sort-down" aria-hidden="true"></i>
-          <span className="sr-only">Sort {label} desc</span>
-        </a>
+          label={label}
+          name={key}
+        />
       </th>
     ));
   };
