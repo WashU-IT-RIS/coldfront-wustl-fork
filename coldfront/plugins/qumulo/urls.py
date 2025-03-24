@@ -35,9 +35,4 @@ urlpatterns = [
         name="user-access-management",
     ),
     path("api/allocations", Allocations.as_view(), name="getAllocations"),
-    path(
-        "progress-bar",
-        progress_view.ProgressView.as_view(),
-        name="progress-bar",
-    ),
 ]
