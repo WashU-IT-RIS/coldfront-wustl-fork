@@ -50,6 +50,14 @@ class AllocationForm(forms.Form):
         help_text="The cost center for billing",
         label="Cost Center",
     )
+    billing_exempt = forms.ChoiceField(
+        help_text="Exempt the allocation from billing",
+        label="Billing Exempt",
+        choices=[("Yes", "Yes"), ("No", "No")],
+        initial="No",
+        widget=forms.RadioSelect,
+        required=True,
+    )
     department_number = forms.CharField(
         help_text="The department for billing",
         label="Department Number",
@@ -68,6 +76,7 @@ class AllocationForm(forms.Form):
     )
     billing_cycle = forms.ChoiceField(
         choices=BILLING_CYCLE_OPTIONS,
+        initial="monthly",
         label="Billing Cycle Options",
         help_text="Choose one billing cycle option from the above list",
         required=True,
@@ -221,7 +230,7 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["storage_filesystem_path"].validators = []
         self.fields["storage_name"].validators = []
 
-        self.fields["prepaid_expiration"] = forms.DateField(
+        self.fields["prepaid_expiration"] = forms.DateTimeField(
             help_text="Allocation is paid until this date",
             label="Prepaid Expiration Date",
             required=False,
