@@ -83,7 +83,7 @@ def _get_allocation_by_attribute(value, logger) -> Allocation:
         attribute = AllocationAttribute.objects.select_related("allocation").get(
             value=value,
             allocation_attribute_type__name="storage_filesystem_path",
-            allocation__status=AllocationStatusChoice.objects.get(name="Active"),
+            allocation__status__name="Active",
         )
     except AllocationAttribute.DoesNotExist:
         logger.warn(f"Allocation record for {value} path was not found")

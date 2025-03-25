@@ -1,12 +1,18 @@
 import os
 from dotenv import load_dotenv
 
+from formencode.validators import Email
+
 from coldfront.core.test_helpers.factories import (
     ProjectUserFactory,
     ProjectUserRoleChoiceFactory,
     ProjectUserStatusChoiceFactory,
 )
-from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing, create_ris_project_and_allocations
+from coldfront.core.utils.mail import allocation_email_recipients
+from coldfront.plugins.qumulo.tests.fixtures import (
+    create_metadata_for_testing,
+    create_ris_project_and_allocations,
+)
 
 from coldfront.plugins.qumulo.tests.helper_classes.factories import (
     RisProjectFactory,
@@ -15,6 +21,7 @@ from coldfront.plugins.qumulo.tests.helper_classes.factories import (
     Storage2Factory,
 )
 from coldfront.plugins.qumulo.tests.utils.mock_data import get_mock_quota_response
+from coldfront.plugins.qumulo.utils.mail import allocation_email_recipients_for_ris
 
 load_dotenv(override=True)
 
@@ -100,7 +107,7 @@ class TestFileQuotaService(TestCase):
             FileQuotaService.get_file_system_allocations_near_limit()
         )
         for quota in allocations_near_limit:
-            project, allocations = create_ris_project_and_allocations(path=quota["path"])
-            print(f"{project=}")
-            print(f"{allocations=}")
-
+            project, _ = create_ris_project_and_allocations(path=quota["path"])
+            recipients = allocation_email_recipients_for_ris(project)
+            self.assertIsInstance(recipients, list)
+            self.assertTrue(all(Email.to_python(email) for email in recipients))
