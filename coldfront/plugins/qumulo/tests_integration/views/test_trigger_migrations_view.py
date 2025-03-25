@@ -8,7 +8,7 @@ from unittest import mock
 
 from coldfront.plugins.qumulo.views.trigger_migrations_view import TriggerMigrationsView
 
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.urls.exceptions import NoReverseMatch
 from unittest.mock import patch, MagicMock
 from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
@@ -18,18 +18,8 @@ class TriggerMigrationsViewTests(TestCase):
     def setUp(self) -> None:
         create_allocation_assets()
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def testMigrationSuccessfulWithValidAllocation(
         self,
-        mock_async_task: mock.MagicMock,
-        mock_active_directory_api: mock.MagicMock,
-        mock_itsm_client: mock.MagicMock,
     ):
         success = True
         valid_data = {"allocation_name_search": "/vol/rdcw-fs1/kchoi"}
@@ -42,6 +32,7 @@ class TriggerMigrationsViewTests(TestCase):
             success = False
         self.assertEqual(success, True)
 
+    @tag("integration")
     def testMigrationFailWithInvalidAllocation(self):
         success = True
         invalid_data = {"allocation_name_search": "allocation"}
