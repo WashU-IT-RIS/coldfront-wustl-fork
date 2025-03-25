@@ -8,10 +8,8 @@ import logging
 from coldfront.config.env import ENV
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationStatusChoice,
     AllocationAttribute,
-    AllocationAttributeType,
-    AllocationAttributeUsage,
+    AllocationStatusChoice,
     AllocationLinkage,
 )
 from coldfront.core.resource.models import Resource
@@ -19,6 +17,9 @@ from coldfront.core.utils.mail import send_email_template, email_template_contex
 from coldfront.core.utils.common import import_from_settings
 
 from coldfront.plugins.qumulo.services.file_quota_service import FileQuotaService
+from coldfront.plugins.qumulo.services.notifications_service import (
+    send_email_for_near_limit_allocation,
+)
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -107,8 +108,22 @@ def ingest_quotas_with_daily_usage() -> None:
 
 
 def notify_users_with_allocations_near_limit() -> None:
-    logger = logging.getLogger("notify_users_with_allocations_near_limit")
-    allocations = FileQuotaService.get_file_system_allocations_near_limit()
+    qumulo_allocations = FileQuotaService.get_file_system_allocations_near_limit()
+    as_it_paths = list(map(lambda quota: quota["path"], qumulo_allocations))
+    paths_without_trailing_slash = list(map(lambda path: path.rstrip("/"), as_it_paths))
+    allocation_attributes = AllocationAttribute.objects.select_related(
+        "allocation"
+    ).filter(
+        value__in=as_it_paths + paths_without_trailing_slash,
+        allocation_attribute_type__name="storage_filesystem_path",
+        allocation__status__name="Active",
+    )
+    allocations = list(
+        map(lambda attribute: attribute.allocation, allocation_attributes)
+    )
+
+    for allocation in allocations:
+        send_email_for_near_limit_allocation(allocation)
 
 
 def addMembersToADGroup(

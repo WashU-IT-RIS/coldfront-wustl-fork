@@ -42,7 +42,7 @@ class RisAllocationFactory(DjangoModelFactory):
     class Params:
         storage2 = factory.Trait(
             justification="",
-            status=factory.SubFactory(AllocationStatusChoiceFactory, name="Pending"),
+            status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
         )
 
         read_write_group = factory.Trait(

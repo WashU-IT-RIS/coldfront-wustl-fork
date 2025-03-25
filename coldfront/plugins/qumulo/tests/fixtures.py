@@ -51,6 +51,13 @@ def create_ris_project_and_allocations(
     )
 
     storage2 = Storage2Factory(project=project)
+
+    AllocationAttributeFactory(
+        allocation=storage2,
+        allocation_attribute_type__name="storage_filesystem_path",
+        value=path,
+    )
+
     AllocationUserFactory(
         allocation=storage2,
         user=project.pi,

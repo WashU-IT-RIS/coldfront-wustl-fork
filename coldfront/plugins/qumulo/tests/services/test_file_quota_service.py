@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 from formencode.validators import Email
 
 from coldfront.core.utils.mail import allocation_email_recipients
+from coldfront.plugins.qumulo.services.notifications_service import send_email_for_near_limit_allocation
+from coldfront.plugins.qumulo.tasks import notify_users_with_allocations_near_limit
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
     create_ris_project_and_allocations,
@@ -90,7 +92,7 @@ class TestFileQuotaService(TestCase):
             "Expects the result to have all allocations near or over the limit",
         )
 
-    def test_send_emails_to_allocations(self, qumulo_api_mock: MagicMock) -> None:
+    def test_create_email_receiver_list(self, qumulo_api_mock: MagicMock) -> None:
         qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = (
             FileQuotaService.get_file_system_allocations_near_limit()
@@ -100,3 +102,26 @@ class TestFileQuotaService(TestCase):
             recipients = allocation_email_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(email) for email in recipients))
+
+    def test_send_email_for_allocations_near_limit(self, qumulo_api_mock: MagicMock):
+        qumulo_api_mock.return_value = self.qumulo_api
+        allocations_near_limit = (
+            FileQuotaService.get_file_system_allocations_near_limit()
+        )
+        for quota in allocations_near_limit:
+            project, _ = create_ris_project_and_allocations(path=quota["path"])
+            recipients = allocation_email_recipients_for_ris(project)
+            self.assertIsInstance(recipients, list)
+            self.assertTrue(all(Email.to_python(email) for email in recipients))    
+
+
+    def test_task(self, qumulo_api_mock: MagicMock):
+        qumulo_api_mock.return_value = self.qumulo_api
+        allocations_near_limit = (
+            FileQuotaService.get_file_system_allocations_near_limit()
+        )
+        for quota in allocations_near_limit:
+            project, _ = create_ris_project_and_allocations(path=quota["path"])
+
+        notify_users_with_allocations_near_limit()
+
