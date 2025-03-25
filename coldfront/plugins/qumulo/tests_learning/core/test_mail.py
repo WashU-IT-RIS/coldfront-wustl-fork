@@ -24,7 +24,7 @@ class TestLearningMail(TestCase):
         project_user = ProjectUserFactory(
             user=allocation.project.pi,
             project=allocation.project,
-            status=ProjectUserStatusChoiceFactory(name="Active"),
+            status__name="Active",
         )
         allocation_user = AllocationUserFactory(
             user=project_user.user, allocation=allocation
