@@ -17,8 +17,8 @@ function UserSelector({ name, users, setUsers, label, errorMessage }) {
   };
 
   const handleRemoveButtonClick = (event) => {
-    setSelectedUsers([]);
     setUsers(users.filter((user) => !selectedUsers.includes(user)));
+    setSelectedUsers([]);
   };
 
   const onListItemClick = (event) => {
