@@ -1,16 +1,9 @@
-import os
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import TemplateView
 from coldfront.plugins.qumulo.forms import TriggerMigrationsForm
-
-from django.urls import reverse
-from unittest import mock
+from unittest.mock import patch, MagicMock
 
 from coldfront.plugins.qumulo.views.trigger_migrations_view import TriggerMigrationsView
 
 from django.test import TestCase, tag
-from django.urls.exceptions import NoReverseMatch
-from unittest.mock import patch, MagicMock
 from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
 
 
@@ -18,8 +11,11 @@ class TriggerMigrationsViewTests(TestCase):
     def setUp(self) -> None:
         create_allocation_assets()
 
+    @patch("coldfront.plugins.qumulo.signals.async_task")
+    @tag("integration")
     def testMigrationSuccessfulWithValidAllocation(
         self,
+        mock_async_task: MagicMock,
     ):
         success = True
         valid_data = {"allocation_name_search": "/vol/rdcw-fs1/kchoi"}
