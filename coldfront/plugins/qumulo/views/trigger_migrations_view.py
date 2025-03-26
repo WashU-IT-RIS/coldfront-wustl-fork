@@ -82,7 +82,7 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
                 allocation_name, display_message
             )
 
-        return super().form_valid(form)
+        return super().form_valid(request, form)
 
     def get_success_url(self):
         return reverse("qumulo:trigger-migrations")
