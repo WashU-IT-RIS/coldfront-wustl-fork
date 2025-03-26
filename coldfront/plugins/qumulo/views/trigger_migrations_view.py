@@ -65,24 +65,24 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         context["trigger_migrations_form"] = TriggerMigrationsForm()
         return context
 
-    def form_valid(self, request, form: TriggerMigrationsForm):
+    def form_valid(self, form: TriggerMigrationsForm):
         allocation_name = form.cleaned_data["allocation_name_search"]
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
         display_message = "Allocation metadata migrated"
         try:
             migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
-            messages.success(request, display_message)
+            messages.success(TriggerMigrationsView.request, display_message)
             TriggerMigrationsView.send_successful_metadata_migration_email(
                 allocation_name
             )
         except Exception as e:
             display_message = str(e)
-            messages.error(request, display_message)
+            messages.error(TriggerMigrationsView.request, display_message)
             TriggerMigrationsView.send_failed_metadata_migration_email(
                 allocation_name, display_message
             )
 
-        return super().form_valid(request, form)
+        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse("qumulo:trigger-migrations")
