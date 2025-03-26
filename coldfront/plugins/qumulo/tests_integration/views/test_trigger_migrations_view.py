@@ -11,11 +11,9 @@ class TriggerMigrationsViewTests(TestCase):
     def setUp(self) -> None:
         create_allocation_assets()
 
-    @patch("coldfront.plugins.qumulo.signals.async_task")
     @tag("integration")
     def testMigrationSuccessfulWithValidAllocation(
         self,
-        mock_async_task: MagicMock,
     ):
         success = True
         valid_data = {"allocation_name_search": "/vol/rdcw-fs1/kchoi"}
