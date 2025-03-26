@@ -70,7 +70,6 @@ class MigrateToColdfront:
         if created:
             self.__create_project_user(project, pi_user)
             self.__create_project_attributes(fields, project)
-        breakpoint()
         allocation = self.__create_allocation(fields, project, pi_user)
         self.__create_allocation_attributes(fields, allocation)
         return {

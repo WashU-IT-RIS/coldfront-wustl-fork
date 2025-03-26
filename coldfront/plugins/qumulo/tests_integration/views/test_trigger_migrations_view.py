@@ -3,13 +3,16 @@ from unittest.mock import patch, MagicMock
 
 from coldfront.plugins.qumulo.views.trigger_migrations_view import TriggerMigrationsView
 
-from django.test import TestCase, tag
+from django.test import TestCase, tag, RequestFactory
 from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
 
 
 class TriggerMigrationsViewTests(TestCase):
     def setUp(self) -> None:
         create_allocation_assets()
+        self.request = RequestFactory().get(
+            "src/coldfront.plugins.qumulo/views/trigger_migrations_view.py"
+        )
 
     @tag("integration")
     def testMigrationSuccessfulWithValidAllocation(
@@ -21,7 +24,7 @@ class TriggerMigrationsViewTests(TestCase):
         form.is_valid()
         view = TriggerMigrationsView()
         try:
-            view.form_valid(form)
+            view.form_valid(self.request, form)
         except:
             success = False
         self.assertEqual(success, True)
