@@ -4,6 +4,8 @@ import axios from "axios";
 import InputLabel from "../InputLabel/InputLabel";
 import PageSelector from "../PageSelector/PageSelector";
 import SortButtons from "../SortButtons/SortButtons";
+import Table from "../Table/Table";
+import Row from "../Row/Row";
 
 import "./AllocationSelector.css";
 
@@ -64,25 +66,6 @@ function AllocationSelector({
     });
   }, [queryState]);
 
-  const renderHeader = () => {
-    return columns.map(({ key, label }) => (
-      <th key={key} scope="col" className="text-nowrap">
-        <InputLabel
-          label={label}
-          value={queryState.filters[key]}
-          onChange={(value) => queryDispatch({ action: "filter", key, value })}
-        />
-        <SortButtons
-          onClick={(value) =>
-            queryDispatch({ action: "sort", key, value: value })
-          }
-          label={label}
-          name={key}
-        />
-      </th>
-    ));
-  };
-
   const onAllocationCheck = (event) => {
     const allocationId = event.target.value;
 
@@ -134,48 +117,65 @@ function AllocationSelector({
       .includes(allocation.id);
   };
 
+  const checkAllHeader = (
+    <th key="checkbox" scope="col" className="text-nowrap">
+      <input
+        type="checkbox"
+        name="select_all"
+        onChange={onCheckAll}
+        value="select_all"
+        checked={allChecked}
+      />
+    </th>
+  );
+
+  const inputHeaders = columns.map(({ key, label }) => (
+    <th key={key} scope="col" className="text-nowrap">
+      <InputLabel
+        label={label}
+        value={queryState.filters[key]}
+        onChange={(value) => queryDispatch({ action: "filter", key, value })}
+      />
+      <SortButtons
+        onClick={(value) =>
+          queryDispatch({ action: "sort", key, value: value })
+        }
+        label={label}
+        name={key}
+      />
+    </th>
+  ));
+
+  const emptyHeader = <th key="_"></th>;
+  const plainHeaders = [
+    emptyHeader,
+    ...columns.map(({ key, label }) => (
+      <th key={key} scope="col" className="text-nowrap">
+        {label}
+      </th>
+    )),
+  ];
+
   const renderRows = (allocations) => {
     return allocations.map((allocation) => (
-      <tr
+      <Row
         key={allocation.id}
-        className={`text-nowrap ${isChecked(allocation) ? "checked" : ""}`}
-      >
-        <td key="checkbox">
-          <input
-            type="checkbox"
-            id={`allocation-${allocation.id}`}
-            value={allocation.id}
-            checked={isChecked(allocation)}
-            onChange={onAllocationCheck}
-          />
-        </td>
-        {columns.map(({ key, label }) => (
-          <td key={key} className="text-nowrap">
-            {allocation[key]}
-          </td>
-        ))}
-      </tr>
+        allocation={allocation}
+        isChecked={isChecked(allocation)}
+        onAllocationCheck={onAllocationCheck}
+        columns={columns}
+      />
     ));
   };
 
   return (
     <div className="table-responsive">
       <p className="form-label">Selected {label}:</p>
-      <table className="table table-sm">
-        <thead>
-          <tr>
-            <th></th>
-            {columns.map(({ key, label }) => (
-              <th key={key} scope="col" className="text-nowrap">
-                {label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody name="table-values-tbody" className="table-values-tbody">
-          {renderRows(selectedAllocations.sort((a, b) => a.id - b.id))}
-        </tbody>
-      </table>
+      <Table
+        columns={columns}
+        rows={renderRows(selectedAllocations.sort((a, b) => a.id - b.id))}
+        headers={plainHeaders}
+      />
       <PageSelector
         totalPages={totalPages}
         currentPage={queryState.page}
@@ -183,24 +183,13 @@ function AllocationSelector({
           queryDispatch({ action: "page", key: "page", value })
         }
       />
+
       <p className="form-label">{label}:</p>
-      <table className="table table-sm">
-        <thead>
-          <tr>
-            <th key="checkbox" scope="col" className="text-nowrap">
-              <input
-                type="checkbox"
-                name="select_all"
-                onChange={onCheckAll}
-                value="select_all"
-                checked={allChecked}
-              />
-            </th>
-            {renderHeader()}
-          </tr>
-        </thead>
-        <tbody className="table-options-tbody">{renderRows(allocations)}</tbody>
-      </table>
+      <Table
+        columns={columns}
+        rows={renderRows(allocations)}
+        headers={[checkAllHeader, ...inputHeaders]}
+      />
       <PageSelector
         totalPages={totalPages}
         currentPage={queryState.page}
