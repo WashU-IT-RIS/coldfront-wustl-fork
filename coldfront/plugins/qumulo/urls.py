@@ -33,7 +33,12 @@ urlpatterns = [
         name="client-list",
     ),
     path(
-        "client-export-csv",
+        "client-export-csv/",
+        client_list_csv_view.ClientListCSVView.as_view(),
+        name="client-export-csv-no-id",
+    ),
+    path(
+        "client-export-csv/<int:allocation_id>/",
         client_list_csv_view.ClientListCSVView.as_view(),
         name="client-export-csv",
     )
