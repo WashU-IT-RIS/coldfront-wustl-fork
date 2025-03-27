@@ -6,6 +6,7 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute
 )
+from coldfront.core.user.models import User
 
 from django.db.models import OuterRef, Subquery, Q
 
@@ -15,9 +16,22 @@ class ClientListItem:
     email: str
 
 class AllocationUserQueryService:
+
+    @staticmethod
+    def get_all_users_with_allocation_info() -> List[ClientListItem]:
+        all_users = User.objects.exclude(is_staff=True)
+        all_users = all_users.prefetch_related(
+            "allocationuser_set__allocation"
+        )
+
+        import pdb
+        pdb.set_trace()
+
+        
+
+        
     @staticmethod
     def find_users_for_allocations(primary_allocation_ids: Optional[List[int]]) -> List[ClientListItem]:
-
         # NOTE: awkwardly, the connection between allocations and users
         # is *NOT* through the primary allocation, but through the associated RW/RO allocations
         resources = Resource.objects.filter(Q(name="rw") | Q(name="ro"))
