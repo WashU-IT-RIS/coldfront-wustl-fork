@@ -10,21 +10,22 @@ from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
 class TriggerMigrationsViewTests(TestCase):
     def setUp(self) -> None:
         create_allocation_assets()
-        self.request = RequestFactory().get(
-            "src/coldfront.plugins.qumulo/views/trigger_migrations_view.py"
-        )
 
     @tag("integration")
     def testMigrationSuccessfulWithValidAllocation(
         self,
     ):
         success = True
+        request = RequestFactory().get(
+            "src/coldfront.plugins.qumulo/views/trigger_migrations_view.py"
+        )
         valid_data = {"allocation_name_search": "/vol/rdcw-fs1/kchoi"}
         form = TriggerMigrationsForm(data=valid_data)
         form.is_valid()
         view = TriggerMigrationsView()
+        view.request = request
         try:
-            view.form_valid(self.request, form)
+            view.form_valid(form)
         except:
             success = False
         self.assertEqual(success, True)
