@@ -16,7 +16,7 @@ from coldfront.core.allocation.models import (
     AllocationAttribute
 )
 
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Q
 
 
 class ClientListItem:
