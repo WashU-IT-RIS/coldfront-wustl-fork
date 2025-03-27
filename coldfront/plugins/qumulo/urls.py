@@ -6,7 +6,6 @@ from coldfront.plugins.qumulo.views import (
     create_sub_allocation_view,
     allocation_table_view,
     user_management_view,
-    progress_view,
 )
 from coldfront.plugins.qumulo.api.allocations import Allocations
 
