@@ -37,7 +37,5 @@ class Command(BaseCommand):
         from coldfront.plugins.qumulo.services.allocation_user_query_service import AllocationUserQueryService
 
         service = AllocationUserQueryService()
-
-        import pdb
-        pdb.set_trace()
+        service.get_all_users_with_allocation_info()
 
