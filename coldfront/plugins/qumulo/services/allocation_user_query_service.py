@@ -4,7 +4,8 @@ from typing import List, Optional
 from coldfront.core.resource.models import Resource
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationAttribute
+    AllocationAttribute,
+    AllocationUser
 )
 from coldfront.core.user.models import User
 
@@ -19,12 +20,10 @@ class AllocationUserQueryService:
 
     @staticmethod
     def get_all_users_with_allocation_info() -> List[ClientListItem]:
-        all_users = User.objects.exclude(is_staff=True)
-        all_users = all_users.prefetch_related(
-            "allocationuser_set__allocation"
-        )
-
         import pdb
+        pdb.set_trace()
+        all_users = AllocationUser.objects.filter(user__is_staff=False).select_related('user')
+
         pdb.set_trace()
 
         
