@@ -172,6 +172,7 @@ function AllocationSelector({
     <div className="table-responsive">
       <p className="form-label">Selected {label}:</p>
       <Table
+        className="selected-table"
         columns={columns}
         rows={renderRows(selectedAllocations.sort((a, b) => a.id - b.id))}
         headers={plainHeaders}
@@ -186,6 +187,7 @@ function AllocationSelector({
 
       <p className="form-label">{label}:</p>
       <Table
+        className="options-table"
         columns={columns}
         rows={renderRows(allocations)}
         headers={[checkAllHeader, ...inputHeaders]}
