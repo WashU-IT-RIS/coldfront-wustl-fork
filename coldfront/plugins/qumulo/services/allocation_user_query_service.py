@@ -28,9 +28,6 @@ class AllocationUserQueryService:
             allocation_attribute_type__name='storage_name'
         ).values('value')[:1]
 
-        all_users = all_users.annotate(
-            storage_name=Subquery(storage_name_subquery)
-        )
         all_users = AllocationUser.objects.filter(user__is_staff=False).prefetch_related(
             Prefetch(
                 'allocation',
@@ -41,7 +38,8 @@ class AllocationUserQueryService:
             )
         ).annotate(
             wustl_key=F('user__username'),
-            email=F('user__email')
+            email=F('user__email'),
+            storage_name=Subquery(storage_name_subquery)
         )
 
         pdb.set_trace()
