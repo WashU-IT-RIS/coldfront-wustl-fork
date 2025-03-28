@@ -6,7 +6,10 @@ from coldfront.plugins.qumulo.views import (
     create_sub_allocation_view,
     allocation_table_view,
     trigger_migrations_view,
+    user_management_view,
 )
+from coldfront.plugins.qumulo.api.allocations import Allocations
+
 
 app_name = "qumulo"
 urlpatterns = [
@@ -31,4 +34,10 @@ urlpatterns = [
         trigger_migrations_view.TriggerMigrationsView.as_view(),
         name="trigger-migrations",
     ),
+    path(
+        "allocation-admin/user-access-management",
+        user_management_view.UserAccessManagementView.as_view(),
+        name="user-access-management",
+    ),
+    path("api/allocations", Allocations.as_view(), name="getAllocations"),
 ]
