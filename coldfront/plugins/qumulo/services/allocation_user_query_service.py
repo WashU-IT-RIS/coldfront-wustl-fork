@@ -9,7 +9,8 @@ from coldfront.core.allocation.models import (
 )
 from coldfront.core.user.models import User
 
-from django.db.models import OuterRef, Subquery, Q
+from django.db.models import OuterRef, Subquery, Q, Prefetch, F, Value
+from django.db.models.functions import Concat
 
 
 class ClientListItem:
@@ -22,7 +23,29 @@ class AllocationUserQueryService:
     def get_all_users_with_allocation_info() -> List[ClientListItem]:
         import pdb
         pdb.set_trace()
-        all_users = AllocationUser.objects.filter(user__is_staff=False).select_related('user')
+        all_users = AllocationUser.objects.filter(user__is_staff=False).prefetch_related(
+            Prefetch(
+                'allocation',
+                queryset=Allocation.objects.annotate(
+                    allocation_id=F('id')
+            ).only('id', 'name'),
+            to_attr='allocations'
+            )
+        ).annotate(
+            wustl_key=F('user__username'),
+            email=F('user__email')
+        )
+
+        pdb.set_trace()
+
+        result = [
+            ClientListItem(
+            wustl_key=user.wustl_key,
+            email=user.email
+            )
+            for user in all_users
+        ]
+        return result
 
         pdb.set_trace()
 
