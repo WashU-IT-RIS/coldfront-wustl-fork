@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import FormView
-from coldfront.plugins.qumulo.forms import TriggerMigrationsForm
+from coldfront.plugins.qumulo.forms.TriggerMigrationsForm import TriggerMigrationsForm
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.models import User

@@ -209,12 +209,3 @@ class AllocationForm(forms.Form):
             projects = Project.objects.filter(pi=self.user_id)
 
         return map(lambda project: (project.id, project.title), projects)
-
-
-class TriggerMigrationsForm(forms.Form):
-    allocation_name_search = forms.CharField(
-        label="Allocation Name",
-        max_length=100,
-        required=True,
-        help_text="Type the allocation name here!",
-    )
