@@ -23,6 +23,14 @@ class AllocationUserQueryService:
     def get_all_users_with_allocation_info() -> List[ClientListItem]:
         import pdb
         pdb.set_trace()
+        storage_name_subquery = AllocationAttribute.objects.filter(
+            allocation=OuterRef('allocation'),
+            allocation_attribute_type__name='storage_name'
+        ).values('value')[:1]
+
+        all_users = all_users.annotate(
+            storage_name=Subquery(storage_name_subquery)
+        )
         all_users = AllocationUser.objects.filter(user__is_staff=False).prefetch_related(
             Prefetch(
                 'allocation',
