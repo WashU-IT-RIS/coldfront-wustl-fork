@@ -23,10 +23,15 @@ class AllocationUserQueryService:
     def get_all_users_with_allocation_info() -> List[ClientListItem]:
         import pdb
         pdb.set_trace()
+
         storage_name_subquery = AllocationAttribute.objects.filter(
-            allocation=OuterRef('allocation__id'),
+            allocation=OuterRef('primary_allocation_id'),
             allocation_attribute_type__name='storage_name'
         ).values('value')[:1]
+
+        primary_alloc_sub_query = AllocationAttribute.objects.filter(
+            allocation=OuterRef("pk"), allocation_attribute_type__name="storage_allocation_pk"
+        ).values("value")[:1]
 
         all_users = AllocationUser.objects.filter(user__is_staff=False).prefetch_related(
             Prefetch(
@@ -39,6 +44,8 @@ class AllocationUserQueryService:
         ).annotate(
             wustl_key=F('user__username'),
             email=F('user__email'),
+            primary_allocation_id=Subquery(primary_alloc_sub_query)
+        ).annotate(
             storage_name=Subquery(storage_name_subquery)
         )
 
