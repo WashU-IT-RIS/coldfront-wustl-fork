@@ -1,11 +1,10 @@
 from coldfront.plugins.qumulo.forms import TriggerMigrationsForm
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 from django.contrib import messages
 
 from coldfront.plugins.qumulo.views.trigger_migrations_view import TriggerMigrationsView
 
-from django.test import TestCase, tag, RequestFactory, Client
-from coldfront.core.test_helpers.factories import UserFactory
+from django.test import TestCase, tag, RequestFactory
 from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
 
 
