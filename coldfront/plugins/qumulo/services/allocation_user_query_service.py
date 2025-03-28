@@ -24,7 +24,7 @@ class AllocationUserQueryService:
         import pdb
         pdb.set_trace()
         storage_name_subquery = AllocationAttribute.objects.filter(
-            allocation=OuterRef('allocation'),
+            allocation=OuterRef('allocation__id'),
             allocation_attribute_type__name='storage_name'
         ).values('value')[:1]
 
