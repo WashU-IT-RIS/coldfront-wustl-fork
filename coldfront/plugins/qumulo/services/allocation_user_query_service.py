@@ -34,13 +34,8 @@ class AllocationUserQueryService:
         ).values("value")[:1]
 
         all_users = AllocationUser.objects.filter(user__is_staff=False).prefetch_related(
-            Prefetch(
-                'allocation',
-                queryset=Allocation.objects.annotate(
-                    allocation_id=F('id')
-            ).only('id'),
-            to_attr='allocations'
-            )
+            "allocation",
+            "user"
         ).annotate(
             wustl_key=F('user__username'),
             email=F('user__email'),
