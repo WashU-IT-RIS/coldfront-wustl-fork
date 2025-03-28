@@ -33,7 +33,7 @@ class AllocationUserQueryService:
                 'allocation',
                 queryset=Allocation.objects.annotate(
                     allocation_id=F('id')
-            ).only('id', 'name'),
+            ).only('id'),
             to_attr='allocations'
             )
         ).annotate(
