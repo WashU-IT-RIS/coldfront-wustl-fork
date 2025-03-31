@@ -6,7 +6,7 @@ function PageSelector({
   currentPage,
   setCurrentPage,
   totalPages,
-  maxContinous = 1,
+  maxContinous = 5,
 }) {
   const renderContinousPages = () => {
     return Array.from(Array(totalPages)).map((_, index) => (
