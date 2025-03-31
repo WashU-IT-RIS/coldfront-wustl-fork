@@ -319,16 +319,3 @@ class AllocationAttributeCreateForm(forms.ModelForm):
         self.fields["allocation_attribute_type"].queryset = self.fields[
             "allocation_attribute_type"
         ].queryset.order_by(Lower("name"))
-
-
-class TriggerMigrationsForm(forms.ModelForm):
-    fileset_alias = forms.CharField(
-        label="Fileset Alias",
-        required=True,
-        help_text="The alias of a fileset",
-    )
-    fileset_name = forms.CharField(
-        label="Fileset Name",
-        required=True,
-        help_text="The name of the fileset",
-    )
