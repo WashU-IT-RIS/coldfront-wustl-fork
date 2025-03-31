@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import "./PageSelector.css";
 
@@ -6,7 +6,7 @@ function PageSelector({
   currentPage,
   setCurrentPage,
   totalPages,
-  maxContinous = 5,
+  maxContinous = 1,
 }) {
   const renderContinousPages = () => {
     return Array.from(Array(totalPages)).map((_, index) => (
@@ -24,6 +24,10 @@ function PageSelector({
   const renderNonContinousPages = () => {
     const [thisPage, setThisPage] = useState(currentPage);
 
+    useEffect(() => {
+      setThisPage(currentPage);
+    }, [currentPage]);
+
     return (
       <li className="page-item">
         <input
@@ -36,7 +40,7 @@ function PageSelector({
           }
           min="1"
           max={totalPages}
-        />
+        />{" "}
       </li>
     );
   };
@@ -55,30 +59,33 @@ function PageSelector({
 
   return (
     totalPages > 1 && (
-      <ul className="pagination">
-        <li className="page-item">
-          <button
-            className="page-link"
-            aria-label="Previous"
-            onClick={() => onChangePage(currentPage - 1)}
-          >
-            <span aria-hidden="true">&laquo;</span>
-            <span className="sr-only">Previous</span>
-          </button>
-        </li>
-        {totalPages <= maxContinous && renderContinousPages()}
-        {totalPages > maxContinous && renderNonContinousPages()}
-        <li className="page-item">
-          <button
-            className="page-link"
-            aria-label="Next"
-            onClick={() => onChangePage(currentPage + 1)}
-          >
-            <span aria-hidden="true">&raquo;</span>
-            <span className="sr-only">Next</span>
-          </button>
-        </li>
-      </ul>
+      <>
+        <ul className="pagination">
+          <li className="page-item">
+            <button
+              className="page-link"
+              aria-label="Previous"
+              onClick={() => onChangePage(currentPage - 1)}
+            >
+              <span aria-hidden="true">&laquo;</span>
+              <span className="sr-only">Previous</span>
+            </button>
+          </li>
+          {totalPages <= maxContinous && renderContinousPages()}
+          {totalPages > maxContinous && renderNonContinousPages()}
+          <li className="page-item">
+            <button
+              className="page-link"
+              aria-label="Next"
+              onClick={() => onChangePage(currentPage + 1)}
+            >
+              <span aria-hidden="true">&raquo;</span>
+              <span className="sr-only">Next</span>
+            </button>
+          </li>
+        </ul>
+        {totalPages > maxContinous && <p>Total Pages: {totalPages}</p>}
+      </>
     )
   );
 }

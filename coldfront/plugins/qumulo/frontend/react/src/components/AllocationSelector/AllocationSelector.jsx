@@ -177,6 +177,7 @@ function AllocationSelector({
         rows={renderRows(selectedAllocations.sort((a, b) => a.id - b.id))}
         headers={plainHeaders}
       />
+      <p className="form-label">{label}:</p>
       <PageSelector
         totalPages={totalPages}
         currentPage={queryState.page}
@@ -184,8 +185,6 @@ function AllocationSelector({
           queryDispatch({ action: "page", key: "page", value })
         }
       />
-
-      <p className="form-label">{label}:</p>
       <Table
         className="options-table"
         columns={columns}
@@ -204,7 +203,7 @@ function AllocationSelector({
 }
 
 async function getAllocations(params) {
-  const PAGE_SIZE = 25;
+  const PAGE_SIZE = 1;
 
   const response = await axios.get("/qumulo/api/allocations", {
     params: { ...params, limit: PAGE_SIZE },
