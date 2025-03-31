@@ -42,7 +42,6 @@ from coldfront.core.allocation.forms import (
     AllocationReviewUserForm,
     AllocationSearchForm,
     AllocationUpdateForm,
-    TriggerMigrationsForm,
 )
 from coldfront.core.allocation.models import (
     Allocation,
