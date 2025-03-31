@@ -19,7 +19,7 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     form_class = TriggerMigrationsForm
 
     def test_func(self):
-        # TODO: chnage superuser to reflect user support role when present in prod
+        # TODO: change superuser to reflect user support role when present in prod
         return (
             self.request.user.is_staff
             or self.request.user.is_superuser
@@ -27,9 +27,9 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         )
 
     def send_successful_metadata_migration_email(allocation) -> None:
-        ctx = email_template_context()
+        email_context = email_template_context()
         CENTER_BASE_URL = import_from_settings("CENTER_BASE_URL")
-        ctx["allocation"] = allocation
+        email_context["allocation"] = allocation
 
         user_support_users = User.objects.filter(groups__name="RIS_UserSupport")
         user_support_emails = [user.email for user in user_support_users if user.email]
@@ -37,17 +37,17 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         send_email_template(
             subject="Metadata Migration Success",
             template_name="email/successful_metadata_migration.txt",
-            template_context=ctx,
+            template_context=email_context,
             sender=import_from_settings("DEFAULT_FROM_EMAIL"),
             receiver_list=user_support_emails,
         )
 
     def send_failed_metadata_migration_email(allocation, exception_output) -> None:
-        ctx = email_template_context()
+        email_context = email_template_context()
 
         CENTER_BASE_URL = import_from_settings("CENTER_BASE_URL")
-        ctx["allocation"] = allocation
-        ctx["exception_output"] = exception_output
+        email_context["allocation"] = allocation
+        email_context["exception_output"] = exception_output
 
         user_support_users = User.objects.filter(groups__name="RIS_UserSupport")
         user_support_emails = [user.email for user in user_support_users if user.email]
@@ -55,7 +55,7 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         send_email_template(
             subject="Metadata Migration Failed",
             template_name="email/failed_metadata_migration.txt",
-            template_context=ctx,
+            template_context=email_context,
             sender=import_from_settings("DEFAULT_FROM_EMAIL"),
             receiver_list=user_support_emails,
         )

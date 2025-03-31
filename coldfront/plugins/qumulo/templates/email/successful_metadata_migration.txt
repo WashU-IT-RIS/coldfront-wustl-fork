@@ -1,1 +1,1 @@
-The requested metadata migration for {{ allocation }} was successful.
+The requested metadata migration for {{ itsm_service_provision_name }} was successful.
