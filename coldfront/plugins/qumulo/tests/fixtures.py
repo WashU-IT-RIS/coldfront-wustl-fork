@@ -1,6 +1,6 @@
 from typing import Tuple
 
-import factory
+import factory, random
 from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import Project
 from coldfront.core.test_helpers.factories import (
@@ -10,6 +10,7 @@ from coldfront.core.test_helpers.factories import (
     AllocationStatusChoiceFactory,
     AllocationUserStatusChoiceFactory,
     FieldOfScienceFactory,
+    ProjectAttributeFactory,
     ProjectAttributeTypeFactory,
     ProjectStatusChoiceFactory,
     ProjectUserFactory,
@@ -19,7 +20,6 @@ from coldfront.core.test_helpers.factories import (
     ResourceFactory,
     ResourceTypeFactory,
     AllocationUserFactory,
-    UserFactory,
 )
 
 from coldfront.core.test_helpers.factories import field_of_science_provider
@@ -48,6 +48,11 @@ def create_ris_project_and_allocations(
         user=project.pi,
         role=ProjectUserRoleChoiceFactory(name="Manager"),
         status=ProjectUserStatusChoiceFactory(name="New"),
+    )
+    ProjectAttributeTypeFactory(name="sponsor_department_number")
+    ProjectAttributeFactory(
+        project=project,
+        proj_attr_type=ProjectAttributeTypeFactory(name="sponsor_department_number"),
     )
 
     storage2 = Storage2Factory(project=project)

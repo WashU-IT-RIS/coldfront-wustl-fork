@@ -6,10 +6,8 @@ from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import ProjectAttribute
 from coldfront.core.resource.models import ResourceType, Resource
 from coldfront.core.test_helpers.factories import (
-    AllocationFactory,
     AllocationStatusChoiceFactory,
     FieldOfScienceFactory,
-    ProjectAttributeFactory,
     ProjectFactory,
     ProjectStatusChoiceFactory,
     ResourceFactory,

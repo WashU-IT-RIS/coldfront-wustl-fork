@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from formencode.validators import Email
 
 from coldfront.core.utils.mail import allocation_email_recipients
-from coldfront.plugins.qumulo.services.notifications_service import send_email_for_near_limit_allocation
+from coldfront.plugins.qumulo.services.notifications_service import (
+    send_email_for_near_limit_allocation,
+)
 from coldfront.plugins.qumulo.tasks import notify_users_with_allocations_near_limit
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
@@ -112,10 +114,11 @@ class TestFileQuotaService(TestCase):
             project, _ = create_ris_project_and_allocations(path=quota["path"])
             recipients = allocation_email_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
-            self.assertTrue(all(Email.to_python(email) for email in recipients))    
+            self.assertTrue(all(Email.to_python(email) for email in recipients))
 
-
-    def test_task(self, qumulo_api_mock: MagicMock):
+    def test_notify_users_with_allocations_near_limit_task(
+        self, qumulo_api_mock: MagicMock
+    ):
         qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = (
             FileQuotaService.get_file_system_allocations_near_limit()
@@ -124,4 +127,3 @@ class TestFileQuotaService(TestCase):
             project, _ = create_ris_project_and_allocations(path=quota["path"])
 
         notify_users_with_allocations_near_limit()
-

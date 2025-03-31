@@ -1,11 +1,10 @@
 from coldfront.core.project.models import Project
-from coldfront.core.utils.common import import_from_settings
 from coldfront.core.utils.mail import email_template_context
 
 import os
 
 
-def ris_email_template_context() -> dict:
+def email_template_context_for_service_desk() -> dict:
     template_context = email_template_context()
     template_context["service_desk_url"] = os.environ.get("SERVICE_DESK_URL")
     template_context["service_rate_categories_brouchure_url"] = os.environ.get(
