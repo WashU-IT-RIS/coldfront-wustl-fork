@@ -46,6 +46,10 @@ function UserAccessManagement() {
   return (
     <>
       <h2>User Access Management</h2>
+      <p>
+        Selected users will be added to the selected allocations. Existing users
+        will not be modified.
+      </p>
       <hr />
       <UserSelector
         name="rw-user-selector"

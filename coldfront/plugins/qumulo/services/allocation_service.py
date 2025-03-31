@@ -269,7 +269,10 @@ class AllocationService:
 
     @staticmethod
     def set_access_users(
-        access_key: str, access_users: list[str], storage_allocation: Allocation
+        access_key: str,
+        access_users: list[str],
+        storage_allocation: Allocation,
+        add_only: bool = False,
     ):
 
         active_directory_api = ActiveDirectoryAPI()
@@ -289,10 +292,11 @@ class AllocationService:
             addMembersToADGroup, users_to_add, access_allocation, create_group_time
         )
 
-        users_to_remove = set(allocation_usernames) - set(access_users)
-        for allocation_username in users_to_remove:
-            allocation_users.get(user__username=allocation_username).delete()
-            active_directory_api.remove_member_from_group(
-                allocation_username,
-                access_allocation.get_attribute("storage_acl_name"),
-            )
+        if not add_only:
+            users_to_remove = set(allocation_usernames) - set(access_users)
+            for allocation_username in users_to_remove:
+                allocation_users.get(user__username=allocation_username).delete()
+                active_directory_api.remove_member_from_group(
+                    allocation_username,
+                    access_allocation.get_attribute("storage_acl_name"),
+                )
