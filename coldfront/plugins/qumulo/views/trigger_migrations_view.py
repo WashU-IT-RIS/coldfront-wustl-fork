@@ -32,9 +32,9 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
         return user_support_emails
 
-    def send_successful_metadata_migration_email(allocation) -> None:
+    def send_successful_metadata_migration_email(itsm_service_provision_name) -> None:
         email_context = email_template_context()
-        email_context["allocation"] = allocation
+        email_context["itsm_service_provision_name"] = itsm_service_provision_name
 
         email_receivers = TriggerMigrationsView.get_reciever_email_list()
 
@@ -46,9 +46,11 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             receiver_list=email_receivers,
         )
 
-    def send_failed_metadata_migration_email(allocation, exception_output) -> None:
+    def send_failed_metadata_migration_email(
+        itsm_service_provision_name, exception_output
+    ) -> None:
         email_context = email_template_context()
-        email_context["allocation"] = allocation
+        email_context["itsm_service_provision_name"] = itsm_service_provision_name
         email_context["exception_output"] = exception_output
 
         email_receivers = TriggerMigrationsView.get_reciever_email_list()
