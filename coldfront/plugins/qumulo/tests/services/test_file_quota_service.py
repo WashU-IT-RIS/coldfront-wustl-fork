@@ -14,7 +14,7 @@ from coldfront.plugins.qumulo.tests.fixtures import (
 )
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import get_mock_quota_response
-from coldfront.plugins.qumulo.utils.mail import allocation_email_recipients_for_ris
+from coldfront.plugins.qumulo.utils.mail import allocation_user_recipients_for_ris
 
 load_dotenv(override=True)
 
@@ -101,7 +101,7 @@ class TestFileQuotaService(TestCase):
         )
         for quota in allocations_near_limit:
             project, _ = create_ris_project_and_allocations(path=quota["path"])
-            recipients = allocation_email_recipients_for_ris(project)
+            recipients = allocation_user_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(email) for email in recipients))
 
@@ -112,9 +112,9 @@ class TestFileQuotaService(TestCase):
         )
         for quota in allocations_near_limit:
             project, _ = create_ris_project_and_allocations(path=quota["path"])
-            recipients = allocation_email_recipients_for_ris(project)
+            recipients = allocation_user_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
-            self.assertTrue(all(Email.to_python(email) for email in recipients))
+            self.assertTrue(all(Email.to_python(recipient) for recipient in recipients))
 
     def test_notify_users_with_allocations_near_limit_task(
         self, qumulo_api_mock: MagicMock

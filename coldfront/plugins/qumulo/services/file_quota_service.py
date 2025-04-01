@@ -5,7 +5,6 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeUsage,
-    AllocationStatusChoice,
 )
 
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations

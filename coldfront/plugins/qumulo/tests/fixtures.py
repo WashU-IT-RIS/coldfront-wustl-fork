@@ -2,7 +2,7 @@ from typing import Tuple
 
 import factory, random
 from coldfront.core.allocation.models import Allocation
-from coldfront.core.project.models import Project
+from coldfront.core.project.models import Project, ProjectAttributeType
 from coldfront.core.test_helpers.factories import (
     AAttributeTypeFactory,
     AllocationAttributeFactory,
@@ -49,10 +49,13 @@ def create_ris_project_and_allocations(
         role=ProjectUserRoleChoiceFactory(name="Manager"),
         status=ProjectUserStatusChoiceFactory(name="New"),
     )
-    ProjectAttributeTypeFactory(name="sponsor_department_number")
+
+    # django_get_or_create was not implemented in the core, so get the desired object
+    # TODO implement a RIS specific factory
+    sponsor_department_number = ProjectAttributeType.objects.get(name="sponsor_department_number")
     ProjectAttributeFactory(
         project=project,
-        proj_attr_type=ProjectAttributeTypeFactory(name="sponsor_department_number"),
+        proj_attr_type=sponsor_department_number,
     )
 
     storage2 = Storage2Factory(project=project)
