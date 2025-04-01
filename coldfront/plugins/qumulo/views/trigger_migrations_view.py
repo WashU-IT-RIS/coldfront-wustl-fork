@@ -26,38 +26,39 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             or self.request.user.has_perm("allocation.can_add_allocation")
         )
 
-    def send_successful_metadata_migration_email(allocation) -> None:
-        email_context = email_template_context()
-        CENTER_BASE_URL = import_from_settings("CENTER_BASE_URL")
-        email_context["allocation"] = allocation
-
+    def get_reciever_email_list() -> list[str]:
         user_support_users = User.objects.filter(groups__name="RIS_UserSupport")
         user_support_emails = [user.email for user in user_support_users if user.email]
+
+        return user_support_emails
+
+    def send_successful_metadata_migration_email(allocation) -> None:
+        email_context = email_template_context()
+        email_context["allocation"] = allocation
+
+        email_receivers = TriggerMigrationsView.get_reciever_email_list()
 
         send_email_template(
             subject="Metadata Migration Success",
             template_name="email/successful_metadata_migration.txt",
             template_context=email_context,
             sender=import_from_settings("DEFAULT_FROM_EMAIL"),
-            receiver_list=user_support_emails,
+            receiver_list=email_receivers,
         )
 
     def send_failed_metadata_migration_email(allocation, exception_output) -> None:
         email_context = email_template_context()
-
-        CENTER_BASE_URL = import_from_settings("CENTER_BASE_URL")
         email_context["allocation"] = allocation
         email_context["exception_output"] = exception_output
 
-        user_support_users = User.objects.filter(groups__name="RIS_UserSupport")
-        user_support_emails = [user.email for user in user_support_users if user.email]
+        email_receivers = TriggerMigrationsView.get_reciever_email_list()
 
         send_email_template(
             subject="Metadata Migration Failed",
             template_name="email/failed_metadata_migration.txt",
             template_context=email_context,
             sender=import_from_settings("DEFAULT_FROM_EMAIL"),
-            receiver_list=user_support_emails,
+            receiver_list=email_receivers,
         )
 
     def get_context_data(self, *args, **kwargs):
