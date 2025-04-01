@@ -79,7 +79,7 @@ function UserAccessManagement() {
         </button>
       </div>
       <GenericModal
-        title="Update Sumbitted"
+        title="Update Submitted"
         text="Permissions changes have been submitted and will be applied shortly."
         onClose={() => window.location.reload()}
         show={renderModal}

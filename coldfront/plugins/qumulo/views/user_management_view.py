@@ -25,19 +25,17 @@ class UserAccessManagementView(LoginRequiredMixin, TemplateView):
         for allocation in allocations:
             if len(ro_users) > 0:
                 async_task(
-                    AllocationService.set_access_users,
+                    AllocationService.add_access_users,
                     "ro",
                     ro_users,
                     allocation,
-                    True,
                 )
             if len(rw_users) > 0:
                 async_task(
-                    AllocationService.set_access_users,
+                    AllocationService.add_access_users,
                     "rw",
                     rw_users,
                     allocation,
-                    True,
                 )
 
         return HttpResponse()

@@ -40,7 +40,7 @@ function PageSelector({
           }
           min="1"
           max={totalPages}
-        />{" "}
+        />
       </li>
     );
   };
