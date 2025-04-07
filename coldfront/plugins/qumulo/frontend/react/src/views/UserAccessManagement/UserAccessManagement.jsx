@@ -43,6 +43,14 @@ function UserAccessManagement() {
       });
   };
 
+  const getInvalidUsers = (users) => {
+    if (users.length > 1) {
+      return [users[1]];
+    }
+
+    return [];
+  };
+
   return (
     <>
       <h2>User Access Management</h2>
@@ -56,12 +64,14 @@ function UserAccessManagement() {
         users={rwUsers}
         setUsers={setRwUsers}
         label={"Read/Write Users"}
+        getInvalidUsers={getInvalidUsers}
       />
       <UserSelector
         name="ro-user-selector"
         users={roUsers}
         setUsers={setRoUsers}
         label={"Read-Only Users"}
+        getInvalidUsers={getInvalidUsers}
       />
       <AllocationSelector
         setSelectedAllocations={setAllocations}
