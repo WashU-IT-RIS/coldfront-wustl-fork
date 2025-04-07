@@ -1,4 +1,3 @@
-import os
 from django import forms
 
 from coldfront.plugins.qumulo.validators import (
@@ -8,7 +7,9 @@ from coldfront.plugins.qumulo.validators import (
     validate_batch_ad_users,
 )
 
-from coldfront.plugins.qumulo.widgets import MultiSelectLookupInput
+from coldfront.plugins.qumulo.widgets import (
+    MultiSelectLookupInput,
+)
 
 
 class ADUserField(forms.Field):
