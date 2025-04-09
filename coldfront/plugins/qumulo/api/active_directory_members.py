@@ -10,8 +10,12 @@ class ActiveDirectoryMembers(LoginRequiredMixin, View):
         active_directory_api = ActiveDirectoryAPI()
 
         members = request.GET.getlist("members[]")
-        ldap_members = active_directory_api.get_members(members)
-        print(f"ldap_members: {ldap_members}")
+        try:
+            ldap_members = active_directory_api.get_members(members)
+        except ValueError as e:
+            if str(e) == "Invalid account_name":
+                ldap_members = []
+
         found_members = list(
             map(
                 lambda member: member["attributes"]["sAMAccountName"],

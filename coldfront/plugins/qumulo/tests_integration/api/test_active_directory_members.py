@@ -51,3 +51,18 @@ class TestActiveDirectoryMembersGet(TestCase):
         content = json.loads(response.content)
 
         self.assertListEqual(content["validNames"], good_members)
+
+    def test_returns_empty_list_with_only_invalid_names(self):
+        members = ["invalid_member"]
+        active_directory_api = ActiveDirectoryMembers()
+
+        request = HttpRequest()
+        request.method = "GET"
+
+        for member in members:
+            request.GET.update({"members[]": member})
+
+        response = active_directory_api.get(request)
+        content = json.loads(response.content)
+
+        self.assertListEqual(content["validNames"], [])

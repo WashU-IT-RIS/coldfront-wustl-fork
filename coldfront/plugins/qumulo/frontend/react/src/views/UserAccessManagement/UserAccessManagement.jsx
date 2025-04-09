@@ -43,12 +43,15 @@ function UserAccessManagement() {
       });
   };
 
-  const getInvalidUsers = (users) => {
-    if (users.length > 1) {
-      return [users[1]];
-    }
+  const getInvalidUsers = async (users) => {
+    const response = await axios.get("/qumulo/api/active-directory-members", {
+      params: { members: users },
+    });
 
-    return [];
+    const validUsers = response.data.validNames;
+    const invalidUsers = users.filter((user) => !validUsers.includes(user));
+
+    return invalidUsers;
   };
 
   return (

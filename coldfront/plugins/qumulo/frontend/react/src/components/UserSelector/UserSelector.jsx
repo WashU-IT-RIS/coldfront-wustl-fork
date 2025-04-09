@@ -6,7 +6,7 @@ function UserSelector({
   name,
   users,
   setUsers,
-  getInvalidUsers = () => [],
+  getInvalidUsers = async () => [],
   label,
   errorMessage,
 }) {
@@ -14,18 +14,18 @@ function UserSelector({
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [invalidUsers, setInvalidUsers] = useState([]);
 
-  const handleAddButtonClick = (event) => {
+  const handleAddButtonClick = async (event) => {
     const values = inputText
       .split(",")
       .map((value) => value.trim())
       .filter((value) => value.length);
 
     const newUsers = [...users, ...values];
-    const invalidUsers = getInvalidUsers(newUsers);
-
     setUsers(newUsers);
-    setInvalidUsers(invalidUsers);
     setInputText("");
+
+    const invalidUsers = await getInvalidUsers(newUsers);
+    setInvalidUsers(invalidUsers);
   };
 
   const handleRemoveButtonClick = (event) => {
