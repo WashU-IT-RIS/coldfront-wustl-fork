@@ -68,6 +68,9 @@ class ActiveDirectoryAPI:
         return self.conn.response[0]
 
     def get_members(self, account_names: list[str]):
+        if not account_names:
+            return []
+
         member_filter_base = lambda member: f"(sAMAccountName={member})"
         member_filters = f"(|{''.join(map(member_filter_base, account_names))})"
 
