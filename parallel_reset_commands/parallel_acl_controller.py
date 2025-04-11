@@ -54,7 +54,6 @@ def check_acl(original_path, processed_path, expected_spec):
         result_set = _piece_out_acl(acl_info)
         expected_set = _piece_out_acl(expected_spec)
         if result_set != expected_set:
-            print(f"Returning False {processed_path} {expected_set} {result_set}")
             return False
         return True
     except subprocess.CalledProcessError as e:
@@ -71,13 +70,11 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
             subprocess.run(reset_command, check=True, shell=True)
         return check_acl(path, processed_path, spec), path
     except subprocess.CalledProcessError as e:
-        print(f'Failed to set ACL for {path_type}: {path}, Error: {e}')
         return False, path
 
 
 
 def process_acls_recursive(perform_reset: bool, target_directory: str, num_workers: int, alloc_name: str, sub_alloc_names: List[str], error_file: str, walker_method: Callable):
-    print(f"Processing ACLs recursively in {target_directory} with {num_workers} workers.")
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         builder = ACL_SpecBuilder()
         builder.build_specs(alloc_name, sub_alloc_names)
@@ -86,25 +83,24 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
         result_futures = []
         with open(error_file, 'w') as error_log:
             for path, path_type in walker_method(target_directory):
-                if count % 1000 == 0:
-                    # print(f'Number pending tasks: {executor._work_queue.qsize()}')
-                    print(f'Processed {count} paths')
+                # jprew - leaving as it is useful for debugging
+                #if count % 1000 == 0:
+                #    print(f'Number pending tasks: {executor._work_queue.qsize()}')
+                #    print(f'Processed {count} paths')
                 count += 1
                 ret = executor.submit(process_acl, perform_reset, path, path_type, builder)
                 result_futures.append(ret)
                 if len(result_futures) == BATCH_SIZE:
-                    print(f"Batch count: {batch_count}")
+                    # print(f"Batch count: {batch_count}")
                     batch_count += 1
                     for future in result_futures:
                         x = future.result()
-                        print(f"Future result: {x}")
                         success, check_path = x
                         if not success:
                             error_log.write(f"{check_path}\n")
                     result_futures = []
             for future in result_futures:
                 x = future.result()
-                print(f"Future result: {x}")
                 success, check_path = x
                 if not success:
                     error_log.write(f"{check_path}\n")
