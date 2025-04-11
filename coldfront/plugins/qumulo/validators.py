@@ -20,25 +20,6 @@ from datetime import date
 
 
 def validate_ad_users(ad_users: list[str]):
-    bad_users = []
-
-    for user in ad_users:
-
-        if not __ad_user_validation_helper(user):
-            bad_users.append(user)
-
-    if len(bad_users) > 0:
-        raise ValidationError(
-            list(
-                map(
-                    lambda bad_user: ValidationError(message=bad_user, code="invalid"),
-                    bad_users,
-                )
-            )
-        )
-
-
-def validate_batch_ad_users(ad_users: list[str]):
     active_directory_api = ActiveDirectoryAPI()
 
     bad_users = []

@@ -4,7 +4,7 @@ from coldfront.plugins.qumulo.validators import (
     validate_filesystem_path_unique,
     validate_parent_directory,
     validate_relative_path,
-    validate_batch_ad_users,
+    validate_ad_users,
 )
 
 from coldfront.plugins.qumulo.widgets import (
@@ -14,7 +14,7 @@ from coldfront.plugins.qumulo.widgets import (
 
 class ADUserField(forms.Field):
     widget = MultiSelectLookupInput
-    default_validators = [validate_batch_ad_users]
+    default_validators = [validate_ad_users]
 
     def prepare_value(self, value: list[str]):
         value_str = ",".join(value)

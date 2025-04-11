@@ -81,7 +81,7 @@ class ActiveDirectoryAPI:
         )
 
         if not self.conn.response:
-            raise ValueError("Invalid account_name")
+            return []
 
         return self.conn.response
 

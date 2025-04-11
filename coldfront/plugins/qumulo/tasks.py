@@ -1,6 +1,5 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
-from django_q.tasks import async_task
 
 import json
 import logging
@@ -123,41 +122,50 @@ def addMembersToADGroup(
     create_group_time: datetime,
 ) -> None:
     bad_keys = []
-    good_keys = []
+    good_members = []
 
     if len(wustlkeys) == 0:
-        return __ad_members_and_handle_errors(
-            wustlkeys, acl_allocation, create_group_time, good_keys, bad_keys
-        )
+        return
 
     active_directory_api = ActiveDirectoryAPI()
 
-    gotten_keys = active_directory_api.get_members(wustlkeys)
-    gotten_user_names = [user["attributes"]["sAMAccountName"] for user in gotten_keys]
+    gotten_members = active_directory_api.get_members(wustlkeys)
+    gotten_keys = [member["attributes"]["sAMAccountName"] for member in gotten_members]
 
-    for user in wustlkeys:
-        if user in gotten_user_names:
-            good_keys.append(user)
+    for wustlkey in wustlkeys:
+        if wustlkey in gotten_keys:
+            member = __find_member(wustlkey, gotten_members)
+            is_group = "group" in member["attributes"]["objectClass"]
+            good_members.append(
+                {"wustlkey": wustlkey, "dn": member["dn"], "is_group": is_group}
+            )
         else:
-            bad_keys.append(user)
+            bad_keys.append(wustlkey)
 
-    return __ad_members_and_handle_errors(
-        wustlkeys, acl_allocation, create_group_time, good_keys, bad_keys
+    return __add_members_and_handle_errors(
+        wustlkeys, acl_allocation, create_group_time, good_members, bad_keys
     )
 
 
-def __ad_members_and_handle_errors(
+def __find_member(wustlkey: str, members: list[dict]) -> dict:
+    for member in members:
+        if member["attributes"]["sAMAccountName"] == wustlkey:
+            return member
+    return None
+
+
+def __add_members_and_handle_errors(
     wustlkeys: list[str],
     acl_allocation: Allocation,
     create_group_time: datetime,
-    good_keys: list[dict],
+    good_members: list[dict],
     bad_keys: list[str],
 ) -> None:
     active_directory_api = ActiveDirectoryAPI()
     group_name = acl_allocation.get_attribute("storage_acl_name")
 
-    if len(good_keys) > 0:
-        member_dns = [member["dn"] for member in good_keys]
+    if len(good_members) > 0:
+        member_dns = [member["dn"] for member in good_members]
 
         current_time = datetime.now()
         logger.warn(
@@ -179,7 +187,7 @@ def __ad_members_and_handle_errors(
             __send_error_adding_users_email(acl_allocation, wustlkeys)
             return
 
-        for member in good_keys:
+        for member in good_members:
             AclAllocations.add_user_to_access_allocation(
                 member["wustlkey"], acl_allocation, member["is_group"]
             )
