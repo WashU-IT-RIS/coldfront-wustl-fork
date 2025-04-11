@@ -54,6 +54,7 @@ def check_acl(original_path, processed_path, expected_spec):
         result_set = _piece_out_acl(acl_info)
         expected_set = _piece_out_acl(expected_spec)
         if result_set != expected_set:
+            print(f"Returning False {processed_path}")
             return False
         return True
     except subprocess.CalledProcessError as e:
