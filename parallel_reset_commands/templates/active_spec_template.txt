@@ -1,0 +1,7 @@
+A::OWNER@:rwaDxtTnNcy
+A:dg:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaDxtTnNcy
+A:fig:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaDxtTnNcy
+A:dg:storage-<ALLOC>-rw@accounts.ad.wustl.edu:rwaDxtTnNcy
+A:fig:storage-<ALLOC>-rw@accounts.ad.wustl.edu:rwaDxtTnNcy
+A:dg:storage-<ALLOC>-ro@accounts.ad.wustl.edu:rxtncy
+A:fig:storage-<ALLOC>-ro@accounts.ad.wustl.edu:rtncy
