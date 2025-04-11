@@ -117,6 +117,7 @@ def main():
 
     # find the depth at which there are >= num_walkers subdirectories to use as parallel targets
     result = find_depth_for_target_dirs(parser.get_target_dir(), parser.get_num_walkers())
+    print(result)
 
     if result is None:
         # if there are not enough subdirectories, just process the whole thing
