@@ -33,7 +33,7 @@ class ACL_SpecBuilder:
                 with open("templates/root_spec_sub_alloc_entry_template.txt", "r") as sub_alloc_template_file:
                     sub_alloc_template = sub_alloc_template_file.read()
                     sub_alloc_spec_entry = sub_alloc_template.replace("<SUB_ALLOC>", sub_alloc_name)
-                    root_template = root_template + sub_alloc_spec_entry
+                    root_template = root_template + "\n" + sub_alloc_spec_entry
             self.root_spec = root_template.replace("<ALLOC>", alloc_name)
         
         # need a spec for the Active folder
@@ -45,7 +45,7 @@ class ACL_SpecBuilder:
                 with open("templates/active_spec_sub_alloc_entry_template.txt", "r") as sub_alloc_template_file:
                     sub_alloc_template = sub_alloc_template_file.read()
                     sub_alloc_spec_entry = sub_alloc_template.replace("<SUB_ALLOC>", sub_alloc_name)
-                    active_template = active_template + sub_alloc_spec_entry + "\n"
+                    active_template = active_template + "\n" + sub_alloc_spec_entry
             self.active_spec = active_template.replace("<ALLOC>", alloc_name)
 
         # need a spec for folders/files *OUTSIDE* sub-allocations
