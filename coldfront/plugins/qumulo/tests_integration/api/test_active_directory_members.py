@@ -1,7 +1,5 @@
-from django.test import TestCase
+from django.test import TestCase, tag
 from django.http import HttpRequest
-
-from unittest.mock import patch
 
 from coldfront.plugins.qumulo.api.active_directory_members import ActiveDirectoryMembers
 
@@ -9,6 +7,7 @@ import json
 
 
 class TestActiveDirectoryMembersGet(TestCase):
+    @tag("integration")
     def test_returns_empty_list(self):
         active_directory_api = ActiveDirectoryMembers()
 
@@ -20,6 +19,7 @@ class TestActiveDirectoryMembersGet(TestCase):
 
         self.assertEqual(content["validNames"], [])
 
+    @tag("integration")
     def test_returns_valid_names(self):
         members = ["harterj"]
         active_directory_api = ActiveDirectoryMembers()
@@ -35,6 +35,7 @@ class TestActiveDirectoryMembersGet(TestCase):
 
         self.assertListEqual(content["validNames"], members)
 
+    @tag("integration")
     def test_returns_valid_names_and_not_invalid_names(self):
         good_members = ["harterj"]
         bad_members = ["invalid_member"]
@@ -52,6 +53,7 @@ class TestActiveDirectoryMembersGet(TestCase):
 
         self.assertListEqual(content["validNames"], good_members)
 
+    @tag("integration")
     def test_returns_empty_list_with_only_invalid_names(self):
         members = ["invalid_member"]
         active_directory_api = ActiveDirectoryMembers()
