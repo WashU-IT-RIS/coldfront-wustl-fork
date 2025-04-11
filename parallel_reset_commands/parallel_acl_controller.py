@@ -102,6 +102,13 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
                         if not success:
                             error_log.write(f"{check_path}\n")
                     result_futures = []
+            for future in result_futures:
+                x = future.result()
+                print(f"Future result: {x}")
+                success, check_path = x
+                if not success:
+                    error_log.write(f"{check_path}\n")
+                result_futures = []
 
 
 def _create_error_file_name(target_dir: str, output_dir: str) -> str:
