@@ -43,6 +43,17 @@ function UserAccessManagement() {
       });
   };
 
+  const getInvalidUsers = async (users) => {
+    const response = await axios.get("/qumulo/api/active-directory-members", {
+      params: { members: users },
+    });
+
+    const validUsers = response.data.validNames;
+    const invalidUsers = users.filter((user) => !validUsers.includes(user));
+
+    return invalidUsers;
+  };
+
   return (
     <>
       <h2>User Access Management</h2>
@@ -56,12 +67,14 @@ function UserAccessManagement() {
         users={rwUsers}
         setUsers={setRwUsers}
         label={"Read/Write Users"}
+        getInvalidUsers={getInvalidUsers}
       />
       <UserSelector
         name="ro-user-selector"
         users={roUsers}
         setUsers={setRoUsers}
         label={"Read-Only Users"}
+        getInvalidUsers={getInvalidUsers}
       />
       <AllocationSelector
         setSelectedAllocations={setAllocations}
