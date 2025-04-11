@@ -116,11 +116,13 @@ def main():
         os.makedirs(parser.get_log_dir())
 
     # find the depth at which there are >= num_walkers subdirectories to use as parallel targets
-    result = find_depth_for_target_dirs(parser.get_target_dir(), parser.get_num_walkers())
-    print(result)
+    if parser.get_num_walkers() > 1:
+        result = find_depth_for_target_dirs(parser.get_target_dir(), parser.get_num_walkers())
+    else:
+        result = None
 
     if result is None:
-        # if there are not enough subdirectories, just process the whole thing
+        # if there are not enough subdirectories or you only have one walker, just process the whole thing
         print("Not enough subdirectories found for parallel processing. Processing the entire directory.")
         process_acls_recursive(
             parser.get_perform_reset(),
