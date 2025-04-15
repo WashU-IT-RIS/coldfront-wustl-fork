@@ -1821,10 +1821,9 @@ class AllocationChangeView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         
         
         
-        if (EMAIL_USER_SUPPORT != ''):
-            send_email_template('New Allocation Change Request', 'email/new_allocation_change_request.txt', 
-                                {'pi': pi, 'resource': resource, 'url': url}, 
-                                EMAIL_SENDER, [EMAIL_USER_SUPPORT])
+        send_email_template('New Allocation Change Request', 'email/new_allocation_change_request.txt', 
+                            {'pi': pi, 'resource': resource, 'url': url}, 
+                            EMAIL_SENDER, [EMAIL_USER_SUPPORT])
 
         # send_allocation_admin_email(allocation_obj,
         #                             'New Allocation Change Request',
