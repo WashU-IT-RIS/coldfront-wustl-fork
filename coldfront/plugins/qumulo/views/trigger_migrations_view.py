@@ -1,9 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import FormView
-from coldfront.plugins.qumulo.forms.TriggerMigrationsForm import TriggerMigrationsForm
-from django.contrib import messages
 from django.contrib.auth.models import User
-
+from django.contrib import messages
+from django.views.generic import FormView
 from django.urls import reverse
 
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
@@ -11,6 +9,7 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
 )
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
+from coldfront.plugins.qumulo.forms.TriggerMigrationsForm import TriggerMigrationsForm
 
 
 class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
@@ -25,7 +24,7 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             or self.request.user.has_perm("allocation.can_add_allocation")
         )
 
-    def get_reciever_email_list() -> list[str]:
+    def get_receiver_email_list() -> list[str]:
         user_support_users = User.objects.filter(groups__name="RIS_UserSupport")
         user_support_emails = [user.email for user in user_support_users if user.email]
 
@@ -35,7 +34,7 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         email_context = email_template_context()
         email_context["itsm_service_provision_name"] = itsm_service_provision_name
 
-        email_receivers = TriggerMigrationsView.get_reciever_email_list()
+        email_receivers = TriggerMigrationsView.get_receiver_email_list()
 
         send_email_template(
             subject="Metadata Migration Success",
@@ -52,7 +51,7 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         email_context["itsm_service_provision_name"] = itsm_service_provision_name
         email_context["exception_output"] = exception_output
 
-        email_receivers = TriggerMigrationsView.get_reciever_email_list()
+        email_receivers = TriggerMigrationsView.get_receiver_email_list()
 
         send_email_template(
             subject="Metadata Migration Failed",

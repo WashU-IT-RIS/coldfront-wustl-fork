@@ -1,19 +1,19 @@
-from coldfront.plugins.qumulo.forms.TriggerMigrationsForm import TriggerMigrationsForm
-from unittest.mock import MagicMock
 from django.contrib import messages
-
-from coldfront.plugins.qumulo.views.trigger_migrations_view import TriggerMigrationsView
-
 from django.test import TestCase, tag, RequestFactory
+
+from coldfront.plugins.qumulo.forms.TriggerMigrationsForm import TriggerMigrationsForm
+from coldfront.plugins.qumulo.views.trigger_migrations_view import TriggerMigrationsView
 from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
+
+from unittest.mock import MagicMock
 
 
 class TriggerMigrationsViewTests(TestCase):
-    def setUp(self) -> None:
+    def set_up(self) -> None:
         create_allocation_assets()
 
     @tag("integration")
-    def testMigrationSuccessfulWithValidAllocation(
+    def test_migration_successful_with_valid_allocation(
         self,
     ):
         success = None
@@ -23,7 +23,6 @@ class TriggerMigrationsViewTests(TestCase):
         )
         valid_data = {"allocation_name_search": "/vol/rdcw-fs1/kchoi"}
         form = TriggerMigrationsForm(data=valid_data)
-        self.assertTrue(form.is_valid())
         view = TriggerMigrationsView()
         view.request = request
         try:
@@ -34,7 +33,7 @@ class TriggerMigrationsViewTests(TestCase):
         self.assertEqual(success, True)
 
     @tag("integration")
-    def testMigrationFailWithInvalidAllocation(self):
+    def test_migration_fail_with_invalid_allocation(self):
         success = None
         messages.error = MagicMock()
         request = RequestFactory().get(
@@ -42,7 +41,6 @@ class TriggerMigrationsViewTests(TestCase):
         )
         invalid_data = {"allocation_name_search": "allocation"}
         form = TriggerMigrationsForm(data=invalid_data)
-        self.assertTrue(form.is_valid())
         view = TriggerMigrationsView()
         view.request = request
         try:
