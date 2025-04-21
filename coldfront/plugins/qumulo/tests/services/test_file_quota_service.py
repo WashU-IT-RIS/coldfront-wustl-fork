@@ -27,7 +27,6 @@ from coldfront.plugins.qumulo.services.file_quota_service import FileQuotaServic
 
 @patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
 @patch.dict(os.environ, {"ALLOCATION_LIMIT_THRESHOLD": "0.9"})
-@patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
 class TestFileQuotaService(TestCase):
 
     def setUp(self):
@@ -68,6 +67,7 @@ class TestFileQuotaService(TestCase):
         )
         return super().setUp()
 
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_get_file_system_allocations_near_limit(
         self, qumulo_api_mock: MagicMock
     ) -> None:
@@ -81,6 +81,7 @@ class TestFileQuotaService(TestCase):
             >= float(os.environ.get("ALLOCATION_LIMIT_THRESHOLD"))
             for quota in allocations_near_limit
         )
+
         self.assertEqual(
             len(self.mock_quota_allocations), 5, "Expects QUMULO to have 5 allocations"
         )
@@ -94,6 +95,7 @@ class TestFileQuotaService(TestCase):
             "Expects the result to have all allocations near or over the limit",
         )
 
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_create_email_receiver_list(self, qumulo_api_mock: MagicMock) -> None:
         qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = (
@@ -105,6 +107,7 @@ class TestFileQuotaService(TestCase):
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(email) for email in recipients))
 
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_send_email_for_allocations_near_limit(self, qumulo_api_mock: MagicMock):
         qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = (
@@ -116,6 +119,7 @@ class TestFileQuotaService(TestCase):
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(recipient) for recipient in recipients))
 
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_notify_users_with_allocations_near_limit_task(
         self, qumulo_api_mock: MagicMock
     ):
