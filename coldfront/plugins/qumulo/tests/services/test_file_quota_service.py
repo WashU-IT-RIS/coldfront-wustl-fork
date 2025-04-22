@@ -32,27 +32,27 @@ class TestFileQuotaService(TestCase):
     def setUp(self):
         create_metadata_for_testing()
         self.mock_quota_allocations = {
-            f"/storage2-dev/fs1/near_limit/": {
+            "/storage2-dev/fs1/near_limit/": {
                 "id": "42080003",
                 "limit": "38482906972160",
                 "usage": "36558761623552",
             },
-            f"/storage2-dev/fs1/over_limit/": {
+            "/storage2-dev/fs1/over_limit/": {
                 "id": "42130003",
                 "limit": "5497558138880",
                 "usage": "6497558138880",
             },
-            f"/storage2-dev/fs1/under_limit/": {
+            "/storage2-dev/fs1/under_limit/": {
                 "id": "52929567",
                 "limit": "16492674416640",
                 "usage": "997732352",
             },
-            f"/storage2-dev/fs1/just_inside_near_limit/": {
+            "/storage2-dev/fs1/just_inside_near_limit/": {
                 "id": "43010005",
                 "limit": "109951162777600",
                 "usage": "98956046499840",
             },
-            f"/storage2-dev/fs1/at_the_limit/": {
+            "/storage2-dev/fs1/at_the_limit/": {
                 "id": "42030003",
                 "limit": "38482906972160",
                 "usage": "38482906972160",
