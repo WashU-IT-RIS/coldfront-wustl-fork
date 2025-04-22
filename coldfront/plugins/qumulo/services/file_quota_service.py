@@ -51,7 +51,8 @@ class FileQuotaService:
 
     @staticmethod
     def get_limit_threshold() -> float:
-        limit_threshold = os.environ.get("ALLOCATION_LIMIT_THRESHOLD") or 0.9
+        limit_threshold = os.environ.get("ALLOCATION_NEAR_LIMIT_THRESHOLD") or 0.9
+        print(f"{float(limit_threshold)=}")
         return float(limit_threshold)
 
 

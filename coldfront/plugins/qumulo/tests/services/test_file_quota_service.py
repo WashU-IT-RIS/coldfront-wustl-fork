@@ -26,7 +26,7 @@ from coldfront.plugins.qumulo.services.file_quota_service import FileQuotaServic
 
 
 @patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
-@patch.dict(os.environ, {"ALLOCATION_LIMIT_THRESHOLD": "0.9"})
+@patch.dict(os.environ, {"ALLOCATION_NEAR_LIMIT_THRESHOLD": "0.9"})
 class TestFileQuotaService(TestCase):
 
     def setUp(self):
@@ -81,7 +81,7 @@ class TestFileQuotaService(TestCase):
 
         are_all_allocations_near_limit = all(
             int(quota["capacity_usage"]) / int(quota["limit"])
-            >= float(os.environ.get("ALLOCATION_LIMIT_THRESHOLD"))
+            >= float(os.environ.get("ALLOCATION_NEAR_LIMIT_THRESHOLD"))
             for quota in allocations_near_limit
         )
 
