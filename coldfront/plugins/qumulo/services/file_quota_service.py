@@ -39,6 +39,7 @@ class FileQuotaService:
     def get_allocation_file_quotas(filtering_by: callable) -> list:
         qumulo_api = QumuloAPI()
         quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
+        print(f"{quota_usages=}")
         file_system_allocations = list(
             filter(
                 filtering_by,
