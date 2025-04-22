@@ -46,6 +46,7 @@ class FileQuotaService:
                 quota_usages,
             )
         )
+        print(f"{file_system_allocations=}")
         return file_system_allocations
 
     @staticmethod
