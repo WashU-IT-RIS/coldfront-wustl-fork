@@ -25,7 +25,7 @@ class FileQuotaService:
         _validate_results(base_allocation_quota_usages, logger)
 
     @staticmethod
-    def get_file_system_allocations_near_limit() -> None:
+    def get_file_system_allocations_near_limit() -> list:
         filtering_by = lambda quota_usage: AclAllocations.is_base_allocation(
             quota_usage["path"]
         ) and _is_near_limit(quota_usage["capacity_usage"], quota_usage["limit"])
