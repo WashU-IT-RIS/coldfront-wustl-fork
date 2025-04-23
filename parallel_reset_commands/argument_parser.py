@@ -1,6 +1,7 @@
 import os
 
 from constants import STORAGE_2_PREFIX
+import argparse
 
 class ArgumentParser:
 
@@ -39,108 +40,71 @@ class ArgumentParser:
         return self.log_dir
     
     def retrieve_args(self):
-        print("Retrieving args")
 
-        def validate_perform_reset(value):
-            if value.lower() not in ['y', 'n']:
-                print("Invalid input. Please enter 'y' or 'n'.")
-                return False
-            return True
-        perform_reset_y_n = self._retrieve_arg('perform reset', "Perform reset? (y/n): ", validate_perform_reset)
-        self.perform_reset = (perform_reset_y_n == 'y')
+        parser = argparse.ArgumentParser(description="Parse arguments for the ArgumentParser class.")
 
-        # first, retrieve a file and confirm it exists in 
-        # a passed-in validator
-        # enter the root directory of the allocation
+        parser.add_argument("--perform_reset", type=str, required=True, choices=['y', 'n'],
+                            help="Specify whether to perform reset ('y' or 'n').")
+        parser.add_argument("--allocation_root", type=str, required=True,
+                            help=f"Specify the allocation root path. Must start with '{STORAGE_2_PREFIX}'.")
+        parser.add_argument("--target_dir", type=str, required=True,
+                            help="Specify the target directory. Must exist and be within the allocation root.")
+        parser.add_argument("--sub_allocations", type=str, default="",
+                            help="Comma-separated list of sub-allocation names. Optional.")
+        parser.add_argument("--num_walkers", type=int, required=True,
+                            help="Specify the number of walkers. Must be a positive integer.")
+        parser.add_argument("--num_workers_per_walk", type=int, required=True,
+                            help="Specify the number of workers per walk. Must be a positive integer.")
+        parser.add_argument("--log_dir", type=str, required=True,
+                            help="Specify the log directory. Can be absolute or relative.")
+
+        args = parser.parse_args()
+
+        self.perform_reset = args.perform_reset.lower() == 'y'
+
         def validate_allocation_root(value):
-            # check that there is only a single part after the prefix
-            # and that the path exists
             if not value.startswith(STORAGE_2_PREFIX):
-                print(f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'.")
-                return False
-            # check that there is only a single part after the prefix
+                raise ValueError(f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'.")
             allocation_root_name = value.replace(STORAGE_2_PREFIX, '').strip('/')
             if '/' in allocation_root_name:
-                print(f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'.")
-                return False
+                raise ValueError(f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'.")
             if not (os.path.exists(value) and os.path.isdir(value)):
-                print(f"Root path does not exist: {value}")
-                return False
-            return True
-        allocation_root = self._retrieve_arg('allocation root', "Enter the root directory of the allocation: ", validate_allocation_root)
-        # get the target directory (where to start the walk)
-        target_dir = self._retrieve_arg('target directory', "Enter the target directory: ", lambda x: os.path.exists(x) and os.path.isdir(x) and x.startswith(allocation_root))
-        
+                raise ValueError(f"Root path does not exist: {value}")
+            return value
+
+        self.allocation_root = validate_allocation_root(args.allocation_root)
+        self.allocation_name = self.allocation_root.replace(STORAGE_2_PREFIX, '').strip('/')
+
+        if not (os.path.exists(args.target_dir) and os.path.isdir(args.target_dir) and args.target_dir.startswith(self.allocation_root)):
+            raise ValueError("Invalid target directory.")
+        self.target_dir = args.target_dir
+
         def validate_sub_allocation_names(value, allocation_root):
             if value == '':
-                return True
+                return []
             sub_alloc_names = value.split(',')
-            sub_alloc_paths = []
-            for name in sub_alloc_names:
-                path = os.path.join(f"{allocation_root}/Active/", name.strip())
-                sub_alloc_paths.append(path)
-            return all(os.path.exists(path) and os.path.isdir(path) for path in sub_alloc_paths)
-        sub_allocations = self._retrieve_arg('sub-allocation names', "Enter the sub-allocation names (comma-separated): ", lambda x: validate_sub_allocation_names(x, allocation_root)).split(',')
-        if len(sub_allocations) == 1 and sub_allocations[0] == '':
-            sub_allocations = []
+            sub_alloc_paths = [os.path.join(f"{allocation_root}/Active/", name.strip()) for name in sub_alloc_names]
+            if not all(os.path.exists(path) and os.path.isdir(path) for path in sub_alloc_paths):
+                raise ValueError("Invalid sub-allocation names.")
+            return sub_alloc_names
 
-        # enter the number of walkers
-        def _validate_num_walkers(value):
-            try:
-                value = int(value)
-                if value <= 0:
-                    print("Number of walkers must be a positive integer.")
-                    return False
-                return True
-            except ValueError:
-                print("Invalid input. Please enter a valid number.")
-                return False
-        
-        num_walkers = int(self._retrieve_arg('number of walkers', "Enter the number of walkers: ", _validate_num_walkers))
-        # enter the number of workers
-        def _validate_num_workers_per_walk(value):
-            try:
-                value = int(value)
-                if value <= 0:
-                    print("Number of workers per walk must be a positive integer.")
-                    return False
-                return True
-            except ValueError:
-                print("Invalid input. Please enter a valid number.")
-                return False
-        num_workers_per_walk = int(self._retrieve_arg('number of workers per walk', "Enter the number of worker threads per walk: ", _validate_num_workers_per_walk))
+        self.sub_allocations = validate_sub_allocation_names(args.sub_allocations, self.allocation_root)
 
-        def _validate_log_dir(value):
-            if os.path.isabs(value):
-                if not os.path.exists(value):
-                    print(f"Absolute log directory does not exist: {value}")
-                    return False
-            # else the path will be built
-            return True
+        if args.num_walkers <= 0:
+            raise ValueError("Number of walkers must be a positive integer.")
+        self.num_walkers = args.num_walkers
 
-        log_dir = self._retrieve_arg('log directory', "Enter the log directory: ",_validate_log_dir)
+        if args.num_workers_per_walk <= 0:
+            raise ValueError("Number of workers per walk must be a positive integer.")
+        self.num_workers_per_walk = args.num_workers_per_walk
 
-        if os.path.isabs(log_dir):
-            self.log_dir = log_dir
+        if os.path.isabs(args.log_dir):
+            if not os.path.exists(args.log_dir):
+                raise ValueError(f"Absolute log directory does not exist: {args.log_dir}")
+            self.log_dir = args.log_dir
         else:
-            # build the log directory under wherever this script is running
-
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            self.log_dir = os.path.join(current_dir, log_dir)
+            self.log_dir = os.path.join(current_dir, args.log_dir)
         
-        self.allocation_root = allocation_root
-        self.allocation_name = allocation_root.replace(STORAGE_2_PREFIX, '').strip('/')
-        self.target_dir = target_dir
-        self.sub_allocations = sub_allocations
-        self.num_walkers = num_walkers
-        self.num_workers_per_walk = num_workers_per_walk
-
-    def _retrieve_arg(self, arg_name, prompt, validator=None):
-        while True:
-            value = input(prompt)
-            if validator and not validator(value):
-                print(f"Invalid value for {arg_name}. Please try again.")
-                continue
-            # self.args[arg_name] = value
-            break
-        return value
+        if os.listdir(self.log_dir):
+            raise ValueError(f"Log directory is not empty: {self.log_dir}")
