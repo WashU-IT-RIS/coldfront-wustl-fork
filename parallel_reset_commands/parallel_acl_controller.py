@@ -41,7 +41,7 @@ def _piece_out_acl(acl_info: str) -> Set[str]:
         acl_set.add(line.strip())
     return acl_set
 
-def check_acl(original_path, processed_path, expected_spec):
+def check_acl(original_path, processed_path, expected_spec, path_type):
     if os.path.islink(original_path):
         # links don't have ACLs
         return True
@@ -60,6 +60,7 @@ def check_acl(original_path, processed_path, expected_spec):
             logging.error(f"ACL mismatch for {processed_path}")
             logging.error(f"Expected: {expected_set}")
             logging.error(f"Actual: {result_set}")
+            logging.error(f"Path Type: {path_type}")
             return False, acl_info
         return True, acl_info
     except subprocess.CalledProcessError as e:
@@ -74,7 +75,7 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
         if perform_reset:
             reset_command = f'nfs4_setfacl -s "{spec}" {processed_path}'
             subprocess.run(reset_command, check=True, shell=True)
-        success, acl_info = check_acl(path, processed_path, spec)
+        success, acl_info = check_acl(path, processed_path, spec, path_type)
         return success, acl_info, path
     except subprocess.CalledProcessError as e:
         return False, None, path
