@@ -13,6 +13,9 @@ from typing import List, Set, Callable
 from constants import BATCH_SIZE
 import datetime
 
+import logging
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 def process_path(result):
     result = result.replace("\\", "\\\\")
     result = result.replace("@", "\\@")
@@ -54,6 +57,9 @@ def check_acl(original_path, processed_path, expected_spec):
         result_set = _piece_out_acl(acl_info)
         expected_set = _piece_out_acl(expected_spec)
         if result_set != expected_set:
+            logging.error(f"ACL mismatch for {processed_path}")
+            logging.error(f"Expected: {expected_set}")
+            logging.error(f"Actual: {result_set}")
             return False, acl_info
         return True, acl_info
     except subprocess.CalledProcessError as e:
