@@ -32,11 +32,11 @@ def walk_to_max_depth(target, max_depth):
             for entry in it:
                 file_dir_type = 'file'
                 if entry.is_dir():
+                    file_dir_type = 'directory'
                     # check if it is less than max_depth + depth_at_target
                     # if so, add to processing queue
                     if entry.path.count(os.sep) <= (max_depth + depth_at_target):
                         q.append(entry.path)
-                        file_dir_type = 'directory'
                 yield entry.path, file_dir_type
 
 def find_depth_for_target_dirs(root, sub_dir_threshold):
