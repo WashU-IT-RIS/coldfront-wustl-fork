@@ -57,14 +57,10 @@ def check_acl(original_path, processed_path, expected_spec, path_type):
         result_set = _piece_out_acl(acl_info)
         expected_set = _piece_out_acl(expected_spec)
         if result_set != expected_set:
-            logging.error(f"ACL mismatch for {processed_path}")
-            logging.error(f"Expected: {expected_set}")
-            logging.error(f"Actual: {result_set}")
-            logging.error(f"Path Type: {path_type}")
-            return False, acl_info
-        return True, acl_info
+            return False
+        return True
     except subprocess.CalledProcessError as e:
-        return False, None
+        return False
 
 def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     if os.path.islink(path):
@@ -75,10 +71,9 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
         if perform_reset:
             reset_command = f'nfs4_setfacl -s "{spec}" {processed_path}'
             subprocess.run(reset_command, check=True, shell=True)
-        success, acl_info = check_acl(path, processed_path, spec, path_type)
-        return success, acl_info, path
+        return check_acl(path, processed_path, spec, path_type), path
     except subprocess.CalledProcessError as e:
-        return False, None, path
+        return False, path
 
 
 
@@ -103,17 +98,15 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
                     batch_count += 1
                     for future in result_futures:
                         x = future.result()
-                        success, acl_info, check_path = x
+                        success, check_path = x
                         if not success:
-                            error_log.write("---------\n")
-                            error_log.write(f"{check_path} {acl_info} {builder.get_spec_by_path(process_path(path), 'directory')}\n")
+                            error_log.write(f"{check_path}\n")
                     result_futures = []
             for future in result_futures:
                 x = future.result()
-                success, acl_info, check_path = x
+                success, check_path = x
                 if not success:
-                    error_log.write("---------\n")
-                    error_log.write(f"{check_path} {acl_info} {builder.get_spec_by_path(process_path(path), 'directory')}\n")
+                    error_log.write(f"{check_path}\n")
                 result_futures = []
 
 
@@ -127,9 +120,6 @@ def main():
     # get the arguments from the user using ArgumentParser
     parser = ArgumentParser()
     parser.retrieve_args()
-    # go ahead and make a directory for the logs
-    if not os.path.exists(parser.get_log_dir()):
-        os.makedirs(parser.get_log_dir())
 
     # find the depth at which there are >= num_walkers subdirectories to use as parallel targets
     if parser.get_num_walkers() > 1:
@@ -192,6 +182,7 @@ def main():
     
     # If the consolidated error file is empty, delete it
     if os.path.exists(consolidated_error_file) and os.path.getsize(consolidated_error_file) == 0:
+        print(f"No errors found. Deleting empty consolidated error file: {consolidated_error_file}")
         os.remove(consolidated_error_file)
 
 if __name__ == "__main__":

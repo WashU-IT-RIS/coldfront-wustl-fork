@@ -98,13 +98,12 @@ class ArgumentParser:
             raise ValueError("Number of workers per walk must be a positive integer.")
         self.num_workers_per_walk = args.num_workers_per_walk
 
-        if os.path.isabs(args.log_dir):
-            if not os.path.exists(args.log_dir):
-                os.makedirs(args.log_dir)
-            self.log_dir = args.log_dir
-        else:
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            self.log_dir = os.path.join(current_dir, args.log_dir)
+        candidate_dir = args.log_dir
+        if not os.path.isabs(candidate_dir):
+            candidate_dir = os.path.join(os.getcwd(), args.log_dir)
+        if not os.path.exists(candidate_dir):
+            os.makedirs(candidate_dir)
+        self.log_dir = candidate_dir
         
         if os.listdir(self.log_dir):
             raise ValueError(f"Log directory is not empty: {self.log_dir}")
