@@ -54,10 +54,10 @@ def check_acl(original_path, processed_path, expected_spec):
         result_set = _piece_out_acl(acl_info)
         expected_set = _piece_out_acl(expected_spec)
         if result_set != expected_set:
-            return False
-        return True
+            return False, acl_info
+        return True, acl_info
     except subprocess.CalledProcessError as e:
-        return False
+        return False, None
 
 def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_SpecBuilder) -> bool:
     if os.path.islink(path):
@@ -68,9 +68,10 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
         if perform_reset:
             reset_command = f'nfs4_setfacl -s "{spec}" {processed_path}'
             subprocess.run(reset_command, check=True, shell=True)
-        return check_acl(path, processed_path, spec), path
+        success, acl_info = check_acl(path, processed_path, spec)
+        return success, acl_info, path
     except subprocess.CalledProcessError as e:
-        return False, path
+        return False, None, path
 
 
 
@@ -95,15 +96,16 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
                     batch_count += 1
                     for future in result_futures:
                         x = future.result()
-                        success, check_path = x
+                        success, acl_info, check_path = x
                         if not success:
-                            error_log.write(f"{check_path}\n")
+                            error_log.write("---------\n")
+                            error_log.write(f"{check_path} {acl_info} {builder.get_spec_by_path(process_path(path)), path_type}\n")
                     result_futures = []
             for future in result_futures:
                 x = future.result()
-                success, check_path = x
+                success, acl_info, check_path = x
                 if not success:
-                    error_log.write(f"{check_path}\n")
+                    error_log.write(f"{check_path} {acl_info} {builder.get_spec_by_path(process_path(path)), path_type}\n")
                 result_futures = []
 
 
