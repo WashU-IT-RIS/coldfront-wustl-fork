@@ -189,6 +189,10 @@ def main():
             with open(error_file_path, 'r') as ef:
                 consolidated_file.write(ef.read())
             os.remove(error_file_path)
+    
+    # If the consolidated error file is empty, delete it
+    if os.path.exists(consolidated_error_file) and os.path.getsize(consolidated_error_file) == 0:
+        os.remove(consolidated_error_file)
 
 if __name__ == "__main__":
     main()
