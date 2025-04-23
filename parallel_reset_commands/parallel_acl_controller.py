@@ -99,14 +99,14 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
                         success, acl_info, check_path = x
                         if not success:
                             error_log.write("---------\n")
-                            error_log.write(f"{check_path} {acl_info} {builder.get_spec_by_path(process_path(path)), path_type}\n")
+                            error_log.write(f"{check_path} {acl_info} {builder.get_spec_by_path(process_path(path), 'directory')}\n")
                     result_futures = []
             for future in result_futures:
                 x = future.result()
                 success, acl_info, check_path = x
                 if not success:
                     error_log.write("---------\n")
-                    error_log.write(f"{check_path} {acl_info} {builder.get_spec_by_path(process_path(path)), 'directory'}\n")
+                    error_log.write(f"{check_path} {acl_info} {builder.get_spec_by_path(process_path(path), 'directory')}\n")
                 result_futures = []
 
 
