@@ -100,7 +100,7 @@ class ArgumentParser:
 
         if os.path.isabs(args.log_dir):
             if not os.path.exists(args.log_dir):
-                raise ValueError(f"Absolute log directory does not exist: {args.log_dir}")
+                os.makedirs(args.log_dir)
             self.log_dir = args.log_dir
         else:
             current_dir = os.path.dirname(os.path.abspath(__file__))
