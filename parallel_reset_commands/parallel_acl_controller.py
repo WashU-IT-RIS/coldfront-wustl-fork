@@ -168,5 +168,17 @@ def main():
             lambda x: walk_to_max_depth(x, dir_depth)
         )
 
+    # after the processing is 100% done, we can consolidate the error logs
+    # into a single file
+    error_files = [f for f in os.listdir(parser.get_log_dir()) if f.endswith(".log")]
+    consolidated_error_file = os.path.join(parser.get_log_dir(), f"{os.path.basename(parser.get_target_dir().rstrip('/'))}_consolidated_errors.log")
+    
+    with open(consolidated_error_file, 'w') as consolidated_file:
+        for error_file in error_files:
+            error_file_path = os.path.join(parser.get_log_dir(), error_file)
+            with open(error_file_path, 'r') as ef:
+                consolidated_file.write(ef.read())
+            os.remove(error_file_path)
+
 if __name__ == "__main__":
     main()
