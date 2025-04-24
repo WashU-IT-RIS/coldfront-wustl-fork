@@ -2,6 +2,7 @@
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter",
         "editor.formatOnSave": true
+        
     },
     "[javascript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -11,6 +12,7 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true
     },
+    "black-formatter.cwd": "${workspaceFolder}",
     "black-formatter.args": [
         "['--exclude','coldfront/.*']",
         "['--include','coldfront/.*/plugins/qumulo/.*']"
