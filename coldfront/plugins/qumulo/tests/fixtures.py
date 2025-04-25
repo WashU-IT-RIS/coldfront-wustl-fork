@@ -1,6 +1,5 @@
 from typing import Tuple
-
-import factory, random
+ 
 from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import Project, ProjectAttributeType
 from coldfront.core.test_helpers.factories import (
