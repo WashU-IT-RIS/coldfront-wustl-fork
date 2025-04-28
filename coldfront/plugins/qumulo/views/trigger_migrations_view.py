@@ -16,6 +16,25 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
     template_name = "trigger_migrations.html"
     form_class = TriggerMigrationsForm
 
+    def form_valid(self, form: TriggerMigrationsForm):
+        allocation_name = form.cleaned_data["allocation_name_search"]
+        migrate_from_itsm_to_coldfront = MigrateToColdfront()
+        display_message = "Allocation metadata migrated"
+        try:
+            migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
+            messages.success(self.request, display_message)
+            TriggerMigrationsView.send_successful_metadata_migration_email(
+                allocation_name
+            )
+        except Exception as e:
+            display_message = str(e)
+            messages.error(self.request, display_message)
+            TriggerMigrationsView.send_failed_metadata_migration_email(
+                allocation_name, display_message
+            )
+
+        return super().form_valid(form)
+
     def test_func(self):
         # TODO: change superuser to reflect user support role when present in prod
         return (
@@ -65,25 +84,6 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         context = super().get_context_data(*args, **kwargs)
         context["trigger_migrations_form"] = TriggerMigrationsForm()
         return context
-
-    def form_valid(self, form: TriggerMigrationsForm):
-        allocation_name = form.cleaned_data["allocation_name_search"]
-        migrate_from_itsm_to_coldfront = MigrateToColdfront()
-        display_message = "Allocation metadata migrated"
-        try:
-            migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
-            messages.success(self.request, display_message)
-            TriggerMigrationsView.send_successful_metadata_migration_email(
-                allocation_name
-            )
-        except Exception as e:
-            display_message = str(e)
-            messages.error(self.request, display_message)
-            TriggerMigrationsView.send_failed_metadata_migration_email(
-                allocation_name, display_message
-            )
-
-        return super().form_valid(form)
 
     def get_success_url(self):
         return reverse("qumulo:trigger-migrations")
