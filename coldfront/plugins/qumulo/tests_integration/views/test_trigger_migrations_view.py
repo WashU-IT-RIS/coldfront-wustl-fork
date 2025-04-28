@@ -16,36 +16,32 @@ class TriggerMigrationsViewTests(TestCase):
     def test_migration_successful_with_valid_allocation(
         self,
     ):
-        success = None
         messages.success = MagicMock()
         request = RequestFactory().get(
             "src/coldfront.plugins.qumulo/views/trigger_migrations_view.py"
         )
         valid_data = {"allocation_name_search": "/vol/rdcw-fs1/kchoi"}
         form = TriggerMigrationsForm(data=valid_data)
+        form.is_valid()
         view = TriggerMigrationsView()
         view.request = request
         try:
             view.form_valid(form)
-            success = True
         except:
-            success = False
-        self.assertEqual(success, True)
+            self.fail("Metadata migration triggered exception")
 
     @tag("integration")
     def test_migration_fail_with_invalid_allocation(self):
-        success = None
         messages.error = MagicMock()
         request = RequestFactory().get(
             "src/coldfront.plugins.qumulo/views/trigger_migrations_view.py"
         )
         invalid_data = {"allocation_name_search": "allocation"}
         form = TriggerMigrationsForm(data=invalid_data)
+        form.is_valid()
         view = TriggerMigrationsView()
         view.request = request
         try:
             view.form_valid(form)
-            success = True
         except:
-            success = False
-        self.assertEqual(success, True)
+            self.fail("Metadata migration trigger exception")
