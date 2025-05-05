@@ -99,9 +99,9 @@ class ACL_SpecBuilder:
         allocation_root = f"{STORAGE_2_PREFIX}/{self.allocation_name}"
         allocation_root_active = f"{allocation_root}/Active"
         if os.path.samefile(allocation_root, target):
-            return self.get_root_spec()
+            return self.get_root_spec(), False
         elif os.path.samefile(allocation_root_active, target):
-            return self.get_active_spec()
+            return self.get_active_spec(), False
 
         # check if target *is* one of the sub_alloc roots
         sub_alloc_roots = []
@@ -111,14 +111,14 @@ class ACL_SpecBuilder:
 
         for sub_alloc_root, sub_alloc_name in zip(sub_alloc_roots, self.sub_alloc_names):
             if os.path.samefile(sub_alloc_root, target):
-                return self.get_sub_alloc_root_spec(sub_alloc_name)
+                return self.get_sub_alloc_root_spec(sub_alloc_name), True
             elif target.startswith(sub_alloc_root + os.sep):
                 if item_type == "directory":
-                    return self.get_sub_alloc_folder_spec(sub_alloc_name)
+                    return self.get_sub_alloc_folder_spec(sub_alloc_name), True
                 else:
-                    return self.get_sub_alloc_file_spec(sub_alloc_name)
+                    return self.get_sub_alloc_file_spec(sub_alloc_name), True
         
         if item_type == "directory":
-            return self.get_base_folder_spec()
+            return self.get_base_folder_spec(), False
         else:
-            return self.get_base_file_spec()
+            return self.get_base_file_spec(), False

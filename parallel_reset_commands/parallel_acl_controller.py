@@ -66,7 +66,10 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
     if os.path.islink(path):
         return True, path
     processed_path = process_path(path)
-    spec = builder.get_spec_by_path(path, path_type)
+    spec, is_sub_alloc_spec = builder.get_spec_by_path(path, path_type)
+    if not is_sub_alloc_spec:
+        print(f"Path: {path} - Spec: {spec}")
+        return False, path
     try:
         if perform_reset:
             reset_command = f'nfs4_setfacl -s "{spec}" {processed_path}'
