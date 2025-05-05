@@ -110,13 +110,18 @@ class ACL_SpecBuilder:
             sub_alloc_roots.append(str(path))
 
         for sub_alloc_root, sub_alloc_name in zip(sub_alloc_roots, self.sub_alloc_names):
+            print(f"Checking {sub_alloc_root} {sub_alloc_name} against {target}")
             if os.path.samefile(sub_alloc_root, target):
+                print(f"Is same file")
                 return self.get_sub_alloc_root_spec(sub_alloc_name), True
             elif target.startswith(sub_alloc_root + os.sep):
+                print("Starts with matched")
                 if item_type == "directory":
                     return self.get_sub_alloc_folder_spec(sub_alloc_name), True
                 else:
                     return self.get_sub_alloc_file_spec(sub_alloc_name), True
+            else:
+                print("Does not match")
         
         if item_type == "directory":
             return self.get_base_folder_spec(), False

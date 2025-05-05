@@ -96,7 +96,7 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
                 count += 1
                 ret = executor.submit(process_acl, perform_reset, path, path_type, builder)
                 result_futures.append(ret)
-                if len(result_futures) == BATCH_SIZE:
+                if len(result_futures) == 10:
                     # print(f"Batch count: {batch_count}")
                     batch_count += 1
                     for future in result_futures:
@@ -104,6 +104,7 @@ def process_acls_recursive(perform_reset: bool, target_directory: str, num_worke
                         if not success:
                             error_log.write(f"{check_path}\n")
                     result_futures = []
+                    return
             for future in result_futures:
                 x = future.result()
                 success, check_path = x
