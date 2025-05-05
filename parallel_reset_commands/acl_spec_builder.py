@@ -109,6 +109,7 @@ class ACL_SpecBuilder:
             path = os.path.join(f"{allocation_root}/Active/", name.strip())
             sub_alloc_roots.append(str(path))
 
+        print("Checking sub-alloc stuff")
         for sub_alloc_root, sub_alloc_name in zip(sub_alloc_roots, self.sub_alloc_names):
             print(f"Checking {sub_alloc_root} {sub_alloc_name} against {target}")
             if os.path.samefile(sub_alloc_root, target):
