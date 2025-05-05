@@ -24,7 +24,7 @@ class ACL_SpecBuilder:
     
     def build_specs(self, alloc_name: str, sub_alloc_names: List[str]):
         self.allocation_name = alloc_name
-        self.sub_allocation_names = sub_alloc_names
+        self.sub_alloc_names = sub_alloc_names
         # need a spec for the root of the allocation
         with open("templates/root_spec_template.txt", "r") as root_template_file:
             root_template = root_template_file.read()
