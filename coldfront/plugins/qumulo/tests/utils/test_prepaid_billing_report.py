@@ -197,7 +197,7 @@ class TestPrepaidBilling(TestCase):
         self.assertTrue(re.search("^Submit Internal Service Delivery(,){27}", header))
         self.assertEqual(
             hashlib.md5(header.encode("utf-8")).hexdigest(),
-            "368fd336dff3d8824ce9012799774c51",
+            "b22f8ed02a82b7527d743c0403015030",
         )
 
     def test_query_return_sql_statement(self):
