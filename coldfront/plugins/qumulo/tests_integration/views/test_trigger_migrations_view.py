@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 
 
 class TriggerMigrationsViewTests(TestCase):
-    def set_up(self) -> None:
+    def setUp(self) -> None:
         create_allocation_assets()
 
     @tag("integration")
