@@ -6,8 +6,13 @@ from coldfront.plugins.qumulo.views import (
     create_sub_allocation_view,
     allocation_table_view,
     client_list_view,
-    client_list_csv_view
+    client_list_csv_view,
+    trigger_migrations_view,
+    user_management_view,
 )
+from coldfront.plugins.qumulo.api.allocations import Allocations
+from coldfront.plugins.qumulo.api.active_directory_members import ActiveDirectoryMembers
+
 
 app_name = "qumulo"
 urlpatterns = [
@@ -36,5 +41,21 @@ urlpatterns = [
         "client-export-csv",
         client_list_csv_view.ClientListCSVView.as_view(),
         name="client-export-csv",
-    )
+    ),
+    path(
+        "trigger-migrations",
+        trigger_migrations_view.TriggerMigrationsView.as_view(),
+        name="trigger-migrations",
+    ),
+    path(
+        "allocation-admin/user-access-management",
+        user_management_view.UserAccessManagementView.as_view(),
+        name="user-access-management",
+    ),
+    path("api/allocations", Allocations.as_view(), name="getAllocations"),
+    path(
+        "api/active-directory-members",
+        ActiveDirectoryMembers.as_view(),
+        name="getActiveDirectoryMembers",
+    ),
 ]
