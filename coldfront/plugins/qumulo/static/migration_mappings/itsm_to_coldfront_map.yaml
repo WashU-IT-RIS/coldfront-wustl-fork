@@ -402,7 +402,7 @@ itsm_to_coldfront_map:
       attribute: subsidized
       type: boolean
       nulls: true
-      defaults_to: false
+      defaults_to: true
   quota:
     coldfront:
       - entity: allocation_form
