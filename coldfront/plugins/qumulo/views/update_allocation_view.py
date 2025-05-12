@@ -187,6 +187,7 @@ class UpdateAllocationView(AllocationView):
         access_keys = ["rw", "ro"]
         for key in access_keys:
             access_users = form_data[key + "_users"]
+            access_users.sort()
             self.set_access_users(key, access_users, allocation)
 
         # needed for redirect logic to work

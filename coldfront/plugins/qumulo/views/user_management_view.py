@@ -16,10 +16,8 @@ class UserAccessManagementView(LoginRequiredMixin, TemplateView):
     def post(self, request: HttpRequest, *args, **kwargs):
 
         body = json.loads(request.body.decode("utf-8"))
-        ro_users = body["roUsers"].sort()
-        #ro_users.sort()
-        rw_users = body["rwUsers"].sort()
-        #rw_users.sort()
+        ro_users = body["roUsers"]
+        rw_users = body["rwUsers"]
         allocation_ids = body["allocationIds"]
 
         allocations = Allocation.objects.filter(id__in=allocation_ids)
