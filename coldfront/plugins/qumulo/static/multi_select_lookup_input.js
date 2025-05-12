@@ -116,6 +116,7 @@ class MultiSelectLookupInput {
 
     for (const value of values) {
       this.addOption(value, this.widgetName);
+      this.sort((a, b) => a.localeCompare(b));
     }
     inputElement.value = "";
   };
