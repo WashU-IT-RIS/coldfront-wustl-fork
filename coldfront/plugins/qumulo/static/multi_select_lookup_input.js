@@ -65,6 +65,7 @@ class MultiSelectLookupInput {
     if (existingMatches === null) {
       const liElement = this.createListItemElement(value);
       this.outputListElement.appendChild(liElement);
+      this.outputListElement.sort((a, b) => a.localeCompare(b));
 
       if (updateValue) {
         this.outputElement.value = this.addValueToOutputList(
