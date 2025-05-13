@@ -81,9 +81,8 @@ class MultiSelectLookupInput {
     }
 
     const outputList = outputListStr.split(",");
-    outputList.sort((a, b) => a.localeCompare(b));
 
-    return [...outputList, value.trim()].join(",");
+    return [...outputList, value.trim()].sort((a, b) => a.localeCompare(b)).join(",");
   };
 
   createListItemElement = (value) => {
