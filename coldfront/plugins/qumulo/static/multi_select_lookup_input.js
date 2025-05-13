@@ -81,6 +81,7 @@ class MultiSelectLookupInput {
     }
 
     const outputList = outputListStr.split(",");
+    outputList.sort((a, b) => a.localeCompare(b));
 
     return [...outputList, value.trim()].join(",");
   };
@@ -116,7 +117,6 @@ class MultiSelectLookupInput {
 
     for (const value of values) {
       this.addOption(value, this.widgetName);
-      values.sort((a, b) => a.localeCompare(b));
     }
     
     inputElement.value = "";
