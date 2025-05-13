@@ -63,9 +63,13 @@ class MultiSelectLookupInput {
     );
 
     if (existingMatches === null) {
-      const liElement = this.createListItemElement(value);
-      this.outputListElement.appendChild(liElement);
-
+      const liValues = this.outputElement.value.split(",").filter(value => value.length);
+      liValues.push(value)
+      liValues.sort()
+      const liElements = liValues.map(this.createListItemElement);
+      this.outputListElement.replaceChildren(...liElements);
+      
+      console.log({liValues, liElements, outputList:this.outputListElement});
       if (updateValue) {
         this.outputElement.value = this.addValueToOutputList(
           this.outputElement.value,
