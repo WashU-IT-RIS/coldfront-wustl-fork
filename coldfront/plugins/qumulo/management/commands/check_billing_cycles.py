@@ -11,6 +11,7 @@ from coldfront.core.resource.models import Resource
 from django.db.models import OuterRef, Subquery
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 
 logger = logging.getLogger(__name__)
@@ -64,12 +65,7 @@ def calculate_prepaid_expiration(
     if bill_cycle == "prepaid" and prepaid_expiration == None:
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
         prepaid_months = int(prepaid_months)
-        prepaid_until = datetime(
-            prepaid_billing_start.year
-            + (prepaid_billing_start.month + prepaid_months - 1) // 12,
-            (prepaid_billing_start.month + prepaid_months - 1) % 12 + 1,
-            prepaid_billing_start.day,
-        )
+        prepaid_until = prepaid_billing_start + relativedelta(months=prepaid_months)
         AllocationAttribute.objects.create(
             allocation=allocation,
             allocation_attribute_type=prepaid_expiration_attribute,
