@@ -53,6 +53,7 @@ class MultiSelectLookupInput {
       : [];
 
     for (const value of initialValues) {
+      console.log("here")
       this.addOption(value, false);
     }
   };
@@ -61,21 +62,24 @@ class MultiSelectLookupInput {
     const existingMatches = document.querySelector(
       `#${this.widgetName}-output-list > li[value="${value}"]`
     );
-
+    console.log({existingMatches})
     if (existingMatches === null) {
+      //onsole.log({existingMatches})
       const liValues = this.outputElement.value.split(",").filter(value => value.length);
+      //console.log({liValues})
       liValues.push(value)
       liValues.sort()
       const liElements = liValues.map(this.createListItemElement);
       this.outputListElement.replaceChildren(...liElements);
       
-      console.log({liValues, liElements, outputList:this.outputListElement});
+      
       if (updateValue) {
         this.outputElement.value = this.addValueToOutputList(
           this.outputElement.value,
           value
         );
       }
+      console.log(this.outputElement.childElementCount);
     }
   };
 
