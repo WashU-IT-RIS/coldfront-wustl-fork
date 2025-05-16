@@ -46,6 +46,8 @@ def check_acl(original_path, processed_path, expected_spec, path_type):
     if os.path.islink(original_path):
         # links don't have ACLs
         return True
+    
+
     # NOTE: prefixing 'sudo' results in different behavior
     # even though the whole script is run as `sudo` and that
     # elevated status *should* be inherited by the spawned
@@ -67,6 +69,9 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
     if os.path.islink(path):
         return True, path
     processed_path = process_path(path)
+    if 'user-name' in path or 'user-name' in processed_path:
+        # skip the weird ones in dhs and come back later
+        return False, path
     spec = builder.get_spec_by_path(path, path_type)
     try:
         if perform_reset:
