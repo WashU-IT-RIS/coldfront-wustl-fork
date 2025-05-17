@@ -8,7 +8,7 @@ from coldfront.core.project.models import Project
 class BillingResultSet():
     def retrieve_billing_result_set(billing_cycle, begin_billing, end_billing):
         resource = Resource.objects.get(name="Storage2")
-        allocation_list = Allocation.objects.filter(resources=resource)
+        allocation_list = Allocation.objects.filter(Q(resources=resource) & Q(start_date__gte=begin_billing) & Q(end_date__lte=end_billing))
         project_ids = Allocation.objects.filter(resources=resource).values_list('project', flat=True)
         
         billing_cycle_sub_query = AllocationAttribute.objects.filter(
@@ -24,6 +24,11 @@ class BillingResultSet():
         allocation=OuterRef("pk"), allocation_attribute_type__name="billing_exempt"
         ).values("value")[:1]
         project_attribute_pi = Project.objects.filter(id__in=project_ids).values("pi_id")
+        usage_sub_query = AllocationAttribute.objects.filter(
+        allocation=OuterRef("pk"), 
+        allocation_attribute_type__name="has_usage"
+        ).values("value")[:1]
+
         
         breakpoint()
         
@@ -31,7 +36,8 @@ class BillingResultSet():
                                                    cost_center=Subquery(cost_center_sub_query), 
                                                    subsidized=Subquery(subsidized_sub_query),
                                                    billing_exempt=Subquery(billing_exempt_sub_query),
-                                                   pi=project_attribute_pi,)
+                                                   pi=project_attribute_pi,
+                                                   usage=usage_sub_query)
         breakpoint()
 
         return allocation_list
