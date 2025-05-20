@@ -5,6 +5,9 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
 )
+from coldfront.core.allocation.models import (
+    AttributeType, AllocationAttributeType, AllocationStatusChoice
+)
 
 class TestBillingResultSet(TestCase):
     def setUp(self):
@@ -30,15 +33,20 @@ class TestBillingResultSet(TestCase):
             "service_rate": "general",
         }
 
-        create_allocation(
+        new_alloc = create_allocation(
             project=self.project,
             user=self.user,
             form_data=self.default_form_data
         )
+
+        new_alloc.status = AllocationStatusChoice.objects.get(name="Active")
+        new_alloc.end_date = "2025-06-30"
+        new_alloc.start_date = "2025-03-01"
+        new_alloc.save()
 
         return super().setUp()
 
 
 
     def test_monthly(self):
-        BillingResultSet.retrieve_billing_result_set("monthly", "03/01/2025", "07/01/2025")
+        BillingResultSet.retrieve_billing_result_set("monthly", "2025-05-01 00:00:00", "2025-05-31 00:00:00")
