@@ -11,7 +11,7 @@ class BillingResultSet():
         date_format = "%Y-%m-%d %H:%M:%S"
         begin_billing_datetime = datetime.strptime(begin_billing, date_format)
         end_billing_datetime = datetime.strptime(end_billing, date_format)
-        allocation_list = Allocation.objects.filter(Q(resources__name="Storage2") & Q(start_date__lte=begin_billing_datetime) | Q(end_date__gte=end_billing_datetime))
+        allocation_list = Allocation.objects.filter(Q(resources__name="Storage2") & Q(start_date__gte=begin_billing_datetime) | Q(end_date__lte=end_billing_datetime))
         
         billing_cycle_sub_query = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"), allocation_attribute_type__name="billing_cycle",
