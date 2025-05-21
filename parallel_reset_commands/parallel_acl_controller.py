@@ -17,20 +17,22 @@ import logging
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def process_path(result):
-    result = result.replace("\\", "\\\\")
-    result = result.replace("@", "\\@")
-    result = result.replace("=", "\\=")
-    result = result.replace(";", "\\;")
-    result = result.replace("~", "\\~")
-    result = result.replace("$", "\\$")
-    result = result.replace("(", "\\(")
-    result = result.replace(")", "\\)")
-    result = result.replace("'", "\\'")
-    result = result.replace(" ", "\\ ")
-    result = result.replace("&", "\\&")
-    result = result.replace(".", "\\.")
-    result = result.replace("`", "\\`")
-    result = result.replace("|", "\\|")
+    # result = result.replace("\\", "\\\\")
+    # result = result.replace("@", "\\@")
+    # result = result.replace("=", "\\=")
+    # result = result.replace(";", "\\;")
+    # result = result.replace("~", "\\~")
+    # result = result.replace("$", "\\$")
+    # result = result.replace("(", "\\(")
+    # result = result.replace(")", "\\)")
+    # result = result.replace("'", "\\'")
+    # result = result.replace(" ", "\\ ")
+    # result = result.replace("&", "\\&")
+    # result = result.replace(".", "\\.")
+    # result = result.replace("`", "\\`")
+    # result = result.replace("|", "\\|")
+    result = result.replace("'", "'\"'\"'")
+    result = f"'{result}"
     return result
 
 def _piece_out_acl(acl_info: str) -> Set[str]:
@@ -69,9 +71,9 @@ def process_acl(perform_reset: bool, path: str, path_type: str, builder: ACL_Spe
     if os.path.islink(path):
         return True, path
     processed_path = process_path(path)
-    if 'user-name' in path or 'user-name' in processed_path:
-        # skip the weird ones in dhs and come back later
-        return False, path
+    # if 'user-name' in path or 'user-name' in processed_path:
+    #     # skip the weird ones in dhs and come back later
+    #     return False, path
     spec = builder.get_spec_by_path(path, path_type)
     try:
         if perform_reset:
