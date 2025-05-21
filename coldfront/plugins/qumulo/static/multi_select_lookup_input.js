@@ -65,6 +65,7 @@ class MultiSelectLookupInput {
       const liValues = this.outputElement.value
         .split(",")
         .filter((outputValue) => outputValue.length && outputValue !== value);
+
       liValues.push(value);
       liValues.sort();
 
