@@ -42,15 +42,15 @@ class TestBillingResultSet(TestCase):
         new_alloc.status = AllocationStatusChoice.objects.get(name="Active")
         new_alloc.end_date = "2025-06-30"
         new_alloc.start_date = "2025-03-01"
+        new_alloc.save()
         subsidized_attribute = AllocationAttributeType.objects.get(
         name="subsidized"
-    )
+        )
         AllocationAttribute.objects.create(
             allocation=new_alloc,
             allocation_attribute_type=subsidized_attribute,
-            value="Yes",
+            value="No",
         )
-        new_alloc.save()
 
         out_of_date_alloc = create_allocation(
             project=self.project,
@@ -69,6 +69,7 @@ class TestBillingResultSet(TestCase):
 
     def test_monthly(self):
         listl = BillingResultSet.retrieve_billing_result_set("monthly", "2025-04-30 00:00:00", "2025-06-01 00:00:00")
+        breakpoint()
         count = len([l for l in listl if isinstance(l, dict)])
         expected_dict = {'billing_cycle': 'monthly', 'cost_center': 'Uncle Pennybags', 'subsidized': 'Yes', 'billing_exempt': 'No', 'pi': 'test', 'usage': 0.0}
         
