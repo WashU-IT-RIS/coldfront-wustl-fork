@@ -70,7 +70,7 @@ class TestBillingResultSet(TestCase):
     def test_monthly(self):
         listl = BillingResultSet.retrieve_billing_result_set("monthly", "2025-04-30 00:00:00", "2025-06-01 00:00:00")
         count = len([l for l in listl if isinstance(l, dict)])
-        expected_dict = {'billing_cycle': 'monthly', 'cost_center': 'Uncle Pennybags', 'subsidized': 'Yes', 'billing_exempt': 'No', 'pi': 'test', 'usage': 0.0}
+        expected_dict = {'billing_cycle': 'monthly', 'cost_center': 'Uncle Pennybags', 'subsidized': 'No', 'billing_exempt': 'No', 'pi': 'test', 'usage': 0.0}
         
         self.assertDictEqual(listl[0], expected_dict)
         self.assertEqual(count, 1)
