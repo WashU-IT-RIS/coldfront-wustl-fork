@@ -32,7 +32,7 @@ def process_path(result):
     # result = result.replace("`", "\\`")
     # result = result.replace("|", "\\|")
     result = result.replace("'", "'\"'\"'")
-    result = f"'{result}"
+    result = f"'{result}'"
     return result
 
 def _piece_out_acl(acl_info: str) -> Set[str]:
