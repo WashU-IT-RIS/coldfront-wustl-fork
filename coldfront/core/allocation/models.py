@@ -68,6 +68,14 @@ class AllocationStatusChoice(TimeStampedModel):
         return (self.name,)
 
 
+class AllocationQuerySet(models.QuerySet):
+    def active_storage(self):
+        return self.filter(status__name="Active", resources__name="Storage2")
+
+    def parents(self):
+        return self.filter(parent_links=None)
+
+
 class Allocation(TimeStampedModel):
     """An allocation provides users access to a resource.
 
@@ -110,6 +118,7 @@ class Allocation(TimeStampedModel):
     description = models.CharField(max_length=512, blank=True, null=True)
     is_locked = models.BooleanField(default=False)
     is_changeable = models.BooleanField(default=False)
+    objects = AllocationQuerySet.as_manager()
     history = HistoricalRecords()
 
     def clean(self):
