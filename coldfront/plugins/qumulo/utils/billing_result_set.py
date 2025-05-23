@@ -1,4 +1,4 @@
-from django.db.models import Q, OuterRef, Subquery
+from django.db.models import OuterRef, Subquery
 from django.utils.timezone import make_aware
 
 from coldfront.core.allocation.models import Allocation, AllocationAttribute, AllocationAttributeUsage
