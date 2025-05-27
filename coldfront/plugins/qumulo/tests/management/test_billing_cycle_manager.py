@@ -238,7 +238,7 @@ class TestBillingCycleTypeUpdates(TestCase):
 
         self.assertEqual(new_billing_cycle, "monthly")
 
-    def test_prepaid_start_31_of_month(self):
+    def test_prepaid_start_last_of_month(self):
         self.prepaid_form_data["prepaid_billing_date"] = "2025-03-31"
         prepaid_allocation = create_allocation(
             self.project, self.user, self.prepaid_form_data
@@ -254,10 +254,31 @@ class TestBillingCycleTypeUpdates(TestCase):
         ).value
         date_format = "%Y-%m-%d"
 
-        print(date_string)
+        try:
+            datetime.strptime(date_string, date_format)
+        except:
+            self.fail
+
+    def test_prepaid_on_leap_year(self):
+        self.prepaid_form_data["prepaid_billing_date"] = "2024-02-29"
+        self.prepaid_form_data["prepaid_time"] = 12
+        prepaid_allocation = create_allocation(
+            self.project, self.user, self.prepaid_form_data
+        )
+        prepaid_allocation.status = AllocationStatusChoice.objects.get(name="Active")
+        prepaid_allocation.save()
+
+        check_allocation_billing_cycle_and_prepaid_exp()
+
+        date_string = AllocationAttribute.objects.get(
+            allocation=prepaid_allocation,
+            allocation_attribute_type__name="prepaid_expiration",
+        ).value
+        date_format = "%Y-%m-%d"
+        breakpoint()
 
         try:
             datetime.strptime(date_string, date_format)
         except:
-            self.fail    
+            self.fail   
 
