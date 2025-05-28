@@ -275,7 +275,6 @@ class TestBillingCycleTypeUpdates(TestCase):
             allocation_attribute_type__name="prepaid_expiration",
         ).value
         date_format = "%Y-%m-%d"
-        breakpoint()
 
         try:
             datetime.strptime(date_string, date_format)
