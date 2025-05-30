@@ -74,3 +74,4 @@ class TestBillingResultSet(TestCase):
         
         self.assertDictEqual(listl[0], expected_dict)
         self.assertEqual(count, 1)
+        

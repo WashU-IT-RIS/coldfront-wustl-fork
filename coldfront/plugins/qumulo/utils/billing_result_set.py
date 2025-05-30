@@ -39,3 +39,4 @@ class BillingResultSet():
                                                    usage=Subquery(usages_sub_query)).values('billing_cycle','cost_center','subsidized','billing_exempt','usage', 'pi')
         
         return list(allocation_list)
+    
