@@ -6,7 +6,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
 )
 from coldfront.core.allocation.models import (
-    AttributeType, AllocationAttributeType, AllocationStatusChoice, AllocationAttribute
+    AllocationAttributeType, AllocationStatusChoice, AllocationAttribute
 )
 
 class TestBillingResultSet(TestCase):
@@ -67,7 +67,7 @@ class TestBillingResultSet(TestCase):
 
 
 
-    def test_monthly(self):
+    def test_monthly_billing_cycle_result_set(self):
         listl = BillingResultSet.retrieve_billing_result_set("monthly", "2025-04-30 00:00:00", "2025-06-01 00:00:00")
         count = len([l for l in listl if isinstance(l, dict)])
         expected_dict = {'billing_cycle': 'monthly', 'cost_center': 'Uncle Pennybags', 'subsidized': 'No', 'billing_exempt': 'No', 'pi': 'test', 'usage': 0.0}
