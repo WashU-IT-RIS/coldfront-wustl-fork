@@ -99,9 +99,11 @@ class TestBillingCycleTypeUpdates(TestCase):
         prepaid_months = int(prepaid_months)
 
         prepaid_until = prepaid_billing_start + relativedelta(months=prepaid_months)
-        if prepaid_until.day == calendar.monthrange(prepaid_until.year, prepaid_until.month)[1]:
+        last_day_of_month = (prepaid_billing_start.day == calendar.monthrange(prepaid_billing_start.year, prepaid_billing_start.month)[1])
+
+        if last_day_of_month == True:
             new_day = calendar.monthrange(prepaid_until.year, prepaid_until.month)[1]
-            prepaid_until.replace(day=new_day)
+            prepaid_until = prepaid_until.replace(day=new_day)
 
         return prepaid_until
 
@@ -261,7 +263,7 @@ class TestBillingCycleTypeUpdates(TestCase):
 
     def test_prepaid_on_leap_year(self):
         self.prepaid_form_data["prepaid_billing_date"] = "2024-02-29"
-        self.prepaid_form_data["prepaid_time"] = 12
+        self.prepaid_form_data["prepaid_time"] = 1
         prepaid_allocation = create_allocation(
             self.project, self.user, self.prepaid_form_data
         )
@@ -279,5 +281,6 @@ class TestBillingCycleTypeUpdates(TestCase):
         try:
             datetime.strptime(date_string, date_format)
         except:
-            self.fail   
-
+            self.fail
+           
+        self.assertEqual(date_string,"2024-03-31 00:00:00")
