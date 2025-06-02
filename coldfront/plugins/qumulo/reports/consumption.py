@@ -40,7 +40,7 @@ def get_header() -> list:
 
 def generate_row(
     storage_filesystem_path: str, usages: QuerySet[AllocationAttributeUsage]
-) -> str:
+) -> dict:
     stats = usages.aggregate(
         days=Count(Star()),
         maximum=Max("value"),
