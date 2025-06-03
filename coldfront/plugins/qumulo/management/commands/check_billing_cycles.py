@@ -65,12 +65,11 @@ def calculate_prepaid_expiration(
     
     if bill_cycle == "prepaid" and prepaid_expiration == None:
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
-        last_day_of_month = False
         prepaid_months = int(prepaid_months)
         prepaid_until = prepaid_billing_start + relativedelta(months=prepaid_months)
-        last_day_of_month = (prepaid_billing_start.day == calendar.monthrange(prepaid_billing_start.year, prepaid_billing_start.month)[1])
+        is_last_day_of_month = (prepaid_billing_start.day == calendar.monthrange(prepaid_billing_start.year, prepaid_billing_start.month)[1])
 
-        if last_day_of_month == True:
+        if is_last_day_of_month == True:
             new_day = calendar.monthrange(prepaid_until.year, prepaid_until.month)[1]
             prepaid_until = prepaid_until.replace(day=new_day)
 
