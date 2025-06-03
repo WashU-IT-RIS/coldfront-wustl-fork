@@ -74,13 +74,9 @@ def generate_comsumption_usage_report_for(
         ).values("value")
     )
     active_allocations = (
-        Allocation.objects.filter(
-            parent_links=None,
-            allocationattribute__allocation_attribute_type__name="service_rate",
-            allocationattribute__value="consumption",
-            resources__name="Storage2",
-            status__name="Active",
-        )
+        Allocation.objects.parent()
+        .active_storage()
+        .consumption()
         .values("id")
         .annotate(storage_filesystem_path=storage_filesystem_path_sub_query)
         .order_by("storage_filesystem_path")
