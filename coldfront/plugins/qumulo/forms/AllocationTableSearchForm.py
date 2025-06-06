@@ -31,3 +31,11 @@ class AllocationTableSearchForm(forms.Form):
         initial=False,
         required=False,
     )
+
+    pi_user_name = forms.CharField(
+        label="PI WashU Key", max_length=100, required=False
+    )
+
+    file_path = forms.CharField(
+        label="File Path", max_length=100, required=False
+    )

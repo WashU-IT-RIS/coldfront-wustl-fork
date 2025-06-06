@@ -123,6 +123,11 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocations = allocations.filter(
                     project__pi__first_name__icontains=data.get("pi_first_name")
                 )
+            
+            if data.get("pi_user_name"):
+                allocations = allocations.filter(
+                    project__pi__username__icontains=data.get("pi_user_name")
+                )
 
             if data.get("status"):
                 allocations = allocations.filter(status__in=data.get("status"))
@@ -134,6 +139,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
             if data.get("itsd_ticket"):
                 allocations = allocations.filter(itsd_ticket=data.get("itsd_ticket"))
+            
+            if data.get("file_path"):
+                allocations = allocations.filter(file_path=data.get("file_path"))
 
             # for now, use a "brute force" approach to
             # group child allocs with parents
