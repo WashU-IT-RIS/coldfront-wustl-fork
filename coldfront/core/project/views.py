@@ -14,7 +14,7 @@ from django.contrib.auth.models import User
 from coldfront.core.utils.common import import_from_settings
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery
 from django.forms import formset_factory, modelformset_factory
 from django.http import (HttpResponse, HttpResponseForbidden,
                          HttpResponseRedirect)
@@ -30,7 +30,8 @@ from django.views.generic.edit import FormView
 from coldfront.core.allocation.models import (Allocation,
                                               AllocationStatusChoice,
                                               AllocationUser,
-                                              AllocationUserStatusChoice)
+                                              AllocationUserStatusChoice,
+                                              AllocationAttribute)
 from coldfront.core.allocation.signals import (allocation_activate_user,
                                                allocation_remove_user)
 from coldfront.core.grant.models import Grant
@@ -149,10 +150,13 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
         context['mailto'] = 'mailto:' + \
             ','.join([user.user.email for user in project_users])
+        fileset_path_sub_query = AllocationAttribute.objects.filter(
+            allocation=OuterRef("pk"), allocation_attribute_type__name="storage_filesystem_path"
+            ).values("value")
 
         if self.request.user.is_superuser or self.request.user.has_perm('allocation.can_view_all_allocations'):
             allocations = Allocation.objects.prefetch_related(
-                'resources').filter(project=self.object).order_by('-end_date')
+                'resources').filter(project=self.object, resources__name="Storage2").order_by('-end_date').annotate(filesystem_path = Subquery(fileset_path_sub_query))
         else:
             if self.object.status.name in ['Active', 'New', ]:
                 allocations = Allocation.objects.filter(
@@ -160,11 +164,12 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                     Q(project__projectuser__user=self.request.user) &
                     Q(project__projectuser__status__name__in=['Active', ]) &
                     Q(allocationuser__user=self.request.user) &
-                    Q(allocationuser__status__name__in=['Active', ])
-                ).distinct().order_by('-end_date')
+                    Q(allocationuser__status__name__in=['Active', ]) &
+                    Q(resources__name="Storage2")
+                ).distinct().order_by('-end_date').annotate(filesystem_path = Subquery(fileset_path_sub_query))
             else:
                 allocations = Allocation.objects.prefetch_related(
-                    'resources').filter(project=self.object)
+                    'resources').filter(project=self.object, resources__name="Storage2").annotate(filesystem_path = Subquery(fileset_path_sub_query))
 
         context['publications'] = Publication.objects.filter(
             project=self.object, status='Active').order_by('-year')
