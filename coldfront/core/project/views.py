@@ -18,6 +18,8 @@ from django.db.models import Q, OuterRef, Subquery
 from django.forms import formset_factory, modelformset_factory
 from django.http import (HttpResponse, HttpResponseForbidden,
                          HttpResponseRedirect)
+from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -190,6 +192,13 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             pass
 
         return context
+    
+    # def my_view(request):
+    #    if 'my_param' not in request.GET:
+    #        return redirect(reverse('my_view_name') + '?my_param=default')
+    #    my_param = request.GET.get('my_param')
+    #    # ... rest of your view logic ...
+    #    return render(request, 'my_template.html', {'my_param': my_param})
 
 
 class ProjectListView(LoginRequiredMixin, ListView):
@@ -201,7 +210,6 @@ class ProjectListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-
         order_by = self.request.GET.get('order_by', 'id')
         direction = self.request.GET.get('direction', 'asc')
         if order_by != "name":
@@ -210,9 +218,14 @@ class ProjectListView(LoginRequiredMixin, ListView):
             if direction == 'des':
                 direction = '-'
             order_by = direction + order_by
-
-        project_search_form = ProjectSearchForm(self.request.GET)
-
+        form_data_present = any(self.request.GET.get(field, '').strip()
+                                for field in ProjectSearchForm.base_fields
+                                )
+        if form_data_present:
+            project_search_form = ProjectSearchForm(self.request.GET)
+        else:
+            project_search_form = ProjectSearchForm(initial={'show_all_projects': True})  
+        
         if project_search_form.is_valid():
             data = project_search_form.cleaned_data
             if data.get('show_all_projects') and (self.request.user.is_superuser or self.request.user.has_perm('project.can_view_all_projects')):
@@ -244,11 +257,15 @@ class ProjectListView(LoginRequiredMixin, ListView):
                     field_of_science__description__icontains=data.get('field_of_science'))
 
         else:
-            projects = Project.objects.prefetch_related('pi', 'field_of_science', 'status',).filter(
-                Q(status__name__in=['New', 'Active', ]) &
-                Q(projectuser__user=self.request.user) &
-                Q(projectuser__status__name='Active')
-            ).order_by(order_by)
+            if (self.request.user.is_superuser or self.request.user.has_perm('project.can_view_all_projects')):
+                projects = Project.objects.prefetch_related('pi', 'field_of_science', 'status',).filter(
+                    status__name__in=['New', 'Active', ]).order_by(order_by)
+            else:
+                projects = Project.objects.prefetch_related('pi', 'field_of_science', 'status',).filter(
+                    Q(status__name__in=['New', 'Active', ]) &
+                    Q(projectuser__user=self.request.user) &
+                    Q(projectuser__status__name='Active')
+                ).order_by(order_by)
 
         return projects.distinct()
 
@@ -257,8 +274,14 @@ class ProjectListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         projects_count = self.get_queryset().count()
         context['projects_count'] = projects_count
-
-        project_search_form = ProjectSearchForm(self.request.GET)
+        form_data_present = any(self.request.GET.get(field, '').strip()
+                                for field in ProjectSearchForm.base_fields
+                                )
+        
+        if form_data_present:
+            project_search_form = ProjectSearchForm(self.request.GET)
+        else:
+            project_search_form = ProjectSearchForm(initial={'show_all_projects': True})   
         if project_search_form.is_valid():
             context['project_search_form'] = project_search_form
             data = project_search_form.cleaned_data
@@ -272,8 +295,8 @@ class ProjectListView(LoginRequiredMixin, ListView):
                         filter_parameters += '{}={}&'.format(key, value)
             context['project_search_form'] = project_search_form
         else:
-            filter_parameters = None
-            context['project_search_form'] = ProjectSearchForm()
+            filter_parameters = '{}={}&'.format('show_all_projects', 'True')
+            context['project_search_form'] = project_search_form
 
         order_by = self.request.GET.get('order_by')
         if order_by:
