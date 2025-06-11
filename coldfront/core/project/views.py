@@ -18,11 +18,9 @@ from django.db.models import Q, OuterRef, Subquery
 from django.forms import formset_factory, modelformset_factory
 from django.http import (HttpResponse, HttpResponseForbidden,
                          HttpResponseRedirect)
-from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
-from django.urls import reverse
 from coldfront.core.allocation.utils import generate_guauge_data_from_usage
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
@@ -192,13 +190,6 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             pass
 
         return context
-    
-    # def my_view(request):
-    #    if 'my_param' not in request.GET:
-    #        return redirect(reverse('my_view_name') + '?my_param=default')
-    #    my_param = request.GET.get('my_param')
-    #    # ... rest of your view logic ...
-    #    return render(request, 'my_template.html', {'my_param': my_param})
 
 
 class ProjectListView(LoginRequiredMixin, ListView):
