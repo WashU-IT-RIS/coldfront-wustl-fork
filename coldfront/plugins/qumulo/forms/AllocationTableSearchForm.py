@@ -26,16 +26,16 @@ class AllocationTableSearchForm(forms.Form):
 
     itsd_ticket = forms.CharField(label="ITSD Ticket", max_length=100, required=False)
 
-    no_grouping = forms.BooleanField(
-        label="No Grouping",
-        initial=False,
-        required=False,
-    )
-
     pi_user_name = forms.CharField(
         label="PI WashU Key", max_length=100, required=False
     )
 
     file_path = forms.CharField(
         label="File Path", max_length=100, required=False
+    )
+
+    no_grouping = forms.BooleanField(
+        label="No Grouping",
+        initial=False,
+        required=False,
     )
