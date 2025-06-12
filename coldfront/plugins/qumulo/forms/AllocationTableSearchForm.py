@@ -30,8 +30,8 @@ class AllocationTableSearchForm(forms.Form):
 
     itsd_ticket = forms.CharField(label="ITSD Ticket", max_length=100, required=False)
 
-    file_path = forms.CharField(
-        label="File Path", max_length=100, required=False
+    allocation_name = forms.CharField(
+        label="Allocation Name", max_length=100, required=False
     )
 
     no_grouping = forms.BooleanField(
