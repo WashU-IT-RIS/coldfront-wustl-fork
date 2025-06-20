@@ -104,25 +104,15 @@ def on_allocation_change_approved(sender, **kwargs):
     )
 
     try:
-        links = AllocationLinkage.objects.get(parent=kwargs["allocation_pk"])
+        allocation_link = AllocationLinkage.objects.filter(parent=kwargs["allocation_pk"])
     except AllocationLinkage.DoesNotExist:
         pass
-    if links is not None:
-        for child in links.children.all():
-            child_fs_path=child.get_attribute(name="storage_filesystem_path")
-            # child_export_path = child.get_attribute(name="storage_export_path")
-            # child_protocols = json.loads(child.get_attribute(name="storage_protocols"))
-            # child_name = child.get_attribute(name="storage_name")
-            qumulo_api.update_quota(
-                fs_path=child_fs_path,
-                limit_in_bytes=limit_in_bytes,
-            )
-            # qumulo_api.update_allocation(
-            #     protocols=child_protocols,
-            #     export_path=child_export_path,
-            #     fs_path=child_fs_path,
-            #     name=child_name,
-            #     limit_in_bytes=limit_in_bytes,
-            # )
+    
+    for child in allocation_link.children.all():
+        child_fs_path=child.get_attribute(name="storage_filesystem_path")
+        qumulo_api.update_quota(
+            fs_path=child_fs_path,
+            limit_in_bytes=limit_in_bytes,
+        )
                      
 
