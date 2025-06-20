@@ -95,7 +95,7 @@ def on_allocation_change_approved(sender, **kwargs):
     name = allocation_obj.get_attribute(name="storage_name")
     limit_in_bytes = allocation_obj.get_attribute(name="storage_quota") * (2**40)
     limit_in_tb = allocation_obj.get_attribute(name="storage_quota")
-    
+
     qumulo_api.update_allocation(
         protocols=protocols,
         export_path=export_path,
@@ -109,9 +109,8 @@ def on_allocation_change_approved(sender, **kwargs):
     except AllocationLinkage.DoesNotExist:
         pass
         
-    for link in allocation_link:
-        child = link.children.all()
-        child = child.get(allocationattribute__allocation_attribute_type__name="storage_filesystem_path")
+    children = allocation_link[0].children.all()
+    for child in children:
         child_fs_path = child.get_attribute(name="storage_filesystem_path")
         qumulo_api.update_quota(
             fs_path=child_fs_path,
