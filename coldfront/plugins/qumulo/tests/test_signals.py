@@ -136,6 +136,7 @@ class TestSignals(TestCase):
         )
 
         byte_limit = mock_get_attribute("storage_quota") * (2**40)
+        tb_limit = mock_get_attribute("storage_quota")
         qumulo_instance.update_allocation.assert_called_once_with(
             protocols=["nfs"],
             fs_path=mock_get_attribute("storage_filesystem_path"),
@@ -148,6 +149,8 @@ class TestSignals(TestCase):
                 fs_path=sub_alloc.get_attribute(name="storage_filesystem_path"),
                 limit_in_bytes=byte_limit,
             )
+        self.assertEqual(sub_alloc.get_attribute(name="storage_quota"), tb_limit)
+        
 
     def test_allocation_disable_removes_acls(
         self,
