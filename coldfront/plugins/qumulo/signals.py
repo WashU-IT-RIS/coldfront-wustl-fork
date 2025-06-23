@@ -108,18 +108,18 @@ def on_allocation_change_approved(sender, **kwargs):
         allocation_link = AllocationLinkage.objects.filter(parent=kwargs["allocation_pk"])
     except AllocationLinkage.DoesNotExist:
         pass
-        
-    children = allocation_link[0].children.all()
-    for child in children:
-        child_fs_path = child.get_attribute(name="storage_filesystem_path")
-        qumulo_api.update_quota(
-            fs_path=child_fs_path,
-            limit_in_bytes=limit_in_bytes,
-        )
-        AllocationAttribute.objects.filter(
-            allocation=child,
-            allocation_attribute_type__name="storage_quota",
-        ).update(value=limit_in_tb)
+    if allocation_link:    
+        children = allocation_link[0].children.all()
+        for child in children:
+            child_fs_path = child.get_attribute(name="storage_filesystem_path")
+            AllocationAttribute.objects.filter(
+                allocation=child,
+                allocation_attribute_type__name="storage_quota",
+            ).update(value=limit_in_tb)
+            qumulo_api.update_quota(
+                fs_path=child_fs_path,
+                limit_in_bytes=limit_in_bytes,
+            )
 
                      
 

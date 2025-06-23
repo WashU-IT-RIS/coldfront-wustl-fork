@@ -145,8 +145,30 @@ class TestSignals(TestCase):
         mock_getLogger.return_value.warn.assert_called_once_with(
             "Can't create allocation: Some attributes are missing or invalid"
         )
-
+    
     def test_allocation_change_approved_updates_allocation(
+        self,
+        mock_QumuloAPI: MagicMock,
+    ):
+        qumulo_instance = mock_QumuloAPI.return_value
+
+        allocation_change_approved.send(
+            sender=self.__class__,
+            allocation_pk=self.storage_allocation.pk,
+            allocation_change_pk=1,
+        )
+
+        byte_limit = mock_get_attribute("storage_quota") * (2**40)
+        
+        qumulo_instance.update_allocation.assert_called_once_with(
+            protocols=["nfs"],
+            fs_path=mock_get_attribute("storage_filesystem_path"),
+            export_path=mock_get_attribute("storage_export_path"),
+            name=mock_get_attribute("storage_name"),
+            limit_in_bytes=byte_limit,
+        )
+
+    def test_allocation_change_approved_updates_allocation_one_sub_alloc(
         self,
         mock_QumuloAPI: MagicMock,
     ):
