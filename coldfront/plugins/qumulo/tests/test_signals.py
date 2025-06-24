@@ -79,30 +79,6 @@ class TestSignals(TestCase):
             form_data=sub_form_data,
             parent=self.storage_allocation,
         )
-    
-    def _createSecondSubAllocation(self):
-        sub_form_data = {
-            "storage_filesystem_path": "/this/path/will/filter",
-            "storage_export_path": "bar",
-            "storage_ticket": "ITSD-54321",
-            "storage_name": "new",
-            "storage_quota": 4,
-            "protocols": ["nfs"],
-            "rw_users": ["test"],
-            "ro_users": ["test1"],
-            "cost_center": "Uncle Pennybags",
-            "billing_exempt": "No",
-            "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
-            "service_rate": "general",
-        }
-
-        return create_allocation(
-            project=self.project,
-            user=self.user,
-            form_data=sub_form_data,
-            parent=self.storage_allocation,
-        )
 
     @patch("coldfront.plugins.qumulo.signals.async_task")
     def test_allocation_activate_creates_allocation(
@@ -202,7 +178,7 @@ class TestSignals(TestCase):
         mock_QumuloAPI: MagicMock,
     ):
         sub_alloc = self._createSubAllocation()
-        sub_alloc2 = self._createSecondSubAllocation()
+        sub_alloc2 = self._createSubAllocation()
         qumulo_instance = mock_QumuloAPI.return_value
 
         allocation_change_approved.send(
