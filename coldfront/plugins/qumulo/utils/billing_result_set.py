@@ -5,6 +5,8 @@ from coldfront.core.project.models import Project
 
 class BillingResultSet():
     def retrieve_billing_result_set(billing_cycle, begin_billing, end_billing):
+        #Virtual Onsite 06/24/2025
+        # currently allocations that start or end in the middle of the month are intentionally filtered out
         allocation_list = Allocation.objects.filter(resources__name="Storage2", start_date__lte=begin_billing, end_date__gte=end_billing)
         
         billing_cycle_sub_query = AllocationAttribute.objects.filter(
