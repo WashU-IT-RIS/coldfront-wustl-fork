@@ -114,7 +114,7 @@ def on_allocation_change_approved(sender, **kwargs):
     for child in children:
         child_fs_path = child.get_attribute(name="storage_filesystem_path")
         
-        AllocationAttribute.objects.get(
+        AllocationAttribute.objects.filter(
             allocation=child,
             allocation_attribute_type__name="storage_quota",
         ).update(value=limit_in_tb)
