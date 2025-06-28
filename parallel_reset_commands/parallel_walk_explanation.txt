@@ -1,0 +1,61 @@
+/storage2/fs1/japrewitt
+/storage2/fs1/japrewitt/README
+/storage2/fs1/japrewitt/Active
+/storage2/fs1/japrewitt/Active/A
+/storage2/fs1/japrewitt/Active/A/A
+/storage2/fs1/japrewitt/Active/A/A/X
+/storage2/fs1/japrewitt/Active/A/B
+/storage2/fs1/japrewitt/Active/A/B/X
+/storage2/fs1/japrewitt/Active/B
+/storage2/fs1/japrewitt/Active/B/A
+/storage2/fs1/japrewitt/Active/B/A/X
+/storage2/fs1/japrewitt/Active/B/A/X/Y
+/storage2/fs1/japrewitt/Active/B/B
+/storage2/fs1/japrewitt/Active/B/B/X
+/storage2/fs1/japrewitt/Active/B/C
+/storage2/fs1/japrewitt/Active/C
+/storage2/fs1/japrewitt/Active/C/A
+/storage2/fs1/japrewitt/Active/C/A/X
+/storage2/fs1/japrewitt/Active/C/A/X/Y
+/storage2/fs1/japrewitt/Active/C/A/X/Y/Z
+
+0: 1 directory
+1: 3 directories
+2: 6 directories
+3: 5 directories
+4: 2 directories
+5: 1 directory
+
+if num_walkers is 2, parallelized walk will start at level 1 with:
+    /storage2/fs1/japrewitt/Active/A
+    /storage2/fs1/japrewitt/Active/B
+    /storage2/fs1/japrewitt/Active/C
+then a walk to depth 1 will happen, covering:
+    /storage2/fs1/japrewitt
+    /storage2/fs1/japrewitt/README
+    /storage2/fs1/japrewitt/Active
+    # NOTE: this repeat is deliberate as a precaution against fencepost errors 
+    # in future code updates
+    /storage2/fs1/japrewitt/Active/A
+    /storage2/fs1/japrewitt/Active/B
+    /storage2/fs1/japrewitt/Active/C
+
+if num_walkers is 4, parallelized walk will *NOT* start at level 1, but at level 2 with:
+    /storage2/fs1/japrewitt/Active/A/A
+    /storage2/fs1/japrewitt/Active/B/A
+    /storage2/fs1/japrewitt/Active/B/B
+    /storage2/fs1/japrewitt/Active/B/C
+    /storage2/fs1/japrewitt/Active/C/A
+then a walk to depth 2 will happen, covering:
+    /storage2/fs1/japrewitt
+    /storage2/fs1/japrewitt/README
+    /storage2/fs1/japrewitt/Active
+    /storage2/fs1/japrewitt/Active/A
+    /storage2/fs1/japrewitt/Active/A/A
+    /storage2/fs1/japrewitt/Active/A/B
+    /storage2/fs1/japrewitt/Active/B
+    /storage2/fs1/japrewitt/Active/B/A
+    /storage2/fs1/japrewitt/Active/B/B
+    /storage2/fs1/japrewitt/Active/B/C
+    /storage2/fs1/japrewitt/Active/C
+    /storage2/fs1/japrewitt/Active/C/A
