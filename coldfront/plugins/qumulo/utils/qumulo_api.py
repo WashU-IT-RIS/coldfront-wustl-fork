@@ -27,13 +27,11 @@ class QumuloAPI:
                 "All parameters (host, port, username, password) must be provided or none."
             )
         
-        if not host:
+        # If the parameters are not provided, use default environment variables
+        if all(arg is None for arg in args):
             host = os.environ.get("QUMULO_HOST")
-        if not port:
             port = os.environ.get("QUMULO_PORT")
-        if not username:
             username = os.environ.get("QUMULO_USER")
-        if not password:
             password = os.environ.get("QUMULO_PASS")
             
         self.rc: RestClient = RestClient(
