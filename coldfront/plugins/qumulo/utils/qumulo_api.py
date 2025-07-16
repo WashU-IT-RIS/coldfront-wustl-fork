@@ -19,11 +19,25 @@ load_dotenv(override=True)
 
 
 class QumuloAPI:
-    def __init__(self):
+    def __init__(self, host=None, port=None, username=None, password=None):
+        args = [host, port, username, password]
+        
+        if any(arg is None for arg in args) and not all(arg is None for arg in args):
+            raise ValueError(
+                "All parameters (host, port, username, password) must be provided or none."
+            )
+        
+        # If the parameters are not provided, use default environment variables
+        if all(arg is None for arg in args):
+            host = os.environ.get("QUMULO_HOST")
+            port = os.environ.get("QUMULO_PORT")
+            username = os.environ.get("QUMULO_USER")
+            password = os.environ.get("QUMULO_PASS")
+            
         self.rc: RestClient = RestClient(
-            os.environ.get("QUMULO_HOST"), os.environ.get("QUMULO_PORT")
+            host, port
         )
-        self.rc.login(os.environ.get("QUMULO_USER"), os.environ.get("QUMULO_PASS"))
+        self.rc.login(username, password)
         self.valid_protocols = list(
             map(lambda protocol: protocol[0], constants.PROTOCOL_OPTIONS)
         )
