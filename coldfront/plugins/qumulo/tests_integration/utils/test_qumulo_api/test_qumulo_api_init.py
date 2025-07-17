@@ -1,6 +1,7 @@
 from django.test import TestCase, tag
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 import os
+import json
 
 
 class TestQumuloApiInit(TestCase):
@@ -14,10 +15,11 @@ class TestQumuloApiInit(TestCase):
     # These variables should be in .env file
     @tag("integration")
     def test_logs_into_specific_server(self):
-        host = os.environ.get("QUMULO_TEST_HOST")
-        port = os.environ.get("QUMULO_TEST_PORT")
-        username = os.environ.get("QUMULO_TEST_USER")
-        password = os.environ.get("QUMULO_TEST_PASS")
+        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+        host = qumulo_info["storage_3"]["host"]
+        port = qumulo_info["storage_3"]["port"]
+        username = qumulo_info["storage_3"]["user"]
+        password = qumulo_info["storage_3"]["pass"]
 
         try:
             qumulo_api = QumuloAPI(
@@ -29,10 +31,11 @@ class TestQumuloApiInit(TestCase):
     # Used qumulo poc to set custom api values
     @tag("integration")
     def test_can_have_2_connections(self):
-        host = os.environ.get("QUMULO_TEST_HOST")
-        port = os.environ.get("QUMULO_TEST_PORT")
-        username = os.environ.get("QUMULO_TEST_USER")
-        password = os.environ.get("QUMULO_TEST_PASS")
+        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+        host = qumulo_info["storage_3"]["host"]
+        port = qumulo_info["storage_3"]["port"]
+        username = qumulo_info["storage_3"]["user"]
+        password = qumulo_info["storage_3"]["pass"]
 
         try:
             default_qumulo_api = QumuloAPI()
