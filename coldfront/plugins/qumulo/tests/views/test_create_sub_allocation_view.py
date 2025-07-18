@@ -2,7 +2,7 @@ from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
 from coldfront.core.allocation.models import Allocation
-from coldfront.core.resource.models import Resource
+from coldfront.core.resource.models import Resource, ResourceType
 from coldfront.core.allocation.models import (
     AllocationLinkage,
     AllocationAttributeType,
@@ -79,8 +79,10 @@ class AllocationViewTests(TestCase):
 
         # verifying that a new Allocation object was created
         self.assertEqual(Allocation.objects.count(), 3)
-        resource = Resource.objects.get(name="Storage2")
-        storage_allocations = Allocation.objects.filter(resources=resource)
+
+        storage_resource_type = ResourceType.objects.get(name="Storage")
+        resource = Resource.objects.filter(resource_type=storage_resource_type)
+        storage_allocations = Allocation.objects.filter(resources__in=resource)
         self.assertEqual(len(storage_allocations), 1)
 
         self.assertEqual(AllocationLinkage.objects.count(), 0)

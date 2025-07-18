@@ -12,7 +12,18 @@ class Command(BaseCommand):
             resource_type=storage_resource_type,
             parent_resource=None,
             name="Storage2",
-            description="Storage allocation via Qumulo",
+            description="Storage2 allocation via Qumulo",
+            is_available=True,
+            is_public=True,
+            is_allocatable=True,
+            requires_payment=True,
+        )
+
+        Resource.objects.get_or_create(
+            resource_type=storage_resource_type,
+            parent_resource=None,
+            name="Storage3",
+            description="Storage3 allocation via Qumulo",
             is_available=True,
             is_public=True,
             is_allocatable=True,

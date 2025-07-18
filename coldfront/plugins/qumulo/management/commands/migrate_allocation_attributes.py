@@ -3,7 +3,7 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
 )
-from coldfront.core.resource.models import Resource
+from coldfront.core.resource.models import Resource, ResourceType
 from django.core.management.base import BaseCommand
 
 from django.db.models import OuterRef, Subquery
@@ -25,8 +25,9 @@ class Command(BaseCommand):
             allocation=OuterRef("pk"), allocation_attribute_type=attribute_type
         ).values("value")[:1]
 
-        resource = Resource.objects.get(name="Storage2")
-        all_storage_2_allocations = Allocation.objects.filter(resources=resource)
+        storage_resource_type = ResourceType.objects.get(name="Storage")
+        resource = Resource.objects.filter(resource_type=storage_resource_type)
+        all_storage_2_allocations = Allocation.objects.filter(resources__in=resource)
         all_storage_2_allocations = all_storage_2_allocations.annotate(
             **{attribute_name: Subquery(attribute_sub_q)}
         )
@@ -35,5 +36,5 @@ class Command(BaseCommand):
             AllocationAttribute.objects.get_or_create(
                 allocation_attribute_type=attribute_type,
                 allocation=allocation,
-                defaults = {"value": default_value},
+                defaults={"value": default_value},
             )

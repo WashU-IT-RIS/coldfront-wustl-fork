@@ -15,7 +15,7 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationLinkage,
 )
-from coldfront.core.resource.models import Resource
+from coldfront.core.resource.models import Resource, ResourceType
 
 from django.db.models import OuterRef, Subquery
 
@@ -66,8 +66,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
         if allocation_search_form.is_valid():
             data = allocation_search_form.cleaned_data
-            resource = Resource.objects.get(name="Storage2")
-            allocations = Allocation.objects.filter(resources=resource)
+            storage_resource_type = ResourceType.objects.get(name="Storage")
+            resource = Resource.objects.filter(resource_type=storage_resource_type)
+            allocations = Allocation.objects.filter(resources__in=resource)
 
             # find type objects
             department_type = AllocationAttributeType.objects.get(
@@ -82,9 +83,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 name="storage_filesystem_path"
             )
 
-            storage_name_type = AllocationAttributeType.objects.get(
-                name="storage_name"
-            )
+            storage_name_type = AllocationAttributeType.objects.get(name="storage_name")
 
             service_rate_type = AllocationAttributeType.objects.get(name="service_rate")
 
@@ -132,7 +131,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocations = allocations.filter(
                     project__pi__first_name__icontains=data.get("pi_first_name")
                 )
-            
+
             if data.get("pi_user_name"):
                 allocations = allocations.filter(
                     project__pi__username__icontains=data.get("pi_user_name")
@@ -148,9 +147,11 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
             if data.get("itsd_ticket"):
                 allocations = allocations.filter(itsd_ticket=data.get("itsd_ticket"))
-            
+
             if data.get("allocation_name"):
-                allocations = allocations.filter(name__icontains=data.get("allocation_name"))
+                allocations = allocations.filter(
+                    name__icontains=data.get("allocation_name")
+                )
 
             # for now, use a "brute force" approach to
             # group child allocs with parents
