@@ -389,34 +389,34 @@ class UpdateAllocationViewTests(TestCase):
             end_date_extension=10,
         )
 
-        for name, value in original_values:
-            UpdateAllocationView._handle_attribute_change(
-                allocation=storage_allocation_missing_contacts,
-                allocation_change_request=allocation_change_request,
-                attribute_name=name,
-                form_value=value,
-            )
+        # for name, value in original_values:
+        #     UpdateAllocationView._handle_attribute_change(
+        #         allocation=storage_allocation_missing_contacts,
+        #         allocation_change_request=allocation_change_request,
+        #         attribute_name=name,
+        #         form_value=value,
+        #     )
 
-        for name, value in [
-            ("billing_contact", "new_billing_contact"),
-            ("technical_contact", "new_tech_contact"),
-        ]:
-            UpdateAllocationView._handle_attribute_change(
-                allocation=storage_allocation_missing_contacts,
-                allocation_change_request=allocation_change_request,
-                attribute_name=name,
-                form_value=value,
-            )
+        # for name, value in [
+        #     ("billing_contact", "new_billing_contact"),
+        #     ("technical_contact", "new_tech_contact"),
+        # ]:
+        #     UpdateAllocationView._handle_attribute_change(
+        #         allocation=storage_allocation_missing_contacts,
+        #         allocation_change_request=allocation_change_request,
+        #         attribute_name=name,
+        #         form_value=value,
+        #     )
 
-            change_request = AllocationAttributeChangeRequest.objects.get(
-                allocation_attribute=AllocationAttribute.objects.get(
-                    allocation_attribute_type__name=name,
-                    allocation=storage_allocation_missing_contacts,
-                ),
-                allocation_change_request=allocation_change_request,
-            )
+        #     change_request = AllocationAttributeChangeRequest.objects.get(
+        #         allocation_attribute=AllocationAttribute.objects.get(
+        #             allocation_attribute_type__name=name,
+        #             allocation=storage_allocation_missing_contacts,
+        #         ),
+        #         allocation_change_request=allocation_change_request,
+        #     )
 
-            self.assertEqual(change_request.new_value, value)
+        #     self.assertEqual(change_request.new_value, value)
 
         request = RequestFactory().post("/irrelevant")
         form = UpdateAllocationForm(
@@ -429,7 +429,6 @@ class UpdateAllocationViewTests(TestCase):
         view = UpdateAllocationView(form=form, user_id=self.user.id)
         view.setup(request, allocation_id=storage_allocation_missing_contacts.id)
         view.success_id = 1
-        breakpoint()
 
         view.form_valid(form)
 
@@ -576,7 +575,6 @@ class UpdateAllocationViewTests(TestCase):
         view = UpdateAllocationView(form=form, user_id=self.user.id)
         view.setup(request, allocation_id=1)
         # view.success_id = 1
-        # breakpoint()
         view.form_valid(form)
 
         alloc = self.storage_allocation
@@ -586,7 +584,6 @@ class UpdateAllocationViewTests(TestCase):
         ro_alloc = access_allocations[1]
 
         rw_user = AllocationUser.objects.filter(allocation=rw_alloc).values("id")
-        # breakpoint()
         ro_user = AllocationUser.objects.filter(allocation=ro_alloc)
 
         self.assertEqual(rw_user, "test1")

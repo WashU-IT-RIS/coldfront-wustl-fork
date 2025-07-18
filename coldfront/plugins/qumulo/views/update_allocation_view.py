@@ -142,8 +142,9 @@ class UpdateAllocationView(AllocationView):
         messages.add_message(self.request, messages.SUCCESS, self._acl_reset_message())
 
     def _identify_new_form_values(
-        allocation: Allocation, attributes_to_check, attribute_changes
+        self, allocation: Allocation, attributes_to_check, form_values
     ):
+        attribute_changes = list(zip(attributes_to_check, form_values))
         new_values = []
         for attribute_name in attributes_to_check:
             attribute, _ = AllocationAttribute.objects.get_or_create(
@@ -154,10 +155,10 @@ class UpdateAllocationView(AllocationView):
                 defaults={"value": ""},
             )
         for change in attribute_changes:
-            # storage quota needs to be compared as an integer
             current_attribute = AllocationAttribute.objects.get(
                 allocation_attribute_type__name=change[0], allocation=allocation
             )
+            # storage quota needs to be compared as an integer
             comparand = (
                 int(current_attribute.value)
                 if type(change[1]) is int
@@ -194,12 +195,9 @@ class UpdateAllocationView(AllocationView):
         # handle "storage_protocols" separately
         attributes_to_check.append("storage_protocols")
         form_values.append(json.dumps(form_data.get("protocols")))
-
-        attribute_changes = list(zip(attributes_to_check, form_values))
-        attribute_changes = UpdateAllocationView._identify_new_form_values(
-            allocation, attributes_to_check, attribute_changes
+        attribute_changes = self._identify_new_form_values(
+            allocation, attributes_to_check, form_values
         )
-
         if len(attribute_changes):
             allocation_change_request = AllocationChangeRequest.objects.create(
                 allocation=allocation,
