@@ -6,7 +6,7 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationAttributeType,
 )
-from coldfront.core.resource.models import Resource
+from coldfront.core.resource.models import Resource, ResourceType
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -62,12 +62,17 @@ def calculate_prepaid_expiration(
         name="prepaid_expiration"
     )
     logger.warn(f"Calculation prepaid expiration")
-    
+
     if bill_cycle == "prepaid" and prepaid_expiration == None:
         prepaid_billing_start = datetime.strptime(prepaid_billing_start, "%Y-%m-%d")
         prepaid_months = int(prepaid_months)
         prepaid_until = prepaid_billing_start + relativedelta(months=prepaid_months)
-        is_last_day_of_month = (prepaid_billing_start.day == calendar.monthrange(prepaid_billing_start.year, prepaid_billing_start.month)[1])
+        is_last_day_of_month = (
+            prepaid_billing_start.day
+            == calendar.monthrange(
+                prepaid_billing_start.year, prepaid_billing_start.month
+            )[1]
+        )
 
         if is_last_day_of_month == True:
             new_day = calendar.monthrange(prepaid_until.year, prepaid_until.month)[1]
@@ -95,8 +100,11 @@ def update_prepaid_exp_and_billing_cycle(allocation: Allocation):
 
 
 def check_allocation_billing_cycle_and_prepaid_exp() -> None:
-    resource = Resource.objects.get(name="Storage2")
-    allocations = Allocation.objects.filter(status__name="Active", resources=resource)
+    storage_resource_type = ResourceType.objects.get(name="Storage")
+    resource = Resource.objects.filter(resource_type=storage_resource_type)
+    allocations = Allocation.objects.filter(
+        status__name="Active", resources__in=resource
+    )
 
     prepaid_exp_sub_query = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"), allocation_attribute_type__name="prepaid_expiration"

@@ -13,7 +13,7 @@ from coldfront.core.allocation.models import (
     AllocationAttributeUsage,
     AllocationLinkage,
 )
-from coldfront.core.resource.models import Resource
+from coldfront.core.resource.models import Resource, ResourceType
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
 
@@ -91,8 +91,11 @@ def conditionally_update_storage_allocation_status(allocation: Allocation) -> No
 
 
 def conditionally_update_storage_allocation_statuses() -> None:
-    resource = Resource.objects.get(name="Storage2")
-    allocations = Allocation.objects.filter(status__name="Pending", resources=resource)
+    storage_resource_type = ResourceType.objects.get(name="Storage")
+    resource = Resource.objects.filter(resource_type=storage_resource_type)
+    allocations = Allocation.objects.filter(
+        status__name="Pending", resources__in=resource
+    )
     logger.warn(f"Checking {len(allocations)} qumulo allocations")
 
     for allocation in allocations:
