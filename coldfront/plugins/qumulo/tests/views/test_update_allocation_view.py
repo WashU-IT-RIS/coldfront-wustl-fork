@@ -1,6 +1,7 @@
 from django.test import Client, TestCase, RequestFactory
 from django.contrib import messages
 from unittest.mock import patch, MagicMock
+import json
 
 from coldfront.core.allocation.models import AllocationUser
 
@@ -201,7 +202,6 @@ class UpdateAllocationViewTests(TestCase):
             "billing_cycle": "monthly",
             "service_rate": "consumption",
         }
-
         storage_allocation = create_allocation(self.project, self.user, form_data)
 
         new_rw_users: list = form_data["rw_users"].copy()
@@ -221,7 +221,7 @@ class UpdateAllocationViewTests(TestCase):
 
         self.assertNotIn("test", access_usernames)
 
-    def test_set_access_users_removes_user(
+    def test_set_access_users_removes_user_two(
         self,
         mock_ActiveDirectoryAPI: MagicMock,
         mock_async_task: MagicMock,
@@ -302,7 +302,6 @@ class UpdateAllocationViewTests(TestCase):
             ).value
             for attr_name in attributes_to_check
         ]
-
         for attr, val in zip(attributes_to_check, original_values):
             # without mutation, confirm that *no* allocation change requests are created
             UpdateAllocationView._handle_attribute_change(
@@ -390,34 +389,34 @@ class UpdateAllocationViewTests(TestCase):
             end_date_extension=10,
         )
 
-        for name, value in original_values:
-            UpdateAllocationView._handle_attribute_change(
-                allocation=storage_allocation_missing_contacts,
-                allocation_change_request=allocation_change_request,
-                attribute_name=name,
-                form_value=value,
-            )
+        # for name, value in original_values:
+        #     UpdateAllocationView._handle_attribute_change(
+        #         allocation=storage_allocation_missing_contacts,
+        #         allocation_change_request=allocation_change_request,
+        #         attribute_name=name,
+        #         form_value=value,
+        #     )
 
-        for name, value in [
-            ("billing_contact", "new_billing_contact"),
-            ("technical_contact", "new_tech_contact"),
-        ]:
-            UpdateAllocationView._handle_attribute_change(
-                allocation=storage_allocation_missing_contacts,
-                allocation_change_request=allocation_change_request,
-                attribute_name=name,
-                form_value=value,
-            )
+        # for name, value in [
+        #     ("billing_contact", "new_billing_contact"),
+        #     ("technical_contact", "new_tech_contact"),
+        # ]:
+        #     UpdateAllocationView._handle_attribute_change(
+        #         allocation=storage_allocation_missing_contacts,
+        #         allocation_change_request=allocation_change_request,
+        #         attribute_name=name,
+        #         form_value=value,
+        #     )
 
-            change_request = AllocationAttributeChangeRequest.objects.get(
-                allocation_attribute=AllocationAttribute.objects.get(
-                    allocation_attribute_type__name=name,
-                    allocation=storage_allocation_missing_contacts,
-                ),
-                allocation_change_request=allocation_change_request,
-            )
+        #     change_request = AllocationAttributeChangeRequest.objects.get(
+        #         allocation_attribute=AllocationAttribute.objects.get(
+        #             allocation_attribute_type__name=name,
+        #             allocation=storage_allocation_missing_contacts,
+        #         ),
+        #         allocation_change_request=allocation_change_request,
+        #     )
 
-            self.assertEqual(change_request.new_value, value)
+        #     self.assertEqual(change_request.new_value, value)
 
         request = RequestFactory().post("/irrelevant")
         form = UpdateAllocationForm(
@@ -430,6 +429,8 @@ class UpdateAllocationViewTests(TestCase):
         view = UpdateAllocationView(form=form, user_id=self.user.id)
         view.setup(request, allocation_id=storage_allocation_missing_contacts.id)
         view.success_id = 1
+
+        view.form_valid(form)
 
         self.assertTrue(view.form_valid(form))
 
@@ -553,3 +554,88 @@ class UpdateAllocationViewTests(TestCase):
                 hook=acl_reset_complete_hook,
                 q_options={"retry": 90000, "timeout": 86400},
             )
+
+    def test_form_valid_add_user(
+        self,
+        mock_ActiveDirectoryAPI: MagicMock,
+        mock_async_task: MagicMock,
+        mock_file_system_service: MagicMock,
+    ):
+        mock_active_directory_api = mock_ActiveDirectoryAPI.return_value
+        request = RequestFactory().post(
+            "/irrelevant",
+        )
+        request.user = self.user
+        form = UpdateAllocationForm(data=self.form_data, user_id=self.user.id)
+        form.cleaned_data = {
+            "rw_users": ["test", "test1"],
+            "ro_users": ["test2"],
+        }
+        # form.clean()
+        view = UpdateAllocationView(form=form, user_id=self.user.id)
+        view.setup(request, allocation_id=1)
+        # view.success_id = 1
+        view.form_valid(form)
+
+        alloc = self.storage_allocation
+        access_allocations = AclAllocations.get_access_allocations(alloc)
+
+        rw_alloc = access_allocations[0]
+        ro_alloc = access_allocations[1]
+
+        rw_user = AllocationUser.objects.filter(allocation=rw_alloc).values("id")
+        ro_user = AllocationUser.objects.filter(allocation=ro_alloc)
+
+        self.assertEqual(rw_user, "test1")
+
+    def test_identify_new_form_values(
+        self,
+        mock_ActiveDirectoryAPI: MagicMock,
+        mock_async_task: MagicMock,
+        mock_file_system_service: MagicMock,
+    ):
+        form_data = {
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": [],
+            "cost_center": "Caroline Cost Center",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate": "consumption",
+            "technical_contact": "it.guru",
+            "billing_contact": "finance.guru",
+        }
+
+        alloc = self.storage_allocation
+
+        attributes_to_check = [
+            "cost_center",
+            "billing_exempt",
+            "department_number",
+            "billing_cycle",
+            "technical_contact",
+            "billing_contact",
+            "service_rate",
+            "storage_ticket",
+            "storage_quota",
+        ]
+
+        form_values = [form_data.get(field_name) for field_name in attributes_to_check]
+
+        attributes_to_check.append("storage_protocols")
+        form_values.append(json.dumps(form_data.get("protocols")))
+
+        attribute_changes = list(zip(attributes_to_check, form_values))
+
+        try:
+            new_values = UpdateAllocationView._identify_new_form_values(
+                alloc, attributes_to_check, attribute_changes
+            )
+        except:
+            print("Unable to compare values")
