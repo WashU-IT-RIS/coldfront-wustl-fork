@@ -94,8 +94,8 @@ class AllocationViewTests(TestCase):
 
         # verifying that a new sub-Allocation object was created
         self.assertEqual(Allocation.objects.count(), 6)
-        storage_allocations = Allocation.objects.filter(resources=resource)
-        self.assertEqual(len(storage_allocations), 2)
+        storage_allocations = Allocation.objects.filter(resources__in=resource)
+        self.assertEqual(storage_allocations.count(), 2)
 
         # assert that an allocationlinkage was created
         self.assertEqual(AllocationLinkage.objects.count(), 1)
