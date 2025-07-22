@@ -188,7 +188,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 if not data.get("no_grouping", False):
                     if str(allocation.pk) not in all_children:
                         # append a new item, plus any children
-                        resource_list = allocation.get_resources_as_list
                         view_list.append(
                             AllocationListItem(
                                 id=allocation.pk,
@@ -197,7 +196,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                                 pi_user_name=allocation.project.pi.username,
                                 project_id=allocation.project.pk,
                                 project_name=allocation.project.title,
-                                resource_name=resource_list[0].name,
+                                resource_name=allocation.get_resources_as_string,
                                 allocation_status=allocation.status.name,
                                 department_number=allocation.department_number,
                                 itsd_ticket=allocation.itsd_ticket,
