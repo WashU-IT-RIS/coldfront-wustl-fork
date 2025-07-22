@@ -4,7 +4,7 @@ import os, json
 
 
 class StorageControllerFactory:
-    def __init__(self, resource):
+    def __init__(self, resource: str) -> None:
         self.resource = resource
         self.qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
 
@@ -16,10 +16,13 @@ class StorageControllerFactory:
         else:
             raise ValueError(f"Unsupported resource: {self.resource}")
 
-    @staticmethod
     def create_qumulo_connection(self):
         host = self.qumulo_info[self.resource]["host"]
         port = self.qumulo_info[self.resource]["port"]
         username = self.qumulo_info[self.resource]["user"]
         password = self.qumulo_info[self.resource]["pass"]
+        # Do we need error handling here if we handle it in QumuloAPI()?
+        if not all([host, port, username, password]):
+            raise ValueError("Missing required Qumulo connection parameters")
+
         return QumuloAPI(host, port, username, password)
