@@ -92,9 +92,9 @@ def conditionally_update_storage_allocation_status(allocation: Allocation) -> No
 
 def conditionally_update_storage_allocation_statuses() -> None:
     storage_resource_type = ResourceType.objects.get(name="Storage")
-    resource = Resource.objects.filter(resource_type=storage_resource_type)
+    storage_resources = Resource.objects.filter(resource_type=storage_resource_type)
     allocations = Allocation.objects.filter(
-        status__name="Pending", resources__in=resource
+        status__name="Pending", resources__in=storage_resources
     )
     logger.warn(f"Checking {len(allocations)} qumulo allocations")
 

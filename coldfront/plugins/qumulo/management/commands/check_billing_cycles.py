@@ -101,9 +101,9 @@ def update_prepaid_exp_and_billing_cycle(allocation: Allocation):
 
 def check_allocation_billing_cycle_and_prepaid_exp() -> None:
     storage_resource_type = ResourceType.objects.get(name="Storage")
-    resource = Resource.objects.filter(resource_type=storage_resource_type)
+    storage_resources = Resource.objects.filter(resource_type=storage_resource_type)
     allocations = Allocation.objects.filter(
-        status__name="Active", resources__in=resource
+        status__name="Active", resources__in=storage_resources
     )
 
     prepaid_exp_sub_query = AllocationAttribute.objects.filter(

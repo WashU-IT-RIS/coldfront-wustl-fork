@@ -9,9 +9,11 @@ class Command(BaseCommand):
         print("Zeroing all quota usages")
 
         storage_resource_type = ResourceType.objects.get(name="Storage")
-        resource = Resource.objects.filter(resource_type=storage_resource_type)
+        storage_resources = Resource.objects.filter(resource_type=storage_resource_type)
         allocations = list(
-            Allocation.objects.filter(resources__in=[resource], status__name="Active")
+            Allocation.objects.filter(
+                resources__in=[storage_resources], status__name="Active"
+            )
         )
 
         for allocation in allocations:
