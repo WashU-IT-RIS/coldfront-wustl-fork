@@ -4,25 +4,31 @@ import os, json
 
 
 class StorageControllerFactory:
-    def __init__(self, resource: str) -> None:
-        self.resource = resource
+    def __init__(self) -> None:
         self.qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
 
-    def create_connection(self):
+    def create_connection(self, resource: str) -> QumuloAPI:
         # placeholder for now, this will allow us to expand coverage to different resource types
         qumulo_list = ["Storage2", "Storage3"]
-        if self.resource in qumulo_list:
-            return self.create_qumulo_connection()
+        if resource in qumulo_list:
+            connection_info = (
+                self.qumulo_info[resource]["host"],
+                self.qumulo_info[resource]["port"],
+                self.qumulo_info[resource]["user"],
+                self.qumulo_info[resource]["pass"],
+            )
+            return self.create_qumulo_connection(connection_info)
         else:
-            raise ValueError(f"Unsupported resource: {self.resource}")
+            raise ValueError(f"Unsupported resource: {resource}")
 
-    def create_qumulo_connection(self):
-        host = self.qumulo_info[self.resource]["host"]
-        port = self.qumulo_info[self.resource]["port"]
-        username = self.qumulo_info[self.resource]["user"]
-        password = self.qumulo_info[self.resource]["pass"]
-        # Do we need error handling here if we handle it in QumuloAPI()?
-        if not all([host, port, username, password]):
-            raise ValueError("Missing required Qumulo connection parameters")
-
-        return QumuloAPI(host, port, username, password)
+    def create_qumulo_connection(self, connection_info: tuple) -> QumuloAPI:
+        if len(connection_info) != 4:
+            raise ValueError(
+                "Connection info must contain host, port, user, and password."
+            )
+        return QumuloAPI(
+            connection_info[0],
+            connection_info[1],
+            connection_info[2],
+            connection_info[3],
+        )
