@@ -15,10 +15,10 @@ class TestQumuloAPI(TestCase):
             "coldfront.plugins.qumulo.utils.qumulo_api.RestClient"
         ) as mock_RestClient:
             qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
-            host = qumulo_info["storage_2"]["host"]
-            port = qumulo_info["storage_2"]["port"]
-            username = qumulo_info["storage_2"]["user"]
-            password = qumulo_info["storage_2"]["pass"]
+            host = qumulo_info["storage2"]["host"]
+            port = qumulo_info["storage2"]["port"]
+            username = qumulo_info["storage2"]["user"]
+            password = qumulo_info["storage2"]["pass"]
 
             mock_login = MagicMock()
             mock_RestClient.return_value.login = mock_login

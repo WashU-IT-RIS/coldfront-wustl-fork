@@ -16,10 +16,10 @@ class TestQumuloApiInit(TestCase):
     @tag("integration")
     def test_logs_into_specific_server(self):
         qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
-        host = qumulo_info["storage_3"]["host"]
-        port = qumulo_info["storage_3"]["port"]
-        username = qumulo_info["storage_3"]["user"]
-        password = qumulo_info["storage_3"]["pass"]
+        host = qumulo_info["Storage3"]["host"]
+        port = qumulo_info["Storage3"]["port"]
+        username = qumulo_info["Storage3"]["user"]
+        password = qumulo_info["Storage3"]["pass"]
 
         try:
             qumulo_api = QumuloAPI(
@@ -32,10 +32,10 @@ class TestQumuloApiInit(TestCase):
     @tag("integration")
     def test_can_have_2_connections(self):
         qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
-        host = qumulo_info["storage_3"]["host"]
-        port = qumulo_info["storage_3"]["port"]
-        username = qumulo_info["storage_3"]["user"]
-        password = qumulo_info["storage_3"]["pass"]
+        host = qumulo_info["Storage3"]["host"]
+        port = qumulo_info["Storage3"]["port"]
+        username = qumulo_info["Storage3"]["user"]
+        password = qumulo_info["Storage3"]["pass"]
 
         try:
             default_qumulo_api = QumuloAPI()

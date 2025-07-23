@@ -1,6 +1,7 @@
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 
 import os, json
+from typing import Tuple
 
 
 class StorageControllerFactory:
@@ -21,7 +22,9 @@ class StorageControllerFactory:
         else:
             raise ValueError(f"Unsupported resource: {resource}")
 
-    def create_qumulo_connection(self, connection_info: tuple) -> QumuloAPI:
+    def create_qumulo_connection(
+        self, connection_info: Tuple[str, str, str, str]
+    ) -> QumuloAPI:
         if len(connection_info) != 4:
             raise ValueError(
                 "Connection info must contain host, port, user, and password."
