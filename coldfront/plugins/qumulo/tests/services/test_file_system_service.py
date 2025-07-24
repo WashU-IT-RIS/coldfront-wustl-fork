@@ -33,28 +33,32 @@ class TestFileSystemService(TestCase):
 
         return super().setUp()
 
-    @patch("coldfront.plugins.qumulo.services.file_system_service.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_get_file_system_stats_when_api_call_successful(
-        self, qumulo_api_mock: MagicMock
+        self, mock_create_connection: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_file_system_stats.return_value = (
             self.mock_file_system_response_successful
         )
-        qumulo_api_mock.return_value = qumulo_api
+        mock_create_connection.return_value = qumulo_api
 
         actual_result = FileSystemService.get_file_system_stats()
         self.assertDictEqual(self.expected_result_successful, actual_result)
 
-    @patch("coldfront.plugins.qumulo.services.file_system_service.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_get_file_system_stats_when_api_call_unsuccessful(
-        self, qumulo_api_mock: MagicMock
+        self, mock_create_connection: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_file_system_stats.return_value = (
             self.mock_file_system_response_unsuccessful
         )
-        qumulo_api_mock.return_value = qumulo_api
+        mock_create_connection.return_value = qumulo_api
 
         actual_result = FileSystemService.get_file_system_stats()
         self.assertDictEqual(self.expected_result_unsuccessful, actual_result)
