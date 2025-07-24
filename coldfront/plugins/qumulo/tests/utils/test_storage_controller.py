@@ -20,4 +20,10 @@ class TestStorageControllerFactory(unittest.TestCase):
         factory = StorageControllerFactory()
         resource = "Storage3"
         connection = factory.create_connection(resource)
-        self.assertIsInstance(connection, QumuloAPI())
+        from coldfront.plugins.qumulo.utils.storage_controller import (
+            StorageControllerFactory,
+        )
+
+        self.assertIsInstance(
+            connection, StorageControllerFactory().create_connection("Storage2")
+        )
