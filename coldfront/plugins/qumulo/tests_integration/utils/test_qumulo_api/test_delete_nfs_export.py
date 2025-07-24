@@ -3,12 +3,13 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils import (
     create_test_export,
 )
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
 class TestDeleteNFSExport(TestCase):
     @tag("integration")
     def test_deletes_nfs_export(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
 
         export_fs_path = "/test-delete"
 

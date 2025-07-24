@@ -3,12 +3,13 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils import (
     create_test_export,
 )
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
 class TestGetFileAttributes(TestCase):
     @tag("integration")
     def test_gets_file_attributes(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         export_fs_path = "/test/test-get-file-attr"
         create_test_export(qumulo_api, export_fs_path)
 

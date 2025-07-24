@@ -1,5 +1,6 @@
 from django.test import TestCase, tag
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 import os
 import json
 
@@ -8,7 +9,7 @@ class TestQumuloApiInit(TestCase):
     @tag("integration")
     def test_logs_in_without_throwing_error(self):
         try:
-            qumulo_api = QumuloAPI()
+            qumulo_api = StorageControllerFactory().create_connection("Storage2")
         except:
             self.fail("Login failed!")
 
@@ -22,9 +23,7 @@ class TestQumuloApiInit(TestCase):
         password = qumulo_info["Storage3"]["pass"]
 
         try:
-            qumulo_api = QumuloAPI(
-                host=host, port=port, username=username, password=password
-            )
+            qumulo_api = StorageControllerFactory().create_connection("Storage3")
         except:
             self.fail("Login failed!")
 
@@ -38,14 +37,14 @@ class TestQumuloApiInit(TestCase):
         password = qumulo_info["Storage3"]["pass"]
 
         try:
-            default_qumulo_api = QumuloAPI()
+            default_qumulo_api = StorageControllerFactory().create_connection(
+                "Storage2"
+            )
         except:
             self.fail("Login failed!")
 
         try:
-            custom_qumulo_api = QumuloAPI(
-                host=host, port=port, username=username, password=password
-            )
+            custom_qumulo_api = StorageControllerFactory().create_connection("Storage3")
         except:
             self.fail("Login failed!")
 
