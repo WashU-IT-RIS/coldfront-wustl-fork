@@ -29,9 +29,4 @@ class StorageControllerFactory:
             raise ValueError(
                 "Connection info must contain host, port, user, and password."
             )
-        return QumuloAPI(
-            connection_info[0],
-            connection_info[1],
-            connection_info[2],
-            connection_info[3],
-        )
+        return QumuloAPI(connection_info)
