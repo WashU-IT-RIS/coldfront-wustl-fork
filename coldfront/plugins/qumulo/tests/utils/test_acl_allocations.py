@@ -7,6 +7,8 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 )
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
+
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -86,9 +88,11 @@ class TestAclAllocations(TestCase):
                 )
             )
 
+        mock_qumulo_api = MagicMock()
         with patch(
-            "coldfront.plugins.qumulo.utils.acl_allocations.QumuloAPI"
-        ) as mock_qumulo_api:
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection",
+            return_value=mock_qumulo_api,
+        ) as mock_create_connection:
             mock_return_data = {
                 "control": ["PRESENT"],
                 "posix_special_permissions": [],
@@ -101,21 +105,23 @@ class TestAclAllocations(TestCase):
             )
             mock_return_data["aces"].extend(extra_aces)
 
-            mock_qumulo_api.return_value.rc.fs.get_acl_v2.return_value = (
+            mock_create_connection.return_value.rc.fs.get_acl_v2.return_value = (
                 mock_return_data
             )
 
             AclAllocations.remove_acl_access(allocation=test_allocation)
 
-            mock_qumulo_api.return_value.rc.fs.set_acl_v2.assert_has_calls(calls)
+            mock_create_connection.return_value.rc.fs.set_acl_v2.assert_has_calls(calls)
 
     def test_remove_access_sets_allocation_status(self):
         test_allocation = create_allocation(self.project, self.user, self.form_data)
         acl_allocations = AclAllocations.get_access_allocations(test_allocation)
 
+        mock_qumulo_api = MagicMock()
         with patch(
-            "coldfront.plugins.qumulo.utils.acl_allocations.QumuloAPI"
-        ) as mock_qumulo_api:
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection",
+            return_value=mock_qumulo_api,
+        ) as mock_create_connection:
             mock_return_data = {
                 "control": ["PRESENT"],
                 "posix_special_permissions": [],
@@ -128,7 +134,7 @@ class TestAclAllocations(TestCase):
             )
             mock_return_data["aces"].extend(extra_aces)
 
-            mock_qumulo_api.return_value.rc.fs.get_acl_v2.return_value = (
+            mock_create_connection.return_value.rc.fs.get_acl_v2.return_value = (
                 mock_return_data
             )
 

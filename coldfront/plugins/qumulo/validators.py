@@ -13,6 +13,7 @@ from coldfront.core.allocation.models import (
 
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 from pathlib import PurePath
 from qumulo.lib import request
@@ -46,7 +47,7 @@ def validate_filesystem_path_unique(value: str):
 
     storage_root = os.environ.get("STORAGE2_PATH").strip("/")
     full_path = f"/{storage_root}/{value}"
-    qumulo_api = QumuloAPI()
+    qumulo_api = StorageControllerFactory().create_connection("Storage2")
 
     reserved_statuses = AllocationStatusChoice.objects.filter(
         name__in=["Pending", "Active", "New"]
@@ -112,7 +113,7 @@ def validate_parent_directory(value: str):
 
     storage_root = os.environ.get("STORAGE2_PATH").strip("/")
     full_path = f"/{storage_root}/{value}"
-    qumulo_api = QumuloAPI()
+    qumulo_api = StorageControllerFactory().create_connection("Storage2")
     sub_directories = full_path.strip("/").split("/")
 
     for depth in range(1, len(sub_directories), 1):

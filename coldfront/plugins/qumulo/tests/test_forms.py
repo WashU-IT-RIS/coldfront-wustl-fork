@@ -25,7 +25,9 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 class AllocationFormTests(TestCase):
     def setUp(self):
         build_data = build_models()
-        self.qumulo_patcher = patch("coldfront.plugins.qumulo.validators.QumuloAPI")
+        self.qumulo_patcher = patch(
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        )
         self.mock_qumulo_api = self.qumulo_patcher.start()
 
         self.active_directory_patcher = patch(
@@ -222,6 +224,7 @@ class AllocationFormTests(TestCase):
             "service_rate": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
+        form.is_valid()
         self.assertTrue(form.is_valid())
 
     def test_billing_cycle_required(self):

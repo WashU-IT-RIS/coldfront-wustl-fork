@@ -1,12 +1,13 @@
 from django.test import TestCase, tag
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from qumulo.commands.nfs import parse_nfs_export_restrictions
 
 
 class TestGetId(TestCase):
     @tag("integration")
     def test_gets_id(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         export_path = "/test-project"
         fs_path = "/test-other"
 

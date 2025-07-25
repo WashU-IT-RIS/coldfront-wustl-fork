@@ -1,4 +1,5 @@
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 PETABYTE_IN_BYTES = 1e15
 
@@ -7,7 +8,11 @@ class FileSystemService:
 
     @staticmethod
     def get_file_system_stats() -> dict:
-        file_system_stats = QumuloAPI().get_file_system_stats()
+        file_system_stats = (
+            StorageControllerFactory()
+            .create_connection("Storage2")
+            .get_file_system_stats()
+        )
         total_size = FileSystemService._get_size_in_pt(
             file_system_stats.get("total_size_bytes")
         )

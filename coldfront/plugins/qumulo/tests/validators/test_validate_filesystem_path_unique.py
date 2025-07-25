@@ -61,7 +61,9 @@ existing_path_mocked_response = {
 class TestValidateFilesystemPathUnique(TestCase):
     def setUp(self):
         build_models()
-        self.patcher = patch("coldfront.plugins.qumulo.validators.QumuloAPI")
+        self.patcher = patch(
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        )
         self.mock_qumulo_api = self.patcher.start()
         self.mock_get_file_attr = None
         os.environ["STORAGE2_PATH"] = TEST_STORAGE2_PATH

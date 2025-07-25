@@ -100,7 +100,11 @@ class AclAllocations:
 
     @staticmethod
     def remove_acl_access(allocation: Allocation):
-        qumulo_api = QumuloAPI()
+        from coldfront.plugins.qumulo.utils.storage_controller import (
+            StorageControllerFactory,
+        )
+
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         acl_allocations = AclAllocations.get_access_allocations(allocation)
         fs_path = allocation.get_attribute(name="storage_filesystem_path")
 
