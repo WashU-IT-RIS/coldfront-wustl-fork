@@ -22,6 +22,7 @@ class TestGetFileAttributes(TestCase):
 
         export_id = qumulo_api.get_id(protocol="nfs", export_path=export_fs_path)
         qumulo_api.delete_nfs_export(export_id)
+        qumulo_api.rc.fs.delete(export_fs_path)
 
         self.assertIn("id", file_attributes.keys())
         self.assertIn("path", file_attributes.keys())

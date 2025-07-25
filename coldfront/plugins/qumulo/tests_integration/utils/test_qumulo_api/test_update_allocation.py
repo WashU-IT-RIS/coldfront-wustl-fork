@@ -35,3 +35,4 @@ class TestUpdateAllocation(TestCase):
         self.assertIsNotNone(export_id)
 
         self.assertEquals(quota["limit"], str(new_limit_in_bytes))
+        qumulo_api.rc.fs.delete(export_fs_path)

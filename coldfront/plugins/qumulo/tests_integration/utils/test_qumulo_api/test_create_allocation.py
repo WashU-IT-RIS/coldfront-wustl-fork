@@ -19,6 +19,6 @@ class TestCreateAllocation(TestCase):
         )
 
         qumulo_api.delete_quota(fs_path)
-
         export_id = qumulo_api.get_id(protocol="nfs", export_path=export_path)
         qumulo_api.delete_nfs_export(export_id)
+        qumulo_api.rc.fs.delete(fs_path)

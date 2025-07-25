@@ -30,6 +30,7 @@ class TestUpdateNFSExport(TestCase):
 
         qumulo_api.delete_quota(export_fs_path)
         qumulo_api.delete_nfs_export(export_id)
+        qumulo_api.rc.fs.delete(export_fs_path)
 
         self.assertEqual(update_response["description"], update_description)
 

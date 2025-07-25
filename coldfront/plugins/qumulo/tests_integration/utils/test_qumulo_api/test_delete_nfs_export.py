@@ -12,12 +12,12 @@ class TestDeleteNFSExport(TestCase):
         qumulo_api = StorageControllerFactory().create_connection("Storage2")
 
         export_fs_path = "/test-delete"
-
         create_test_export(qumulo_api, export_fs_path=export_fs_path)
         export_id = qumulo_api.get_id(protocol="nfs", export_path=export_fs_path)
 
         qumulo_api.delete_quota(export_fs_path)
         qumulo_api.delete_nfs_export(export_id)
+        qumulo_api.rc.fs.delete(export_fs_path)
 
         exports = qumulo_api.list_nfs_exports()
 

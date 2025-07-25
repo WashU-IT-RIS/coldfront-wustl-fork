@@ -20,6 +20,7 @@ class TestDeleteQuota(TestCase):
         get_quotas_res = qumulo_api.rc.quota.get_all_quotas()
         export_id = qumulo_api.get_id(protocol="nfs", export_path=export_fs_path)
         qumulo_api.delete_nfs_export(export_id)
+        qumulo_api.rc.fs.delete(export_fs_path)
 
         for page in get_quotas_res:
             for quota in page["quotas"]:
