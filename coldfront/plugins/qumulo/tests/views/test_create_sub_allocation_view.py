@@ -80,8 +80,7 @@ class AllocationViewTests(TestCase):
         # verifying that a new Allocation object was created
         self.assertEqual(Allocation.objects.count(), 3)
 
-        storage_resource_type = ResourceType.objects.get(name="Storage")
-        storage_resources = Resource.objects.filter(resource_type=storage_resource_type)
+        storage_resources = Resource.objects.filter(resource_type__name="Storage")
         storage_allocations = Allocation.objects.filter(resources__in=storage_resources)
         self.assertEqual(len(storage_allocations), 1)
 

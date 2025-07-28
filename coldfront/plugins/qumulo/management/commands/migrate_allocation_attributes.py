@@ -25,14 +25,13 @@ class Command(BaseCommand):
             allocation=OuterRef("pk"), allocation_attribute_type=attribute_type
         ).values("value")[:1]
 
-        storage_resource_type = ResourceType.objects.get(name="Storage")
-        resource = Resource.objects.filter(resource_type=storage_resource_type)
-        all_storage_2_allocations = Allocation.objects.filter(resources__in=resource)
-        all_storage_2_allocations = all_storage_2_allocations.annotate(
+        resource = Resource.objects.filter(resource_type__name="Storage")
+        all_storage_allocations = Allocation.objects.filter(resources__in=resource)
+        all_storage_allocations = all_storage_allocations.annotate(
             **{attribute_name: Subquery(attribute_sub_q)}
         )
 
-        for allocation in all_storage_2_allocations:
+        for allocation in all_storage_allocations:
             AllocationAttribute.objects.get_or_create(
                 allocation_attribute_type=attribute_type,
                 allocation=allocation,

@@ -7,19 +7,17 @@ class Command(BaseCommand):
         print("Adding Storage2/Qumulo resources")
         storage_resource_type = ResourceType.objects.get(name="Storage")
         acl_resource_type, created = ResourceType.objects.get_or_create(name="ACL")
-        try:
-            Resource.objects.get_or_create(
-                resource_type=storage_resource_type,
-                parent_resource=None,
-                name="Storage2",
-                description="Storage2 allocation via Qumulo",
-                is_available=True,
-                is_public=True,
-                is_allocatable=True,
-                requires_payment=True,
-            )
-        except Resource.MultipleObjectsReturned:
-            print("Storage2 resource already exists, skipping creation.")
+
+        Resource.objects.get_or_create(
+            resource_type=storage_resource_type,
+            parent_resource=None,
+            name="Storage2",
+            description="Storage2 allocation via Qumulo",
+            is_available=True,
+            is_public=True,
+            is_allocatable=True,
+            requires_payment=True,
+        )
 
         Resource.objects.get_or_create(
             resource_type=storage_resource_type,

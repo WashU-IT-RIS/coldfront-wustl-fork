@@ -66,8 +66,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
         if allocation_search_form.is_valid():
             data = allocation_search_form.cleaned_data
-            storage_resource_type = ResourceType.objects.get(name="Storage")
-            resource = Resource.objects.filter(resource_type=storage_resource_type)
+            resource = Resource.objects.filter(resource_type__name="Storage")
             allocations = Allocation.objects.filter(resources__in=resource)
 
             # find type objects
