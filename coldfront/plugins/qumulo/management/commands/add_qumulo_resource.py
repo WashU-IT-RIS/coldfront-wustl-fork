@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        print("Adding Storage2/Qumulo resources")
+        print("Adding Storage/Qumulo resources")
         storage_resource_type = ResourceType.objects.get(name="Storage")
         acl_resource_type, created = ResourceType.objects.get_or_create(name="ACL")
         storage_resource_list = [
