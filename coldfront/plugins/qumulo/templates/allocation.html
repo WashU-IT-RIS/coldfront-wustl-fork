@@ -23,7 +23,6 @@ Create Allocation
   {% endif %}
   <form method="post" id="allocation_form">
     {% csrf_token %}
-    {{ form.project_pk }}
     {{ form | crispy }}
     {{ status_allocation }}
     <div class="d-flex justify-content-end">

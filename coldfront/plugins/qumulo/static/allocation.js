@@ -1,13 +1,13 @@
 // Initialize Select2 for project_pk field
 $(document).ready(function () {
-  onsole.log("jQuery loaded:", typeof $ !== "undefined");
+  console.log("jQuery loaded:", typeof $ !== "undefined");
   console.log("Select2 loaded:", typeof $.fn.select2 !== "undefined");
   var $dropdown = $(".select2");
   if ($dropdown.length) {
     $dropdown.select2({
-      width: "100%",
       placeholder: "Type to search and select a project",
       allowClear: true,
+      width: "100%",
       minimumInputLength: 1,
     });
   }
