@@ -23,6 +23,7 @@ Create Allocation
   {% endif %}
   <form method="post" id="allocation_form">
     {% csrf_token %}
+    {{ form.project_pk }}
     {{ form | crispy }}
     {{ status_allocation }}
     <div class="d-flex justify-content-end">
@@ -55,5 +56,7 @@ Create Allocation
 {% endblock content %}
 
 {% block javascript %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 {{ form.media }}
 {% endblock javascript%}
