@@ -21,6 +21,7 @@ from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 from qumulo.lib.request import RequestError
 
@@ -38,7 +39,7 @@ def poll_ad_group(
     acl_allocation: Allocation,
     expiration_seconds: int = SECONDS_IN_A_DAY,
 ) -> None:
-    qumulo_api = QumuloAPI()
+    qumulo_api = StorageControllerFactory.create_connection("Storage2")
 
     storage_acl_name = acl_allocation.get_attribute("storage_acl_name")
     group_dn = ActiveDirectoryAPI.generate_group_dn(storage_acl_name)
@@ -103,7 +104,7 @@ def conditionally_update_storage_allocation_statuses() -> None:
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
-    qumulo_api = QumuloAPI()
+    qumulo_api = StorageControllerFactory.create_connection("Storage2")
     quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
     base_allocation_quota_usages = list(
         filter(
@@ -366,7 +367,7 @@ class ResetAcl:
     # or dependent objects (SSL-related) "couldn't be pickled"
     def _setup_qumulo_api(self):
         if self.qumulo_api is None:
-            self.qumulo_api = QumuloAPI()
+            self.qumulo_api = StorageControllerFactory.create_connection("Storage2")
 
     def _set_directory_content_acls(self, contents):
         self._setup_qumulo_api()

@@ -50,7 +50,9 @@ import os
 from copy import deepcopy
 
 
-@patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+@patch(
+    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+)
 class TestPollAdGroup(TestCase):
     def setUp(self) -> None:
         self.client = Client()
@@ -62,7 +64,7 @@ class TestPollAdGroup(TestCase):
         return super().setUp()
 
     def test_poll_ad_group_set_status_to_active_on_success(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
 
         acl_allocation: Allocation = Allocation.objects.create(
@@ -77,7 +79,7 @@ class TestPollAdGroup(TestCase):
         self.assertEqual(acl_allocation.status.name, "Active")
 
     def test_poll_ad_group_set_status_does_nothing_on_failure(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         acl_allocation: Allocation = Allocation.objects.create(
             project=self.project,
@@ -87,7 +89,7 @@ class TestPollAdGroup(TestCase):
         )
 
         get_ad_object_mock: MagicMock = (
-            qumulo_api_mock.return_value.rc.ad.distinguished_name_to_ad_account
+            create_connection_mock.return_value.rc.ad.distinguished_name_to_ad_account
         )
         get_ad_object_mock.side_effect = [
             RequestError(status_code=404, status_message="Not found"),
@@ -98,7 +100,7 @@ class TestPollAdGroup(TestCase):
         self.assertEqual(acl_allocation.status.name, "Pending")
 
     def test_poll_ad_group_set_status_to_denied_on_expiration(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         acl_allocation: Allocation = Allocation.objects.create(
             project=self.project,
@@ -109,7 +111,7 @@ class TestPollAdGroup(TestCase):
         )
 
         get_ad_object_mock: MagicMock = (
-            qumulo_api_mock.return_value.rc.ad.distinguished_name_to_ad_account
+            create_connection_mock.return_value.rc.ad.distinguished_name_to_ad_account
         )
         get_ad_object_mock.side_effect = [
             RequestError(status_code=404, status_message="Not found"),
@@ -123,7 +125,9 @@ class TestPollAdGroup(TestCase):
         self.assertEqual(acl_allocation.status.name, "Expired")
 
 
-@patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+@patch(
+    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+)
 class TestPollAdGroups(TestCase):
     def setUp(self) -> None:
         self.client = Client()
@@ -135,7 +139,7 @@ class TestPollAdGroups(TestCase):
         return super().setUp()
 
     def test_poll_ad_groups_runs_poll_ad_group_for_each_pending_allocation(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         acl_allocation_a: Allocation = Allocation.objects.create(
             project=self.project,
