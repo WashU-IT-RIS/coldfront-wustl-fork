@@ -2,7 +2,7 @@ import logging
 import os
 import re
 import time
-from typing import Tuple
+from typing import Dict
 import urllib.parse
 import json
 import environ
@@ -22,8 +22,11 @@ load_dotenv(override=True)
 
 
 class QumuloAPI:
-    def __init__(self, connection_info: Tuple[str, str, str, str]):
-        self.host, self.port, self.username, self.password = connection_info
+    def __init__(self, connection_info: Dict[str, str]) -> None:
+        self.host = connection_info["host"]
+        self.port = connection_info["port"]
+        self.username = connection_info["user"]
+        self.password = connection_info["pass"]
         self.rc: RestClient = RestClient(self.host, self.port)
         self.rc.login(self.username, self.password)
         self.valid_protocols = list(
