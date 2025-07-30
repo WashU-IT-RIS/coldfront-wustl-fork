@@ -5,13 +5,15 @@ import logging
 import json
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.tasks import reset_allocation_acls
 
 
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationLinkage, AllocationAttribute
+    AllocationLinkage,
+    AllocationAttribute,
 )
 from coldfront.core.allocation.signals import (
     allocation_activate,
@@ -39,7 +41,7 @@ def on_allocation_save_retrieve_additional_user_data(
 @receiver(allocation_activate)
 def on_allocation_activate(sender, **kwargs):
     logger = logging.getLogger(__name__)
-    qumulo_api = QumuloAPI()
+    qumulo_api = StorageControllerFactory().create_connection("Storage2")
 
     allocation = Allocation.objects.get(pk=kwargs["allocation_pk"])
 
@@ -87,7 +89,7 @@ def on_allocation_disable(sender, **kwargs):
 
 @receiver(allocation_change_approved)
 def on_allocation_change_approved(sender, **kwargs):
-    qumulo_api = QumuloAPI()
+    qumulo_api = StorageControllerFactory().create_connection("Storage2")
     allocation_obj = Allocation.objects.get(pk=kwargs["allocation_pk"])
     fs_path = allocation_obj.get_attribute(name="storage_filesystem_path")
     export_path = allocation_obj.get_attribute(name="storage_export_path")
@@ -109,16 +111,15 @@ def on_allocation_change_approved(sender, **kwargs):
     except AllocationLinkage.DoesNotExist:
         return
 
-    
     children = allocation_link.children.all()
     for child in children:
         child_fs_path = child.get_attribute(name="storage_filesystem_path")
-        
+
         AllocationAttribute.objects.filter(
             allocation=child,
             allocation_attribute_type__name="storage_quota",
         ).update(value=limit_in_tb)
-        
+
         try:
             qumulo_api.update_quota(
                 fs_path=child_fs_path,
@@ -126,6 +127,3 @@ def on_allocation_change_approved(sender, **kwargs):
             )
         except:
             print("Quota update for {child} unsuccesful")
-
-                     
-
