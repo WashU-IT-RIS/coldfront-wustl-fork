@@ -215,13 +215,15 @@ class TestEIBBilling(TestCase):
             re.search("^\s*SELECT\s*", eib_billing.get_query(args, "monthly"))
         )
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_create_an_allocation_ingest_usage_and_generate_billing_report(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quota()
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         allocation = create_allocation(
             project=self.project,
@@ -367,13 +369,15 @@ class TestEIBBilling(TestCase):
 
         os.remove(filename)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_create_multiple_allocations_ingest_usages_generate_billing_report(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_multiple_quotas()
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         quota_service_rate_categories = mock_get_quota_service_rate_categories()
 
@@ -444,13 +448,15 @@ class TestEIBBilling(TestCase):
 
         os.remove(filename)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_create_a_suballocation_ingest_usage_and_generate_billing_report(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quota()
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         allocation = create_allocation(
             project=self.project,
