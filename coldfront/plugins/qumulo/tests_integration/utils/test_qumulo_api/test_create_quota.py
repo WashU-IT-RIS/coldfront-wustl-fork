@@ -1,5 +1,4 @@
 from django.test import TestCase, tag
-from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from qumulo.commands.nfs import parse_nfs_export_restrictions
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 

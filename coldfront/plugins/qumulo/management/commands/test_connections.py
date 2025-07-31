@@ -17,8 +17,8 @@ class Command(BaseCommand):
         print(f"Pod connects to Storage: {request_res.status_code == 200}")
         print(request_res.json())
 
-        rc = RestClient(storage_host, qumulo_info["storage_3"]["port"])
-        rc.login(qumulo_info["storage_3"]["user"], qumulo_info["storage_3"]["pass"])
+        rc = RestClient(storage_host, qumulo_info["storage_2"]["port"])
+        rc.login(qumulo_info["storage_2"]["user"], qumulo_info["storage_2"]["pass"])
 
         serverName = os.environ.get("AD_SERVER_NAME")
         adUser = os.environ.get("AD_USERNAME")
