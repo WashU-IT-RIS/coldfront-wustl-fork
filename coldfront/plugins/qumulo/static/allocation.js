@@ -1,8 +1,6 @@
 // Initialize Select2 for project_pk field
 $(document).ready(function () {
-  console.log("jQuery loaded:", typeof $ !== "undefined");
-  console.log("Select2 loaded:", typeof $.fn.select2 !== "undefined");
-  var $dropdown = $(".select2");
+  const $dropdown = $(".select2");
   if ($dropdown.length) {
     $dropdown.select2({
       placeholder: "Type to search and select a project",
