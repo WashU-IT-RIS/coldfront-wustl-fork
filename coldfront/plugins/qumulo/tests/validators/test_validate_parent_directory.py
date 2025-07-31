@@ -29,7 +29,7 @@ mock_response = {
 class TestValidateParentDirectory(TestCase):
     def setUp(self):
         self.patcher = patch(
-            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
         )
         self.mock_qumulo_api = self.patcher.start()
 

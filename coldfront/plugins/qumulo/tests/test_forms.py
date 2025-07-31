@@ -26,7 +26,7 @@ class AllocationFormTests(TestCase):
     def setUp(self):
         build_data = build_models()
         self.qumulo_patcher = patch(
-            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
         )
         self.mock_qumulo_api = self.qumulo_patcher.start()
 

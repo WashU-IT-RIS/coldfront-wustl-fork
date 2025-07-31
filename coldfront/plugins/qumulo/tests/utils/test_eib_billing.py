@@ -216,7 +216,7 @@ class TestEIBBilling(TestCase):
         )
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
     )
     def test_create_an_allocation_ingest_usage_and_generate_billing_report(
         self, create_connection_mock: MagicMock
@@ -370,7 +370,7 @@ class TestEIBBilling(TestCase):
         os.remove(filename)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
     )
     def test_create_multiple_allocations_ingest_usages_generate_billing_report(
         self, create_connection_mock: MagicMock
@@ -449,7 +449,7 @@ class TestEIBBilling(TestCase):
         os.remove(filename)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
     )
     def test_create_a_suballocation_ingest_usage_and_generate_billing_report(
         self, create_connection_mock: MagicMock

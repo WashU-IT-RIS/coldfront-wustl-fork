@@ -90,7 +90,7 @@ class TestAclAllocations(TestCase):
 
         mock_qumulo_api = MagicMock()
         with patch(
-            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection",
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection",
             return_value=mock_qumulo_api,
         ) as mock_create_connection:
             mock_return_data = {
@@ -119,7 +119,7 @@ class TestAclAllocations(TestCase):
 
         mock_qumulo_api = MagicMock()
         with patch(
-            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection",
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection",
             return_value=mock_qumulo_api,
         ) as mock_create_connection:
             mock_return_data = {
