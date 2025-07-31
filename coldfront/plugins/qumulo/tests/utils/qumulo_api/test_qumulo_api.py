@@ -45,27 +45,3 @@ class TestQumuloAPI(TestCase):
 
             mock_RestClient.assert_called_once_with(host, port)
             mock_login.assert_called_once_with(username, password)
-
-    # Do we still need this test? I don't think it's necessary anymore since we are pretty protected from partial args
-
-    # def test_api_throws_exception_on_partial_arguments(self):
-    #     custom_host = "custom_host"
-    #     custom_port = "custom_port"
-    #     custom_username = "custom_user"
-    #     custom_password = "custom_pass"
-
-    #     with self.assertRaises(ValueError):
-    #         StorageControllerFactory().create_connection("Storage2")
-
-    #     with self.assertRaises(ValueError):
-    #         QumuloAPI(host=custom_host, port=custom_port, password=custom_password)
-
-    #     with self.assertRaises(ValueError):
-    #         QumuloAPI(
-    #             host=custom_host, username=custom_username, password=custom_password
-    #         )
-
-    #     with self.assertRaises(ValueError):
-    #         QumuloAPI(
-    #             port=custom_port, username=custom_username, password=custom_password
-    #         )
