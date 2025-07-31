@@ -1,5 +1,6 @@
 from django.test import TestCase, tag
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils import (
     create_test_export,
 )
@@ -8,7 +9,7 @@ from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils impo
 class TestUpdateNFSExport(TestCase):
     @tag("integration")
     def test_updates_an_export_description(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         description = "test-test_update_project-active"
         export_fs_path = "/test/test-update-description"
         create_test_export(
@@ -29,12 +30,13 @@ class TestUpdateNFSExport(TestCase):
 
         qumulo_api.delete_quota(export_fs_path)
         qumulo_api.delete_nfs_export(export_id)
+        qumulo_api.rc.fs.delete(export_fs_path)
 
         self.assertEqual(update_response["description"], update_description)
 
     @tag("integration")
     def test_updates_paths(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
 
         export_fs_path = "/test/test-update-project"
         create_test_export(qumulo_api, export_fs_path)

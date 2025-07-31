@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import time
+from typing import Dict
 import urllib.parse
 import json
 import environ
@@ -21,24 +22,13 @@ load_dotenv(override=True)
 
 
 class QumuloAPI:
-    def __init__(self, host=None, port=None, username=None, password=None):
-        args = [host, port, username, password]
-
-        if any(arg is None for arg in args) and not all(arg is None for arg in args):
-            raise ValueError(
-                "All parameters (host, port, username, password) must be provided or none."
-            )
-
-        # If the parameters are not provided, use default environment variables
-        if all(arg is None for arg in args):
-            qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
-            host = qumulo_info["storage_2"]["host"]
-            port = qumulo_info["storage_2"]["port"]
-            username = qumulo_info["storage_2"]["user"]
-            password = qumulo_info["storage_2"]["pass"]
-
-        self.rc: RestClient = RestClient(host, port)
-        self.rc.login(username, password)
+    def __init__(self, connection_info: Dict[str, str]) -> None:
+        self.host = connection_info["host"]
+        self.port = connection_info["port"]
+        self.username = connection_info["user"]
+        self.password = connection_info["pass"]
+        self.rc: RestClient = RestClient(self.host, self.port)
+        self.rc.login(self.username, self.password)
         self.valid_protocols = list(
             map(lambda protocol: protocol[0], constants.PROTOCOL_OPTIONS)
         )

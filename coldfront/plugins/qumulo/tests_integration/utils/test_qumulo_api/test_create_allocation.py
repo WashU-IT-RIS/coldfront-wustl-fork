@@ -1,16 +1,15 @@
 from django.test import TestCase, tag
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
 class TestCreateAllocation(TestCase):
     @tag("integration")
     def test_creates_nfs_export(self):
-        qumulo_api = QumuloAPI()
-
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         export_path = "/test/integration-project"
         fs_path = "/test/integration-project"
         name = "integration-test"
-
         qumulo_api.create_allocation(
             protocols=["nfs"],
             export_path=export_path,
@@ -20,6 +19,6 @@ class TestCreateAllocation(TestCase):
         )
 
         qumulo_api.delete_quota(fs_path)
-
         export_id = qumulo_api.get_id(protocol="nfs", export_path=export_path)
         qumulo_api.delete_nfs_export(export_id)
+        qumulo_api.rc.fs.delete(fs_path)
