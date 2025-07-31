@@ -954,13 +954,15 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.first().value, 0)
             self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_after_getting_daily_usages_from_qumulo_api(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = self.mock_quota_response
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         try:
             ingest_quotas_with_daily_usage()
@@ -992,13 +994,15 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.first().value, usage)
             self.assertGreater(allocation_attribute_usage.history.count(), 1)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_doesnt_ingest_sub_allocation_data(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = self.mock_quota_response
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         try:
             ingest_quotas_with_daily_usage()
@@ -1026,9 +1030,11 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.value, 0)
             self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_filtering_out_not_active_allocations(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         index = 1
         path = f"{self.STORAGE2_PATH}/status_test"
@@ -1049,7 +1055,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = mock_quota
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         form_data = {
             "storage_filesystem_path": path,
