@@ -51,7 +51,7 @@ from copy import deepcopy
 
 
 @patch(
-    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
 )
 class TestPollAdGroup(TestCase):
     def setUp(self) -> None:
@@ -126,7 +126,7 @@ class TestPollAdGroup(TestCase):
 
 
 @patch(
-    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
 )
 class TestPollAdGroups(TestCase):
     def setUp(self) -> None:
@@ -955,7 +955,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
     )
     def test_after_getting_daily_usages_from_qumulo_api(
         self, create_connection_mock: MagicMock
@@ -995,7 +995,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertGreater(allocation_attribute_usage.history.count(), 1)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
     )
     def test_doesnt_ingest_sub_allocation_data(
         self, create_connection_mock: MagicMock
@@ -1031,7 +1031,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
     )
     def test_filtering_out_not_active_allocations(
         self, create_connection_mock: MagicMock
