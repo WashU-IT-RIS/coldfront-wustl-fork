@@ -55,8 +55,9 @@ class AllocationService:
         AllocationUser.objects.create(
             allocation=allocation, user=user, status=active_status
         )
-
-        resource = Resource.objects.get(name="Storage2")
+        resource_type = form_data["storage_type"]
+        print(f"Creating allocation with resource type: {resource_type}")
+        resource = Resource.objects.get(name=resource_type)
         allocation.resources.add(resource)
 
         AllocationService.__set_allocation_attributes(

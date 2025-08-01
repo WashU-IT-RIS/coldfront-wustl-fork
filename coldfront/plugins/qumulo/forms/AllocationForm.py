@@ -4,6 +4,7 @@ from typing import Any
 from django import forms
 
 from coldfront.core.project.models import Project
+from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
 from coldfront.plugins.qumulo.fields import ADUserField, StorageFileSystemPathField
 from coldfront.plugins.qumulo.validators import (
@@ -27,14 +28,13 @@ class AllocationForm(forms.Form):
         self.user_id = kwargs.pop("user_id")
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
+        self.fields["storage_type"].choices = self.get_storage_type_choices()
 
     class Media:
         js = ("allocation.js",)
 
     storage_type = forms.ChoiceField(
         label="Storage Type",
-        choices=[("Storage2", "Storage2"), ("Storage3", "Storage3")],
-        initial="Storage2",
     )
     project_pk = forms.ChoiceField(label="Project")
     storage_name = forms.CharField(
@@ -215,3 +215,7 @@ class AllocationForm(forms.Form):
             projects = Project.objects.filter(pi=self.user_id)
 
         return map(lambda project: (project.id, project.title), projects)
+
+    def get_storage_type_choices(self) -> list[str]:
+        storage_types = Resource.objects.filter(resource_type__name="Storage")
+        return map(lambda storage: (storage.name, storage.description), storage_types)
