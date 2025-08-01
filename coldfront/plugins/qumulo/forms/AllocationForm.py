@@ -31,6 +31,11 @@ class AllocationForm(forms.Form):
     class Media:
         js = ("allocation.js",)
 
+    storage_type = forms.ChoiceField(
+        label="Storage Type",
+        choices=[("Storage2", "Storage2"), ("Storage3", "Storage3")],
+        initial="Storage2",
+    )
     project_pk = forms.ChoiceField(label="Project")
     storage_name = forms.CharField(
         help_text="Name of the Allocation",
