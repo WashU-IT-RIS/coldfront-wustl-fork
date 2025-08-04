@@ -26,12 +26,12 @@ class AllocationForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user_id = kwargs.pop("user_id")
         super(forms.Form, self).__init__(*args, **kwargs)
+        self.fields["project_pk"].choices = self.get_project_choices()
 
     class Media:
         js = ("allocation.js",)
 
-    project_pk = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+    project_pk = forms.ChoiceField(
         label="Project",
         widget=forms.Select(
             attrs={
