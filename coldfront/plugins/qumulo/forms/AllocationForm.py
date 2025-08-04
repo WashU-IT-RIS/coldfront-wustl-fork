@@ -36,7 +36,15 @@ class AllocationForm(forms.Form):
     storage_type = forms.ChoiceField(
         label="Storage Type",
     )
-    project_pk = forms.ChoiceField(label="Project")
+    project_pk = forms.ModelChoiceField(
+        queryset=Project.objects.all(),
+        label="Project",
+        widget=forms.Select(
+            attrs={
+                "class": "select2",
+            }
+        ),
+    )
     storage_name = forms.CharField(
         help_text="Name of the Allocation",
         label="Name",
