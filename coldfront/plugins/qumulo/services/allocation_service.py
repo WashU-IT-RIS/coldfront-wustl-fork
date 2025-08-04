@@ -40,7 +40,6 @@ class AllocationService:
                     parent_allocation.get_attribute(name="storage_name"),
                 )
             )
-
         project_pk = form_data.get("project_pk")
         project = get_object_or_404(Project, pk=project_pk)
 
