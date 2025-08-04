@@ -1,8 +1,14 @@
+import json
 import re
 
 from typing import Any
 from django import forms
 
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationStatusChoice,
+)
 from coldfront.core.project.models import Project
 from coldfront.core.user.models import User
 from coldfront.plugins.qumulo.fields import ADUserField, StorageFileSystemPathField
@@ -27,6 +33,10 @@ class AllocationForm(forms.Form):
         self.user_id = kwargs.pop("user_id")
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
+        self.class_name = self.__class__.__name__
+        self.fields["rw_users"].required = self._rw_user_required(
+            kwargs.get("initial", {})
+        )
 
     class Media:
         js = ("allocation.js",)
@@ -119,11 +129,23 @@ class AllocationForm(forms.Form):
         label="ITSD Ticket",
         validators=[validate_ticket],
     )
-    rw_users = ADUserField(
-        label="Read/Write Users",
-        initial="",
-    )
+    rw_users = ADUserField(label="Read/Write Users", initial="")
     ro_users = ADUserField(label="Read Only Users", initial="", required=False)
+
+    def _rw_user_required(self, initial={}) -> bool:
+        required = True
+        if self.class_name == "UpdateAllocationForm":
+            storage_name = initial.get("storage_name", False)
+            if storage_name:
+                allocation = AllocationAttribute.objects.get(
+                    value=storage_name
+                ).allocation
+                ready_for_deletion_id = AllocationStatusChoice.objects.get(
+                    name="Ready for Deletion"
+                ).id
+                if allocation.status_id == ready_for_deletion_id:
+                    required = False
+        return required
 
     def _upper(self, val: Any) -> Any:
         return val.upper() if isinstance(val, str) else val
