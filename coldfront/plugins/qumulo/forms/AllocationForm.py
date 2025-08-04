@@ -36,8 +36,7 @@ class AllocationForm(forms.Form):
     storage_type = forms.ChoiceField(
         label="Storage Type",
     )
-    project_pk = forms.ModelChoiceField(
-        queryset=Project.objects.all(),
+    project_pk = forms.ChoiceField(
         label="Project",
         widget=forms.Select(
             attrs={
