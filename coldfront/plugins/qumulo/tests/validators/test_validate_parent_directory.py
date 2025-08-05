@@ -1,3 +1,6 @@
+import os
+import json
+
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
@@ -28,10 +31,22 @@ mock_response = {
 
 class TestValidateParentDirectory(TestCase):
     def setUp(self):
-        self.patcher = patch(
+        patch.dict(
+            os.environ,
+            {
+                "QUMULO_INFO": json.dumps(
+                    {
+                        "Storage2": {
+                            "path": "/storage2/fs1",
+                        }
+                    }
+                )
+            },
+        ).start()
+
+        self.mock_factory = patch(
             "coldfront.plugins.qumulo.validators.StorageControllerFactory"
-        )
-        self.mock_factory = self.patcher.start()
+        ).start()
 
         self.mock_qumulo_api = MagicMock()
         self.mock_factory.return_value.create_connection.return_value = (
@@ -45,7 +60,7 @@ class TestValidateParentDirectory(TestCase):
         return super().setUp()
 
     def tearDown(self):
-        self.patcher.stop()
+        patch.stopall()
 
         return super().tearDown()
 

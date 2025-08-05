@@ -21,7 +21,6 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 )
 
 
-# @patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
 class AllocationFormTests(TestCase):
     def setUp(self):
         build_data = build_models()
