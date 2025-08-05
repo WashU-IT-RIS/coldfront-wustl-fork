@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.test import TestCase
@@ -72,7 +73,9 @@ class TestValidateFilesystemPathUnique(TestCase):
         )
 
         self.mock_get_file_attr = None
-        os.environ["STORAGE2_PATH"] = TEST_STORAGE2_PATH
+        json.loads(os.environ.get("QUMULO_INFO"))["Storage2"][
+            "path"
+        ] = TEST_STORAGE2_PATH
 
         return super().setUp()
 
@@ -102,6 +105,7 @@ class TestValidateFilesystemPathUnique(TestCase):
         relative_path = "foo/"
 
         form_data = {
+            "storage_type": "Storage2",
             "storage_filesystem_path": f"{TEST_STORAGE2_PATH}/{relative_path}",
             "storage_export_path": "foo",
             "storage_name": "for_tester_foo",
@@ -121,7 +125,7 @@ class TestValidateFilesystemPathUnique(TestCase):
         )
 
         with self.assertRaises(ValidationError):
-            validate_filesystem_path_unique(relative_path)
+            validate_filesystem_path_unique(relative_path, "Storage2")
 
     def test_only_raises_coldfront_error_for_select_statuses(self):
         self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
@@ -131,6 +135,7 @@ class TestValidateFilesystemPathUnique(TestCase):
         relative_path = "foo/"
 
         form_data = {
+            "storage_type": "Storage2",
             "storage_filesystem_path": f"{TEST_STORAGE2_PATH}/{relative_path}",
             "storage_export_path": "foo",
             "storage_name": "for_tester_foo",
@@ -159,7 +164,7 @@ class TestValidateFilesystemPathUnique(TestCase):
             existing_allocation.save()
 
             with self.assertRaises(ValidationError):
-                validate_filesystem_path_unique(relative_path)
+                validate_filesystem_path_unique(relative_path, "Storage2")
 
         other_statuses = AllocationStatusChoice.objects.exclude(
             name__in=reserved_status_names
@@ -169,6 +174,6 @@ class TestValidateFilesystemPathUnique(TestCase):
             existing_allocation.save()
 
             try:
-                validate_filesystem_path_unique(relative_path)
+                validate_filesystem_path_unique(relative_path, "Storage2")
             except ValidationError:
                 self.fail()
