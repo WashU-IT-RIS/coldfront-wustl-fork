@@ -44,10 +44,20 @@ def validate_ad_users(ad_users: list[str]):
 
 
 def validate_filesystem_path_unique(value: str):
-
-    storage_root = os.environ.get("STORAGE2_PATH").strip("/")
-    full_path = f"/{storage_root}/{value}"
-    qumulo_api = StorageControllerFactory().create_connection("Storage2")
+    split_path = value.split("/")
+    print(split_path)
+    cluster_resource = split_path[1]
+    if cluster_resource == "storage3-dev":
+        connect = "Storage3"
+    elif cluster_resource == "storage2-dev":
+        connect = "Storage2"
+    else:
+        raise ValidationError(
+            message=f"Invalid cluster resource: {cluster_resource}",
+            code="invalid",
+        )
+    full_path = f"/{cluster_resource}/{value}"
+    qumulo_api = StorageControllerFactory().create_connection(connect)
 
     reserved_statuses = AllocationStatusChoice.objects.filter(
         name__in=["Pending", "Active", "New"]
