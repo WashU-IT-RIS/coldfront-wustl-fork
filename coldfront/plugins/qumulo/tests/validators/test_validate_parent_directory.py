@@ -29,13 +29,18 @@ mock_response = {
 class TestValidateParentDirectory(TestCase):
     def setUp(self):
         self.patcher = patch(
-            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+            "coldfront.plugins.qumulo.validators.StorageControllerFactory"
         )
-        self.mock_qumulo_api = self.patcher.start()
+        self.mock_factory = self.patcher.start()
+
+        self.mock_qumulo_api = MagicMock()
+        self.mock_factory.return_value.create_connection.return_value = (
+            self.mock_qumulo_api
+        )
 
         self.mock_get_file_attr = MagicMock()
         self.mock_get_file_attr.return_value = mock_response
-        self.mock_qumulo_api.return_value.rc.fs.get_file_attr = self.mock_get_file_attr
+        self.mock_qumulo_api.rc.fs.get_file_attr = self.mock_get_file_attr
 
         return super().setUp()
 
@@ -46,7 +51,7 @@ class TestValidateParentDirectory(TestCase):
 
     def test_returns_valid_for_root(self):
         try:
-            validate_parent_directory("/test-dir")
+            validate_parent_directory("/test-dir", "Storage2")
         except Exception:
             self.fail()
 
@@ -54,10 +59,10 @@ class TestValidateParentDirectory(TestCase):
         self.mock_get_file_attr.side_effect = Exception()
 
         with self.assertRaises(ValidationError):
-            validate_parent_directory("/test/test-dir/other")
+            validate_parent_directory("/test/test-dir/other", "Storage2")
 
     def test_returns_valid_for_child_with_good_parent(self):
         try:
-            validate_parent_directory("/test/test-dir/more")
+            validate_parent_directory("/test/test-dir/more", "Storage2")
         except Exception:
             self.fail()
