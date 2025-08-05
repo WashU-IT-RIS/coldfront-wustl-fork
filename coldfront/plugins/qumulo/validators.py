@@ -1,5 +1,6 @@
 import os
 import re
+import json
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy
@@ -43,21 +44,11 @@ def validate_ad_users(ad_users: list[str]):
         )
 
 
-def validate_filesystem_path_unique(value: str):
-    split_path = value.split("/")
-    print(split_path)
-    cluster_resource = split_path[1]
-    if cluster_resource == "storage3-dev":
-        connect = "Storage3"
-    elif cluster_resource == "storage2-dev":
-        connect = "Storage2"
-    else:
-        raise ValidationError(
-            message=f"Invalid cluster resource: {cluster_resource}",
-            code="invalid",
-        )
-    full_path = f"/{cluster_resource}/{value}"
-    qumulo_api = StorageControllerFactory().create_connection(connect)
+def validate_filesystem_path_unique(value: str, resource_type: str):
+    connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+    storage_dir = connection_info[resource_type]["path"].strip("/")
+    full_path = f"/{storage_dir}/{value}"
+    qumulo_api = StorageControllerFactory().create_connection(resource_type)
 
     reserved_statuses = AllocationStatusChoice.objects.filter(
         name__in=["Pending", "Active", "New"]

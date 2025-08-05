@@ -13,6 +13,7 @@ from coldfront.plugins.qumulo.validators import (
     validate_ticket,
     validate_storage_name,
     validate_prepaid_start_date,
+    validate_filesystem_path_unique,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -197,6 +198,8 @@ class AllocationForm(forms.Form):
         protocols = cleaned_data.get("protocols")
         storage_export_path = cleaned_data.get("storage_export_path")
         storage_ticket = self._upper(cleaned_data.get("storage_ticket", None))
+        storage_type = cleaned_data.get("storage_type")
+        storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
 
         if "nfs" in protocols:
             if storage_export_path == "":
@@ -210,6 +213,10 @@ class AllocationForm(forms.Form):
                 self.cleaned_data["storage_ticket"] = "ITSD-{:s}".format(storage_ticket)
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
+        try:
+            validate_filesystem_path_unique(storage_filesystem_path, storage_type)
+        except:
+            self.add_error("storage_filesystem_path", e)
 
     def get_project_choices(self) -> list[str]:
         # jprew - NOTE: accesses to db collections should be consolidated to

@@ -62,9 +62,15 @@ class TestValidateFilesystemPathUnique(TestCase):
     def setUp(self):
         build_models()
         self.patcher = patch(
-            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+            "coldfront.plugins.qumulo.validators.StorageControllerFactory"
         )
-        self.mock_qumulo_api = self.patcher.start()
+        self.mock_factory = self.patcher.start()
+
+        self.mock_qumulo_api = MagicMock()
+        self.mock_factory.return_value.create_connection.return_value = (
+            self.mock_qumulo_api
+        )
+
         self.mock_get_file_attr = None
         os.environ["STORAGE2_PATH"] = TEST_STORAGE2_PATH
 
@@ -75,21 +81,21 @@ class TestValidateFilesystemPathUnique(TestCase):
         return super().tearDown()
 
     def test_existing_path_raises_validation_error_on_qumulo_conflict(self):
-        self.mock_qumulo_api.return_value.rc.fs.get_file_attr = MagicMock(
+        self.mock_qumulo_api.rc.fs.get_file_attr = MagicMock(
             return_value=existing_path_mocked_response
         )
         with self.assertRaises(ValidationError):
-            validate_filesystem_path_unique("/new/existing/file/path")
+            validate_filesystem_path_unique("/new/existing/file/path", "Storage2")
 
     def test_unique_path_passes_validation(self):
-        self.mock_qumulo_api.return_value.rc.fs.get_file_attr = ValidFormPathMock()
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
         try:
-            validate_filesystem_path_unique("/new/nonexistent/file/path")
+            validate_filesystem_path_unique("/new/nonexistent/file/path", "Storage2")
         except ValidationError:
             self.fail()
 
     def test_raises_error_on_coldfront_conflict(self):
-        self.mock_qumulo_api.return_value.rc.fs.get_file_attr = ValidFormPathMock()
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
 
         user_project_data = build_user_plus_project("foo", "bar")
 
@@ -118,7 +124,7 @@ class TestValidateFilesystemPathUnique(TestCase):
             validate_filesystem_path_unique(relative_path)
 
     def test_only_raises_coldfront_error_for_select_statuses(self):
-        self.mock_qumulo_api.return_value.rc.fs.get_file_attr = ValidFormPathMock()
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
 
         user_project_data = build_user_plus_project("foo", "bar")
 
