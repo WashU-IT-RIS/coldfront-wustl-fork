@@ -41,9 +41,11 @@ def on_allocation_save_retrieve_additional_user_data(
 @receiver(allocation_activate)
 def on_allocation_activate(sender, **kwargs):
     logger = logging.getLogger(__name__)
-    qumulo_api = StorageControllerFactory().create_connection("Storage2")
 
     allocation = Allocation.objects.get(pk=kwargs["allocation_pk"])
+    resource = allocation.resources.first()
+
+    qumulo_api = StorageControllerFactory().create_connection(resource.name)
 
     fs_path = allocation.get_attribute(name="storage_filesystem_path")
     export_path = allocation.get_attribute(name="storage_export_path")
