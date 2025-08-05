@@ -950,7 +950,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.first().value, 0)
             self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_after_getting_daily_usages_from_qumulo_api(
         self, qumulo_api_mock: MagicMock
     ) -> None:
@@ -988,7 +988,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.first().value, usage)
             self.assertGreater(allocation_attribute_usage.history.count(), 1)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_doesnt_ingest_sub_allocation_data(
         self, qumulo_api_mock: MagicMock
     ) -> None:
@@ -1022,7 +1022,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.value, 0)
             self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
     def test_filtering_out_not_active_allocations(
         self, qumulo_api_mock: MagicMock
     ) -> None:
