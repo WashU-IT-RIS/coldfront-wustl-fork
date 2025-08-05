@@ -55,7 +55,6 @@ class AllocationService:
             allocation=allocation, user=user, status=active_status
         )
         resource_type = form_data["storage_type"]
-        print(f"Creating allocation with resource type: {resource_type}")
         resource = Resource.objects.get(name=resource_type)
         allocation.resources.add(resource)
 
@@ -226,10 +225,11 @@ class AllocationService:
                 value = form_data.get(allocation_attribute_name)
                 if value is None:
                     continue
-
+                resource_type = form_data.get("storage_type")
                 if allocation_attribute_name == "storage_filesystem_path":
                     if parent_allocation is None:
-                        storage_root_path = os.environ.get("STORAGE2_PATH", "")
+                        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+                        storage_root_path = qumulo_info[resource_type]["path"]
                     else:
                         storage_root_path = "{:s}/Active".format(
                             parent_allocation.get_attribute(

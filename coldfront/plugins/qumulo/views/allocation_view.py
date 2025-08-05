@@ -47,10 +47,8 @@ class AllocationView(LoginRequiredMixin, FormView):
     ):
         form_data = form.cleaned_data
         user = self.request.user
-        cluster_resource = form_data.get("storage_type")
-        print(cluster_resource)
+        storage_type = form_data.get("storage_type")
         storage_filesystem_path = form_data.get("storage_filesystem_path")
-        print(storage_filesystem_path)
         is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
         if is_absolute_path:
             absolute_path = storage_filesystem_path
@@ -64,15 +62,13 @@ class AllocationView(LoginRequiredMixin, FormView):
                 prepend_val = f"{root_val}/Active"
             else:
                 cluster_info = json.loads(os.environ.get("QUMULO_INFO"))
-                storage_root_env = cluster_info[cluster_resource]["path"]
-                print(storage_root_env)
+                storage_root_env = cluster_info[storage_type]["path"]
                 storage_root = storage_root_env.strip("/")
                 prepend_val = storage_root
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
-            print(absolute_path)
         AllocationView.set_billing_cycle(form_data)
-        validate_filesystem_path_unique(absolute_path)
+        validate_filesystem_path_unique(absolute_path, storage_type)
 
         self.new_allocation = AllocationService.create_new_allocation(
             form_data, user, parent_allocation
