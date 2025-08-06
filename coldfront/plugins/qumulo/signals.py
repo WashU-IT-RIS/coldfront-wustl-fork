@@ -91,8 +91,10 @@ def on_allocation_disable(sender, **kwargs):
 
 @receiver(allocation_change_approved)
 def on_allocation_change_approved(sender, **kwargs):
-    qumulo_api = StorageControllerFactory().create_connection("Storage2")
     allocation_obj = Allocation.objects.get(pk=kwargs["allocation_pk"])
+    resource = allocation_obj.resources.first()
+
+    qumulo_api = StorageControllerFactory().create_connection(resource.name)
     fs_path = allocation_obj.get_attribute(name="storage_filesystem_path")
     export_path = allocation_obj.get_attribute(name="storage_export_path")
     protocols = json.loads(allocation_obj.get_attribute(name="storage_protocols"))

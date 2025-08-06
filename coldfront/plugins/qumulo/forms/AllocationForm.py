@@ -214,14 +214,14 @@ class AllocationForm(forms.Form):
                 self.cleaned_data["storage_ticket"] = "ITSD-{:s}".format(storage_ticket)
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
-
         storage_type = cleaned_data.get("storage_type")
         storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
-        try:
-            validate_filesystem_path_unique(storage_filesystem_path, storage_type)
-            validate_parent_directory(storage_filesystem_path, storage_type)
-        except forms.ValidationError as error:
-            self.add_error("storage_filesystem_path", error.message)
+        if getattr(self, "from_update_allocation_view", False):
+            try:
+                validate_filesystem_path_unique(storage_filesystem_path, storage_type)
+                validate_parent_directory(storage_filesystem_path, storage_type)
+            except forms.ValidationError as error:
+                self.add_error("storage_filesystem_path", error.message)
 
     def get_project_choices(self) -> list[str]:
         # jprew - NOTE: accesses to db collections should be consolidated to
