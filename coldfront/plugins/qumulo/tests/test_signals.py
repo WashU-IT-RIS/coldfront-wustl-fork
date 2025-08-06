@@ -81,7 +81,7 @@ class TestSignals(TestCase):
 
     @patch("coldfront.plugins.qumulo.signals.async_task")
     @patch(
-        "coldfront.plugins.qumulo.signals.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
     )
     def test_allocation_activate_creates_allocation(
         self,
@@ -107,7 +107,7 @@ class TestSignals(TestCase):
     @patch("coldfront.plugins.qumulo.signals.logging.getLogger")
     @patch("coldfront.plugins.qumulo.signals.async_task")
     @patch(
-        "coldfront.plugins.qumulo.signals.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
     )
     def test_allocation_activate_handles_missing_attribute_error(
         self,
@@ -131,7 +131,7 @@ class TestSignals(TestCase):
         )
 
     @patch(
-        "coldfront.plugins.qumulo.signals.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
     )
     def test_allocation_change_approved_updates_allocation(
         self,
@@ -158,7 +158,7 @@ class TestSignals(TestCase):
         )
 
     @patch(
-        "coldfront.plugins.qumulo.signals.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
     )
     def test_allocation_change_approved_updates_allocation_one_sub_alloc(
         self,
@@ -190,7 +190,7 @@ class TestSignals(TestCase):
         self.assertEqual(sub_alloc.get_attribute(name="storage_quota"), tb_limit)
 
     @patch(
-        "coldfront.plugins.qumulo.signals.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
     )
     def test_allocation_change_approved_updates_allocation_multiple_sub_allocs(
         self,
