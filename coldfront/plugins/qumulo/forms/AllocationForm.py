@@ -34,9 +34,7 @@ class AllocationForm(forms.Form):
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
         self.class_name = self.__class__.__name__
-        self.fields["rw_users"].required = self._rw_user_required(
-            kwargs.get("initial", {})
-        )
+        self.fields["rw_users"].required = self._rw_user_required(**kwargs)
 
     class Media:
         js = ("allocation.js",)
@@ -132,19 +130,21 @@ class AllocationForm(forms.Form):
     rw_users = ADUserField(label="Read/Write Users", initial="")
     ro_users = ADUserField(label="Read Only Users", initial="", required=False)
 
-    def _rw_user_required(self, initial={}) -> bool:
+    def _rw_user_required(self, **kwargs) -> bool:
         required = True
         if self.class_name == "UpdateAllocationForm":
-            storage_name = initial.get("storage_name", False)
-            if storage_name:
-                allocation = AllocationAttribute.objects.get(
-                    value=storage_name
-                ).allocation
-                ready_for_deletion_id = AllocationStatusChoice.objects.get(
-                    name="Ready for Deletion"
-                ).id
-                if allocation.status_id == ready_for_deletion_id:
-                    required = False
+            for key in ['data', 'initial']:
+                storage_name = kwargs.get(key, {}).get("storage_name", False)
+                if storage_name:
+                    allocation = AllocationAttribute.objects.filter(
+                        value=storage_name
+                    )[0].allocation
+                    ready_for_deletion_id = AllocationStatusChoice.objects.get(
+                        name="Ready for deletion"
+                    ).id
+                    if allocation.status_id == ready_for_deletion_id:
+                        required = False
+                    break
         return required
 
     def _upper(self, val: Any) -> Any:

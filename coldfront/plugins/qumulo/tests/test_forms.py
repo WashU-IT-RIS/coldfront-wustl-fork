@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.test import TestCase
@@ -5,12 +6,16 @@ from unittest.mock import patch, MagicMock
 
 from django.contrib.auth.models import Permission
 
+from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
 from coldfront.core.project.models import Project, ProjectStatusChoice
 from coldfront.core.user.models import User
 from coldfront.core.field_of_science.models import FieldOfScience
 
 from coldfront.plugins.qumulo.forms.ProjectCreateForm import ProjectCreateForm
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
+from coldfront.plugins.qumulo.forms.UpdateAllocationForm import (
+    UpdateAllocationForm
+)
 from coldfront.plugins.qumulo.tests.helper_classes.filesystem_path import (
     PathExistsMock,
     ValidFormPathMock,
@@ -18,6 +23,7 @@ from coldfront.plugins.qumulo.tests.helper_classes.filesystem_path import (
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     build_models_without_project,
+    create_allocation,
 )
 
 
@@ -373,6 +379,25 @@ class AllocationFormTests(TestCase):
         self.assertFalse(form.fields["billing_contact"].required)
         self.assertTrue(form.is_valid())
 
+    def test_default_rw_user_required(self):
+        valid_data = {
+            "project_pk": self.project1.id,
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "service_rate": "consumption",
+            "billing_cycle": "monthly",
+        }
+        form = AllocationForm(data=valid_data, user_id=self.user.id)
+        self.assertTrue(form.fields["rw_users"].required)
 
 class AllocationFormProjectChoiceTests(TestCase):
     def setUp(self):
@@ -489,3 +514,46 @@ class ProjectFormTests(TestCase):
         }
         form = ProjectCreateForm(data=valid_data, user_id="admin")
         self.assertTrue(form.is_valid())
+
+class UpdateAllocationFormTests(TestCase):
+    def setUp(self):
+        build_data = build_models()
+        self.user = build_data["user"]
+        self.project1 = build_data["project"]
+        self.data = {
+            "project_pk": self.project1.id,
+            "storage_name": "TestAllocation",
+            "storage_quota": 1000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "service_rate": "consumption",
+            "billing_cycle": "monthly",
+        }
+        self.allocation = create_allocation(
+            self.project1,
+            self.user,
+            self.data
+        )
+
+    def tearDown(self):
+        return super().tearDown()
+
+    def test_default_rw_users_required(self):
+        form = UpdateAllocationForm(data=self.data, user_id=self.user.id)
+        self.assertTrue(form.fields["rw_users"].required)
+
+    def test_ready_for_deletion_rw_users_not_required(self):
+        rfd_status = AllocationStatusChoice.objects.filter(
+            name="Ready for deletion"
+        )[0]
+        self.allocation.status = rfd_status
+        self.allocation.save()
+        form = UpdateAllocationForm(data=self.data, user_id=self.user.id)
+        self.assertFalse(form.fields["rw_users"].required)
