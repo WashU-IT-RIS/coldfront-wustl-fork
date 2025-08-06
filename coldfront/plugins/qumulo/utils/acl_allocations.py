@@ -18,6 +18,7 @@ from pathlib import PurePath
 import copy
 import os
 from dotenv import load_dotenv
+import json
 
 load_dotenv(override=True)
 
@@ -91,12 +92,13 @@ class AclAllocations:
         return list(access_allocations)
 
     @staticmethod
-    def is_base_allocation(path: str):
-        STORAGE2_PATH = os.environ.get("STORAGE2_PATH").rstrip("/")
+    def is_base_allocation(path: str, strorage_info: str) -> bool:
+        connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+        storage_path = connection_info[strorage_info].get("path", "").rstrip(" /")
 
         purePath = PurePath(path)
 
-        return purePath.match(f"{STORAGE2_PATH}/*/")
+        return purePath.match(f"{storage_path}/*/")
 
     @staticmethod
     def remove_acl_access(allocation: Allocation):
@@ -204,6 +206,7 @@ class AclAllocations:
             ro_groupname=ro_groupname,
             qumulo_api=qumulo_api,
             is_base_allocation=is_base_allocation,
+            # storage_info=allocation.project.storage_info.name,
         )
 
         acl = qumulo_api.rc.fs.get_acl_v2(fs_path)

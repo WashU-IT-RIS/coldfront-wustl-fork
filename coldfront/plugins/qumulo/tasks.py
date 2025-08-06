@@ -106,11 +106,14 @@ def conditionally_update_storage_allocation_statuses() -> None:
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
-    qumulo_api = StorageControllerFactory().create_connection("Storage2")
+    storage_info = "Storage2"
+    qumulo_api = StorageControllerFactory().create_connection(storage_info)
     quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
     base_allocation_quota_usages = list(
         filter(
-            lambda quota_usage: AclAllocations.is_base_allocation(quota_usage["path"]),
+            lambda quota_usage: AclAllocations.is_base_allocation(
+                quota_usage["path"], storage_info
+            ),
             quota_usages,
         )
     )
