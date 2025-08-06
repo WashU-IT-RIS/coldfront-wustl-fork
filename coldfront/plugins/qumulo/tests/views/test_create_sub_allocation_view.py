@@ -34,6 +34,7 @@ class AllocationViewTests(TestCase):
 
         self.parent_form_data = {
             "project_pk": self.project.id,
+            "storage_type": "Storage2",
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
             "storage_ticket": "ITSD-54321",
@@ -51,6 +52,7 @@ class AllocationViewTests(TestCase):
 
         self.sub_form_data = {
             "project_pk": self.project.id,
+            "storage_type": self.parent_form_data["storage_type"],
             "parent_allocation_name": self.parent_form_data["storage_name"],
             "storage_filesystem_path": "xyz",
             "storage_export_path": "abc",
