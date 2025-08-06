@@ -6,7 +6,7 @@ from django import forms
 from coldfront.core.project.models import Project
 from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
-from coldfront.plugins.qumulo.fields import ADUserField, StorageFileSystemPathField
+from coldfront.plugins.qumulo.fields import ADUserField
 from coldfront.plugins.qumulo.validators import (
     validate_leading_forward_slash,
     validate_single_ad_user,
@@ -121,7 +121,7 @@ class AllocationForm(forms.Form):
     storage_filesystem_path = forms.CharField(
         help_text="Path of the allocation resource",
         label="Filesystem Path",
-        validators=[validate_parent_directory, validate_relative_path],
+        validators=[validate_relative_path],
     )
     storage_export_path = forms.CharField(
         help_text="Path of the allocation resource",
@@ -219,6 +219,7 @@ class AllocationForm(forms.Form):
         storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
         try:
             validate_filesystem_path_unique(storage_filesystem_path, storage_type)
+            validate_parent_directory(storage_filesystem_path, storage_type)
         except forms.ValidationError as error:
             self.add_error("storage_filesystem_path", error.message)
 

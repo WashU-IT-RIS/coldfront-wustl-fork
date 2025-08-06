@@ -99,4 +99,4 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
 
 
 def __get_storage2_base_path():
-    return os.environ.get("STORAGE2_PATH")
+    return os.environ.get("connection_info", {}).get("Storage2", {}).get("path")

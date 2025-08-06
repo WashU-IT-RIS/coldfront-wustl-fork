@@ -110,9 +110,9 @@ def validate_leading_forward_slash(value: str):
         )
 
 
-def validate_parent_directory(value: str):
-
-    storage_root = os.environ.get("STORAGE2_PATH").strip("/")
+def validate_parent_directory(value: str, resource_type: str):
+    connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+    storage_root = connection_info[resource_type]["path"].strip("/")
     full_path = f"/{storage_root}/{value}"
     qumulo_api = StorageControllerFactory().create_connection("Storage2")
     sub_directories = full_path.strip("/").split("/")

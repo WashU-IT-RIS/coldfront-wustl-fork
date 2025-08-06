@@ -62,25 +62,32 @@ existing_path_mocked_response = {
 class TestValidateFilesystemPathUnique(TestCase):
     def setUp(self):
         build_models()
-        self.patcher = patch(
+        self.mock_factory = patch(
             "coldfront.plugins.qumulo.validators.StorageControllerFactory"
-        )
-        self.mock_factory = self.patcher.start()
+        ).start()
 
         self.mock_qumulo_api = MagicMock()
         self.mock_factory.return_value.create_connection.return_value = (
             self.mock_qumulo_api
         )
 
-        self.mock_get_file_attr = None
-        json.loads(os.environ.get("QUMULO_INFO"))["Storage2"][
-            "path"
-        ] = TEST_STORAGE2_PATH
+        patch.dict(
+            os.environ,
+            {
+                "QUMULO_INFO": json.dumps(
+                    {
+                        "Storage2": {
+                            "path": TEST_STORAGE2_PATH,
+                        }
+                    }
+                )
+            },
+        ).start()
 
         return super().setUp()
 
     def tearDown(self):
-        self.patcher.stop()
+        patch.stopall()
         return super().tearDown()
 
     def test_existing_path_raises_validation_error_on_qumulo_conflict(self):

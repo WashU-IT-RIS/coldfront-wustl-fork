@@ -1,3 +1,6 @@
+import os
+import json
+
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
@@ -28,25 +31,42 @@ mock_response = {
 
 class TestValidateParentDirectory(TestCase):
     def setUp(self):
-        self.patcher = patch(
-            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+        patch.dict(
+            os.environ,
+            {
+                "QUMULO_INFO": json.dumps(
+                    {
+                        "Storage2": {
+                            "path": "/storage2/fs1",
+                        }
+                    }
+                )
+            },
+        ).start()
+
+        self.mock_factory = patch(
+            "coldfront.plugins.qumulo.validators.StorageControllerFactory"
+        ).start()
+
+        self.mock_qumulo_api = MagicMock()
+        self.mock_factory.return_value.create_connection.return_value = (
+            self.mock_qumulo_api
         )
-        self.mock_qumulo_api = self.patcher.start()
 
         self.mock_get_file_attr = MagicMock()
         self.mock_get_file_attr.return_value = mock_response
-        self.mock_qumulo_api.return_value.rc.fs.get_file_attr = self.mock_get_file_attr
+        self.mock_qumulo_api.rc.fs.get_file_attr = self.mock_get_file_attr
 
         return super().setUp()
 
     def tearDown(self):
-        self.patcher.stop()
+        patch.stopall()
 
         return super().tearDown()
 
     def test_returns_valid_for_root(self):
         try:
-            validate_parent_directory("/test-dir")
+            validate_parent_directory("/test-dir", "Storage2")
         except Exception:
             self.fail()
 
@@ -54,10 +74,10 @@ class TestValidateParentDirectory(TestCase):
         self.mock_get_file_attr.side_effect = Exception()
 
         with self.assertRaises(ValidationError):
-            validate_parent_directory("/test/test-dir/other")
+            validate_parent_directory("/test/test-dir/other", "Storage2")
 
     def test_returns_valid_for_child_with_good_parent(self):
         try:
-            validate_parent_directory("/test/test-dir/more")
+            validate_parent_directory("/test/test-dir/more", "Storage2")
         except Exception:
             self.fail()

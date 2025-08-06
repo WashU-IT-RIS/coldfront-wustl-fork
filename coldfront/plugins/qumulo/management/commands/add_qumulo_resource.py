@@ -13,16 +13,19 @@ class Command(BaseCommand):
         ]
 
         for storage_resource in storage_resource_list:
-            Resource.objects.get_or_create(
-                resource_type=storage_resource_type,
-                parent_resource=None,
-                name=storage_resource["name"],
-                description=storage_resource["description"],
-                is_available=True,
-                is_public=True,
-                is_allocatable=True,
-                requires_payment=True,
-            )
+            try:
+                Resource.objects.get_or_create(
+                    resource_type=storage_resource_type,
+                    parent_resource=None,
+                    name=storage_resource["name"],
+                    description=storage_resource["description"],
+                    is_available=True,
+                    is_public=True,
+                    is_allocatable=True,
+                    requires_payment=True,
+                )
+            except:
+                continue
 
         Resource.objects.get_or_create(
             name="rw",
