@@ -214,9 +214,10 @@ class AllocationForm(forms.Form):
                 self.cleaned_data["storage_ticket"] = "ITSD-{:s}".format(storage_ticket)
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
-        storage_type = cleaned_data.get("storage_type")
-        storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
-        if getattr(self, "from_update_allocation_view", False):
+
+        if self.fields[storage_filesystem_path].disabled is False:
+            storage_type = cleaned_data.get("storage_type")
+            storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
             try:
                 validate_filesystem_path_unique(storage_filesystem_path, storage_type)
                 validate_parent_directory(storage_filesystem_path, storage_type)
