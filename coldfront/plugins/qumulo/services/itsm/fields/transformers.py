@@ -1,4 +1,4 @@
-import math, os
+import math, os, json
 from typing import Optional
 
 
@@ -99,4 +99,5 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
 
 
 def __get_storage2_base_path():
-    return os.environ.get("connection_info", {}).get("Storage2", {}).get("path")
+    qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+    return qumulo_info["Storage2"]["path"]
