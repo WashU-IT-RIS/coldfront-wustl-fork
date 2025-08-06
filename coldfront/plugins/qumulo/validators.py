@@ -114,7 +114,7 @@ def validate_parent_directory(value: str, resource_type: str):
     connection_info = json.loads(os.environ.get("QUMULO_INFO"))
     storage_root = connection_info[resource_type]["path"].strip("/")
     full_path = f"/{storage_root}/{value}"
-    qumulo_api = StorageControllerFactory().create_connection("Storage2")
+    qumulo_api = StorageControllerFactory().create_connection(resource_type)
     sub_directories = full_path.strip("/").split("/")
 
     for depth in range(1, len(sub_directories), 1):
