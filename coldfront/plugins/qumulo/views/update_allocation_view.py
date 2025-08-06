@@ -32,12 +32,6 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 logger = logging.getLogger(__name__)
 
 
-class FromUpdateAllocationViewMixin:
-    def dispatch(self, request, *args, **kwargs):
-        self.from_update_allocation_view = True
-        return super().dispatch(request, *args, **kwargs)
-
-
 class UpdateAllocationView(AllocationView):
     form_class = UpdateAllocationForm
     template_name = "update_allocation.html"
