@@ -15,7 +15,8 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
 
 from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
 
-STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
+QUMULO_INFO = json.loads(os.environ.get("QUMULO_INFO"))
+STORAGE2_PATH = QUMULO_INFO["Storage2"]["path"]
 
 
 class TestMigrateToColdfront(TestCase):
