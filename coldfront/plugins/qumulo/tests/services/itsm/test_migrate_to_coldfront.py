@@ -17,7 +17,7 @@ from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
 from coldfront.plugins.qumulo.tests.utils.mock_data import mock_qumulo_info
 
 QUMULO_INFO = mock_qumulo_info
-STORAGE2_PATH = QUMULO_INFO["Storage2"]["path"]
+storage2_path = QUMULO_INFO["Storage2"]["path"]
 
 
 @patch.dict("os.environ", {"QUMULO_INFO": json.dumps(QUMULO_INFO)})
@@ -30,8 +30,8 @@ class TestMigrateToColdfront(TestCase):
             ("storage_name", "mocker"),
             ("storage_quota", "200"),
             ("storage_protocols", '["smb"]'),
-            ("storage_filesystem_path", f"{STORAGE2_PATH}/mocker"),
-            ("storage_export_path", f"{STORAGE2_PATH}/mocker"),
+            ("storage_filesystem_path", f"{storage2_path}/mocker"),
+            ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
             ("service_rate", "subscription"),
@@ -57,8 +57,8 @@ class TestMigrateToColdfront(TestCase):
             ("storage_name", "mocker_missing_contacts"),
             ("storage_quota", "200"),
             ("storage_protocols", '["smb"]'),
-            ("storage_filesystem_path", f"{STORAGE2_PATH}/mocker_missing_contacts"),
-            ("storage_export_path", f"{STORAGE2_PATH}/mocker_missing_contacts"),
+            ("storage_filesystem_path", f"{storage2_path}/mocker_missing_contacts"),
+            ("storage_export_path", f"{storage2_path}/mocker_missing_contacts"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
             ("service_rate", "subscription"),
@@ -82,8 +82,8 @@ class TestMigrateToColdfront(TestCase):
             ("storage_name", "mocker"),
             ("storage_quota", "200"),
             ("storage_protocols", '["smb"]'),
-            ("storage_filesystem_path", f"{STORAGE2_PATH}/mocker"),
-            ("storage_export_path", f"{STORAGE2_PATH}/mocker"),
+            ("storage_filesystem_path", f"{storage2_path}/mocker"),
+            ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
             ("service_rate", "subscription"),

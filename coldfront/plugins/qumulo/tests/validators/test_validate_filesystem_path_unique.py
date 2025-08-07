@@ -1,5 +1,4 @@
 import json
-import os
 
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
@@ -16,9 +15,10 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     build_user_plus_project,
     create_allocation,
+    mock_qumulo_info,
 )
 
-TEST_STORAGE2_PATH = "/storage2-dev/fs1"
+TEST_STORAGE2_PATH = mock_qumulo_info["Storage2"]["path"]
 existing_path_mocked_response = {
     "path": f"{TEST_STORAGE2_PATH}/bobs_your_uncle/",
     "name": "bobs_your_uncle",
@@ -59,6 +59,7 @@ existing_path_mocked_response = {
 }
 
 
+@patch.dict("os.environ", {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class TestValidateFilesystemPathUnique(TestCase):
     def setUp(self):
         build_models()
@@ -71,23 +72,9 @@ class TestValidateFilesystemPathUnique(TestCase):
             self.mock_qumulo_api
         )
 
-        patch.dict(
-            os.environ,
-            {
-                "QUMULO_INFO": json.dumps(
-                    {
-                        "Storage2": {
-                            "path": TEST_STORAGE2_PATH,
-                        }
-                    }
-                )
-            },
-        ).start()
-
         return super().setUp()
 
     def tearDown(self):
-        patch.stopall()
         return super().tearDown()
 
     def test_existing_path_raises_validation_error_on_qumulo_conflict(self):

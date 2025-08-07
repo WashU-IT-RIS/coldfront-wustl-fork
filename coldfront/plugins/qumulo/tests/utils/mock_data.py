@@ -295,114 +295,114 @@ def enumerate_directory_contents(
     ]
 
 
-def get_mock_quota_base_allocations(STORAGE2_PATH: str) -> dict:
+def get_mock_quota_base_allocations(storage_path: str) -> dict:
     return {
-        f"{STORAGE2_PATH}/alex.holehouse_test/": {
+        f"{storage_path}/alex.holehouse_test/": {
             "id": "42080003",
             "limit": "38482906972160",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/amlai/": {
+        f"{storage_path}/amlai/": {
             "id": "42130003",
             "limit": "5497558138880",
             "usage": "4198400",
         },
-        f"{STORAGE2_PATH}/amlai_test2/": {
+        f"{storage_path}/amlai_test2/": {
             "id": "52929567",
             "limit": "16492674416640",
             "usage": "997732352",
         },
-        f"{STORAGE2_PATH}/dinglab_test/": {
+        f"{storage_path}/dinglab_test/": {
             "id": "43010005",
             "limit": "109951162777600",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/engineering_test/": {
+        f"{storage_path}/engineering_test/": {
             "id": "42030003",
             "limit": "5497558138880",
             "usage": "307242479616",
         },
-        f"{STORAGE2_PATH}/gtac-mgi_test2/": {
+        f"{storage_path}/gtac-mgi_test2/": {
             "id": "43070003",
             "limit": "5497558138880",
             "usage": "1477898227712",
         },
-        f"{STORAGE2_PATH}/hong.chen_test/": {
+        f"{storage_path}/hong.chen_test/": {
             "id": "38760894",
             "limit": "5497558138880",
             "usage": "40960",
         },
-        f"{STORAGE2_PATH}/i2_test/": {
+        f"{storage_path}/i2_test/": {
             "id": "38760895",
             "limit": "109951162777600",
             "usage": "20480",
         },
-        f"{STORAGE2_PATH}/jian_test/": {
+        f"{storage_path}/jian_test/": {
             "id": "37000005",
             "limit": "10995116277760",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/jin810_test/": {
+        f"{storage_path}/jin810_test/": {
             "id": "43010004",
             "limit": "109951162777600",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/mweil_test/": {
+        f"{storage_path}/mweil_test/": {
             "id": "52929566",
             "limit": "5497558138880",
             "usage": "1436366471168",
         },
-        f"{STORAGE2_PATH}/prewitt_test/": {
+        f"{storage_path}/prewitt_test/": {
             "id": "34717218",
             "limit": "1099511627776",
             "usage": "53248",
         },
-        f"{STORAGE2_PATH}/prewitt_test_2/": {
+        f"{storage_path}/prewitt_test_2/": {
             "id": "36860003",
             "limit": "1099511627776",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/prewitt_test_3/": {
+        f"{storage_path}/prewitt_test_3/": {
             "id": "39720382",
             "limit": "5497558138880",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/sleong/": {
+        f"{storage_path}/sleong/": {
             "id": "18600003",
             "limit": "100000000000000",
             "usage": "37089736126464",
         },
-        f"{STORAGE2_PATH}/sleong_summer/": {
+        f"{storage_path}/sleong_summer/": {
             "id": "42030004",
             "limit": "5497558138880",
             "usage": "713363001344",
         },
-        f"{STORAGE2_PATH}/swamidass_test/": {
+        f"{storage_path}/swamidass_test/": {
             "id": "39720243",
             "limit": "24189255811072",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/tychele_test/": {
+        f"{storage_path}/tychele_test/": {
             "id": "36270003",
             "limit": "109951162777600",
             "usage": "57344",
         },
-        f"{STORAGE2_PATH}/tychele_test2/": {
+        f"{storage_path}/tychele_test2/": {
             "id": "52929568",
             "limit": "109951162777600",
             "usage": "18083368955904",
         },
-        f"{STORAGE2_PATH}/wexler_test/": {
+        f"{storage_path}/wexler_test/": {
             "id": "42050003",
             "limit": "5497558138880",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/wucci/": {
+        f"{storage_path}/wucci/": {
             "id": "42080004",
             "limit": "5497558138880",
             "usage": "16384",
         },
-        f"{STORAGE2_PATH}/wucci_test/": {
+        f"{storage_path}/wucci_test/": {
             "id": "43050003",
             "limit": "109951162777600",
             "usage": "16384",
@@ -410,19 +410,19 @@ def get_mock_quota_base_allocations(STORAGE2_PATH: str) -> dict:
     }
 
 
-def get_mock_quota_sub_allocations(STORAGE2_PATH: str) -> dict:
+def get_mock_quota_sub_allocations(storage_path: str) -> dict:
     return {
-        f"{STORAGE2_PATH}/hong.chen_test/Active/hong.chen_suballocation/": {
+        f"{storage_path}/hong.chen_test/Active/hong.chen_suballocation/": {
             "id": "42020003",
             "limit": "5497558138880",
             "usage": "4096",
         },
-        f"{STORAGE2_PATH}/prewitt_test/Active/prewitt_test_2_a/": {
+        f"{storage_path}/prewitt_test/Active/prewitt_test_2_a/": {
             "id": "36850003",
             "limit": "1099511627776",
             "usage": "4096",
         },
-        f"{STORAGE2_PATH}/tychele_test/Active/tychele_suballoc_test/": {
+        f"{storage_path}/tychele_test/Active/tychele_suballoc_test/": {
             "id": "36290003",
             "limit": "109951162777600",
             "usage": "4096",
@@ -430,7 +430,7 @@ def get_mock_quota_sub_allocations(STORAGE2_PATH: str) -> dict:
     }
 
 
-def get_mock_quota_response(quota_data: str, STORAGE2_PATH: str) -> dict:
+def get_mock_quota_response(quota_data: str, storage_path: str) -> dict:
     quotas = list(
         map(
             lambda quota_key_value: (
@@ -446,7 +446,7 @@ def get_mock_quota_response(quota_data: str, STORAGE2_PATH: str) -> dict:
     )
     quotas.append(
         {
-            "path": f"{STORAGE2_PATH}/not_in_coldfront/",
+            "path": f"{storage_path}/not_in_coldfront/",
             "id": "111111111",
             "limit": "20000000000000",
             "capacity_usage": "1",
@@ -455,9 +455,9 @@ def get_mock_quota_response(quota_data: str, STORAGE2_PATH: str) -> dict:
     return {"quotas": quotas, "paging": {"next": ""}}
 
 
-def get_mock_quota_data(STORAGE2_PATH: str) -> dict:
-    mock_quota_base_allocations = get_mock_quota_base_allocations(STORAGE2_PATH)
-    mock_quota_sub_allocations = get_mock_quota_sub_allocations(STORAGE2_PATH)
+def get_mock_quota_data(storage_path: str) -> dict:
+    mock_quota_base_allocations = get_mock_quota_base_allocations(storage_path)
+    mock_quota_sub_allocations = get_mock_quota_sub_allocations(storage_path)
 
     mock_quota_data = dict(mock_quota_base_allocations)
     mock_quota_data.update(mock_quota_sub_allocations)
