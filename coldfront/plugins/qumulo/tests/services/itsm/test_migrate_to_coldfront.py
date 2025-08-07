@@ -232,7 +232,8 @@ class TestMigrateToColdfront(TestCase):
         name = "mocker"
         result = self.migrate.by_fileset_alias(f"{fileset_alias}")
         self.assertDictEqual(
-            result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
+            result,
+            {"allocation_id": 1, "pi_user_id": 1, "project_id": 1},
         )
 
         allocation = Allocation.objects.get(id=result["allocation_id"])

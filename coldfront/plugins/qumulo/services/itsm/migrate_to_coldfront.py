@@ -8,6 +8,7 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     Project,
     User,
+    Resource,
 )
 
 from coldfront.core.project.models import (
@@ -67,10 +68,11 @@ class MigrateToColdfront:
 
         pi_user = self.__get_or_create_user(fields)
         project, created = self.__get_or_create_project(pi_user)
+        resource = self.__get_resource()
         if created:
             self.__create_project_user(project, pi_user)
             self.__create_project_attributes(fields, project)
-        allocation = self.__create_allocation(fields, project, pi_user)
+        allocation = self.__create_allocation(fields, project, pi_user, resource)
         self.__create_allocation_attributes(fields, allocation)
         return {
             "allocation_id": allocation.id,
@@ -110,6 +112,12 @@ class MigrateToColdfront:
             )
 
         return True
+
+    def __get_resource(self) -> Resource:
+        resource = Resource.objects.get(name="Storage2")
+        if not resource:
+            raise Exception("Qumulo resource not found")
+        return resource
 
     def __get_or_create_user(self, fields: list) -> User:
         username = self.__get_username(fields)
@@ -173,7 +181,9 @@ class MigrateToColdfront:
                         value=field.value,
                     )
 
-    def __create_allocation(self, fields: list, project: Project, pi_user: User) -> str:
+    def __create_allocation(
+        self, fields: list, project: Project, pi_user: User, resource: Resource
+    ) -> str:
         attributes_for_allocation = filter(
             lambda field: field.entity == "allocation_form", fields
         )
@@ -181,6 +191,7 @@ class MigrateToColdfront:
         allocation_data = {}
         allocation_data["project_pk"] = project.id
         allocation_data["ro_users"] = []
+        allocation_data["storage_type"] = resource.name
         for field in list(attributes_for_allocation):
             allocation_data.update(field.entity_item)
 
