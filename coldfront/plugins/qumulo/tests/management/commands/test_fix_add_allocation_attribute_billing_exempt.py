@@ -1,18 +1,15 @@
-import os
-import json
 from io import StringIO
 
 from django.test import TestCase
 
-from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
+from coldfront.plugins.qumulo.tests.utils.mock_data import (
+    build_models,
+)
 from django.core.management import call_command
 from coldfront.core.allocation.models import (
     AttributeType,
     AllocationAttributeType,
 )
-
-QUMULO_INFO = json.loads(os.environ.get("QUMULO_INFO"))
-STORAGE2_PATH = QUMULO_INFO["Storage2"]["path"]
 
 
 class TestAddBillingExempt(TestCase):
