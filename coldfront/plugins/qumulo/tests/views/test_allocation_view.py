@@ -25,6 +25,7 @@ class AllocationViewTests(TestCase):
 
         self.form_data = {
             "project_pk": self.project.id,
+            "storage_type": "Storage2",
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
             "storage_ticket": "ITSD-54321",

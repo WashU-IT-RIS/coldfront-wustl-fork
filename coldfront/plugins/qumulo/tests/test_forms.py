@@ -1,4 +1,5 @@
 import os
+import json
 
 from django.test import TestCase
 from unittest.mock import patch
@@ -25,7 +26,7 @@ class AllocationFormTests(TestCase):
     def setUp(self):
         build_data = build_models()
         self.qumulo_patcher = patch(
-            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
         )
         self.mock_qumulo_api = self.qumulo_patcher.start()
 
@@ -37,8 +38,9 @@ class AllocationFormTests(TestCase):
             {"attributes": {"sAMAccountName": "test"}}
         ]
 
-        self.old_storage2_path = os.environ.get("STORAGE2_PATH")
-        os.environ["STORAGE2_PATH"] = "/path/to"
+        self.qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+        self.old_storage2_path = self.qumulo_info["Storage2"]["path"]
+        self.qumulo_info["Storage2"]["path"] = "/path/to"
 
         self.user = build_data["user"]
         self.project1 = build_data["project"]
@@ -50,7 +52,7 @@ class AllocationFormTests(TestCase):
     def tearDown(self):
         self.qumulo_patcher.stop()
 
-        os.environ["STORAGE2_PATH"] = self.old_storage2_path
+        self.qumulo_info["Storage2"]["path"] = self.old_storage2_path
         return super().tearDown()
 
     def _setupPathExistsMock(self):
@@ -62,6 +64,7 @@ class AllocationFormTests(TestCase):
     def test_clean_method_with_valid_data(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "TestAllocation",
             "storage_quota": 1000,
             "protocols": ["nfs"],
@@ -82,6 +85,7 @@ class AllocationFormTests(TestCase):
     def test_clean_method_with_invalid_data(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "Test Allocation",
             "storage_quota": 1000,
             "protocols": ["nfs"],
@@ -102,6 +106,7 @@ class AllocationFormTests(TestCase):
     def test_empty_ro_users_form_valid(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -123,6 +128,7 @@ class AllocationFormTests(TestCase):
     def test_storage_ticket_required(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -144,6 +150,7 @@ class AllocationFormTests(TestCase):
     def test_billing_exempt_required(self):
         invalid_data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -168,6 +175,7 @@ class AllocationFormTests(TestCase):
         for invalid_value in invalid_values:
             invalid_data = {
                 "project_pk": self.project1.id,
+                "storage_type": "Storage2",
                 "storage_name": "valid-smb-allocation-name",
                 "storage_quota": 1000,
                 "protocols": ["smb"],
@@ -188,6 +196,7 @@ class AllocationFormTests(TestCase):
     def test_billing_exempt_is_Yes(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -208,6 +217,7 @@ class AllocationFormTests(TestCase):
     def test_billing_exempt_is_No(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -229,6 +239,7 @@ class AllocationFormTests(TestCase):
     def test_billing_cycle_required(self):
         invalid_data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -250,6 +261,7 @@ class AllocationFormTests(TestCase):
     def test_service_rate_valid_options(self):
         invalid_data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -270,6 +282,7 @@ class AllocationFormTests(TestCase):
 
         valid_data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -292,6 +305,7 @@ class AllocationFormTests(TestCase):
     def test_empty_technical_contact(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -313,6 +327,7 @@ class AllocationFormTests(TestCase):
     def test_provided_technical_contact(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -335,6 +350,7 @@ class AllocationFormTests(TestCase):
     def test_empty_billing_contact(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -356,6 +372,7 @@ class AllocationFormTests(TestCase):
     def test_provided_billing_contact(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],

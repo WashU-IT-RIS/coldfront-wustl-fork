@@ -1,4 +1,5 @@
 import os
+import json
 from io import StringIO
 
 from django.test import TestCase
@@ -10,8 +11,8 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
 )
 
-
-STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
+QUMULO_INFO = json.loads(os.environ.get("QUMULO_INFO"))
+STORAGE2_PATH = QUMULO_INFO["Storage2"]["path"]
 
 
 class TestAddBillingExempt(TestCase):

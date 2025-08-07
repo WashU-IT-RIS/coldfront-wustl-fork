@@ -215,7 +215,7 @@ class AllocationForm(forms.Form):
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
 
-        if self.fields[storage_filesystem_path].disabled is False:
+        if self.fields["storage_filesystem_path"].disabled is False:
             storage_type = cleaned_data.get("storage_type")
             storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
             try:

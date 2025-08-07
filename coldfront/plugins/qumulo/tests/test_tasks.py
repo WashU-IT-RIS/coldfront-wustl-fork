@@ -48,10 +48,11 @@ from ldap3.core.exceptions import LDAPInvalidDnError
 import datetime
 import os
 from copy import deepcopy
+import json
 
 
 @patch(
-    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
 )
 class TestPollAdGroup(TestCase):
     def setUp(self) -> None:
@@ -126,7 +127,7 @@ class TestPollAdGroup(TestCase):
 
 
 @patch(
-    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+    "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
 )
 class TestPollAdGroups(TestCase):
     def setUp(self) -> None:
@@ -298,6 +299,7 @@ class TestAddMembersToADGroup(TestCase):
 
         self.form_data = {
             "project_pk": self.project.id,
+            "storage_type": "Storage2",
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
             "storage_ticket": "ITSD-54321",
@@ -851,9 +853,10 @@ class TestResetAcl(TestCase):
 
 class TestIngestQuotasWithDailyUsages(TestCase):
     def setUp(self) -> None:
-        self.original_storage_path = os.environ.get("STORAGE2_PATH")
-        self.STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
-        os.environ["STORAGE2_PATH"] = self.STORAGE2_PATH
+        self.QUMULO_INFO = json.loads(os.environ.get("QUMULO_INFO"))
+        self.original_storage_path = self.QUMULO_INFO["Storage2"]["path"]
+        self.STORAGE2_PATH = self.QUMULO_INFO["Storage2"]["path"]
+        self.QUMULO_INFO["Storage2"]["path"] = self.STORAGE2_PATH
 
         build_data = build_models()
 
@@ -904,7 +907,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        os.environ["STORAGE2_PATH"] = self.original_storage_path
+        self.QUMULO_INFO["Storage2"]["path"] = self.original_storage_path
 
         return super().tearDown()
 
@@ -955,7 +958,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
     def test_after_getting_daily_usages_from_qumulo_api(
         self, create_connection_mock: MagicMock
@@ -995,7 +998,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertGreater(allocation_attribute_usage.history.count(), 1)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
     def test_doesnt_ingest_sub_allocation_data(
         self, create_connection_mock: MagicMock
@@ -1031,7 +1034,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             self.assertEqual(allocation_attribute_usage.history.count(), 1)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
     def test_filtering_out_not_active_allocations(
         self, create_connection_mock: MagicMock

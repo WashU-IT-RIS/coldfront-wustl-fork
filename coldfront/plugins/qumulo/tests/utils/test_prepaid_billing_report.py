@@ -2,6 +2,7 @@ import os
 import csv
 import re
 import hashlib
+import json
 from datetime import datetime, timezone
 
 from django.db import connection
@@ -22,7 +23,8 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 
 from coldfront.plugins.qumulo.utils.prepaid_billing import PrepaidBilling
 
-STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
+QUMULO_INFO = json.loads(os.environ.get("QUMULO_INFO"))
+STORAGE2_PATH = QUMULO_INFO["Storage2"]["path"]
 
 REPORT_COLUMNS = [
     "fields",
@@ -213,7 +215,7 @@ class TestPrepaidBilling(TestCase):
         )
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
     def test_create_multiple_allocations_ingest_usages_generate_billing_report(
         self, create_connection_mock: MagicMock
@@ -288,7 +290,7 @@ class TestPrepaidBilling(TestCase):
         os.remove(filename)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
     def test_create_a_suballocation_ingest_usage_and_generate_billing_report(
         self, create_connection_mock: MagicMock
