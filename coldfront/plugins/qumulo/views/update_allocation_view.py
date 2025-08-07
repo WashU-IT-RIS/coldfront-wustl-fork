@@ -156,14 +156,14 @@ class UpdateAllocationView(AllocationView):
                 defaults={"value": ""},
             )
 
-            current_attribute = AllocationAttribute.objects.get(
-                allocation_attribute_type__name=change[0], allocation=allocation
-            )
+            # current_attribute = AllocationAttribute.objects.get(
+            #     allocation_attribute_type__name=change[0], allocation=allocation
+            # )
 
             comparand = (
-                int(current_attribute.value)
+                int(attribute.value)
                 if type(change[1]) is int
-                else current_attribute.value
+                else attribute.value
             )
             if comparand != change[1]:
                 new_values.append((change[0], change[1]))
