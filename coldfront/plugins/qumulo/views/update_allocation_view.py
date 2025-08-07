@@ -146,19 +146,20 @@ class UpdateAllocationView(AllocationView):
     ):
         attribute_changes = list(zip(attributes_to_check, form_values))
         new_values = []
-        for attribute_name in attributes_to_check:
+
+        for change in attribute_changes:
             attribute, _ = AllocationAttribute.objects.get_or_create(
                 allocation_attribute_type=AllocationAttributeType.objects.get(
-                    name=attribute_name
+                    name=change[0]
                 ),
                 allocation=allocation,
                 defaults={"value": ""},
             )
-        for change in attribute_changes:
+
             current_attribute = AllocationAttribute.objects.get(
                 allocation_attribute_type__name=change[0], allocation=allocation
             )
-            # storage quota needs to be compared as an integer
+
             comparand = (
                 int(current_attribute.value)
                 if type(change[1]) is int
@@ -166,6 +167,7 @@ class UpdateAllocationView(AllocationView):
             )
             if comparand != change[1]:
                 new_values.append((change[0], change[1]))
+
         return new_values
 
     def _updated_fields_handler(
@@ -244,10 +246,10 @@ class UpdateAllocationView(AllocationView):
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
         create_group_time = datetime.now()
-        if users_to_add:
-            async_task(
-                addMembersToADGroup, users_to_add, access_allocation, create_group_time
-            )
+        
+        async_task(
+            addMembersToADGroup, users_to_add, access_allocation, create_group_time
+        )
 
         users_to_remove = set(allocation_usernames) - set(access_users)
         for allocation_username in users_to_remove:
