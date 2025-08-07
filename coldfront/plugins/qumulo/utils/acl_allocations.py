@@ -17,6 +17,7 @@ from pathlib import PurePath
 
 import copy
 import os
+import json
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -92,7 +93,8 @@ class AclAllocations:
 
     @staticmethod
     def is_base_allocation(path: str):
-        STORAGE2_PATH = os.environ.get("STORAGE2_PATH").rstrip("/")
+        QUMULO_INFO = json.loads(os.environ.get("QUMULO_INFO"))
+        STORAGE2_PATH = QUMULO_INFO["Storage2"]["path"].rstrip("/")
 
         purePath = PurePath(path)
 
