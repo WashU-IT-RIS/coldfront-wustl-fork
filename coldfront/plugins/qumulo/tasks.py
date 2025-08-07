@@ -107,6 +107,7 @@ def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
     storage_info = "Storage2"
+    # STORAGE2_PATH = json.loads(os.environ.get("QUMULO_INFO"))["Storage2"]["path"].rstrip("/") HERE just for findability
     qumulo_api = StorageControllerFactory().create_connection(storage_info)
     quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
     base_allocation_quota_usages = list(
