@@ -16,6 +16,8 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     get_mock_quota_base_allocations,
     get_mock_quota_sub_allocations,
     get_mock_quota_response,
+    mock_qumulo_info,
+    default_form_data,
 )
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_group,
@@ -56,6 +58,13 @@ import json
 )
 class TestPollAdGroup(TestCase):
     def setUp(self) -> None:
+        patch.dict(
+            "os.environ",
+            {
+                "QUMULO_INFO": json.dumps(mock_qumulo_info),
+            },
+        ).start()
+
         self.client = Client()
         build_data = build_models()
 
@@ -63,6 +72,11 @@ class TestPollAdGroup(TestCase):
         self.user = build_data["user"]
 
         return super().setUp()
+
+    def tearDown(self):
+        patch.stopall()
+
+        return super().tearDown()
 
     def test_poll_ad_group_set_status_to_active_on_success(
         self, create_connection_mock: MagicMock
@@ -290,6 +304,13 @@ class TestStorageAllocationStatuses(TestCase):
 @patch("coldfront.plugins.qumulo.tasks.ActiveDirectoryAPI")
 class TestAddMembersToADGroup(TestCase):
     def setUp(self) -> None:
+        patch.dict(
+            "os.environ",
+            {
+                "QUMULO_INFO": json.dumps(mock_qumulo_info),
+            },
+        ).start()
+
         self.client = Client()
 
         build_data = build_models()
@@ -297,29 +318,19 @@ class TestAddMembersToADGroup(TestCase):
         self.project: Project = build_data["project"]
         self.user: User = build_data["user"]
 
-        self.form_data = {
-            "project_pk": self.project.id,
-            "storage_type": "Storage2",
-            "storage_filesystem_path": "foo",
-            "storage_export_path": "bar",
-            "storage_ticket": "ITSD-54321",
-            "storage_name": "baz",
-            "storage_quota": 7,
-            "protocols": ["nfs"],
-            "rw_users": ["foo"],
-            "ro_users": ["test1"],
-            "cost_center": "Uncle Pennybags",
-            "billing_exempt": "No",
-            "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
-            "service_rate": "general",
-        }
+        self.form_data = default_form_data.copy()
+        self.form_data["project_pk"] = self.project.id
 
         self.client.force_login(self.user)
 
         self.create_allocation = AllocationService.create_new_allocation
 
         return super().setUp()
+
+    def tearDown(self):
+        patch.stopall()
+
+        return super().tearDown()
 
     def test_checks_single_user(
         self,
@@ -853,18 +864,21 @@ class TestResetAcl(TestCase):
 
 class TestIngestQuotasWithDailyUsages(TestCase):
     def setUp(self) -> None:
-        self.QUMULO_INFO = json.loads(os.environ.get("QUMULO_INFO"))
-        self.original_storage_path = self.QUMULO_INFO["Storage2"]["path"]
-        self.STORAGE2_PATH = self.QUMULO_INFO["Storage2"]["path"]
-        self.QUMULO_INFO["Storage2"]["path"] = self.STORAGE2_PATH
+        patch.dict(
+            "os.environ",
+            {
+                "QUMULO_INFO": json.dumps(mock_qumulo_info),
+            },
+        ).start()
 
+        self.storage_path = list(mock_qumulo_info.values())[0]["path"]
         build_data = build_models()
 
         self.project = build_data["project"]
         self.user = build_data["user"]
 
         self.mock_quota_response = get_mock_quota_response(
-            get_mock_quota_data(self.STORAGE2_PATH), self.STORAGE2_PATH
+            get_mock_quota_data(self.storage_path), self.storage_path
         )
 
         self.status_active = AllocationStatusChoiceFactory(name="Active")
@@ -873,7 +887,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         )
 
         for index, (path, value) in enumerate(
-            get_mock_quota_data(self.STORAGE2_PATH).items()
+            get_mock_quota_data(self.storage_path).items()
         ):
             form_data = {
                 "storage_filesystem_path": path.rstrip("/"),
@@ -907,7 +921,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         return super().setUp()
 
     def tearDown(self) -> None:
-        self.QUMULO_INFO["Storage2"]["path"] = self.original_storage_path
+        patch.stopall()
 
         return super().tearDown()
 
@@ -928,7 +942,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         os.environ["QUMULO_RESULT_SET_PAGE_LIMIT"] = old_page_limit
 
     def test_after_allocation_create_usage_is_zero(self) -> None:
-        for path in get_mock_quota_data(self.STORAGE2_PATH).keys():
+        for path in get_mock_quota_data(self.storage_path).keys():
             allocation_attribute_usage = None
             try:
                 storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
@@ -972,7 +986,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         except:
             self.fail("Ingest quotas raised exception")
 
-        base_quotas = get_mock_quota_base_allocations(self.STORAGE2_PATH)
+        base_quotas = get_mock_quota_base_allocations(self.storage_path)
         for path, quota_data in base_quotas.items():
             storage_filesystem_path_attribute = AllocationAttribute.objects.select_related(
                 "allocation"
@@ -1012,7 +1026,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         except:
             self.fail("Ingest quotas raised exception")
 
-        sub_quotas = get_mock_quota_sub_allocations(self.STORAGE2_PATH)
+        sub_quotas = get_mock_quota_sub_allocations(self.storage_path)
         for path in sub_quotas.keys():
             allocation_attribute_usage = None
             storage_filesystem_path_attribute = AllocationAttribute.objects.get(
@@ -1040,7 +1054,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         self, create_connection_mock: MagicMock
     ) -> None:
         index = 1
-        path = f"{self.STORAGE2_PATH}/status_test"
+        path = f"{self.storage_path}/status_test"
         limit = "100000000000000"
         capacity_usage = "37089837494272"
 

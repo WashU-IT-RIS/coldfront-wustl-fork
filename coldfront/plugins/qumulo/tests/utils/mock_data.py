@@ -34,6 +34,7 @@ default_form_data = {
     "storage_ticket": "ITSD-54321",
     "storage_name": "baz",
     "storage_quota": 7,
+    "storage_type": "Storage2",
     "protocols": ["nfs"],
     "rw_users": ["test"],
     "ro_users": ["test1"],
@@ -42,6 +43,23 @@ default_form_data = {
     "department_number": "Time Travel Services",
     "billing_cycle": "monthly",
     "service_rate": "general",
+}
+
+mock_qumulo_info = {
+    "Storage2": {
+        "path": "/storage2/fs1",
+        "host": "foo.bar.com",
+        "port": "8000",
+        "user": "foo",
+        "pass": "bar",
+    },
+    "Storage3": {
+        "host": "0.0.0.0",
+        "port": "8000",
+        "user": "bar",
+        "pass": "foo",
+        "path": "/storage2-dev/fs1",
+    },
 }
 
 

@@ -1,8 +1,11 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
 
+import os
 import json
 import logging
+import time
+from datetime import datetime
 
 from coldfront.config.env import ENV
 from coldfront.core.allocation.models import (
@@ -13,7 +16,7 @@ from coldfront.core.allocation.models import (
     AllocationAttributeUsage,
     AllocationLinkage,
 )
-from coldfront.core.resource.models import Resource, ResourceType
+from coldfront.core.resource.models import Resource
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
 
@@ -25,10 +28,6 @@ from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerF
 
 from qumulo.lib.request import RequestError
 
-import time
-from datetime import datetime
-
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 SECONDS_IN_AN_HOUR = 60 * 60
@@ -106,18 +105,20 @@ def conditionally_update_storage_allocation_statuses() -> None:
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
-    storage_info = "Storage2"
-    # STORAGE2_PATH = json.loads(os.environ.get("QUMULO_INFO"))["Storage2"]["path"].rstrip("/") HERE just for findability
-    qumulo_api = StorageControllerFactory().create_connection(storage_info)
-    quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
-    base_allocation_quota_usages = list(
-        filter(
-            lambda quota_usage: AclAllocations.is_base_allocation(
-                quota_usage["path"], storage_info
-            ),
-            quota_usages,
+    connection_info = json.loads(os.environ.get("QUMULO_INFO", "{}"))
+
+    base_allocation_quota_usages = []
+    for storage_key in connection_info.keys():
+        qumulo_api = StorageControllerFactory().create_connection(storage_key)
+        quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
+        base_allocation_quota_usages += list(
+            filter(
+                lambda quota_usage: AclAllocations.is_base_allocation(
+                    quota_usage["path"], storage_key
+                ),
+                quota_usages,
+            )
         )
-    )
 
     __set_daily_quota_usages(base_allocation_quota_usages, logger)
     __validate_results(base_allocation_quota_usages, logger)
