@@ -54,7 +54,6 @@ class TestAclAllocations(TestCase):
             os.environ,
             {
                 "QUMULO_INFO": json.dumps({"Storage2": {"path": self.storage2_path}}),
-                "STORAGE2_PATH": self.storage2_path,
             },
         ).start()
 
@@ -267,6 +266,7 @@ class TestAclAllocations(TestCase):
                 ro_groupname=f"{group_name_base}-ro",
                 qumulo_api=mock_qumulo_api,
                 is_base_allocation=True,
+                resource_name="Storage2",
             )
 
     def test_set_allocation_acls_sets_sub_acl(self):
@@ -376,6 +376,7 @@ class TestAclAllocations(TestCase):
             ro_groupname=ro_groupname,
             qumulo_api=mock_qumulo_api,
             is_base_allocation=True,
+            resource_name="Storage2",
         )
 
         mock_set_acl_v2.assert_called_once()
@@ -414,6 +415,7 @@ class TestAclAllocations(TestCase):
             ro_groupname=ro_groupname,
             qumulo_api=mock_qumulo_api,
             is_base_allocation=True,
+            resource_name="Storage2",
         )
 
         mock_set_acl_v2.assert_called_once()
@@ -445,6 +447,7 @@ class TestAclAllocations(TestCase):
             ro_groupname=ro_groupname,
             qumulo_api=mock_qumulo_api,
             is_base_allocation=False,
+            resource_name="Storage2",
         )
 
         mock_set_acl_v2.assert_called()
