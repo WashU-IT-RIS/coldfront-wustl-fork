@@ -156,10 +156,6 @@ class UpdateAllocationView(AllocationView):
                 defaults={"value": ""},
             )
 
-            # current_attribute = AllocationAttribute.objects.get(
-            #     allocation_attribute_type__name=change[0], allocation=allocation
-            # )
-
             comparand = (
                 int(attribute.value)
                 if type(change[1]) is int
