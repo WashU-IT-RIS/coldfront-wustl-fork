@@ -2,7 +2,7 @@ import os
 import json
 
 from django.test import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from django.contrib.auth.models import Permission
 
