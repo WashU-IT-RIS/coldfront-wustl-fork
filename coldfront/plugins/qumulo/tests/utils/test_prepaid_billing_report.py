@@ -19,12 +19,13 @@ from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
+    mock_qumulo_info,
 )
 
 from coldfront.plugins.qumulo.utils.prepaid_billing import PrepaidBilling
 
-QUMULO_INFO = json.loads(os.environ.get("QUMULO_INFO"))
-STORAGE2_PATH = QUMULO_INFO["Storage2"]["path"]
+QUMULO_INFO = mock_qumulo_info
+storage2_path = QUMULO_INFO["Storage2"]["path"]
 
 REPORT_COLUMNS = [
     "fields",
@@ -68,8 +69,8 @@ def construct_allocation_form_data(quota_tb: int, service_rate_category: str):
         "storage_name": f"{quota_tb}tb-{service_rate_category}",
         "storage_quota": str(quota_tb),
         "protocols": ["smb"],
-        "storage_filesystem_path": f"{STORAGE2_PATH}/{quota_tb}tb-{service_rate_category}",
-        "storage_export_path": f"{STORAGE2_PATH}/{quota_tb}tb-{service_rate_category}",
+        "storage_filesystem_path": f"{storage2_path}/{quota_tb}tb-{service_rate_category}",
+        "storage_export_path": f"{storage2_path}/{quota_tb}tb-{service_rate_category}",
         "rw_users": ["test"],
         "ro_users": ["test1"],
         "storage_ticket": "ITSD-1234",
@@ -137,7 +138,7 @@ def mock_get_multiple_quotas() -> str:
     json_id = 100
     for name, quota, usage in mock_get_names_quotas_usages():
         usage_in_json = construct_usage_data_in_json(
-            f"{STORAGE2_PATH}/{name}", quota, usage
+            f"{storage2_path}/{name}", quota, usage
         )
         usage_in_json[id] = json_id
         usages_in_json.append(usage_in_json)
@@ -158,13 +159,13 @@ def mock_get_quota() -> str:
     usage_in_json = [
         {
             "id": "101",
-            "path": f"{STORAGE2_PATH}/{name}/",
+            "path": f"{storage2_path}/{name}/",
             "limit": f"{quota}",
             "capacity_usage": f"{usage}",
         },
         {
             "id": "102",
-            "path": f"{STORAGE2_PATH}/{name}/Active/{suballocation_name}",
+            "path": f"{storage2_path}/{name}/Active/{suballocation_name}",
             "limit": f"{suballocation_quota}",
             "capacity_usage": f"{suballocation_usage}",
         },
@@ -175,6 +176,7 @@ def mock_get_quota() -> str:
     }
 
 
+@patch.dict("os.environ", {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class TestPrepaidBilling(TestCase):
     def setUp(self) -> None:
         self.client = Client()
