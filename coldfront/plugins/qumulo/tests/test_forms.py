@@ -6,16 +6,14 @@ from unittest.mock import patch, MagicMock
 
 from django.contrib.auth.models import Permission
 
-from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
+from coldfront.core.allocation.models import AllocationStatusChoice
 from coldfront.core.project.models import Project, ProjectStatusChoice
 from coldfront.core.user.models import User
 from coldfront.core.field_of_science.models import FieldOfScience
 
 from coldfront.plugins.qumulo.forms.ProjectCreateForm import ProjectCreateForm
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
-from coldfront.plugins.qumulo.forms.UpdateAllocationForm import (
-    UpdateAllocationForm
-)
+from coldfront.plugins.qumulo.forms.UpdateAllocationForm import UpdateAllocationForm
 from coldfront.plugins.qumulo.tests.helper_classes.filesystem_path import (
     PathExistsMock,
     ValidFormPathMock,
@@ -399,6 +397,7 @@ class AllocationFormTests(TestCase):
         form = AllocationForm(data=valid_data, user_id=self.user.id)
         self.assertTrue(form.fields["rw_users"].required)
 
+
 class AllocationFormProjectChoiceTests(TestCase):
     def setUp(self):
         build_models_without_project()
@@ -515,6 +514,7 @@ class ProjectFormTests(TestCase):
         form = ProjectCreateForm(data=valid_data, user_id="admin")
         self.assertTrue(form.is_valid())
 
+
 class UpdateAllocationFormTests(TestCase):
     def setUp(self):
         build_data = build_models()
@@ -536,11 +536,7 @@ class UpdateAllocationFormTests(TestCase):
             "service_rate": "consumption",
             "billing_cycle": "monthly",
         }
-        self.allocation = create_allocation(
-            self.project1,
-            self.user,
-            self.data
-        )
+        self.allocation = create_allocation(self.project1, self.user, self.data)
 
     def tearDown(self):
         return super().tearDown()
@@ -550,9 +546,7 @@ class UpdateAllocationFormTests(TestCase):
         self.assertTrue(form.fields["rw_users"].required)
 
     def test_ready_for_deletion_rw_users_not_required(self):
-        rfd_status = AllocationStatusChoice.objects.filter(
-            name="Ready for deletion"
-        )[0]
+        rfd_status = AllocationStatusChoice.objects.filter(name="Ready for deletion")[0]
         self.allocation.status = rfd_status
         self.allocation.save()
         form = UpdateAllocationForm(data=self.data, user_id=self.user.id)

@@ -5,7 +5,6 @@ from typing import Any
 from django import forms
 
 from coldfront.core.allocation.models import (
-    Allocation,
     AllocationAttribute,
     AllocationStatusChoice,
 )
@@ -133,12 +132,12 @@ class AllocationForm(forms.Form):
     def _rw_user_required(self, **kwargs) -> bool:
         required = True
         if self.class_name == "UpdateAllocationForm":
-            for key in ['data', 'initial']:
+            for key in ["data", "initial"]:
                 storage_name = kwargs.get(key, {}).get("storage_name", False)
                 if storage_name:
-                    allocation = AllocationAttribute.objects.filter(
-                        value=storage_name
-                    )[0].allocation
+                    allocation = AllocationAttribute.objects.filter(value=storage_name)[
+                        0
+                    ].allocation
                     ready_for_deletion_id = AllocationStatusChoice.objects.get(
                         name="Ready for deletion"
                     ).id
