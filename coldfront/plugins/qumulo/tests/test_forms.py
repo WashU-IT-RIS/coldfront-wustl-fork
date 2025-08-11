@@ -546,7 +546,10 @@ class UpdateAllocationFormTests(TestCase):
         self.assertTrue(form.fields["rw_users"].required)
 
     def test_ready_for_deletion_rw_users_not_required(self):
-        rfd_status = AllocationStatusChoice.objects.filter(name="Ready for deletion")[0]
+        rfd_status = AllocationStatusChoice \
+                .objects \
+                .filter(name="Ready for deletion") \
+                .first()
         self.allocation.status = rfd_status
         self.allocation.save()
         form = UpdateAllocationForm(data=self.data, user_id=self.user.id)
