@@ -542,7 +542,11 @@ class UpdateAllocationFormTests(TestCase):
         return super().tearDown()
 
     def test_default_rw_users_required(self):
-        form = UpdateAllocationForm(data=self.data, user_id=self.user.id)
+        form = UpdateAllocationForm(
+            allocation_id=self.allocation.id,
+            data=self.data,
+            user_id=self.user.id
+        )
         self.assertTrue(form.fields["rw_users"].required)
 
     def test_ready_for_deletion_rw_users_not_required(self):
