@@ -57,7 +57,7 @@ class UpdateAllocationView(AllocationView):
         kwargs = super(UpdateAllocationView, self).get_form_kwargs()
         kwargs["user_id"] = self.request.user.id
 
-        allocation_id = self.kwargs.get("allocation_id")
+        kwargs["allocation_id"] = allocation_id = self.kwargs.get("allocation_id")
         allocation = Allocation.objects.get(pk=allocation_id)
         allocation_attrs = AllocationAttribute.objects.filter(allocation=allocation_id)
 
