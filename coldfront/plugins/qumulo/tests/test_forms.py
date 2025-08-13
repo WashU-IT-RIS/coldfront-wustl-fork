@@ -543,9 +543,9 @@ class UpdateAllocationFormTests(TestCase):
 
     def test_default_rw_users_required(self):
         form = UpdateAllocationForm(
-            allocation_id=self.allocation.id,
+            allocation_status_name=self.allocation.status.name,
             data=self.data,
-            user_id=self.user.id
+            user_id=self.user.id,
         )
         self.assertTrue(form.fields["rw_users"].required)
 
@@ -556,6 +556,8 @@ class UpdateAllocationFormTests(TestCase):
         self.allocation.status = rfd_status
         self.allocation.save()
         form = UpdateAllocationForm(
-            allocation_id=self.allocation.id, data=self.data, user_id=self.user.id
+            allocation_status_name=self.allocation.status.name,
+            data=self.data,
+            user_id=self.user.id,
         )
         self.assertFalse(form.fields["rw_users"].required)
