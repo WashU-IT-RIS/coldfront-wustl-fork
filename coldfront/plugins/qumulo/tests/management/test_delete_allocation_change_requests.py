@@ -37,17 +37,17 @@ class TestDeleteAllocationChangeRequests(TestCase):
             "service_rate": "consumption",
         }
 
-        alloc = create_allocation(self.project, self.user, self.form_data)
+        self.alloc = create_allocation(self.project, self.user, self.form_data)
 
         allocation_change_request = AllocationChangeRequest.objects.create(
-                allocation=alloc,
+                allocation=self.alloc,
                 status=AllocationChangeStatusChoice.objects.get(name="Pending"),
                 justification="updating",
                 notes="updating",
                 end_date_extension=10,
             )
         attribute = AllocationAttribute.objects.get(
-            allocation=alloc,
+            allocation=self.alloc,
             allocation_attribute_type__name="storage_ticket",
         )
         AllocationAttributeChangeRequest.objects.create(
@@ -60,3 +60,15 @@ class TestDeleteAllocationChangeRequests(TestCase):
         call_command("delete_allocation_change_requests")
         pending_requests = AllocationChangeRequest.objects.filter(status__name='Pending')
         self.assertEqual(0, pending_requests.count())
+
+    def test_only_deletes_pending_change_requests(self):
+        AllocationChangeRequest.objects.create(
+            allocation=self.alloc,
+            status=AllocationChangeStatusChoice.objects.get(name="Approved"),
+            justification="updating",
+            notes="updating",
+            end_date_extension=10,
+        )
+        call_command("delete_allocation_change_requests")
+        pending_requests = AllocationChangeRequest.objects.filter(status__name='Approved')
+        self.assertEqual(1, pending_requests.count())
