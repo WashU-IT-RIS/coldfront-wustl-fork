@@ -115,10 +115,7 @@ class AllocationForm(forms.Form):
         label="ITSD Ticket",
         validators=[validate_ticket],
     )
-    rw_users = ADUserField(
-        label="Read/Write Users",
-        initial="",
-    )
+    rw_users = ADUserField(label="Read/Write Users", initial="")
     ro_users = ADUserField(label="Read Only Users", initial="", required=False)
 
     def _upper(self, val: Any) -> Any:
