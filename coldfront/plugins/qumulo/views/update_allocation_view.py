@@ -59,6 +59,7 @@ class UpdateAllocationView(AllocationView):
 
         allocation_id = self.kwargs.get("allocation_id")
         allocation = Allocation.objects.get(pk=allocation_id)
+        kwargs["allocation_status_name"] = allocation.status.name
         allocation_attrs = AllocationAttribute.objects.filter(allocation=allocation_id)
 
         form_data = {
