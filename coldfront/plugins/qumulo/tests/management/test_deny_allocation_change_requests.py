@@ -11,9 +11,9 @@ from coldfront.core.allocation.models import (
 from coldfront.plugins.qumulo.tests.utils.mock_data import create_allocation, build_models
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
-from coldfront.plugins.qumulo.management.commands.delete_allocation_change_requests import Command
+from coldfront.plugins.qumulo.management.commands.deny_allocation_change_requests import Command
 
-class TestDeleteAllocationChangeRequests(TestCase):
+class TestDenyAllocationChangeRequests(TestCase):
     def setUp(self):
         build_data = build_models()
 
@@ -56,12 +56,12 @@ class TestDeleteAllocationChangeRequests(TestCase):
                     new_value="ITSD-54322",
                 )
 
-    def test_deletes_pending_allocation_change_requests(self):
-        call_command("delete_allocation_change_requests")
-        pending_requests = AllocationChangeRequest.objects.filter(status__name='Pending')
-        self.assertEqual(0, pending_requests.count())
+    def test_denies_pending_allocation_change_requests(self):
+        call_command("deny_allocation_change_requests")
+        pending_requests = AllocationChangeRequest.objects.filter(status__name='Denied')
+        self.assertEqual(1, pending_requests.count())
 
-    def test_only_deletes_pending_change_requests(self):
+    def test_only_denies_pending_change_requests(self):
         AllocationChangeRequest.objects.create(
             allocation=self.alloc,
             status=AllocationChangeStatusChoice.objects.get(name="Approved"),
@@ -69,6 +69,8 @@ class TestDeleteAllocationChangeRequests(TestCase):
             notes="updating",
             end_date_extension=10,
         )
-        call_command("delete_allocation_change_requests")
-        pending_requests = AllocationChangeRequest.objects.filter(status__name='Approved')
-        self.assertEqual(1, pending_requests.count())
+        call_command("deny_allocation_change_requests")
+        denied_requests = AllocationChangeRequest.objects.filter(status__name='Denied')
+        approved_requests = AllocationChangeRequest.objects.filter(status__name='Approved')
+        self.assertEqual(1, denied_requests.count())
+        self.assertEqual(1, approved_requests.count())

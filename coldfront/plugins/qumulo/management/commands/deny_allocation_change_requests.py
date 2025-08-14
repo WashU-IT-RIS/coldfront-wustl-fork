@@ -7,5 +7,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         pending_requests = AllocationChangeRequest.objects.filter(status__name='Pending')
         count = pending_requests.count()
-        pending_requests.delete()
-        print(f"Deleted {count} pending allocation change request(s).")
+        pending_requests.update(status__name='Denied')
+        print(f"Denied {count} pending allocation change request(s).")
