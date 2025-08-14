@@ -34,7 +34,7 @@ class TestFileSystemService(TestCase):
         return super().setUp()
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
     def test_get_file_system_stats_when_api_call_successful(
         self, mock_create_connection: MagicMock
@@ -49,7 +49,7 @@ class TestFileSystemService(TestCase):
         self.assertDictEqual(self.expected_result_successful, actual_result)
 
     @patch(
-        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory().create_connection"
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
     def test_get_file_system_stats_when_api_call_unsuccessful(
         self, mock_create_connection: MagicMock

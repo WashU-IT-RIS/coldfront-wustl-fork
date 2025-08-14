@@ -1,5 +1,6 @@
 import os
 import re
+import json
 
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy
@@ -43,11 +44,11 @@ def validate_ad_users(ad_users: list[str]):
         )
 
 
-def validate_filesystem_path_unique(value: str):
-
-    storage_root = os.environ.get("STORAGE2_PATH").strip("/")
-    full_path = f"/{storage_root}/{value}"
-    qumulo_api = StorageControllerFactory().create_connection("Storage2")
+def validate_filesystem_path_unique(value: str, resource_type: str):
+    connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+    storage_dir = connection_info[resource_type]["path"].strip("/")
+    full_path = f"/{storage_dir}/{value}"
+    qumulo_api = StorageControllerFactory().create_connection(resource_type)
 
     reserved_statuses = AllocationStatusChoice.objects.filter(
         name__in=["Pending", "Active", "New"]
@@ -109,11 +110,11 @@ def validate_leading_forward_slash(value: str):
         )
 
 
-def validate_parent_directory(value: str):
-
-    storage_root = os.environ.get("STORAGE2_PATH").strip("/")
+def validate_parent_directory(value: str, resource_type: str):
+    connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+    storage_root = connection_info[resource_type]["path"].strip("/")
     full_path = f"/{storage_root}/{value}"
-    qumulo_api = StorageControllerFactory().create_connection("Storage2")
+    qumulo_api = StorageControllerFactory().create_connection(resource_type)
     sub_directories = full_path.strip("/").split("/")
 
     for depth in range(1, len(sub_directories), 1):

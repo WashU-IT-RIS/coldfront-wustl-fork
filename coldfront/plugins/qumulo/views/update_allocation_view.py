@@ -61,8 +61,10 @@ class UpdateAllocationView(AllocationView):
         allocation = Allocation.objects.get(pk=allocation_id)
         allocation_attrs = AllocationAttribute.objects.filter(allocation=allocation_id)
 
+        resource = allocation.resources.first()
         form_data = {
             "project_pk": allocation.project.pk,
+            "storage_type": resource.name,
         }
 
         allocation_attribute_keys = [

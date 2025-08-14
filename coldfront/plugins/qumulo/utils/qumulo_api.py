@@ -4,8 +4,6 @@ import re
 import time
 from typing import Dict
 import urllib.parse
-import json
-import environ
 
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo import constants
