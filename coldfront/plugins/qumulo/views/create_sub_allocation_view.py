@@ -28,7 +28,11 @@ class CreateSubAllocationView(UpdateAllocationView):
 
         form_data = {
             "project_pk": parent_allocation.project.pk,
+<<<<<<< HEAD
             "storage_type": parent_allocation.get_attribute(name="storage_type"),
+=======
+            "storage_type": parent_allocation.resources.first().name,
+>>>>>>> origin/storage3
             "parent_allocation_name": parent_allocation.get_attribute(
                 name="storage_name"
             ),
