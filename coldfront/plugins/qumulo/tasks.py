@@ -38,7 +38,12 @@ def poll_ad_group(
     acl_allocation: Allocation,
     expiration_seconds: int = SECONDS_IN_A_DAY,
 ) -> None:
-    qumulo_api = StorageControllerFactory().create_connection("Storage2")
+    storage_allocation = Allocation.objects.get(
+        pk=acl_allocation.get_attribute(name="storage_allocation_pk")
+    )
+    qumulo_api = StorageControllerFactory().create_connection(
+        storage_allocation.resources.first().name
+    )
 
     storage_acl_name = acl_allocation.get_attribute("storage_acl_name")
     group_dn = ActiveDirectoryAPI.generate_group_dn(storage_acl_name)
@@ -374,7 +379,9 @@ class ResetAcl:
     # or dependent objects (SSL-related) "couldn't be pickled"
     def _setup_qumulo_api(self):
         if self.qumulo_api is None:
-            self.qumulo_api = StorageControllerFactory().create_connection("Storage2")
+            self.qumulo_api = StorageControllerFactory().create_connection(
+                self.allocation.resources.first().name
+            )
 
     def _set_directory_content_acls(self, contents):
         self._setup_qumulo_api()
