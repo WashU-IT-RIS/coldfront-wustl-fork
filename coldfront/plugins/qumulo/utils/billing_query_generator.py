@@ -133,26 +133,17 @@ class BillingGenerator:
                 NULL,
                 {monthly_specific_columns}
                 report.rate rate,
-                report.service_unit unit
+                report.service_unit unit,
+                report.subsidized subsidized
             FROM (
                 SELECT
                     '{args["delivery_date"]}' delivery_date,
                     data.service_unit,
+                    data.subsidized,
                     data.storage_name,
                     data.service_name,
                     data.sponsor,
-                    CASE service_rate_category
-                        WHEN 'consumption' THEN
-                            CASE subsidized
-                                WHEN TRUE THEN
-                                    CASE (billing_amount_tb - 5) > 0
-                                        WHEN TRUE THEN (billing_amount_tb -5)
-                                        ELSE 0
-                                    END
-                                ELSE billing_amount_tb
-                            END
-                        ELSE billing_amount_tb
-                    END billing_amount,
+                    billing_amount_tb billing_amount,
                     data.rate,
                     data.service_rate_category,
                     data.department_number,
@@ -169,7 +160,7 @@ class BillingGenerator:
                         cost_center,
                         {prepaid_custom_columns_from_select_lowest_level}
                         'monthly' billing_cycle,
-                        TRUE subsidized,
+                        subsidized,
                         FALSE exempt,
                         CASE service_rate_category
                             {additional_category_case_monthly}
@@ -201,6 +192,7 @@ class BillingGenerator:
                     LEFT JOIN (SELECT aa.allocation_id, aa.value department_number FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='department_number') AS department_number ON a.id=department_number.allocation_id
                     LEFT JOIN (SELECT aa.allocation_id, aa.value service_rate_category FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='service_rate') AS service_rate_category ON a.id=service_rate_category.allocation_id
                     LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value storage_quota FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='storage_quota') AS storage_quota ON a.id=storage_quota.allocation_id
+                    LEFT JOIN (SELECT aa.allocation_id, aa.id, aa.value subsidized FROM allocation_allocationattribute aa JOIN allocation_allocationattributetype aat ON aa.allocation_attribute_type_id=aat.id WHERE aat.name='subsidized') AS subsidized ON a.id=subsidized.allocation_id
                     {join_clause}
                     JOIN allocation_allocation_resources ar ON ar.allocation_id=a.id
                     JOIN resource_resource r ON r.id=ar.resource_id
