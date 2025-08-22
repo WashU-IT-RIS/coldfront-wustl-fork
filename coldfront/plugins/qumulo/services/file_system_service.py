@@ -7,10 +7,10 @@ PETABYTE_IN_BYTES = 1e15
 class FileSystemService:
 
     @staticmethod
-    def get_file_system_stats() -> dict:
+    def get_file_system_stats(storage_resource: str) -> dict:
         file_system_stats = (
             StorageControllerFactory()
-            .create_connection("Storage2")
+            .create_connection(storage_resource)
             .get_file_system_stats()
         )
         total_size = FileSystemService._get_size_in_pt(

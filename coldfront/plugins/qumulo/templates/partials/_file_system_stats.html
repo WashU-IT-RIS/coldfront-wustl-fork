@@ -1,22 +1,28 @@
-<div id="file-system-stats" class="stats-widget alert alert-secondary" role="alert">
-    <div class="stats-heading">Storage-2 Stats</div>
-    <div class="stats-item">
-        Total Size: {{ file_system_stats.total_size }} PB
+<div id="file-system-stats" class="stats-widget alert alert-secondary" role="alert" style="display: flex;">
+    <div>
+        <p class="stats-heading">Storage-2 Stats</p>
+        <p class="stats-item">
+            Total Size: {{ file_system_stats_storage2.total_size }} PB
+        </p>
+        <p class="stats-item">
+            Free Size: {{ file_system_stats_storage2.free_size }} PB
+        </p>
+        <p class="stats-item">
+            Snapshot Size: {{ file_system_stats_storage2.snapshot_size }} PB
+        </p>
     </div>
-    <div class="stats-item">
-        Free Size: {{ file_system_stats.free_size }} PB
-    </div>
-    <div class="stats-item">
-        Snapshot Size: {{ file_system_stats.snapshot_size }} PB
-    </div>
-    <div class="stats-heading">Storage-3 Stats</div>
-    <div class="stats-item">
-        Total Size: {{ file_system_stats.total_size }} PB
-    </div>
-    <div class="stats-item">
-        Free Size: {{ file_system_stats.free_size }} PB
-    </div>
-    <div class="stats-item">
-        Snapshot Size: {{ file_system_stats.snapshot_size }} PB
+    <div style="width: 40px;"></div>
+    <div>
+        <p class="stats-heading">Storage-3 Stats</p>
+        <p class="stats-item">
+            Total Size: {{ file_system_stats_storage3.total_size }} PB
+        </p>
+        <p class="stats-item">
+            Free Size: {{ file_system_stats_storage3.free_size }} PB
+        </p>
+        <p class="stats-item">
+            Snapshot Size: {{ file_system_stats_storage3.snapshot_size }} PB
+        </p>
+
     </div>
 </div>
