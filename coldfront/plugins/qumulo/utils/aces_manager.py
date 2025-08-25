@@ -238,7 +238,9 @@ class AcesManager(object):
                 "type": "ALLOWED",
                 "trustee": {"name": "Everyone"},
                 "rights": [
-                    "READ",
+                    "READ_EA",
+                    "WRITE_EA",
+                    "WRITE_ATTR",
                     "EXECUTE",
                 ],
             },
