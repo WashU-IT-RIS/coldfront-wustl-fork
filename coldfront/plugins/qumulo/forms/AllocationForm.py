@@ -25,6 +25,7 @@ from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 class AllocationForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user_id = kwargs.pop("user_id")
+        self.allocation_status_name = self._upper(kwargs.pop("allocation_status_name", None))
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
 
