@@ -5,7 +5,6 @@ from django import forms
 
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
-        allocation_status_name = self._upper(kwargs.pop("allocation_status_name", None))
         super().__init__(*args, **kwargs)
 
         self.fields["storage_name"].disabled = True
@@ -21,5 +20,5 @@ class UpdateAllocationForm(AllocationForm):
         )
         self.fields["prepaid_expiration"].disabled = True
         self.fields["rw_users"].required = (
-            allocation_status_name != "READY FOR DELETION"
+            self.allocation_status_name != "READY FOR DELETION"
         )
