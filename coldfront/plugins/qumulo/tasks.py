@@ -28,6 +28,7 @@ import time
 from datetime import datetime
 
 from typing import Optional
+import os
 
 logger = logging.getLogger(__name__)
 SECONDS_IN_AN_HOUR = 60 * 60
@@ -52,6 +53,8 @@ def poll_ad_group(
     except RequestError as e:
         logger.warn(f'Allocation Group "{group_dn}" not found')
         logger.warn(f"QUMULO API error: {e}")
+        host = os.environ.get("QUMULO_HOST")
+        logger.warn(f"QUMULO Host: {host}")
         success = False
 
     acl_group_name = acl_allocation.get_attribute("storage_acl_name")
