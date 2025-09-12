@@ -26,7 +26,7 @@ plugin_configs = {
 }
 
 # Temporary addition of weeklyreportapp plugin
-plugin_configs['PLUGIN_WEEKLYREPORTAPP'] = 'plugins/weeklyreportapp.py'
+plugin_configs["PLUGIN_WEEKLYREPORTAPP"] = "plugins/weeklyreportapp.py"
 
 
 # This allows plugins to be enabled via environment variables. Can alternatively
