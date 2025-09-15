@@ -26,6 +26,7 @@ jobs:
         env:
           ENVIRONMENT: test
           PLUGIN_QUMULO: True
+          PLUGIN_WEEKLYREPORTAPP: True
           AD_USER_PASS: ADPassword@123
           AD_USERNAME: ADUsername
           AD_SERVER_NAME: accounts-ldap.wusm.wustl.edu
