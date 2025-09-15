@@ -42,5 +42,5 @@ if 'coldfront.plugins.qumulo' in settings.INSTALLED_APPS:
     urlpatterns.append(path('qumulo/', include('coldfront.plugins.qumulo.urls'), name='qumulo'))
 
 urlpatterns += [
-    path('weeklyreportapp/', include('coldfront.plugins.weeklyreportapp.urls')),
+    path('weeklyreportapp/', include('weeklyreportapp.urls')),
 ]
