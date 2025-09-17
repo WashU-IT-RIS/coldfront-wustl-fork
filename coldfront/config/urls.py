@@ -41,6 +41,12 @@ if 'django_su.backends.SuBackend' in settings.AUTHENTICATION_BACKENDS:
 if 'coldfront.plugins.qumulo' in settings.INSTALLED_APPS:
     urlpatterns.append(path('qumulo/', include('coldfront.plugins.qumulo.urls'), name='qumulo'))
 
-urlpatterns += [
-    path('weeklyreportapp/', include('weeklyreportapp.urls')),
-]
+if 'weeklyreportapp' in settings.INSTALLED_APPS:
+    urlpatterns += [
+        path('weeklyreportapp/', include('weeklyreportapp.urls')),
+    ]
+
+if 'integratedbilling' in settings.INSTALLED_APPS:
+    urlpatterns += [
+        path('integratedbilling/', include('integratedbilling.urls')),
+    ]
