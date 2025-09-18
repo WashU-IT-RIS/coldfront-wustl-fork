@@ -50,18 +50,18 @@ if "coldfront.plugins.qumulo" in settings.INSTALLED_APPS:
         path("qumulo/", include("coldfront.plugins.qumulo.urls"), name="qumulo")
     )
 
-if "weeklyreportapp" in settings.INSTALLED_APPS:
-    urlpatterns.append(
-        path(
-            "weeklyreportapp/", include("weeklyreportapp.urls"), name="weeklyreportapp"
-        )
-    )
-
 if "integratedbilling" in settings.INSTALLED_APPS:
     urlpatterns.append(
         path(
             "integratedbilling/",
             include("integratedbilling.urls"),
             name="integratedbilling",
+        )
+    )
+
+if "weeklyreportapp" in settings.INSTALLED_APPS:
+    urlpatterns.append(
+        path(
+            "weeklyreportapp/", include("weeklyreportapp.urls"), name="weeklyreportapp"
         )
     )
