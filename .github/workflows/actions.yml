@@ -19,7 +19,7 @@ jobs:
 
       - name: install python packages
         run: |
-          echo ${{ secrets.RIS_COLDFRONT_DEPLOYMENT_KEY }} > ~/.ssh/id_rsa
+          echo "${{ secrets.RIS_COLDFRONT_DEPLOYMENT_KEY }}" > ~/.ssh/id_rsa
           cat <<EOF> ~/.ssh/config
           Host github.com
             User git
