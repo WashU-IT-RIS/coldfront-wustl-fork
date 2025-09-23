@@ -19,6 +19,7 @@ jobs:
 
       - name: create_ssh_key
         run: |
+          mkdir ~/.ssh
           echo "${{ secrets.RIS_COLDFRONT_DEPLOYMENT_KEY }}" > ~/.ssh/id_rsa
 
       - name: install python packages
