@@ -17,14 +17,17 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: install python packages
+      - name: create_ssh_key
         run: |
           echo "${{ secrets.RIS_COLDFRONT_DEPLOYMENT_KEY }}" > ~/.ssh/id_rsa
+
+      - name: install python packages
+        run: |
           cat <<EOF> ~/.ssh/config
           Host github.com
             User git
             IdentityFile ~/.ssh/id_rsa
-          <<EOF
+          EOF
           pip install -e git+https://github.com/rg663/weeklyreportapppip#egg=weeklyreportapp
           pip install -r requirements.txt
           pip install -e git+ssh://github.com/WashU-IT-RIS/coldfront-plugin-billing@feature/integrated-billing-scaffold#egg=integratedbilling
