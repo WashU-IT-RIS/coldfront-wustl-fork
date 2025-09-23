@@ -19,9 +19,15 @@ jobs:
 
       - name: install python packages
         run: |
+          echo ${{ secrets.RIS_COLDFRONT_DEPLOYMENT_KEY }} > ~/.ssh/id_rsa
+          cat <<EOF> ~/.ssh/config
+          Host github.com
+            User git
+            IdentityFile ~/.ssh/id_rsa
+          <<EOF
           pip install -e git+https://github.com/rg663/weeklyreportapppip#egg=weeklyreportapp
           pip install -r requirements.txt
-          pip install -e git+https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/WashU-IT-RIS/coldfront-plugin-billing@feature/integrated-billing-scaffold#egg=integratedbilling
+          pip install -e git+ssh://github.com/WashU-IT-RIS/coldfront-plugin-billing@feature/integrated-billing-scaffold#egg=integratedbilling
 
       - name: run tests
         run: python3 manage.py test --exclude-tag integration -b
