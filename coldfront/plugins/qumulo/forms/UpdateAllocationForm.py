@@ -1,3 +1,4 @@
+from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
 
@@ -19,3 +20,6 @@ class UpdateAllocationForm(AllocationForm):
             required=False,
         )
         self.fields["prepaid_expiration"].disabled = True
+        self.fields["rw_users"].required = (
+            self.allocation_status_name != "READY FOR DELETION"
+        )

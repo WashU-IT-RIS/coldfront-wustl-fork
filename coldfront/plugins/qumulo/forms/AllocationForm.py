@@ -29,6 +29,7 @@ from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 class AllocationForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user_id = kwargs.pop("user_id")
+        self.allocation_status_name = self._upper(kwargs.pop("allocation_status_name", None))
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
         self.fields["storage_type"].choices = self.get_storage_type_choices()
@@ -135,10 +136,7 @@ class AllocationForm(forms.Form):
         label="ITSD Ticket",
         validators=[validate_ticket],
     )
-    rw_users = ADUserField(
-        label="Read/Write Users",
-        initial="",
-    )
+    rw_users = ADUserField(label="Read/Write Users", initial="")
     ro_users = ADUserField(label="Read Only Users", initial="", required=False)
 
     def _upper(self, val: Any) -> Any:
