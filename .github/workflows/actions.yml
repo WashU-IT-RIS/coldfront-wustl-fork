@@ -17,15 +17,30 @@ jobs:
         with:
           python-version: '3.9'
 
+      - name: create_ssh_key
+        run: |
+          mkdir ~/.ssh
+          echo "${{ secrets.RIS_COLDFRONT_DEPLOYMENT_KEY }}" > ~/.ssh/id_rsa
+          chmod 600  ~/.ssh/id_rsa
+
       - name: install python packages
         run: |
+          cat <<EOF> ~/.ssh/config
+          Host github.com
+            User git
+            IdentityFile ~/.ssh/id_rsa
+          EOF
+          pip install -e git+https://github.com/rg663/weeklyreportapppip#egg=weeklyreportapp
           pip install -r requirements.txt
+          pip install -e git+ssh://github.com/WashU-IT-RIS/coldfront-plugin-billing@feature/integrated-billing-scaffold#egg=integratedbilling
 
       - name: run tests
         run: python3 manage.py test --exclude-tag integration -b
         env:
           ENVIRONMENT: test
           PLUGIN_QUMULO: True
+          PLUGIN_WEEKLYREPORTAPP: True
+          PLUGIN_INTEGRATEDBILLING: True
           AD_USER_PASS: ADPassword@123
           AD_USERNAME: ADUsername
           AD_SERVER_NAME: accounts-ldap.wusm.wustl.edu
