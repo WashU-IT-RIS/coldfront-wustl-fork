@@ -71,6 +71,7 @@ INSTALLED_APPS += [
     "coldfront.core.project",
     "coldfront.core.resource",
     "coldfront.core.allocation",
+    "coldfront.core.billing",
     "coldfront.core.grant",
     "coldfront.core.publication",
     "coldfront.core.research_output",
