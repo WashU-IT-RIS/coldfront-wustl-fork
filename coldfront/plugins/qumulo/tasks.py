@@ -27,6 +27,7 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 from qumulo.lib.request import RequestError
+from qumulo.lib.uri import UriBuilder
 
 import requests
 
@@ -53,7 +54,15 @@ def poll_ad_group(
     success = False
 
     try:
-        qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
+        # qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
+
+        uri = UriBuilder(path="/v1/ad/distinguished-names/")
+        uri.add_path_component(str(group_dn))
+        uri.add_path_component("object")
+
+        logger.warn(f"Polling AD group with URI: {uri}")
+
+        qumulo_api.client.send_request("GET", str(uri))
         success = True
     except RequestError as qumulo_request_error:
         logger.warn(f'Allocation Group "{group_dn}" not found')
