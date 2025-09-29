@@ -59,11 +59,22 @@ def poll_ad_group(
         logger.warn(f'Allocation Group "{group_dn}" not found')
         logger.warn(f"Qumulo Request Error: {qumulo_request_error}")
 
+        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+        username = qumulo_info[storage_allocation.resources.first().name]["user"]
+        password = qumulo_info[storage_allocation.resources.first().name]["pass"]
+
+        auth_response = requests.post(
+            url="https://storage2-dev.ris.wustl.edu/api/v1/session/login",
+            headers={"Content-Type": "application/json", "accept": "application/json"},
+            json={"username": username, "password": password},
+        )
+        token = auth_response.json().get("bearer_token")
+
         response = requests.get(
             "https://storage2-dev.ris.wustl.edu/api/v1/ad/distinguished-names/cn%3Dstorage-test-harterj-092925-01-rw%2COU%3DQA%2COU%3DRIS%2COU%3DGroups%2CDC%3Daccounts%2CDC%3Dad%2CDC%3Dwustl%2CDC%3Dedu/object",
             headers={
-                "Authorization": "Authorization: Bearer session-v1:T7bsYl1yhNV6FRb11N1I004PD33v16rsK4lOXbxW7YQBAAAAeJwzfXYrgwEIrhbdBtOLTskysANpRiYGMM0JxJNnCoHZDDkyYJrphTCYngYV/58tg6IHZsbZWRB16c94IfqBAABDtxC0",
-                "Content-Type": "application/json",
+                "Authorization": f"Authorization: Bearer {token}",
+                "accept": "application/json",
             },
         )
 
