@@ -28,6 +28,8 @@ from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerF
 
 from qumulo.lib.request import RequestError
 
+import requests
+
 
 logger = logging.getLogger(__name__)
 SECONDS_IN_AN_HOUR = 60 * 60
@@ -56,6 +58,17 @@ def poll_ad_group(
     except RequestError as qumulo_request_error:
         logger.warn(f'Allocation Group "{group_dn}" not found')
         logger.warn(f"Qumulo Request Error: {qumulo_request_error}")
+
+        response = requests.get(
+            "https://storage2-dev.ris.wustl.edu/api/v1/ad/distinguished-names/cn%3Dstorage-test-harterj-092925-01-rw%2COU%3DQA%2COU%3DRIS%2COU%3DGroups%2CDC%3Daccounts%2CDC%3Dad%2CDC%3Dwustl%2CDC%3Dedu/object",
+            headers={
+                "Authorization": "Authorization: Bearer session-v1:T7bsYl1yhNV6FRb11N1I004PD33v16rsK4lOXbxW7YQBAAAAeJwzfXYrgwEIrhbdBtOLTskysANpRiYGMM0JxJNnCoHZDDkyYJrphTCYngYV/58tg6IHZsbZWRB16c94IfqBAABDtxC0",
+                "Content-Type": "application/json",
+            },
+        )
+
+        logger.warn(f"AD API Response Status Code: {response.status_code}")
+        logger.warn(f"AD API Response Body: {response.json()}")
         success = False
 
     acl_group_name = acl_allocation.get_attribute("storage_acl_name")
