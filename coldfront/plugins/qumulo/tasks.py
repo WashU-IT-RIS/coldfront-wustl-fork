@@ -70,6 +70,9 @@ def poll_ad_group(
         )
         token = auth_response.json().get("bearer_token")
 
+        logger.warn(f"Qumulo Auth Response Status Code: {auth_response.status_code}")
+        logger.warn(f"Qumulo Auth Response Body: {auth_response.text}")
+
         response = requests.get(
             "https://storage2-dev.ris.wustl.edu/api/v1/ad/distinguished-names/cn%3Dstorage-test-harterj-092925-01-rw%2COU%3DQA%2COU%3DRIS%2COU%3DGroups%2CDC%3Daccounts%2CDC%3Dad%2CDC%3Dwustl%2CDC%3Dedu/object",
             headers={
@@ -79,7 +82,7 @@ def poll_ad_group(
         )
 
         logger.warn(f"AD API Response Status Code: {response.status_code}")
-        logger.warn(f"AD API Response Body: {response.json()}")
+        logger.warn(f"AD API Response Body: {response.text}")
         success = False
 
     acl_group_name = acl_allocation.get_attribute("storage_acl_name")
