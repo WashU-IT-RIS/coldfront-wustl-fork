@@ -76,7 +76,7 @@ def poll_ad_group(
         response = requests.get(
             "https://storage2-dev.ris.wustl.edu/api/v1/ad/distinguished-names/cn%3Dstorage-test-harterj-092925-01-rw%2COU%3DQA%2COU%3DRIS%2COU%3DGroups%2CDC%3Daccounts%2CDC%3Dad%2CDC%3Dwustl%2CDC%3Dedu/object",
             headers={
-                "Authorization": f"Authorization: Bearer {token}",
+                "Authorization": f"Bearer {token}",
                 "accept": "application/json",
             },
         )
