@@ -27,9 +27,6 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 from qumulo.lib.request import RequestError
-from qumulo.lib.uri import UriBuilder
-
-import requests
 
 
 logger = logging.getLogger(__name__)
@@ -54,44 +51,10 @@ def poll_ad_group(
     success = False
 
     try:
-        # qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
-
-        uri = UriBuilder(path="/v1/ad/distinguished-names/")
-        uri.add_path_component(str(group_dn))
-        uri.add_path_component("object")
-
-        logger.warn(f"Polling AD group with URI: {uri}")
-
-        qumulo_api.client.send_request("GET", str(uri))
+        qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
         success = True
     except RequestError as qumulo_request_error:
         logger.warn(f'Allocation Group "{group_dn}" not found')
-        logger.warn(f"Qumulo Request Error: {qumulo_request_error}")
-
-        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
-        username = qumulo_info[storage_allocation.resources.first().name]["user"]
-        password = qumulo_info[storage_allocation.resources.first().name]["pass"]
-
-        auth_response = requests.post(
-            url="https://storage2-dev.ris.wustl.edu/api/v1/session/login",
-            headers={"Content-Type": "application/json", "accept": "application/json"},
-            json={"username": username, "password": password},
-        )
-        token = auth_response.json().get("bearer_token")
-
-        logger.warn(f"Qumulo Auth Response Status Code: {auth_response.status_code}")
-        logger.warn(f"Qumulo Auth Response Body: {auth_response.text}")
-
-        response = requests.get(
-            "https://storage2-dev.ris.wustl.edu/api/v1/ad/distinguished-names/cn%3Dstorage-test-harterj-092925-01-rw%2COU%3DQA%2COU%3DRIS%2COU%3DGroups%2CDC%3Daccounts%2CDC%3Dad%2CDC%3Dwustl%2CDC%3Dedu/object",
-            headers={
-                "Authorization": f"Bearer {token}",
-                "accept": "application/json",
-            },
-        )
-
-        logger.warn(f"AD API Response Status Code: {response.status_code}")
-        logger.warn(f"AD API Response Body: {response.text}")
         success = False
 
     acl_group_name = acl_allocation.get_attribute("storage_acl_name")
