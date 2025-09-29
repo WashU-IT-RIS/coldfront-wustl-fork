@@ -53,8 +53,9 @@ def poll_ad_group(
     try:
         qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
         success = True
-    except RequestError:
+    except RequestError as qumulo_request_error:
         logger.warn(f'Allocation Group "{group_dn}" not found')
+        logger.warn(f"Qumulo Request Error: {qumulo_request_error}")
         success = False
 
     acl_group_name = acl_allocation.get_attribute("storage_acl_name")
