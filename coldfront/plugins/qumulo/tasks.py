@@ -49,7 +49,7 @@ def poll_ad_group(
     )
 
     storage_acl_name = acl_allocation.get_attribute("storage_acl_name")
-    group_dn = ActiveDirectoryAPI.generate_group_dn(storage_acl_name)
+    group_dn = ActiveDirectoryAPI.generate_group_dn(storage_acl_name).strip()
 
     success = False
 
