@@ -37,3 +37,12 @@ class AllocationUsageModelTest(TestCase):
         self.assertNotEqual(usage.quota, "")
         self.assertNotEqual(usage.billing_cycle, "")
         self.assertNotEqual(usage.storage_cluster, "")
+
+        def test_allocation_usage_parent_id_key_null(self):
+            usage = AllocationUsageFactory(parent_id_key=None)
+            self.assertIsNone(usage.parent_id_key)
+
+        def test_allocation_usage_parent_id_key_empty_string(self):
+            # Django IntegerField with blank=True, null=True will coerce empty string to None
+            usage = AllocationUsageFactory(parent_id_key="")
+            self.assertIsNone(usage.parent_id_key)

@@ -49,7 +49,7 @@ class AllocationUsage(TimeStampedModel):
     exempt=models.BooleanField()
     subsidized=models.BooleanField()
     is_condo_group=models.BooleanField()
-    parent_id_key=models.IntegerField()
+    parent_id_key=models.IntegerField(null=True, blank=True)
     quota=models.CharField(max_length=256)
     billing_cycle=models.CharField(max_length=256)
     usage_timestamp=models.DateTimeField()
