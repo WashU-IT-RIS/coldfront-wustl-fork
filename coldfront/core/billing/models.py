@@ -44,7 +44,7 @@ class AllocationUsage(TimeStampedModel):
     billing_contact=models.CharField(max_length=512)
     fileset_name=models.CharField(max_length=256)
     service_rate_category=models.CharField(max_length=256)
-    usage=models.CharField(max_length=256)
+    usage=models.DecimalField(max_digits=20, decimal_places=6)
     funding_number=models.CharField(max_length=256)
     exempt=models.BooleanField()
     subsidized=models.BooleanField()
