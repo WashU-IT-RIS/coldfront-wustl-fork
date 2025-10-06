@@ -34,4 +34,3 @@ class ItsmClient:
         itsm_active_allocation_service_id = 1
         status = "active"
         return f'{{"{fileset_key}":"{fileset_value}","status":"{status}","service_id":{itsm_active_allocation_service_id}}}'
-    
