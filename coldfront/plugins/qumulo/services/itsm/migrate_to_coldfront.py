@@ -70,7 +70,7 @@ class MigrateToColdfront:
 
         if self.dry_run:
             return {
-                f"validations checks for {fileset_key}": "successful",
+                f"validations checks for {key}": "successful",
                 "itsm_allocation": itsm_allocation,
             }
 
@@ -106,16 +106,16 @@ class MigrateToColdfront:
         )
         return itsm_allocation
 
-    def __validate_itsm_result_set(self, fileset_key: str, itsm_result: list) -> bool:
+    def __validate_itsm_result_set(self, key: str, itsm_result: list) -> bool:
         how_many = len(itsm_result)
         # ITSM does not return a respond code of 404 when the service provision record is not found.
         # Instead, it returns an empty array.
         if how_many == 0:
-            raise Exception(f"ITSM active allocation was not found for {fileset_key}")
+            raise Exception(f"ITSM active allocation was not found for {key}")
 
         if how_many > 1:
             raise Exception(
-                f"Multiple ({how_many} total) ITSM active allocations were found for {fileset_key}"
+                f"Multiple ({how_many} total) ITSM active allocations were found for {key}"
             )
 
         return True
