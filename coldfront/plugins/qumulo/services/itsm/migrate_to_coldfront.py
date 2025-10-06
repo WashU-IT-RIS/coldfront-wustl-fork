@@ -70,7 +70,7 @@ class MigrateToColdfront:
 
         if self.dry_run:
             return {
-                f"validations checks for {key}": "successful",
+                f"validation checks for {key}": "successful",
                 "itsm_allocation": itsm_allocation,
             }
 
