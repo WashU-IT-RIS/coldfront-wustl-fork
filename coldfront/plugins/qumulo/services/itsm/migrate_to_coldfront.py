@@ -29,7 +29,7 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
 
 class MigrateToColdfront:
 
-    def __init__(self, dry_run: bool):
+    def __init__(self, dry_run: bool = False) -> None:
         self.dry_run = dry_run
 
     def by_fileset_alias(self, fileset_alias: str) -> str:
