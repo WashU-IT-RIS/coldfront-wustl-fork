@@ -34,7 +34,9 @@ class AllocationViewTests(TestCase):
             "rw_users": ["test"],
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
         }
 
@@ -59,8 +61,8 @@ class AllocationViewTests(TestCase):
         allocation_defaults = {
             "secure": "No",
             "audit": "No",
-            "exempt": "No",
-            "subsidized": "No",
+            "billing_exempt": "No",
+            "subsidized": "Yes",
         }
         for attr, value in allocation_defaults.items():
             attribute_type = AllocationAttributeType.objects.get(name=attr)

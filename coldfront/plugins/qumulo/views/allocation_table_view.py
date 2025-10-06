@@ -5,7 +5,9 @@ from django.core.paginator import EmptyPage, Paginator
 from django.db.models.query import QuerySet
 from django.views.generic import ListView
 
-from coldfront.plugins.qumulo.forms import AllocationTableSearchForm
+from coldfront.plugins.qumulo.forms.AllocationTableSearchForm import (
+    AllocationTableSearchForm,
+)
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -80,6 +82,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 name="storage_filesystem_path"
             )
 
+            storage_name_type = AllocationAttributeType.objects.get(
+                name="storage_name"
+            )
+
             service_rate_type = AllocationAttributeType.objects.get(name="service_rate")
 
             # add sub-queries
@@ -99,11 +105,16 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocation=OuterRef("pk"), allocation_attribute_type=service_rate_type
             ).values("value")[:1]
 
+            storage_name_sub_q = AllocationAttribute.objects.filter(
+                allocation=OuterRef("pk"), allocation_attribute_type=storage_name_type
+            ).values("value")[:1]
+
             allocations = allocations.annotate(
                 department_number=Subquery(department_sub_q),
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
                 file_path=Subquery(file_path_sub_q),
                 service_rate=Subquery(service_rate_sub_q),
+                name=Subquery(storage_name_sub_q),
             )
 
             # add filters
@@ -121,6 +132,11 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocations = allocations.filter(
                     project__pi__first_name__icontains=data.get("pi_first_name")
                 )
+            
+            if data.get("pi_user_name"):
+                allocations = allocations.filter(
+                    project__pi__username__icontains=data.get("pi_user_name")
+                )
 
             if data.get("status"):
                 allocations = allocations.filter(status__in=data.get("status"))
@@ -132,6 +148,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
             if data.get("itsd_ticket"):
                 allocations = allocations.filter(itsd_ticket=data.get("itsd_ticket"))
+            
+            if data.get("allocation_name"):
+                allocations = allocations.filter(name__icontains=data.get("allocation_name"))
 
             # for now, use a "brute force" approach to
             # group child allocs with parents

@@ -70,6 +70,7 @@ def construct_allocation_form_data(quota_tb: int, service_rate_category: str):
         "ro_users": ["test1"],
         "storage_ticket": "ITSD-1234",
         "cost_center": "CC0000123",
+        "billing_exempt": "No",
         "department_number": "CH000123",
         "billing_cycle": "monthly",
         "service_rate": service_rate_category,
@@ -89,6 +90,7 @@ def construct_suballocation_form_data(quota_tb: int, parent_allocation: Allocati
         "ro_users": ["test1"],
         "storage_ticket": "ITSD-1234",
         "cost_center": parent_allocation.get_attribute("cost_center"),
+        "billing_exempt": parent_allocation.get_attribute("billing_exempt"),
         "department_number": parent_allocation.get_attribute("department_number"),
         "billing_cycle": parent_allocation.get_attribute("billing_cycle"),
         "service_rate": parent_allocation.get_attribute("service_rate"),
@@ -194,7 +196,7 @@ class TestEIBBilling(TestCase):
         return super().setUp()
 
     def test_header_return_csv(self):
-        eib_billing = EIBBilling()
+        eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
         header = eib_billing.get_report_header()
         self.assertTrue(re.search("^Submit Internal Service Delivery(,){27}", header))
         self.assertEqual(
@@ -203,9 +205,14 @@ class TestEIBBilling(TestCase):
         )
 
     def test_query_return_sql_statement(self):
-        eib_billing = EIBBilling()
+        eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
+        args = dict()
+        args["document_date"] = datetime.today().strftime("%m/%d/%Y")
+        args["billing_month"] = eib_billing.billing_month
+        args["delivery_date"] = eib_billing.delivery_date
+        args["usage_date"] = eib_billing.usage_date
         self.assertTrue(
-            re.search("^\s*SELECT\s*", eib_billing.get_monthly_billing_query_template())
+            re.search("^\s*SELECT\s*", eib_billing.get_query(args, "monthly"))
         )
 
     @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
@@ -339,9 +346,11 @@ class TestEIBBilling(TestCase):
         eib_billing.generate_monthly_billing_report()
 
         filename = eib_billing.get_filename()
-        self.assertFalse(re.search("RIS-%s-storage2-active-billing.csv", filename))
+        self.assertFalse(
+            re.search("RIS-%s-storage2-monthly-active-billing.csv", filename)
+        )
         self.assertTrue(
-            re.search("RIS-[A-Za-z]+-storage2-active-billing.csv", filename)
+            re.search("RIS-[A-Za-z]+-storage2-monthly-active-billing.csv", filename)
         )
         self.assertTrue(os.path.exists(filename))
         os.system(f"ls -l {filename}")

@@ -21,6 +21,7 @@ from coldfront.core.allocation.models import (
 
 from coldfront.plugins.qumulo.tasks import addMembersToADGroup
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
 from datetime import datetime
 
@@ -39,7 +40,6 @@ class AllocationService:
                     parent_allocation.get_attribute(name="storage_name"),
                 )
             )
-
         project_pk = form_data.get("project_pk")
         project = get_object_or_404(Project, pk=project_pk)
 
@@ -196,10 +196,14 @@ class AllocationService:
             "storage_filesystem_path",
             "storage_export_path",
             "cost_center",
+            "billing_exempt",
             "department_number",
             "technical_contact",
             "billing_contact",
             "service_rate",
+            "billing_cycle",
+            "prepaid_time",
+            "prepaid_billing_date",
         ]
 
         # some of the above are optional
@@ -251,8 +255,7 @@ class AllocationService:
         allocation_defaults = {
             "secure": "No",
             "audit": "No",
-            "exempt": "No",
-            "subsidized": "No",
+            "subsidized": "Yes",
         }
 
         for attr, value in allocation_defaults.items():
@@ -262,3 +265,48 @@ class AllocationService:
                 allocation=allocation,
                 value=value,
             )
+
+    @staticmethod
+    def set_access_users(
+        access_key: str,
+        access_users: list[str],
+        storage_allocation: Allocation,
+    ):
+        AllocationService.add_access_users(access_key, access_users, storage_allocation)
+
+        active_directory_api = ActiveDirectoryAPI()
+
+        access_allocation = AclAllocations.get_access_allocation(
+            storage_allocation, access_key
+        )
+        allocation_users = AllocationUser.objects.filter(allocation=access_allocation)
+        allocation_usernames = [
+            allocation_user.user.username for allocation_user in allocation_users
+        ]
+        users_to_remove = set(allocation_usernames) - set(access_users)
+
+        for allocation_username in users_to_remove:
+            allocation_users.get(user__username=allocation_username).delete()
+            active_directory_api.remove_member_from_group(
+                allocation_username,
+                access_allocation.get_attribute("storage_acl_name"),
+            )
+
+    @staticmethod
+    def add_access_users(
+        access_key: str, access_users: list[str], storage_allocation: Allocation
+    ):
+        access_allocation = AclAllocations.get_access_allocation(
+            storage_allocation, access_key
+        )
+
+        allocation_users = AllocationUser.objects.filter(allocation=access_allocation)
+        allocation_usernames = [
+            allocation_user.user.username for allocation_user in allocation_users
+        ]
+
+        users_to_add = list(set(access_users) - set(allocation_usernames))
+        create_group_time = datetime.now()
+        async_task(
+            addMembersToADGroup, users_to_add, access_allocation, create_group_time
+        )

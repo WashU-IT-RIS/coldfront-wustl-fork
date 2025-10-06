@@ -5,7 +5,9 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
 )
-from coldfront.plugins.qumulo.forms import CreateSubAllocationForm
+from coldfront.plugins.qumulo.forms.CreateSubAllocationForm import (
+    CreateSubAllocationForm,
+)
 from coldfront.plugins.qumulo.views.update_allocation_view import UpdateAllocationView
 
 
@@ -37,7 +39,9 @@ class CreateSubAllocationView(UpdateAllocationView):
             "storage_export_path",
             "storage_ticket",
             "cost_center",
+            "billing_exempt",
             "department_number",
+            "billing_cycle",
             "technical_contact",
             "billing_contact",
             "service_rate",

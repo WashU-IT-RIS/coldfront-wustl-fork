@@ -306,11 +306,9 @@ itsm_to_coldfront_map:
       nulls: true # found nulls and found duplicates
   exempt:
     coldfront:
-      - entity: allocation_attribute
+      - entity: allocation_form
         attributes:
-          - name: allocation_attribute_type__name
-            value: exempt
-          - name: value
+          - name: billing_exempt
             value:
               type: Yes/No
               transforms: truthy_or_falsy_to_boolean
@@ -338,7 +336,7 @@ itsm_to_coldfront_map:
       type: string
       values: ["condo", "consumption", "subscription"] # if the status is active
       nulls: true
-      defaults_to: subscription
+      defaults_to: consumption
   comment:
     coldfront:
       - entity: allocation_attribute
@@ -404,7 +402,7 @@ itsm_to_coldfront_map:
       attribute: subsidized
       type: boolean
       nulls: true
-      defaults_to: false
+      defaults_to: true
   quota:
     coldfront:
       - entity: allocation_form

@@ -11,18 +11,13 @@ from coldfront.core.allocation.models import (
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
-from coldfront.plugins.qumulo.views.create_sub_allocation_view import (
-    CreateSubAllocationView,
-)
+
 
 from coldfront.core.allocation.models import (
     AllocationLinkage,
     AllocationAttributeType,
     AllocationAttribute,
 )
-
-# TODO why isn't the CreateSubAllocationForm used?
-from coldfront.plugins.qumulo.forms import CreateSubAllocationForm
 
 
 @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
@@ -48,7 +43,9 @@ class AllocationViewTests(TestCase):
             "rw_users": ["test"],
             "ro_users": ["test1"],
             "cost_center": "CC-1234",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
         }
 
@@ -64,7 +61,9 @@ class AllocationViewTests(TestCase):
             "rw_users": ["test2"],
             "ro_users": ["test3"],
             "cost_center": "CC-3232",
+            "billing_exempt": "No",
             "department_number": "Whale-watching",
+            "billing_cycle": "monthly",
             "service_rate": "consumption",
         }
 

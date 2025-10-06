@@ -5,14 +5,13 @@ from django import forms
 
 from coldfront.core.project.models import Project
 from coldfront.core.user.models import User
-from coldfront.core.field_of_science.models import FieldOfScience
 from coldfront.plugins.qumulo.fields import ADUserField, StorageFileSystemPathField
 from coldfront.plugins.qumulo.validators import (
     validate_leading_forward_slash,
-    validate_single_ad_user_skip_admin,
     validate_single_ad_user,
     validate_ticket,
     validate_storage_name,
+    validate_prepaid_start_date,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -23,23 +22,24 @@ from coldfront.plugins.qumulo.constants import (
 from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 
 
-from coldfront.core.allocation.models import (
-    AllocationStatusChoice,
-)
-
-from django.db.models.functions import Lower
-
-
 class AllocationForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user_id = kwargs.pop("user_id")
+        self.allocation_status_name = self._upper(kwargs.pop("allocation_status_name", None))
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
 
     class Media:
         js = ("allocation.js",)
 
-    project_pk = forms.ChoiceField(label="Project")
+    project_pk = forms.ChoiceField(
+        label="Project",
+        widget=forms.Select(
+            attrs={
+                "class": "select2",
+            }
+        ),
+    )
     storage_name = forms.CharField(
         help_text="Name of the Allocation",
         label="Name",
@@ -48,6 +48,14 @@ class AllocationForm(forms.Form):
     cost_center = forms.CharField(
         help_text="The cost center for billing",
         label="Cost Center",
+    )
+    billing_exempt = forms.ChoiceField(
+        help_text="Exempt the allocation from billing",
+        label="Billing Exempt",
+        choices=[("Yes", "Yes"), ("No", "No")],
+        initial="No",
+        widget=forms.RadioSelect,
+        required=True,
     )
     department_number = forms.CharField(
         help_text="The department for billing",
@@ -66,15 +74,28 @@ class AllocationForm(forms.Form):
         required=False,
     )
     billing_cycle = forms.ChoiceField(
-        help_text="The billing cycle of the allocation",
-        label="Billing Cycle",
         choices=BILLING_CYCLE_OPTIONS,
+        initial="monthly",
+        label="Billing Cycle Options",
+        help_text="Choose one billing cycle option from the above list",
         required=True,
+    )
+    prepaid_time = forms.IntegerField(
+        help_text="Prepaid Time in Months",
+        label="Prepaid Time",
+        required=False,
+    )
+    prepaid_billing_date = forms.DateField(
+        help_text="Start Date Date of Prepaid Billing",
+        label="Prepaid Billing Start Date",
+        validators=[validate_prepaid_start_date],
+        required=False,
     )
     service_rate = forms.ChoiceField(
         help_text="Service rate option for the Storage2 allocation",
         label="Service Rate",
         choices=STORAGE_SERVICE_RATES,
+        initial="consumption",
     )
     storage_quota = forms.IntegerField(
         min_value=0,
@@ -106,10 +127,7 @@ class AllocationForm(forms.Form):
         label="ITSD Ticket",
         validators=[validate_ticket],
     )
-    rw_users = ADUserField(
-        label="Read/Write Users",
-        initial="",
-    )
+    rw_users = ADUserField(label="Read/Write Users", initial="")
     ro_users = ADUserField(label="Read Only Users", initial="", required=False)
 
     def _upper(self, val: Any) -> Any:
@@ -197,91 +215,3 @@ class AllocationForm(forms.Form):
             projects = Project.objects.filter(pi=self.user_id)
 
         return map(lambda project: (project.id, project.title), projects)
-
-
-class UpdateAllocationForm(AllocationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.fields["storage_name"].disabled = True
-        self.fields["storage_filesystem_path"].disabled = True
-
-        self.fields["storage_filesystem_path"].validators = []
-        self.fields["storage_name"].validators = []
-
-
-class CreateSubAllocationForm(AllocationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # hide the project field and show the parent allocation instead
-        self.fields["project_pk"].widget = forms.HiddenInput()
-        self.fields["parent_allocation"] = forms.CharField(
-            help_text="The parent of this sub-allocation",
-            label="Parent Allocation",
-            required=True,
-        )
-
-        # display the parent allocation name
-        self.fields["parent_allocation"].initial = kwargs["initial"].pop(
-            "parent_allocation_name"
-        )
-        self.fields["parent_allocation"].disabled = True
-
-        # re-order fields so parent allocation field appears at the top
-        self.fields = {
-            "parent_allocation": self.fields.pop("parent_allocation"),
-            **self.fields,
-        }
-
-
-class ProjectCreateForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.user_id = kwargs.pop("user_id")
-        super().__init__(*args, **kwargs)
-        self.fields["pi"].initial = self.user_id
-        self.fields["field_of_science"].choices = self.get_fos_choices()
-        self.fields["field_of_science"].initial = FieldOfScience.DEFAULT_PK
-
-    title = forms.CharField(
-        label="Title",
-        max_length=255,
-    )
-    pi = forms.CharField(
-        label="Principal Investigator",
-        max_length=128,
-        validators=[validate_single_ad_user_skip_admin],
-    )
-    description = forms.CharField(
-        required=False,
-        widget=forms.Textarea,
-    )
-    field_of_science = forms.ChoiceField(label="Field of Science")
-
-    def get_fos_choices(self):
-        return map(lambda fos: (fos.id, fos.description), FieldOfScience.objects.all())
-
-
-class AllocationTableSearchForm(forms.Form):
-    pi_last_name = forms.CharField(label="PI Surname", max_length=100, required=False)
-
-    pi_first_name = forms.CharField(
-        label="PI Given Name", max_length=100, required=False
-    )
-
-    status = forms.ModelMultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple,
-        queryset=AllocationStatusChoice.objects.all().order_by(Lower("name")),
-        required=False,
-    )
-
-    department_number = forms.CharField(
-        label="Department Number", max_length=100, required=False
-    )
-
-    itsd_ticket = forms.CharField(label="ITSD Ticket", max_length=100, required=False)
-
-    no_grouping = forms.BooleanField(
-        label="No Grouping",
-        initial=False,
-        required=False,
-    )

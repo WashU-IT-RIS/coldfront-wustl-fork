@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
         self._migrate_allocation_attribute("secure", "No")
         self._migrate_allocation_attribute("audit", "No")
-        self._migrate_allocation_attribute("exempt", "No")
+        self._migrate_allocation_attribute("billing_exempt", "No")
         self._migrate_allocation_attribute("subsidized", "No")
         self._migrate_allocation_attribute("billing_cycle", "monthly")
 
@@ -35,5 +35,5 @@ class Command(BaseCommand):
             AllocationAttribute.objects.get_or_create(
                 allocation_attribute_type=attribute_type,
                 allocation=allocation,
-                value=default_value,
+                defaults = {"value": default_value},
             )
