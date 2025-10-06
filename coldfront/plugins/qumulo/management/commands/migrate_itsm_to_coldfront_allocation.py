@@ -40,7 +40,7 @@ class Command(BaseCommand):
         find_by_storage_provision_name = options["storage_provision_name"]
         ic(find_by_storage_provision_name)
 
-        dry_run = options["--dry-run"]
+        dry_run = options["dry_run"]
         ic(dry_run)
 
         migrate_from_itsm_to_coldfront = MigrateToColdfront(dry_run)
