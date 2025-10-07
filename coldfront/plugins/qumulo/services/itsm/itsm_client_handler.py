@@ -1,5 +1,5 @@
 import os
-from typing import Any, Optional
+from typing import Any, Optional, Union
 import requests
 
 
@@ -47,9 +47,9 @@ class ItsmClientHandler:
 
         return (self.user, self.password)
 
-    def _get_verify_certificate(self) -> Any:
+    def _get_verify_certificate(self) -> Union[str, bool]:
         # Unfortunately, the verify attribute could be a path where the certificate is located or bool
         return os.environ.get("RIS_CHAIN_CERTIFICATE") or True
 
     def _get_filtered_url(self, attributes: str, filters: str) -> str:
-        return f"{self.url}?attribute={attributes}&filter={filters}"
+        return f"{self.url}?filter={filters}&attribute={attributes}"

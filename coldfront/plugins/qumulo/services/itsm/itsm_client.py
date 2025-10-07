@@ -1,7 +1,3 @@
-import os
-from typing import Any, Optional
-import requests
-
 from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_factory import (
     itsm_attributes,
 )
