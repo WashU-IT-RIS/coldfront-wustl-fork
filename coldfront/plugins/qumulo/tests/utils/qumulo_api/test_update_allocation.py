@@ -2,13 +2,14 @@ from django.test import TestCase
 from unittest.mock import call, patch, MagicMock
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from qumulo.lib.request import RequestError
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
 @patch("coldfront.plugins.qumulo.utils.qumulo_api.RestClient")
 class UpdateAllocation(TestCase):
 
     def test_rejects_when_incorrect_protocol(self, mock_RestClient: MagicMock):
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with self.assertRaises(ValueError):
             qumulo_instance.update_allocation(
@@ -20,7 +21,7 @@ class UpdateAllocation(TestCase):
             )
 
     def test_rejects_if_some_protocols_are_bad(self, mock_RestClient: MagicMock):
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with self.assertRaises(ValueError):
             qumulo_instance.update_allocation(
@@ -32,7 +33,7 @@ class UpdateAllocation(TestCase):
             )
 
     def test_adds_nfs_export(self, mock_RestClient: MagicMock):
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch.object(
             QumuloAPI, "create_protocol", MagicMock()
@@ -50,7 +51,7 @@ class UpdateAllocation(TestCase):
             )
 
     def test_adds_smb_share(self, mock_RestClient: MagicMock):
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
         with patch.object(
             QumuloAPI, "create_protocol", MagicMock()
         ) as mock_create_protocol:
@@ -67,7 +68,7 @@ class UpdateAllocation(TestCase):
             )
 
     def test_adds_nfs_smb(self, mock_RestClient: MagicMock):
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch.object(
             QumuloAPI, "create_protocol", MagicMock()
@@ -99,7 +100,7 @@ class UpdateAllocation(TestCase):
             if protocol in ["nfs", "smb"]:
                 raise RequestError(409, "Already exists")
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch.object(
             QumuloAPI, "create_protocol", MagicMock()
@@ -124,7 +125,7 @@ class UpdateAllocation(TestCase):
             if protocol in ["nfs", "smb"]:
                 raise Exception()
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch.object(
             QumuloAPI, "create_protocol", MagicMock()
@@ -152,7 +153,7 @@ class UpdateAllocation(TestCase):
             if protocol == "nfs":
                 raise Exception()
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch.object(
             QumuloAPI, "create_protocol", MagicMock()
@@ -177,7 +178,7 @@ class UpdateAllocation(TestCase):
             if protocol == "nfs":
                 raise TypeError("Export path is not defined.")
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch.object(
             QumuloAPI, "create_protocol", MagicMock()
@@ -202,7 +203,7 @@ class UpdateAllocation(TestCase):
             if protocol == "nfs":
                 raise TypeError()
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch.object(
             QumuloAPI, "create_protocol", MagicMock()
