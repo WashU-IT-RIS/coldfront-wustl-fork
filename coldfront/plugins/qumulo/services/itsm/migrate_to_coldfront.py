@@ -29,6 +29,9 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
 
 class MigrateToColdfront:
 
+    def __init__(self, dry_run: bool = False) -> None:
+        self.dry_run = dry_run
+
     def by_fileset_alias(self, fileset_alias: str) -> str:
         itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
         result = self.__create_by(fileset_alias, itsm_result)
@@ -65,6 +68,12 @@ class MigrateToColdfront:
             errors = {"errors": field_error_messages}
             raise Exception("Validation messages: ", errors)
 
+        if self.dry_run:
+            return {
+                f"validation checks for {key}": "successful",
+                "itsm_allocation": itsm_allocation,
+            }
+
         pi_user = self.__get_or_create_user(fields)
         project, created = self.__get_or_create_project(pi_user)
         if created:
@@ -97,16 +106,16 @@ class MigrateToColdfront:
         )
         return itsm_allocation
 
-    def __validate_itsm_result_set(self, fileset_key: str, itsm_result: list) -> bool:
+    def __validate_itsm_result_set(self, key: str, itsm_result: list) -> bool:
         how_many = len(itsm_result)
         # ITSM does not return a respond code of 404 when the service provision record is not found.
         # Instead, it returns an empty array.
         if how_many == 0:
-            raise Exception(f"ITSM active allocation was not found for {fileset_key}")
+            raise Exception(f"ITSM active allocation was not found for {key}")
 
         if how_many > 1:
             raise Exception(
-                f"Multiple ({how_many} total) ITSM active allocations were found for {fileset_key}"
+                f"Multiple ({how_many} total) ITSM active allocations were found for {key}"
             )
 
         return True
