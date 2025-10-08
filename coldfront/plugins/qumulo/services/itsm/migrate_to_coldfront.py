@@ -43,15 +43,17 @@ class MigrateToColdfront:
         result = self.__create_by(fileset_name, itsm_result)
         return result
 
-    def by_storage_provision_name(self, storage_provision_name: str) -> str:
+    def by_storage_provision_name(
+        self, storage_provision_name: str, resource_name: str
+    ) -> str:
         itsm_result = self.__get_itsm_allocation_by_storage_provision_name(
             storage_provision_name
         )
-        result = self.__create_by(storage_provision_name, itsm_result)
+        result = self.__create_by(storage_provision_name, itsm_result, resource_name)
         return result
 
     # Private Methods
-    def __create_by(self, key: str, itsm_result: str) -> str:
+    def __create_by(self, key: str, itsm_result: str, resource_name: str) -> str:
         self.__validate_itsm_result_set(key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
@@ -77,7 +79,10 @@ class MigrateToColdfront:
 
         pi_user = self.__get_or_create_user(fields)
         project, created = self.__get_or_create_project(pi_user)
-        resource = self.__get_resource()
+        if resource_name:
+            resource = Resource.objects.get(name=resource_name)
+        else:
+            resource = self.__get_resource()
         if created:
             self.__create_project_user(project, pi_user)
             self.__create_project_attributes(fields, project)

@@ -18,10 +18,13 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
     def form_valid(self, form: TriggerMigrationsForm):
         allocation_name = form.cleaned_data["allocation_name_search"]
+        resource_name = form.cleaned_data["allocation_resource_name"]
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
         display_message = "Allocation metadata migrated"
         try:
-            migrate_from_itsm_to_coldfront.by_storage_provision_name(allocation_name)
+            migrate_from_itsm_to_coldfront.by_storage_provision_name(
+                allocation_name, resource_name
+            )
             messages.success(self.request, display_message)
             TriggerMigrationsView.send_successful_metadata_migration_email(
                 allocation_name
