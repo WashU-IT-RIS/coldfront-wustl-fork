@@ -159,7 +159,7 @@ class AllocationFormTests(TestCase):
             # "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
         self.assertTrue(invalid_form.fields["billing_exempt"].required)
@@ -183,7 +183,7 @@ class AllocationFormTests(TestCase):
                 "billing_exempt": invalid_value,
                 "department_number": "Time Travel Services",
                 "billing_cycle": "monthly",
-                "service_rate": "consumption",
+                "service_rate_category": "consumption",
             }
             invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
             self.assertFalse(invalid_form.is_valid())
@@ -203,7 +203,7 @@ class AllocationFormTests(TestCase):
             "billing_exempt": "Yes",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.is_valid())
@@ -223,7 +223,7 @@ class AllocationFormTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.is_valid())
@@ -392,7 +392,7 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
             "billing_cycle": "monthly",
         }
         form = AllocationForm(data=valid_data, user_id=self.user.id)
@@ -534,7 +534,7 @@ class UpdateAllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
             "billing_cycle": "monthly",
         }
         self.allocation = create_allocation(self.project1, self.user, self.data)

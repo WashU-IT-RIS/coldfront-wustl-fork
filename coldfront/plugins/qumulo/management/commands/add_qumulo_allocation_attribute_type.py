@@ -118,7 +118,7 @@ class Command(BaseCommand):
             is_changeable=True,
         )
 
-        AllocationAttributeType.objects.filter(name="service_rate").update(
+        AllocationAttributeType.objects.filter(name="service_rate_category").update(
             name="service_rate_category"
         )
 

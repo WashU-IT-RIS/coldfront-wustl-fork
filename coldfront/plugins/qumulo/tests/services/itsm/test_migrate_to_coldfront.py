@@ -83,7 +83,7 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{STORAGE2_PATH}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate", "subscription"),
+            ("service_rate_category", "subscription"),
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "No"),

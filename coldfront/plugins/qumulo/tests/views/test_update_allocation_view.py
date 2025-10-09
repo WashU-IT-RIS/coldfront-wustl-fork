@@ -275,7 +275,7 @@ class UpdateAllocationViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         storage_allocation = create_allocation(self.project, self.user, form_data)
 
@@ -317,7 +317,7 @@ class UpdateAllocationViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -608,7 +608,7 @@ class UpdateAllocationViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
             "technical_contact": "it.guru",
             "billing_contact": "finance.guru",
         }
@@ -622,7 +622,7 @@ class UpdateAllocationViewTests(TestCase):
             "billing_cycle",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
             "storage_ticket",
             "storage_quota",
         ]
