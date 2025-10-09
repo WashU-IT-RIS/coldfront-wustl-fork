@@ -328,6 +328,7 @@ class AllocationFormTests(TestCase):
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
             "technical_contact": "captain.crunch",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["technical_contact"].required)
@@ -371,6 +372,7 @@ class AllocationFormTests(TestCase):
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
             "billing_contact": "captain.crunch",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["billing_contact"].required)

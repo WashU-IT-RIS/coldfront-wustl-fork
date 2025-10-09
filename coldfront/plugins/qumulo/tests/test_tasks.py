@@ -765,7 +765,6 @@ class TestResetAcl(TestCase):
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "general",
-
         }
         build_data = build_models()
         self.project = build_data["project"]

@@ -80,6 +80,18 @@ class AllocationForm(forms.Form):
         help_text="Choose one billing cycle option from the above list",
         required=True,
     )
+
+    prepaid_time = forms.IntegerField(
+        help_text="Prepaid Time in Months",
+        label="Prepaid Time",
+        required=False,
+    )
+    prepaid_billing_date = forms.DateField(
+        help_text="Start Date Date of Prepaid Billing",
+        label="Prepaid Billing Start Date",
+        validators=[validate_prepaid_start_date],
+        required=False,
+    )
     service_rate_category = forms.ChoiceField(
         help_text="Service rate category options for the Storage2 allocation",
         label="Service Rate Category",
