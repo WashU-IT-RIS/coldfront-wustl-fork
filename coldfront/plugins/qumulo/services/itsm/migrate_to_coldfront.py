@@ -57,6 +57,7 @@ class MigrateToColdfront:
         self.__validate_itsm_result_set(key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
+        print(fields)
 
         field_error_messages = {}
         for field in fields:
@@ -207,7 +208,10 @@ class MigrateToColdfront:
         allocation_data["ro_users"] = []
         allocation_data["storage_type"] = resource.name
         for field in list(attributes_for_allocation):
+            print(field.entity_item)
             allocation_data.update(field.entity_item)
+            print(field.entity_item)
+        print(allocation_data)
 
         service_result = AllocationService.create_new_allocation(
             allocation_data, pi_user
