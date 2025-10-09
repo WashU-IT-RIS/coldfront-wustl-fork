@@ -104,7 +104,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             ).values("value")[:1]
 
             service_rate_category_sub_q = AllocationAttribute.objects.filter(
-                allocation=OuterRef("pk"), allocation_attribute_type=service_rate_categoty_type
+                allocation=OuterRef("pk"), allocation_attribute_type=service_rate_category_type
             ).values("value")[:1]
 
             storage_name_sub_q = AllocationAttribute.objects.filter(
