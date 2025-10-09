@@ -34,8 +34,10 @@ class AllocationTableViewTests(TestCase):
             "rw_users": ["test"],
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate_category": "general",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
         }
 
         self.allocation = create_allocation(self.project, self.user, self.form_data)
@@ -72,7 +74,9 @@ class AllocationTableViewTests(TestCase):
             "rw_users": ["test2"],
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
+            "billing_exempt": "No",
             "department_number": "Whale-watching",
+            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
 
@@ -110,7 +114,9 @@ class AllocationTableViewTests(TestCase):
             "rw_users": ["test2"],
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
+            "billing_exempt": "No",
             "department_number": "Whale-watching",
+            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
 
@@ -181,7 +187,9 @@ class AllocationTableViewTests(TestCase):
             "rw_users": ["test2"],
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
+            "billing_exempt": "No",
             "department_number": "Whale-watching",
+            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
 
@@ -195,7 +203,9 @@ class AllocationTableViewTests(TestCase):
             "rw_users": ["test2"],
             "ro_users": ["test3"],
             "cost_center": "CC-001122",
+            "billing_exempt": "No",
             "department_number": "Whale-watching",
+            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
 
@@ -238,7 +248,9 @@ class AllocationTableViewTests(TestCase):
             "rw_users": ["test2"],
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
+            "billing_exempt": "No",
             "department_number": "Whale-watching",
+            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
 
@@ -322,7 +334,9 @@ class AllocationTableViewTests(TestCase):
             "rw_users": ["test2"],
             "ro_users": ["test3"],
             "cost_center": "Scrooge McDuck",
+            "billing_exempt": "No",
             "department_number": "Whale-watching",
+            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
 

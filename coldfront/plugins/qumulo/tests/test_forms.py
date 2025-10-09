@@ -61,8 +61,8 @@ class AllocationFormTests(TestCase):
             "rw_users": ["test"],
             "ro_users": ["test"],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
@@ -81,6 +81,7 @@ class AllocationFormTests(TestCase):
             "rw_users": ["test"],
             "ro_users": ["test"],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -100,6 +101,7 @@ class AllocationFormTests(TestCase):
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -120,6 +122,7 @@ class AllocationFormTests(TestCase):
             # "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -127,6 +130,90 @@ class AllocationFormTests(TestCase):
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.fields["storage_ticket"].required)
         self.assertFalse(form.is_valid())
+
+    def test_billing_exempt_required(self, mock_active_directory_api: MagicMock):
+        invalid_data = {
+            "project_pk": self.project1.id,
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            # "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate": "consumption",
+        }
+        invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
+        self.assertTrue(invalid_form.fields["billing_exempt"].required)
+        self.assertFalse(invalid_form.is_valid())
+
+    # The value of billing_exempt is casesensitive, which will only take "Yes" or "No".
+    def test_billing_exempt_invalid_values(self, mock_active_directory_api: MagicMock):
+        invalid_values = {True, False, "yes", "no", "YES", "NO", "Yes/No", "abc", ""}
+        for invalid_value in invalid_values:
+            invalid_data = {
+                "project_pk": self.project1.id,
+                "storage_name": "valid-smb-allocation-name",
+                "storage_quota": 1000,
+                "protocols": ["smb"],
+                "ro_users": [],
+                "rw_users": ["test"],
+                "storage_filesystem_path": "path_to_filesystem",
+                "storage_ticket": "ITSD-98765",
+                "storage_export_path": "",
+                "cost_center": "Uncle Pennybags",
+                "billing_exempt": invalid_value,
+                "department_number": "Time Travel Services",
+                "billing_cycle": "monthly",
+                "service_rate": "consumption",
+            }
+            invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
+            self.assertFalse(invalid_form.is_valid())
+
+    def test_billing_exempt_is_Yes(self, mock_active_directory_api: MagicMock):
+        data = {
+            "project_pk": self.project1.id,
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "Yes",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate": "consumption",
+        }
+        form = AllocationForm(data=data, user_id=self.user.id)
+        self.assertTrue(form.is_valid())
+
+    def test_billing_exempt_is_No(self, mock_active_directory_api: MagicMock):
+        data = {
+            "project_pk": self.project1.id,
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate": "consumption",
+        }
+        form = AllocationForm(data=data, user_id=self.user.id)
+        self.assertTrue(form.is_valid())
 
     def test_billing_cycle_required(self, mock_active_directory_api: MagicMock):
         invalid_data = {
@@ -140,7 +227,9 @@ class AllocationFormTests(TestCase):
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
+            # "billing_cycle": "monthly",
             "service_rate_category": "not_a_rate",
         }
         invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
@@ -159,6 +248,7 @@ class AllocationFormTests(TestCase):
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "not_a_rate",
@@ -178,6 +268,7 @@ class AllocationFormTests(TestCase):
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -198,6 +289,7 @@ class AllocationFormTests(TestCase):
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -218,6 +310,7 @@ class AllocationFormTests(TestCase):
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -239,10 +332,10 @@ class AllocationFormTests(TestCase):
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
-            "service_rate": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["billing_contact"].required)
@@ -260,6 +353,7 @@ class AllocationFormTests(TestCase):
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "",
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -310,6 +404,7 @@ class AllocationFormProjectChoiceTests(TestCase):
             "rw_users": ["test"],
             "ro_users": ["test"],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -327,6 +422,7 @@ class AllocationFormProjectChoiceTests(TestCase):
             "rw_users": ["test"],
             "ro_users": ["test"],
             "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
