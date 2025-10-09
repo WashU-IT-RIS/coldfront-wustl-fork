@@ -2,6 +2,7 @@ import logging
 import os
 import re
 import time
+from typing import Dict
 import urllib.parse
 
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
@@ -19,11 +20,13 @@ load_dotenv(override=True)
 
 
 class QumuloAPI:
-    def __init__(self):
-        self.rc: RestClient = RestClient(
-            os.environ.get("QUMULO_HOST"), os.environ.get("QUMULO_PORT")
-        )
-        self.rc.login(os.environ.get("QUMULO_USER"), os.environ.get("QUMULO_PASS"))
+    def __init__(self, connection_info: Dict[str, str]) -> None:
+        self.host = connection_info["host"]
+        self.port = connection_info["port"]
+        self.username = connection_info["user"]
+        self.password = connection_info["pass"]
+        self.rc: RestClient = RestClient(self.host, self.port)
+        self.rc.login(self.username, self.password)
         self.valid_protocols = list(
             map(lambda protocol: protocol[0], constants.PROTOCOL_OPTIONS)
         )

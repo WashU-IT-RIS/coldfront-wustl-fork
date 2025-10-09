@@ -13,8 +13,8 @@
         "editor.formatOnSave": true
     },
     "black-formatter.cwd": "${workspaceFolder}",
-    "black-formatter.args": [
-        "['--exclude','coldfront/.*']",
-        "['--include','coldfront/.*/plugins/qumulo/.*']"
-    ]
+    // "black-formatter.args": [
+    //     "['--exclude','coldfront/.*']",
+    //     "['--include','coldfront/.*/plugins/qumulo/.*']"
+    // ]
 }

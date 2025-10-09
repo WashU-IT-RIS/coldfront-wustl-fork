@@ -2,6 +2,7 @@ import os
 import csv
 import re
 import hashlib
+import json
 from datetime import datetime, timezone
 
 from django.db import connection
@@ -18,11 +19,13 @@ from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
+    mock_qumulo_info,
 )
 
 from coldfront.plugins.qumulo.utils.eib_billing import EIBBilling
 
-STORAGE2_PATH = os.environ.get("STORAGE2_PATH")
+QUMULO_INFO = mock_qumulo_info
+storage2_path = QUMULO_INFO["Storage2"]["path"]
 
 REPORT_COLUMNS = [
     "fields",
@@ -64,8 +67,8 @@ def construct_allocation_form_data(quota_tb: int, service_rate_category: str):
         "storage_name": f"{quota_tb}tb-{service_rate_category}",
         "storage_quota": str(quota_tb),
         "protocols": ["smb"],
-        "storage_filesystem_path": f"{STORAGE2_PATH}/{quota_tb}tb-{service_rate_category}",
-        "storage_export_path": f"{STORAGE2_PATH}/{quota_tb}tb-{service_rate_category}",
+        "storage_filesystem_path": f"{storage2_path}/{quota_tb}tb-{service_rate_category}",
+        "storage_export_path": f"{storage2_path}/{quota_tb}tb-{service_rate_category}",
         "rw_users": ["test"],
         "ro_users": ["test1"],
         "storage_ticket": "ITSD-1234",
@@ -141,7 +144,7 @@ def mock_get_multiple_quotas() -> str:
     json_id = 100
     for name, quota, usage in mock_get_names_quotas_usages():
         usage_in_json = construct_usage_data_in_json(
-            f"{STORAGE2_PATH}/{name}", quota, usage
+            f"{storage2_path}/{name}", quota, usage
         )
         usage_in_json[id] = json_id
         usages_in_json.append(usage_in_json)
@@ -162,13 +165,13 @@ def mock_get_quota() -> str:
     usage_in_json = [
         {
             "id": "101",
-            "path": f"{STORAGE2_PATH}/{name}/",
+            "path": f"{storage2_path}/{name}/",
             "limit": f"{quota}",
             "capacity_usage": f"{usage}",
         },
         {
             "id": "102",
-            "path": f"{STORAGE2_PATH}/{name}/Active/{suballocation_name}",
+            "path": f"{storage2_path}/{name}/Active/{suballocation_name}",
             "limit": f"{suballocation_quota}",
             "capacity_usage": f"{suballocation_usage}",
         },
@@ -179,6 +182,7 @@ def mock_get_quota() -> str:
     }
 
 
+@patch.dict("os.environ", {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class TestEIBBilling(TestCase):
     def setUp(self) -> None:
         self.client = Client()
@@ -215,13 +219,15 @@ class TestEIBBilling(TestCase):
             re.search("^\s*SELECT\s*", eib_billing.get_query(args, "monthly"))
         )
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_create_an_allocation_ingest_usage_and_generate_billing_report(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quota()
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         allocation = create_allocation(
             project=self.project,
@@ -367,13 +373,15 @@ class TestEIBBilling(TestCase):
 
         os.remove(filename)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_create_multiple_allocations_ingest_usages_generate_billing_report(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_multiple_quotas()
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         quota_service_rate_categories = mock_get_quota_service_rate_categories()
 
@@ -444,13 +452,15 @@ class TestEIBBilling(TestCase):
 
         os.remove(filename)
 
-    @patch("coldfront.plugins.qumulo.tasks.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_create_a_suballocation_ingest_usage_and_generate_billing_report(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         qumulo_api = MagicMock()
         qumulo_api.get_all_quotas_with_usage.return_value = mock_get_quota()
-        qumulo_api_mock.return_value = qumulo_api
+        create_connection_mock.return_value = qumulo_api
 
         allocation = create_allocation(
             project=self.project,

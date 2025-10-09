@@ -25,3 +25,5 @@ class CreateSubAllocationForm(AllocationForm):
             "parent_allocation": self.fields.pop("parent_allocation"),
             **self.fields,
         }
+
+        self.fields["storage_type"].disabled = True

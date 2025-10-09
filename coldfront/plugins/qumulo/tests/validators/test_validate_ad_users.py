@@ -1,5 +1,5 @@
 from django.test import TestCase
-from unittest.mock import patch, MagicMock, call
+from unittest.mock import patch, MagicMock
 
 from django.core.exceptions import ValidationError
 from coldfront.plugins.qumulo.validators import (
@@ -10,8 +10,9 @@ from coldfront.plugins.qumulo.validators import (
 
 class TestValidateAdUsers(TestCase):
     def setUp(self):
-        self.patcher = patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
-        self.mock_active_directory = self.patcher.start()
+        self.mock_active_directory = patch(
+            "coldfront.plugins.qumulo.validators.ActiveDirectoryAPI"
+        ).start()
 
         self.mock_get_user = MagicMock()
         self.mock_get_members = MagicMock()
@@ -21,7 +22,7 @@ class TestValidateAdUsers(TestCase):
         return super().setUp()
 
     def tearDown(self):
-        self.patcher.stop()
+        patch.stopall()
 
         return super().tearDown()
 

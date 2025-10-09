@@ -4,14 +4,18 @@ from typing import Any
 from django import forms
 
 from coldfront.core.project.models import Project
+from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
-from coldfront.plugins.qumulo.fields import ADUserField, StorageFileSystemPathField
+from coldfront.plugins.qumulo.fields import ADUserField
 from coldfront.plugins.qumulo.validators import (
     validate_leading_forward_slash,
     validate_single_ad_user,
     validate_ticket,
     validate_storage_name,
     validate_prepaid_start_date,
+    validate_filesystem_path_unique,
+    validate_relative_path,
+    validate_parent_directory,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -25,13 +29,19 @@ from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 class AllocationForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user_id = kwargs.pop("user_id")
-        self.allocation_status_name = self._upper(kwargs.pop("allocation_status_name", None))
+        self.allocation_status_name = self._upper(
+            kwargs.pop("allocation_status_name", None)
+        )
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
+        self.fields["storage_type"].choices = self.get_storage_type_choices()
 
     class Media:
         js = ("allocation.js",)
 
+    storage_type = forms.ChoiceField(
+        label="Storage Type",
+    )
     project_pk = forms.ChoiceField(
         label="Project",
         widget=forms.Select(
@@ -92,7 +102,7 @@ class AllocationForm(forms.Form):
         required=False,
     )
     service_rate = forms.ChoiceField(
-        help_text="Service rate option for the Storage2 allocation",
+        help_text="Service rate option for the Storage allocation",
         label="Service Rate",
         choices=STORAGE_SERVICE_RATES,
         initial="consumption",
@@ -111,9 +121,10 @@ class AllocationForm(forms.Form):
         initial=["smb"],
         required=False,
     )
-    storage_filesystem_path = StorageFileSystemPathField(
+    storage_filesystem_path = forms.CharField(
         help_text="Path of the allocation resource",
         label="Filesystem Path",
+        validators=[validate_relative_path],
     )
     storage_export_path = forms.CharField(
         help_text="Path of the allocation resource",
@@ -204,6 +215,15 @@ class AllocationForm(forms.Form):
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
 
+        if self.fields["storage_filesystem_path"].disabled is False:
+            storage_type = cleaned_data.get("storage_type")
+            storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
+            try:
+                validate_filesystem_path_unique(storage_filesystem_path, storage_type)
+                validate_parent_directory(storage_filesystem_path, storage_type)
+            except forms.ValidationError as error:
+                self.add_error("storage_filesystem_path", error.message)
+
     def get_project_choices(self) -> list[str]:
         # jprew - NOTE: accesses to db collections should be consolidated to
         # single classes
@@ -215,3 +235,7 @@ class AllocationForm(forms.Form):
             projects = Project.objects.filter(pi=self.user_id)
 
         return map(lambda project: (project.id, project.title), projects)
+
+    def get_storage_type_choices(self) -> list[str]:
+        storage_types = Resource.objects.filter(resource_type__name="Storage")
+        return map(lambda storage: (storage.name, storage.description), storage_types)

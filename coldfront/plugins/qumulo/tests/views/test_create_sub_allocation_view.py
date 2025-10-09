@@ -2,7 +2,7 @@ from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
 from coldfront.core.allocation.models import Allocation
-from coldfront.core.resource.models import Resource
+from coldfront.core.resource.models import Resource, ResourceType
 from coldfront.core.allocation.models import (
     AllocationLinkage,
     AllocationAttributeType,
@@ -34,6 +34,7 @@ class AllocationViewTests(TestCase):
 
         self.parent_form_data = {
             "project_pk": self.project.id,
+            "storage_type": "Storage2",
             "storage_filesystem_path": "foo",
             "storage_export_path": "bar",
             "storage_ticket": "ITSD-54321",
@@ -51,6 +52,7 @@ class AllocationViewTests(TestCase):
 
         self.sub_form_data = {
             "project_pk": self.project.id,
+            "storage_type": self.parent_form_data["storage_type"],
             "parent_allocation_name": self.parent_form_data["storage_name"],
             "storage_filesystem_path": "xyz",
             "storage_export_path": "abc",
@@ -79,8 +81,9 @@ class AllocationViewTests(TestCase):
 
         # verifying that a new Allocation object was created
         self.assertEqual(Allocation.objects.count(), 3)
-        resource = Resource.objects.get(name="Storage2")
-        storage_allocations = Allocation.objects.filter(resources=resource)
+
+        storage_resources = Resource.objects.filter(resource_type__name="Storage")
+        storage_allocations = Allocation.objects.filter(resources__in=storage_resources)
         self.assertEqual(len(storage_allocations), 1)
 
         self.assertEqual(AllocationLinkage.objects.count(), 0)
@@ -92,8 +95,8 @@ class AllocationViewTests(TestCase):
 
         # verifying that a new sub-Allocation object was created
         self.assertEqual(Allocation.objects.count(), 6)
-        storage_allocations = Allocation.objects.filter(resources=resource)
-        self.assertEqual(len(storage_allocations), 2)
+        storage_allocations = Allocation.objects.filter(resources__in=storage_resources)
+        self.assertEqual(storage_allocations.count(), 2)
 
         # assert that an allocationlinkage was created
         self.assertEqual(AllocationLinkage.objects.count(), 1)

@@ -6,6 +6,7 @@ from django import forms
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["storage_type"].disabled = True
 
         self.fields["storage_name"].disabled = True
         self.fields["storage_filesystem_path"].disabled = True

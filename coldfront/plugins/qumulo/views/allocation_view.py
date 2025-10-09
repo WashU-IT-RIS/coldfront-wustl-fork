@@ -5,6 +5,7 @@ from django.urls import reverse
 from typing import Optional
 
 import os
+import json
 
 from coldfront.core.allocation.models import Allocation
 
@@ -27,7 +28,12 @@ class AllocationView(LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["file_system_stats"] = FileSystemService.get_file_system_stats()
+        context["file_system_stats_storage2"] = FileSystemService.get_file_system_stats(
+            "Storage2"
+        )
+        context["file_system_stats_storage3"] = FileSystemService.get_file_system_stats(
+            "Storage3"
+        )
         return context
 
     def get_form_kwargs(self):
@@ -46,6 +52,7 @@ class AllocationView(LoginRequiredMixin, FormView):
     ):
         form_data = form.cleaned_data
         user = self.request.user
+        storage_type = form_data.get("storage_type")
         storage_filesystem_path = form_data.get("storage_filesystem_path")
         is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
         if is_absolute_path:
@@ -59,12 +66,14 @@ class AllocationView(LoginRequiredMixin, FormView):
                 ).strip("/")
                 prepend_val = f"{root_val}/Active"
             else:
-                storage_root = os.environ.get("STORAGE2_PATH").strip("/")
+                cluster_info = json.loads(os.environ.get("QUMULO_INFO"))
+                storage_root_env = cluster_info[storage_type]["path"]
+                storage_root = storage_root_env.strip("/")
                 prepend_val = storage_root
 
             absolute_path = f"/{prepend_val}/{storage_filesystem_path}"
         AllocationView.set_billing_cycle(form_data)
-        validate_filesystem_path_unique(absolute_path)
+        validate_filesystem_path_unique(absolute_path, storage_type)
 
         self.new_allocation = AllocationService.create_new_allocation(
             form_data, user, parent_allocation

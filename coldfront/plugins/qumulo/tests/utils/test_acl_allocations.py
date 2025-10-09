@@ -7,6 +7,8 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 )
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
+
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -16,10 +18,8 @@ from coldfront.core.allocation.models import (
 
 from deepdiff import DeepDiff
 
+import json
 import os
-from dotenv import load_dotenv
-
-load_dotenv(override=True)
 
 
 class TestAclAllocations(TestCase):
@@ -48,6 +48,20 @@ class TestAclAllocations(TestCase):
         }
 
         self.client.force_login(self.user)
+
+        self.storage2_path = "/storage2/fs1"
+        patch.dict(
+            os.environ,
+            {
+                "QUMULO_INFO": json.dumps({"Storage2": {"path": self.storage2_path}}),
+            },
+        ).start()
+
+        return super().setUp()
+
+    def tearDown(self):
+        patch.stopall()
+        return super().tearDown()
 
     def test_set_allocation_attributes_sets_allocation_attributes(self):
         test_allocation = Allocation.objects.create(
@@ -86,9 +100,11 @@ class TestAclAllocations(TestCase):
                 )
             )
 
+        mock_qumulo_api = MagicMock()
         with patch(
-            "coldfront.plugins.qumulo.utils.acl_allocations.QumuloAPI"
-        ) as mock_qumulo_api:
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection",
+            return_value=mock_qumulo_api,
+        ) as mock_create_connection:
             mock_return_data = {
                 "control": ["PRESENT"],
                 "posix_special_permissions": [],
@@ -101,21 +117,23 @@ class TestAclAllocations(TestCase):
             )
             mock_return_data["aces"].extend(extra_aces)
 
-            mock_qumulo_api.return_value.rc.fs.get_acl_v2.return_value = (
+            mock_create_connection.return_value.rc.fs.get_acl_v2.return_value = (
                 mock_return_data
             )
 
             AclAllocations.remove_acl_access(allocation=test_allocation)
 
-            mock_qumulo_api.return_value.rc.fs.set_acl_v2.assert_has_calls(calls)
+            mock_create_connection.return_value.rc.fs.set_acl_v2.assert_has_calls(calls)
 
     def test_remove_access_sets_allocation_status(self):
         test_allocation = create_allocation(self.project, self.user, self.form_data)
         acl_allocations = AclAllocations.get_access_allocations(test_allocation)
 
+        mock_qumulo_api = MagicMock()
         with patch(
-            "coldfront.plugins.qumulo.utils.acl_allocations.QumuloAPI"
-        ) as mock_qumulo_api:
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection",
+            return_value=mock_qumulo_api,
+        ) as mock_create_connection:
             mock_return_data = {
                 "control": ["PRESENT"],
                 "posix_special_permissions": [],
@@ -128,7 +146,7 @@ class TestAclAllocations(TestCase):
             )
             mock_return_data["aces"].extend(extra_aces)
 
-            mock_qumulo_api.return_value.rc.fs.get_acl_v2.return_value = (
+            mock_create_connection.return_value.rc.fs.get_acl_v2.return_value = (
                 mock_return_data
             )
 
@@ -147,7 +165,7 @@ class TestAclAllocations(TestCase):
         mock_qumulo_api.rc.fs.get_acl_v2 = mock_get_acl_v2
 
         form_data = self.form_data.copy()
-        form_data["storage_filesystem_path"] = f"{os.environ.get('STORAGE2_PATH')}/foo"
+        form_data["storage_filesystem_path"] = f"{self.storage2_path}/foo"
 
         group_name_base = f"storage-{form_data['storage_name']}"
         expected_aces = AcesManager.default_copy()
@@ -187,7 +205,7 @@ class TestAclAllocations(TestCase):
         mock_qumulo_api.rc.fs.get_acl_v2 = mock_get_acl_v2
 
         form_data = self.form_data.copy()
-        form_data["storage_filesystem_path"] = f"{os.environ.get('STORAGE2_PATH')}/foo"
+        form_data["storage_filesystem_path"] = f"{self.storage2_path}/foo"
 
         group_name_base = f"storage-{form_data['storage_name']}"
 
@@ -228,7 +246,7 @@ class TestAclAllocations(TestCase):
         mock_qumulo_api.rc.fs.get_acl_v2 = mock_get_acl_v2
 
         form_data = self.form_data.copy()
-        form_data["storage_filesystem_path"] = f"{os.environ.get('STORAGE2_PATH')}/foo"
+        form_data["storage_filesystem_path"] = f"{self.storage2_path}/foo"
 
         allocation = create_allocation(self.project, self.user, form_data)
 
@@ -248,6 +266,7 @@ class TestAclAllocations(TestCase):
                 ro_groupname=f"{group_name_base}-ro",
                 qumulo_api=mock_qumulo_api,
                 is_base_allocation=True,
+                resource_name="Storage2",
             )
 
     def test_set_allocation_acls_sets_sub_acl(self):
@@ -258,9 +277,7 @@ class TestAclAllocations(TestCase):
         mock_qumulo_api.rc.fs.get_acl_v2 = mock_get_acl_v2
 
         form_data = self.form_data.copy()
-        form_data["storage_filesystem_path"] = (
-            f"{os.environ.get('STORAGE2_PATH')}/bar/Active/foo"
-        )
+        form_data["storage_filesystem_path"] = f"{self.storage2_path}/bar/Active/foo"
 
         group_name_base = f"storage-{form_data['storage_name']}"
 
@@ -301,9 +318,7 @@ class TestAclAllocations(TestCase):
         mock_qumulo_api.rc.fs.get_acl_v2 = mock_get_acl_v2
 
         form_data = self.form_data.copy()
-        form_data["storage_filesystem_path"] = (
-            f"{os.environ.get('STORAGE2_PATH')}/foo/Active/bar"
-        )
+        form_data["storage_filesystem_path"] = f"{self.storage2_path}/foo/Active/bar"
 
         group_name_base = f"storage-{form_data['storage_name']}"
 
@@ -345,7 +360,7 @@ class TestAclAllocations(TestCase):
         mock_set_acl_v2 = MagicMock()
         mock_qumulo_api.rc.fs.set_acl_v2 = mock_set_acl_v2
 
-        fs_path = f"{os.environ.get('STORAGE2_PATH')}/foo"
+        fs_path = f"{self.storage2_path}/foo"
         rw_groupname = "rw_group"
         ro_groupname = "ro_group"
 
@@ -361,6 +376,7 @@ class TestAclAllocations(TestCase):
             ro_groupname=ro_groupname,
             qumulo_api=mock_qumulo_api,
             is_base_allocation=True,
+            resource_name="Storage2",
         )
 
         mock_set_acl_v2.assert_called_once()
@@ -378,7 +394,7 @@ class TestAclAllocations(TestCase):
         mock_set_acl_v2 = MagicMock()
         mock_qumulo_api.rc.fs.set_acl_v2 = mock_set_acl_v2
 
-        fs_path = f"{os.environ.get('STORAGE2_PATH')}/foo"
+        fs_path = f"{self.storage2_path}/foo"
         rw_groupname = "rw_group"
         ro_groupname = "ro_group"
 
@@ -399,6 +415,7 @@ class TestAclAllocations(TestCase):
             ro_groupname=ro_groupname,
             qumulo_api=mock_qumulo_api,
             is_base_allocation=True,
+            resource_name="Storage2",
         )
 
         mock_set_acl_v2.assert_called_once()
@@ -414,7 +431,7 @@ class TestAclAllocations(TestCase):
         mock_set_acl_v2 = MagicMock()
         mock_qumulo_api.rc.fs.set_acl_v2 = mock_set_acl_v2
 
-        fs_path = f"{os.environ.get('STORAGE2_PATH')}/foo/Active/bar"
+        fs_path = f"{self.storage2_path}/foo/Active/bar"
         rw_groupname = "rw_group"
         ro_groupname = "ro_group"
 
@@ -430,6 +447,7 @@ class TestAclAllocations(TestCase):
             ro_groupname=ro_groupname,
             qumulo_api=mock_qumulo_api,
             is_base_allocation=False,
+            resource_name="Storage2",
         )
 
         mock_set_acl_v2.assert_called()
@@ -439,40 +457,38 @@ class TestAclAllocations(TestCase):
 
         self.assertEqual(
             call_args_list[0].kwargs["path"],
-            f"{os.environ.get('STORAGE2_PATH')}/foo/Active",
+            f"{self.storage2_path}/foo/Active",
         )
         diff = DeepDiff(
             call_args_list[0].kwargs["acl"], expected_acl, ignore_order=True
         )
 
-        self.assertEqual(
-            call_args_list[1].kwargs["path"], f"{os.environ.get('STORAGE2_PATH')}/foo"
-        )
+        self.assertEqual(call_args_list[1].kwargs["path"], f"{self.storage2_path}/foo")
         diff = DeepDiff(
             call_args_list[1].kwargs["acl"], expected_acl, ignore_order=True
         )
         self.assertFalse(diff)
 
     def test_is_base_allocation_confirms_base_allocation(self):
-        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo"
-        self.assertTrue(AclAllocations.is_base_allocation(path), path)
+        path = f"/{self.storage2_path.strip('/')}/foo"
+        self.assertTrue(AclAllocations.is_base_allocation(path, "Storage2"), path)
 
-        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/"
-        self.assertTrue(AclAllocations.is_base_allocation(path), path)
+        path = f"/{self.storage2_path.strip('/')}/foo/"
+        self.assertTrue(AclAllocations.is_base_allocation(path, "Storage2"), path)
 
     def test_is_base_allocation_rejects_sub_allocation(self):
-        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/Active/bar"
-        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+        path = f"/{self.storage2_path.strip('/')}/foo/Active/bar"
+        self.assertFalse(AclAllocations.is_base_allocation(path, "Storage2"), path)
 
     def test_is_base_allocation_rejects_gibberish_allocations(self):
-        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/Active"
-        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+        path = f"/{self.storage2_path.strip('/')}/foo/Active"
+        self.assertFalse(AclAllocations.is_base_allocation(path, "Storage2"), path)
 
         path = "/foo"
-        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+        self.assertFalse(AclAllocations.is_base_allocation(path, "Storage2"), path)
 
-        path = f"/{os.environ.get('STORAGE2_PATH').strip('/')}/foo/bar/Active"
-        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+        path = f"/{self.storage2_path.strip('/')}/foo/bar/Active"
+        self.assertFalse(AclAllocations.is_base_allocation(path, "Storage2"), path)
 
-        path = f"{os.environ.get('STORAGE2_PATH').strip('/')}/foo"
-        self.assertFalse(AclAllocations.is_base_allocation(path), path)
+        path = f"{self.storage2_path.strip('/')}/foo"
+        self.assertFalse(AclAllocations.is_base_allocation(path, "Storage2"), path)
