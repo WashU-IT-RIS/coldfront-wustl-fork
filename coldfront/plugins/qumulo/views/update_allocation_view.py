@@ -79,7 +79,7 @@ class UpdateAllocationView(AllocationView):
             "billing_cycle",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
             "billing_cycle",
             "prepaid_time",
             "prepaid_billing_date",
@@ -184,7 +184,7 @@ class UpdateAllocationView(AllocationView):
             "billing_cycle",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
             "storage_ticket",
             "storage_quota",
         ]

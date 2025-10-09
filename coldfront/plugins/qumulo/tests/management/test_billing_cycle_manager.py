@@ -62,7 +62,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "subscription",
+            "service_rate_category": "subscription",
             "billing_cycle": "prepaid",
             "prepaid_time": 6,
             "prepaid_billing_date": self.calculate_past_date(),
@@ -79,7 +79,7 @@ class TestBillingCycleTypeUpdates(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "subscription",
+            "service_rate_category": "subscription",
             "billing_cycle": "monthly",
         }
 
@@ -183,7 +183,7 @@ class TestBillingCycleTypeUpdates(TestCase):
 
         new_service_rate = AllocationAttribute.objects.get(
             allocation=prepaid_present_allocation,
-            allocation_attribute_type__name="service_rate",
+            allocation_attribute_type__name="service_rate_category",
         ).value
         new_prepaid_expiration = datetime.strptime(
             new_prepaid_expiration, "%Y-%m-%d %H:%M:%S"

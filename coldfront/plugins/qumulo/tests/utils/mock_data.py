@@ -41,7 +41,7 @@ default_form_data = {
     "billing_exempt": "No",
     "department_number": "Time Travel Services",
     "billing_cycle": "monthly",
-    "service_rate": "general",
+    "service_rate_category": "general",
 }
 
 
@@ -201,8 +201,8 @@ def set_allocation_attributes(
         "storage_export_path",
         "department_number",
         "cost_center",
+        "service_rate_category",
         "billing_exempt",
-        "service_rate",
         "storage_ticket",
         "technical_contact",
         "billing_contact",

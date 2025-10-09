@@ -1,5 +1,4 @@
 import re, json
-from icecream import ic
 
 import coldfront.core.allocation.models as coldfront_models
 
