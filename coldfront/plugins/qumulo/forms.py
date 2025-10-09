@@ -13,6 +13,7 @@ from coldfront.plugins.qumulo.validators import (
     validate_single_ad_user,
     validate_ticket,
     validate_storage_name,
+    validate_prepaid_start_date,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -66,9 +67,9 @@ class AllocationForm(forms.Form):
         required=False,
     )
     billing_cycle = forms.ChoiceField(
-        help_text="The billing cycle of the allocation",
-        label="Billing Cycle",
         choices=BILLING_CYCLE_OPTIONS,
+        label="Billing Cycle Options",
+        help_text="Choose one billing cycle option from the above list",
         required=True,
     )
     service_rate_category = forms.ChoiceField(
@@ -208,6 +209,13 @@ class UpdateAllocationForm(AllocationForm):
 
         self.fields["storage_filesystem_path"].validators = []
         self.fields["storage_name"].validators = []
+
+        self.fields["prepaid_expiration"] = forms.DateField(
+            help_text="Allocation is paid until this date",
+            label="Prepaid Expiration Date",
+            required=False,
+        )
+        self.fields["prepaid_expiration"].disabled = True
 
 
 class CreateSubAllocationForm(AllocationForm):

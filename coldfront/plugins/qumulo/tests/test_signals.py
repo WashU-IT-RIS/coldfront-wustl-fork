@@ -45,6 +45,7 @@ class TestSignals(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
             "service_rate_category": "general",
         }
 
@@ -61,7 +62,6 @@ class TestSignals(TestCase):
         mock_QumuloAPI: MagicMock,
     ):
         qumulo_instance = mock_QumuloAPI.return_value
-
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )

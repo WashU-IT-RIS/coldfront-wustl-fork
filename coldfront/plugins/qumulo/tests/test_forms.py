@@ -63,6 +63,7 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
+            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
@@ -241,6 +242,7 @@ class AllocationFormTests(TestCase):
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "service_rate": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["billing_contact"].required)
