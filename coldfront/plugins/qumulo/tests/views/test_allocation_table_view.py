@@ -36,8 +36,8 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
+            "service_rate_category": "general",
             "billing_cycle": "monthly",
-            "service_rate_category": "consumption",
         }
 
         self.allocation = create_allocation(self.project, self.user, self.form_data)
@@ -76,8 +76,8 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "Scrooge McDuck",
             "billing_exempt": "No",
             "department_number": "Whale-watching",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         other_allocation = create_allocation(other_project, other_user, other_form_data)
@@ -116,8 +116,8 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "Scrooge McDuck",
             "billing_exempt": "No",
             "department_number": "Whale-watching",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         other_allocation = create_allocation(other_project, other_user, other_form_data)
@@ -189,8 +189,8 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "Scrooge McDuck",
             "billing_exempt": "No",
             "department_number": "Whale-watching",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         other_form_data_b = {
@@ -205,8 +205,8 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "CC-001122",
             "billing_exempt": "No",
             "department_number": "Whale-watching",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         _ = create_allocation(
@@ -250,8 +250,9 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "Scrooge McDuck",
             "billing_exempt": "No",
             "department_number": "Whale-watching",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
+            "service_rate": "consumption",
         }
 
         other_allocations = []
@@ -336,8 +337,8 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "Scrooge McDuck",
             "billing_exempt": "No",
             "department_number": "Whale-watching",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         child_allocation = create_allocation(
