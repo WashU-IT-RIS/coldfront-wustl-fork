@@ -127,7 +127,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker"
-        result = self.migrate.by_fileset_name(f"{name}_active")
+        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
         self.assertDictEqual(
             result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
         )
@@ -180,7 +180,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker"
-        result = self.migrate.by_storage_provision_name(f"{name}")
+        result = self.migrate.by_storage_provision_name(f"{name}", "Storage2")
         self.assertDictEqual(
             result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
         )
@@ -232,7 +232,7 @@ class TestMigrateToColdfront(TestCase):
 
         fileset_alias = "mocker_active"
         name = "mocker"
-        result = self.migrate.by_fileset_alias(f"{fileset_alias}")
+        result = self.migrate.by_fileset_alias(f"{fileset_alias}", "Storage2")
         self.assertDictEqual(
             result,
             {"allocation_id": 1, "pi_user_id": 1, "project_id": 1},
@@ -284,7 +284,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker_missing_contacts"
-        result = self.migrate.by_fileset_name(f"{name}_active")
+        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
 
@@ -326,8 +326,8 @@ class TestMigrateToColdfront(TestCase):
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
 
-        name = "mocker_missing_contacts"
-        result = self.migrate.by_fileset_name(f"{name}_active")
+        name = "mocker"
+        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
 

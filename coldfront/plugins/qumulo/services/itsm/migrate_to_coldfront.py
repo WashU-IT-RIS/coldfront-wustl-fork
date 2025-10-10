@@ -35,14 +35,14 @@ class MigrateToColdfront:
     def __init__(self, dry_run: bool = False) -> None:
         self.dry_run = dry_run
 
-    def by_fileset_alias(self, fileset_alias: str) -> str:
+    def by_fileset_alias(self, fileset_alias: str, resource_name: str) -> str:
         itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
-        result = self.__create_by(fileset_alias, itsm_result)
+        result = self.__create_by(fileset_alias, itsm_result, resource_name)
         return result
 
-    def by_fileset_name(self, fileset_name: str) -> str:
+    def by_fileset_name(self, fileset_name: str, resource_name: str) -> str:
         itsm_result = self.__get_itsm_allocation_by_fileset_name(fileset_name)
-        result = self.__create_by(fileset_name, itsm_result)
+        result = self.__create_by(fileset_name, itsm_result, resource_name)
         return result
 
     def by_storage_provision_name(
