@@ -2,20 +2,13 @@ import math, os, json
 from typing import Optional
 
 
-def fileset_name_to_storage_filesystem_path(
-    fileset_name_or_alias, resource_type: str
-) -> str:
+def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # In ITSM, fileset_names are mapped into name
     # Examples
     # bisiademuyiwa_active --> /storage2/fs1/bisiademuyiwa
     # gc6159 --> /storage2/fs1/gc6159
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    if resource_type == "Storage2":
-        base_path = __get_storage2_base_path()
-    elif resource_type == "Storage3":
-        base_path = __get_storage3_base_path()
-    else:
-        raise ValueError(f"Unknown resource_type: {resource_type}")
+    base_path = __get_storage2_base_path()
     storage_filesystem_path = f"{base_path}/{fileset_name_seed}"
     return storage_filesystem_path
 

@@ -10,6 +10,9 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
 from coldfront.plugins.qumulo.forms.TriggerMigrationsForm import TriggerMigrationsForm
+from coldfront.plugins.qumulo.validators import validate_filesystem_path_unique
+
+import json, os
 
 
 class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
@@ -21,6 +24,8 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         resource_name = form.cleaned_data["allocation_resource_name"]
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
         display_message = "Allocation metadata migrated"
+        seed_path = allocation_name.split("_active")[0].rsplit("/", 1)[-1]
+        validate_filesystem_path_unique(seed_path, resource_name)
         try:
             migrate_from_itsm_to_coldfront.by_storage_provision_name(
                 allocation_name, resource_name

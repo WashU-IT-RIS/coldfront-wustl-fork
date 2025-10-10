@@ -27,6 +27,8 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
     ItsmToColdfrontFieldsFactory,
 )
 
+import json, os
+
 
 class MigrateToColdfront:
 
@@ -57,7 +59,6 @@ class MigrateToColdfront:
         self.__validate_itsm_result_set(key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
-        print(fields)
 
         field_error_messages = {}
         for field in fields:
@@ -87,7 +88,7 @@ class MigrateToColdfront:
         if created:
             self.__create_project_user(project, pi_user)
             self.__create_project_attributes(fields, project)
-        allocation = self.__create_allocation(fields, project, pi_user, resource)
+        allocation = self.__create_allocation(key, fields, project, pi_user, resource)
         self.__create_allocation_attributes(fields, allocation)
         return {
             "allocation_id": allocation.id,
@@ -197,21 +198,27 @@ class MigrateToColdfront:
                     )
 
     def __create_allocation(
-        self, fields: list, project: Project, pi_user: User, resource: Resource
+        self,
+        key: str,
+        fields: list,
+        project: Project,
+        pi_user: User,
+        resource: Resource,
     ) -> str:
         attributes_for_allocation = filter(
             lambda field: field.entity == "allocation_form", fields
         )
-
+        seed_path = key.split("_active")[0].rsplit("/", 1)[-1]
+        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+        base_path = qumulo_info[resource.name]["path"]
         allocation_data = {}
         allocation_data["project_pk"] = project.id
         allocation_data["ro_users"] = []
         allocation_data["storage_type"] = resource.name
         for field in list(attributes_for_allocation):
-            print(field.entity_item)
             allocation_data.update(field.entity_item)
-            print(field.entity_item)
-        print(allocation_data)
+        allocation_data["storage_filesystem_path"] = f"{base_path}/{seed_path}"
+        allocation_data["storage_export_path"] = f"{base_path}/{seed_path}"
 
         service_result = AllocationService.create_new_allocation(
             allocation_data, pi_user
