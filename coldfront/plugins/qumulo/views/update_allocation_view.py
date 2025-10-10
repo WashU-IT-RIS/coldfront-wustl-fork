@@ -21,7 +21,7 @@ from coldfront.core.allocation.models import (
 
 from coldfront.core.user.models import User
 
-from coldfront.plugins.qumulo.forms import UpdateAllocationForm
+from coldfront.plugins.qumulo.forms.UpdateAllocationForm import UpdateAllocationForm
 from coldfront.plugins.qumulo.hooks import acl_reset_complete_hook
 from coldfront.plugins.qumulo.tasks import addMembersToADGroup, reset_allocation_acls
 from coldfront.plugins.qumulo.views.allocation_view import AllocationView
@@ -59,6 +59,7 @@ class UpdateAllocationView(AllocationView):
 
         allocation_id = self.kwargs.get("allocation_id")
         allocation = Allocation.objects.get(pk=allocation_id)
+        kwargs["allocation_status_name"] = allocation.status.name
         allocation_attrs = AllocationAttribute.objects.filter(allocation=allocation_id)
 
         form_data = {
@@ -141,6 +142,31 @@ class UpdateAllocationView(AllocationView):
         )
         messages.add_message(self.request, messages.SUCCESS, self._acl_reset_message())
 
+    def _identify_new_form_values(
+        self, allocation: Allocation, attributes_to_check, form_values
+    ):
+        attribute_changes = list(zip(attributes_to_check, form_values))
+        new_values = []
+
+        for change in attribute_changes:
+            attribute, _ = AllocationAttribute.objects.get_or_create(
+                allocation_attribute_type=AllocationAttributeType.objects.get(
+                    name=change[0]
+                ),
+                allocation=allocation,
+                defaults={"value": ""},
+            )
+
+            comparand = (
+                int(attribute.value)
+                if type(change[1]) is int
+                else attribute.value
+            )
+            if comparand != change[1]:
+                new_values.append((change[0], change[1]))
+
+        return new_values
+
     def _updated_fields_handler(
         self, form: UpdateAllocationForm, parent_allocation: Optional[Allocation] = None
     ):
@@ -148,13 +174,7 @@ class UpdateAllocationView(AllocationView):
 
         allocation = Allocation.objects.get(pk=self.kwargs.get("allocation_id"))
 
-        allocation_change_request = AllocationChangeRequest.objects.create(
-            allocation=allocation,
-            status=AllocationChangeStatusChoice.objects.get(name="Pending"),
-            justification="updating",
-            notes="updating",
-            end_date_extension=10,
-        )
+        allocation_change_request = None
 
         # NOTE - "storage_protocols" will have special handling
         attributes_to_check = [
@@ -174,14 +194,28 @@ class UpdateAllocationView(AllocationView):
         # handle "storage_protocols" separately
         attributes_to_check.append("storage_protocols")
         form_values.append(json.dumps(form_data.get("protocols")))
-
-        for attribute_name, form_value in zip(attributes_to_check, form_values):
-            UpdateAllocationView._handle_attribute_change(
+        attribute_changes = self._identify_new_form_values(
+            allocation, attributes_to_check, form_values
+        )
+        if len(attribute_changes):
+            allocation_change_request = AllocationChangeRequest.objects.create(
                 allocation=allocation,
-                allocation_change_request=allocation_change_request,
-                attribute_name=attribute_name,
-                form_value=form_value,
+                status=AllocationChangeStatusChoice.objects.get(name="Pending"),
+                justification="updating",
+                notes="updating",
+                end_date_extension=10,
             )
+
+            for change in attribute_changes:
+                attribute = AllocationAttribute.objects.get(
+                    allocation_attribute_type__name=change[0],
+                    allocation=allocation,
+                )
+                AllocationAttributeChangeRequest.objects.create(
+                    allocation_attribute=attribute,
+                    allocation_change_request=allocation_change_request,
+                    new_value=change[1],
+                )
 
         # RW and RO users are not handled via an AllocationChangeRequest
         access_keys = ["rw", "ro"]
@@ -191,33 +225,6 @@ class UpdateAllocationView(AllocationView):
 
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
-
-    @staticmethod
-    def _handle_attribute_change(
-        allocation: Allocation,
-        allocation_change_request: AllocationChangeRequest,
-        attribute_name: str,
-        form_value: Union[str, int],
-    ) -> None:
-        # some attributes are optional and so may not exist
-        # if they don't, we want to create them with an empty
-        # value so the change request flow will work
-        attribute, _ = AllocationAttribute.objects.get_or_create(
-            allocation_attribute_type=AllocationAttributeType.objects.get(
-                name=attribute_name
-            ),
-            allocation=allocation,
-            defaults={"value": ""},
-        )
-
-        # storage quota needs to be compared as an integer
-        comparand = int(attribute.value) if type(form_value) is int else attribute.value
-        if comparand != form_value:
-            AllocationAttributeChangeRequest.objects.create(
-                allocation_attribute=attribute,
-                allocation_change_request=allocation_change_request,
-                new_value=form_value,
-            )
 
     @staticmethod
     def set_access_users(
@@ -236,6 +243,7 @@ class UpdateAllocationView(AllocationView):
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
         create_group_time = datetime.now()
+        
         async_task(
             addMembersToADGroup, users_to_add, access_allocation, create_group_time
         )
