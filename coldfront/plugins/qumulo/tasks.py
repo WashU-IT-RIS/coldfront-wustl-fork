@@ -38,9 +38,7 @@ def poll_ad_group(
     acl_allocation: Allocation,
     expiration_seconds: int = SECONDS_IN_A_DAY,
 ) -> None:
-    storage_allocation = Allocation.objects.get(
-        pk=acl_allocation.get_attribute(name="storage_allocation_pk")
-    )
+    storage_allocation = Allocation.objects.get(pk=acl_allocation.pk)
     qumulo_api = StorageControllerFactory().create_connection(
         storage_allocation.resources.first().name
     )

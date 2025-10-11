@@ -45,7 +45,7 @@ class TestFileSystemService(TestCase):
         )
         mock_create_connection.return_value = qumulo_api
 
-        actual_result = FileSystemService.get_file_system_stats()
+        actual_result = FileSystemService.get_file_system_stats("Storage2")
         self.assertDictEqual(self.expected_result_successful, actual_result)
 
     @patch(
@@ -60,5 +60,5 @@ class TestFileSystemService(TestCase):
         )
         mock_create_connection.return_value = qumulo_api
 
-        actual_result = FileSystemService.get_file_system_stats()
+        actual_result = FileSystemService.get_file_system_stats("Storage2")
         self.assertDictEqual(self.expected_result_unsuccessful, actual_result)

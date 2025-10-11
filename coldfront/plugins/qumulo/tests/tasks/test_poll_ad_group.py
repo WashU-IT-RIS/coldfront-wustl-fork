@@ -7,7 +7,9 @@ from unittest.mock import patch, MagicMock
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
+    create_allocation,
     mock_qumulo_info,
+    default_form_data,
 )
 from coldfront.plugins.qumulo.tasks import (
     poll_ad_group,
@@ -36,6 +38,7 @@ class TestPollAdGroup(TestCase):
                 "QUMULO_INFO": json.dumps(mock_qumulo_info),
             },
         ).start()
+        print(mock_qumulo_info)
 
         self.client = Client()
         build_data = build_models()
@@ -53,12 +56,10 @@ class TestPollAdGroup(TestCase):
     def test_poll_ad_group_set_status_to_active_on_success(
         self, create_connection_mock: MagicMock
     ) -> None:
-
-        acl_allocation: Allocation = Allocation.objects.create(
+        acl_allocation: Allocation = create_allocation(
             project=self.project,
-            justification="",
-            quantity=1,
-            status=AllocationStatusChoice.objects.get_or_create(name="Pending")[0],
+            user=self.user,
+            form_data=default_form_data,
         )
 
         poll_ad_group(acl_allocation=acl_allocation)
@@ -68,11 +69,10 @@ class TestPollAdGroup(TestCase):
     def test_poll_ad_group_set_status_does_nothing_on_failure(
         self, create_connection_mock: MagicMock
     ) -> None:
-        acl_allocation: Allocation = Allocation.objects.create(
+        acl_allocation: Allocation = create_allocation(
             project=self.project,
-            justification="",
-            quantity=1,
-            status=AllocationStatusChoice.objects.get_or_create(name="Pending")[0],
+            user=self.user,
+            form_data=default_form_data,
         )
 
         get_ad_object_mock: MagicMock = (
@@ -89,13 +89,13 @@ class TestPollAdGroup(TestCase):
     def test_poll_ad_group_set_status_to_denied_on_expiration(
         self, create_connection_mock: MagicMock
     ) -> None:
-        acl_allocation: Allocation = Allocation.objects.create(
+        acl_allocation: Allocation = create_allocation(
             project=self.project,
-            justification="",
-            quantity=1,
-            status=AllocationStatusChoice.objects.get_or_create(name="Pending")[0],
-            created=timezone.now() - datetime.timedelta(hours=2),
+            user=self.user,
+            form_data=default_form_data,
         )
+        acl_allocation.created = timezone.now() - datetime.timedelta(hours=2)
+        acl_allocation.save()
 
         get_ad_object_mock: MagicMock = (
             create_connection_mock.return_value.rc.ad.distinguished_name_to_ad_account

@@ -70,7 +70,7 @@ class TestAclAllocations(TestCase):
             quantity=1,
             status=AllocationStatusChoice.objects.get(name="Active"),
         )
-
+        breakpoint()
         acl_allocations = AclAllocations(project_pk=self.project)
         acl_allocations.set_allocation_attributes(
             allocation=test_allocation, acl_type="ro", wustlkey="test"
