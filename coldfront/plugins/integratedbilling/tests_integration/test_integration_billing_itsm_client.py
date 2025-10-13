@@ -26,6 +26,7 @@ class TestIntegrationBillingItsmClient(TestCase):
         for key in ITSM_ATTRIBUTES_FOR_BILLING:
             self.assertIn(key, service_provision_usage.keys())
 
+    @tag("integration")
     def test_default_billing_attributes(self):
         billing_itsm_client = self.billing_itsm_client
         data = billing_itsm_client.get_billing_usages()
