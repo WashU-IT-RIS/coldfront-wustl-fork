@@ -10,15 +10,17 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     def handle(self, *args, **options):
         qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
-        storage_host = qumulo_info["Storage2"]["host"]
-        request_res = requests.get(
-            "https://" + storage_host + "/api/v1/version", verify=False
-        )
-        print(f"Pod connects to Storage: {request_res.status_code == 200}")
-        print(request_res.json())
 
-        rc = RestClient(storage_host, qumulo_info["Storage2"]["port"])
-        rc.login(qumulo_info["Storage2"]["user"], qumulo_info["Storage2"]["pass"])
+        for qumulo_host in qumulo_info:
+            storage_host = qumulo_host["host"]
+            request_res = requests.get(
+                "https://" + storage_host + "/api/v1/version", verify=False
+            )
+            print(f"Pod connects to Storage: {request_res.status_code == 200}")
+            print(request_res.json())
+
+            rc = RestClient(storage_host, qumulo_host["port"])
+            rc.login(qumulo_host["user"], qumulo_host["pass"])
 
         serverName = os.environ.get("AD_SERVER_NAME")
         adUser = os.environ.get("AD_USERNAME")
