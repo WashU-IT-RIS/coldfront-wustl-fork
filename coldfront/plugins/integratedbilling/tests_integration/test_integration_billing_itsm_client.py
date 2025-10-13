@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-import json
 from django.test import TestCase, tag
 
 from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmClient
@@ -11,8 +10,9 @@ from coldfront.plugins.integratedbilling.tests.fixtures import (
 class TestIntegrationBillingItsmClient(TestCase):
 
     def setUp(self) -> None:
-        today = datetime.now().date()
-        self.default_billing_date = today.replace(day=1)
+        # fixed current date for testing and simulating when report is generated
+        current_date = datetime(2025, 10, 4).date()
+        self.default_billing_date = current_date.replace(day=1)
         self.billing_itsm_client = BillingItsmClient()
 
     @tag("integration")
