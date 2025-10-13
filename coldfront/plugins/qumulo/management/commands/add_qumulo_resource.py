@@ -14,10 +14,13 @@ class Command(BaseCommand):
 
         for storage_resource in storage_resource_list:
             try:
-                Resource.objects.get_or_create(
+                resource = Resource.objects.get_or_create(
                     resource_type=storage_resource_type,
                     parent_resource=None,
                     name=storage_resource["name"],
+                )
+
+                resource.update(
                     description=storage_resource["description"],
                     is_available=True,
                     is_public=True,
