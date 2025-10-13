@@ -369,7 +369,6 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
             "billing_contact": "captain.crunch",
             "billing_cycle": "monthly",
