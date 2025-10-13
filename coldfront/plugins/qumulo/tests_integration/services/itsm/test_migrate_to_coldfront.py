@@ -17,7 +17,7 @@ class TestMigrateToColdfront(TestCase):
     def test_migrate_to_coldfront_by_fileset_name_found(self):
         raised = False
         try:
-            self.migrate.by_fileset_name("kchoi_active")
+            self.migrate.by_fileset_name("kchoi_active", "Storage2")
         except Exception:
             raised = True
         self.assertFalse(raised)
@@ -36,7 +36,7 @@ class TestMigrateToColdfront(TestCase):
     def test_migrate_to_coldfront_by_storage_provision_name_found(self):
         raised = False
         try:
-            self.migrate.by_storage_provision_name("/vol/rdcw-fs1/kchoi")
+            self.migrate.by_storage_provision_name("/vol/rdcw-fs1/kchoi", "Storage2")
         except Exception:
             raised = True
         self.assertFalse(raised)
