@@ -1,4 +1,3 @@
-import json
 from datetime import date, datetime
 from typing import Any
 
@@ -9,6 +8,7 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
     "sponsor",
     "fileset_name",
     "service_rate_category",
+    "amount",
     "amount_tb",
     "funding_number",
     "exempt",
