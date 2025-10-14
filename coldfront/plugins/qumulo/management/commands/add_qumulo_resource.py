@@ -6,7 +6,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Adding Storage/Qumulo resources")
         storage_resource_type = ResourceType.objects.get(name="Storage")
-        acl_resource_type, created = ResourceType.objects.get_or_create(name="ACL")
+        acl_resource_type, created = ResourceType.objects.update_or_create(name="ACL")
         storage_resource_list = [
             {"name": "Storage2", "description": "Storage2 allocation via Qumulo"},
             {"name": "Storage3", "description": "Storage3 allocation via Qumulo"},
