@@ -26,8 +26,4 @@ jobs:
         env:
           ENVIRONMENT: test
           PLUGIN_QUMULO: True
-          AD_USER_PASS: ADPassword@123
-          AD_USERNAME: ADUsername
-          AD_SERVER_NAME: accounts-ldap.wusm.wustl.edu
-          AD_GROUPS_OU: OU=QA,OU=RIS,OU=Groups,DC=accounts,DC=ad,DC=wustl,DC=edu
-          STORAGE2_PATH: /foo/bar
+          QUMULO_INFO: '{"Storage2": {"path": "/storage2-dev/fs1", "host": "foo","port": "8000","user": "admin","bah": "bar" },"Storage3": {"host": "example.com","port": "8000","user": "baz","pass": "bar", "path": "/test/etc"}}''
