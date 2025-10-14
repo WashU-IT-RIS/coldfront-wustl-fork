@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from coldfront.core.service.models import (
+from coldfront.core.service_rate_category.models import (
     Service,
     ServiceRateCategory,
     ServiceRateCategoryTier,

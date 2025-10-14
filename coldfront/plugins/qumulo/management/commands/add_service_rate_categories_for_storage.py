@@ -1,7 +1,7 @@
 from datetime import date
 from django.core.management.base import BaseCommand
 
-from coldfront.core.service.models import (
+from coldfront.core.service_rate_category.models import (
     Service,
     ServiceRateCategory,
     ServiceRateCategoryTier,
