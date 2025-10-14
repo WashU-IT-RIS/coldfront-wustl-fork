@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "coldfront.core.field_of_science",
     "coldfront.core.resource",
     "coldfront.core.allocation",
+    "coldfront.core.billing",
     "coldfront.core.user",
     "coldfront.core.service",
     "django.contrib.admin",
