@@ -3,13 +3,16 @@ import os, json
 from django.test import TestCase
 from unittest.mock import patch, MagicMock
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
-
-from dotenv import load_dotenv
-
-load_dotenv(override=True)
+from coldfront.plugins.qumulo.tests.test_forms import mock_qumulo_info
 
 
+@patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class TestQumuloAPI(TestCase):
+    def tearDown(self):
+        patch.stopall()
+
+        return super().tearDown()
+
     def test_api_connects_to_storage2(self):
         with patch(
             "coldfront.plugins.qumulo.utils.qumulo_api.RestClient"

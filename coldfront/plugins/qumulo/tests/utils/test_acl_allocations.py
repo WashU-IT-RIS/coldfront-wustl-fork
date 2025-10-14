@@ -7,8 +7,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 )
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
-from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
-
+from coldfront.plugins.qumulo.tests.test_forms import mock_qumulo_info
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -49,11 +48,11 @@ class TestAclAllocations(TestCase):
 
         self.client.force_login(self.user)
 
-        self.storage2_path = "/storage2/fs1"
+        self.storage2_path = mock_qumulo_info["Storage2"]["path"]
         patch.dict(
             os.environ,
             {
-                "QUMULO_INFO": json.dumps({"Storage2": {"path": self.storage2_path}}),
+                "QUMULO_INFO": json.dumps(mock_qumulo_info),
             },
         ).start()
 

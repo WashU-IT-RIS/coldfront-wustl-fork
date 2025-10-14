@@ -193,6 +193,11 @@ class TestPrepaidBilling(TestCase):
         )
         return super().setUp()
 
+    def tearDown(self):
+        patch.stopall()
+
+        return super().tearDown()
+
     def test_header_return_csv(self):
         prepaid_billing = PrepaidBilling(
             datetime.now(timezone.utc).strftime("%Y-%m-%d")

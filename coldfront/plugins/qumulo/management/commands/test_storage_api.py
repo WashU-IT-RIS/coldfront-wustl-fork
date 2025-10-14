@@ -39,12 +39,12 @@ class Command(BaseCommand):
             try:
                 storage_api.create_quota(fs_path, limit_in_bytes)
                 print(f"Quota created for {fs_path} with limit {limit_in_bytes} bytes")
-                # storage_api.delete_quota(fs_path)
+                storage_api.delete_quota(fs_path)
             except Exception as e:
                 print(f"Failed to create quota for {fs_path}: {e}")
 
-            # export_id = storage_api.get_id(protocol="nfs", export_path=export_path)
-            # storage_api.delete_nfs_export(export_id)
-            # storage_api.rc.fs.delete(fs_path)
+            export_id = storage_api.get_id(protocol="nfs", export_path=export_path)
+            storage_api.delete_nfs_export(export_id)
+            storage_api.rc.fs.delete(fs_path)
         except:
             print(f"Failed to connect to {storage_name}")

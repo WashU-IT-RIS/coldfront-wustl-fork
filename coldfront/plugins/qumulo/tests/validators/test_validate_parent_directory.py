@@ -7,6 +7,7 @@ from unittest.mock import patch, MagicMock
 from django.core.exceptions import ValidationError
 
 from coldfront.plugins.qumulo.validators import validate_parent_directory
+from coldfront.plugins.qumulo.tests.test_forms import mock_qumulo_info
 
 mock_response = {
     "control": ["PRESENT"],
@@ -33,15 +34,7 @@ class TestValidateParentDirectory(TestCase):
     def setUp(self):
         patch.dict(
             os.environ,
-            {
-                "QUMULO_INFO": json.dumps(
-                    {
-                        "Storage2": {
-                            "path": "/storage2/fs1",
-                        }
-                    }
-                )
-            },
+            {"QUMULO_INFO": json.dumps(mock_qumulo_info)},
         ).start()
 
         self.mock_factory = patch(

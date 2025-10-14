@@ -23,9 +23,11 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     build_models_without_project,
     create_allocation,
+    mock_qumulo_info,
 )
 
 
+@patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class AllocationFormTests(TestCase):
     def setUp(self):
         build_data = build_models()
@@ -55,6 +57,7 @@ class AllocationFormTests(TestCase):
 
     def tearDown(self):
         self.qumulo_patcher.stop()
+        patch.stopall()
 
         self.qumulo_info["Storage2"]["path"] = self.old_storage2_path
         return super().tearDown()
