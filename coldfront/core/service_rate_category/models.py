@@ -7,7 +7,7 @@ from simple_history.models import HistoricalRecords
 class CurrentRatesManager(models.Manager):
     def get_queryset(self):
         today = date.today()
-        return super.get_queryset(self).filter(start_date__gt=today, end_date__lt=today)
+        return super().get_queryset().filter(start_date__gte=today, end_date__lte=today)
 
 
 class Service(TimeStampedModel):
