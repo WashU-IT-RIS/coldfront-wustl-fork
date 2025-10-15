@@ -83,9 +83,9 @@ Allocation View
             <a href="?order_by=file_path&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort File Path desc</span></a>
           </th>
           <th scope="col" class="text-nowrap">
-            Service Rate
-            <a href="?order_by=service_rate&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Service Rate asc</span></a>
-            <a href="?order_by=service_rate&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Service Rate desc</span></a>
+            Service Rate Category
+            <a href="?order_by=service_rate_category&direction=asc&{{filter_parameters}}"><i class="fas fa-sort-up" aria-hidden="true"></i><span class="sr-only">Sort Service Rate asc</span></a>
+            <a href="?order_by=service_rate_category&direction=des&{{filter_parameters}}"><i class="fas fa-sort-down" aria-hidden="true"></i><span class="sr-only">Sort Service Rate desc</span></a>
           </th>
         </tr>
       </thead>
@@ -106,7 +106,7 @@ Allocation View
             <td class="text-nowrap">{{ allocation.department_number }}</td>
             <td class="text-nowrap">{{ allocation.itsd_ticket }}</td>
             <td class="text-nowrap">{{ allocation.file_path }}</td>
-            <td class="text-nowrap">{{ allocation.service_rate }}</td>
+            <td class="text-nowrap">{{ allocation.service_rate_category }}</td>
           </tr>
         {% endfor %}
       </tbody>

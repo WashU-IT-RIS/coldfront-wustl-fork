@@ -29,7 +29,7 @@ class TestAllocations(TestCase):
     def test_consumption_allocations_queryset(self):
         consumption_allocations = Allocation.objects.consumption()
         filtered_allocations = Allocation.objects.filter(
-            allocationattribute__allocation_attribute_type__name="service_rate",
+            allocationattribute__allocation_attribute_type__name="service_rate_category",
             allocationattribute__value="consumption",
         )
         self.assertQuerysetEqual(consumption_allocations, filtered_allocations)

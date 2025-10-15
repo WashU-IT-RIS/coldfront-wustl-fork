@@ -191,7 +191,7 @@ class TestUpdateStorageAllocationPendingStatus(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         return super().setUp()
@@ -249,7 +249,7 @@ class TestStorageAllocationStatuses(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         return super().setUp()
@@ -306,7 +306,7 @@ class TestAddMembersToADGroup(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         self.client.force_login(self.user)
@@ -764,7 +764,7 @@ class TestResetAcl(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
         build_data = build_models()
         self.project = build_data["project"]
@@ -792,7 +792,7 @@ class TestResetAcl(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         return create_allocation(
@@ -881,7 +881,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
                 "billing_exempt": "No",
                 "department_number": "Time Travel Services",
                 "billing_cycle": "monthly",
-                "service_rate": "general",
+                "service_rate_category": "general",
             }
 
             allocation = create_allocation(
@@ -1060,7 +1060,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         allocation_active = create_allocation(
