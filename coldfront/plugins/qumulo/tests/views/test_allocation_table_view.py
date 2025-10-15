@@ -36,8 +36,8 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate_category": "general",
             "billing_cycle": "monthly",
+            "service_rate_category": "general",
         }
 
         self.allocation = create_allocation(self.project, self.user, self.form_data)
@@ -250,7 +250,6 @@ class AllocationTableViewTests(TestCase):
             "cost_center": "Scrooge McDuck",
             "billing_exempt": "No",
             "department_number": "Whale-watching",
-            "service_rate_category": "consumption",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
