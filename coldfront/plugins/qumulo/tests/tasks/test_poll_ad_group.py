@@ -18,14 +18,12 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationStatusChoice,
 )
-from coldfront.core.resource.models import Resource
 
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
 from qumulo.lib.request import RequestError
 
 import datetime
-from datetime import date
 import json
 
 
