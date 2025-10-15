@@ -14,14 +14,14 @@ class ServiceAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceRateCategory)
 class ServiceRateCategoryAdmin(admin.ModelAdmin):
-    list_display = ("service__name", "model_name", "start_date", "end_date")
+    list_display = ("service_name", "model_name", "start_date", "end_date")
 
 
 @admin.register(ServiceRateCategoryTier)
 class ServiceRateCategoryTierAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "service_rate_category__model_name",
+        "service_rate_category_model_name",
         "rate",
         "unit_rate",
         "unit",
