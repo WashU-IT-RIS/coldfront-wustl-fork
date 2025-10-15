@@ -19,7 +19,6 @@ import copy
 import os
 import json
 from dotenv import load_dotenv
-import json
 
 load_dotenv(override=True)
 

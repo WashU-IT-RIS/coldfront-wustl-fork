@@ -7,8 +7,8 @@ from unittest.mock import patch, MagicMock
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
-    create_allocation,
     mock_qumulo_info,
+    create_allocation,
     default_form_data,
 )
 from coldfront.plugins.qumulo.tasks import (

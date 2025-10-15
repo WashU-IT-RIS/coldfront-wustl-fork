@@ -7,8 +7,10 @@ import json
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
+from coldfront.plugins.qumulo.utils.update_user_data import (
+    update_user_with_additional_data,
+)
 from coldfront.plugins.qumulo.tasks import reset_allocation_acls
-
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -21,13 +23,8 @@ from coldfront.core.allocation.signals import (
     allocation_change_approved,
 )
 
-
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-
-from coldfront.plugins.qumulo.utils.update_user_data import (
-    update_user_with_additional_data,
-)
 
 
 @receiver(post_save, sender=User)

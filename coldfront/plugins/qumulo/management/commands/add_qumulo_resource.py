@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
         for storage_resource in storage_resource_list:
             try:
-                Resource.objects.get_or_create(
+                Resource.objects.update_or_create(
                     resource_type=storage_resource_type,
                     parent_resource=None,
                     name=storage_resource["name"],
@@ -27,7 +27,7 @@ class Command(BaseCommand):
             except:
                 continue
 
-        Resource.objects.get_or_create(
+        Resource.objects.update_or_create(
             name="rw",
             description="RW ACL",
             resource_type=acl_resource_type,
@@ -37,7 +37,7 @@ class Command(BaseCommand):
             requires_payment=False,
         )
 
-        Resource.objects.get_or_create(
+        Resource.objects.update_or_create(
             name="ro",
             description="RO ACL",
             resource_type=acl_resource_type,

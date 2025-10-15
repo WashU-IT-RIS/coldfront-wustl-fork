@@ -1,4 +1,3 @@
-from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 PETABYTE_IN_BYTES = 1e15

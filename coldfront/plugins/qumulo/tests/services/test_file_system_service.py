@@ -1,5 +1,9 @@
+import json
+
 from unittest.mock import MagicMock, patch
+
 from coldfront.plugins.qumulo.services.file_system_service import FileSystemService
+from coldfront.plugins.qumulo.tests.utils.mock_data import mock_qumulo_info
 
 PETABYTE_IN_BYTES = 1e15
 
@@ -7,8 +11,8 @@ PETABYTE_IN_BYTES = 1e15
 from django.test import TestCase
 
 
+@patch.dict("os.environ", {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class TestFileSystemService(TestCase):
-
     def setUp(self) -> None:
         self.mock_file_system_response_successful = {
             "block_size_bytes": 4096,
@@ -32,6 +36,11 @@ class TestFileSystemService(TestCase):
         }
 
         return super().setUp()
+
+    def tearDown(self):
+        patch.stopall()
+
+        return super().tearDown()
 
     @patch(
         "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
