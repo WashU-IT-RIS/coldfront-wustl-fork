@@ -80,8 +80,8 @@ class UpdateAllocationView(AllocationView):
             "technical_contact",
             "billing_contact",
             "service_rate_category",
-            "billing_cycle",
             "prepaid_time",
+            "prepaid_billing_date",
             "prepaid_billing_date",
             "prepaid_expiration",
         ]
