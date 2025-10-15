@@ -153,10 +153,11 @@ class AllocationService:
         storage_acl_name_attribute = AllocationAttributeType.objects.get(
             name="storage_acl_name"
         )
+        resource_name = storage_allocation.resources.first().name.lower()
         AllocationAttribute.objects.create(
             allocation_attribute_type=storage_acl_name_attribute,
             allocation=access_allocation,
-            value="storage-{0}-{1}".format(storage_name, access_data["resource"]),
+            value=f"{resource_name}-{storage_name}-{access_data['resource']}",
         )
 
         storage_allocation_pk_attribute = AllocationAttributeType.objects.get(
