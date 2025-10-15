@@ -27,7 +27,7 @@ class ServiceRateCategoryAdmin(admin.ModelAdmin):
 class ServiceRateCategoryTierAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "service_rate_category",
+        "service_rate_category_name",
         "rate",
         "unit_rate",
         "unit",
