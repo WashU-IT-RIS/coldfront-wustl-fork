@@ -1,7 +1,7 @@
 2025:
   storage2:
     models:
-      comsumption:
+      consumption:
         description: Less than 100TB
         unit_rate: 1
         unit: TB
