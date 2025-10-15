@@ -54,8 +54,8 @@ class AllocationService:
         AllocationUser.objects.create(
             allocation=allocation, user=user, status=active_status
         )
-
-        resource = Resource.objects.get(name="Storage2")
+        resource_type = form_data["storage_type"]
+        resource = Resource.objects.get(name=resource_type)
         allocation.resources.add(resource)
 
         AllocationService.__set_allocation_attributes(
@@ -153,10 +153,11 @@ class AllocationService:
         storage_acl_name_attribute = AllocationAttributeType.objects.get(
             name="storage_acl_name"
         )
+        resource_name = storage_allocation.resources.first().name.lower()
         AllocationAttribute.objects.create(
             allocation_attribute_type=storage_acl_name_attribute,
             allocation=access_allocation,
-            value="storage-{0}-{1}".format(storage_name, access_data["resource"]),
+            value=f"{resource_name}-{storage_name}-{access_data['resource']}",
         )
 
         storage_allocation_pk_attribute = AllocationAttributeType.objects.get(
@@ -225,10 +226,11 @@ class AllocationService:
                 value = form_data.get(allocation_attribute_name)
                 if value is None:
                     continue
-
+                resource_type = form_data.get("storage_type")
                 if allocation_attribute_name == "storage_filesystem_path":
                     if parent_allocation is None:
-                        storage_root_path = os.environ.get("STORAGE2_PATH", "")
+                        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+                        storage_root_path = qumulo_info[resource_type]["path"]
                     else:
                         storage_root_path = "{:s}/Active".format(
                             parent_allocation.get_attribute(

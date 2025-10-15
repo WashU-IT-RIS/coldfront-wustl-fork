@@ -2,22 +2,25 @@ import requests
 import ldap3
 from qumulo.rest_client import RestClient
 
-import os
+import os, json
 
 from django.core.management.base import BaseCommand
 
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        storage_host = os.environ.get("QUMULO_HOST")
-        request_res = requests.get(
-            "https://" + storage_host + "/api/v1/version", verify=False
-        )
-        print(f"Pod connects to Storage: {request_res.status_code == 200}")
-        print(request_res.json())
+        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
 
-        rc = RestClient(storage_host, os.environ.get("QUMULO_PORT"))
-        rc.login(os.environ.get("QUMULO_USER"), os.environ.get("QUMULO_PASS"))
+        for qumulo_host in qumulo_info:
+            storage_host = qumulo_host["host"]
+            request_res = requests.get(
+                "https://" + storage_host + "/api/v1/version", verify=False
+            )
+            print(f"Pod connects to Storage: {request_res.status_code == 200}")
+            print(request_res.json())
+
+            rc = RestClient(storage_host, qumulo_host["port"])
+            rc.login(qumulo_host["user"], qumulo_host["pass"])
 
         serverName = os.environ.get("AD_SERVER_NAME")
         adUser = os.environ.get("AD_USERNAME")
