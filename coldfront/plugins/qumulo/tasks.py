@@ -35,7 +35,7 @@ SECONDS_IN_A_DAY = 24 * SECONDS_IN_AN_HOUR
 
 
 def poll_ad_group(
-    acl_allocation: Allocation,
+    acl_allocation,
     expiration_seconds: int = SECONDS_IN_A_DAY,
 ) -> None:
     storage_allocation = Allocation.objects.get(
