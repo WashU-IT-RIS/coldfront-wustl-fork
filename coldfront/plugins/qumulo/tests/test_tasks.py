@@ -305,8 +305,8 @@ class TestAddMembersToADGroup(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate_category": "general",
             "billing_cycle": "monthly",
+            "service_rate_category": "general",
         }
 
         self.client.force_login(self.user)
@@ -763,8 +763,8 @@ class TestResetAcl(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate_category": "general",
             "billing_cycle": "monthly",
+            "service_rate_category": "general",
         }
         build_data = build_models()
         self.project = build_data["project"]
@@ -791,8 +791,8 @@ class TestResetAcl(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate_category": "general",
             "billing_cycle": "monthly",
+            "service_rate_category": "general",
         }
 
         return create_allocation(
