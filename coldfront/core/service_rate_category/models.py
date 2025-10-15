@@ -14,6 +14,8 @@ class Service(TimeStampedModel):
     name = models.CharField(max_length=255, unique=True)
     description = models.CharField(max_length=255)
 
+    history = HistoricalRecords()
+
 
 class ServiceRateCategory(TimeStampedModel):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
@@ -40,4 +42,5 @@ class ServiceRateCategoryTier(TimeStampedModel):
     unit_rate = models.IntegerField()
     unit = models.CharField(max_length=255)
     cycle = models.CharField(max_length=255)
+
     history = HistoricalRecords()
