@@ -20,7 +20,7 @@ class Command(BaseCommand):
             defaults={"description": "Compute 2 placeholder description"},
         )
 
-        comsumption_category, _ = ServiceRateCategory.objects.update_or_create(
+        consumption_category, _ = ServiceRateCategory.objects.update_or_create(
             service=storage_2_service,
             model_name="consumption",
             model_description="Consumption",
@@ -87,7 +87,7 @@ class Command(BaseCommand):
             unit_rate="1",
             unit="TB",
             cycle="month",
-            service_rate_category=comsumption_category,
+            service_rate_category=consumption_category,
         )
 
         ServiceRateCategoryTier.objects.update_or_create(
@@ -96,7 +96,7 @@ class Command(BaseCommand):
             unit_rate="1",
             unit="TB",
             cycle="month",
-            service_rate_category=comsumption_category,
+            service_rate_category=consumption_category,
         )
 
         ServiceRateCategoryTier.objects.update_or_create(
