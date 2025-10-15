@@ -101,8 +101,3 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
 def __get_storage2_base_path():
     qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
     return qumulo_info["Storage2"]["path"]
-
-
-def __get_storage3_base_path():
-    qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
-    return qumulo_info["Storage3"]["path"]
