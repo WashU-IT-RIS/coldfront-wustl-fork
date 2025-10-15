@@ -37,7 +37,7 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate_category": "general",
+            "service_rate_category": "consumption",
         }
 
         self.allocation = create_allocation(self.project, self.user, self.form_data)
