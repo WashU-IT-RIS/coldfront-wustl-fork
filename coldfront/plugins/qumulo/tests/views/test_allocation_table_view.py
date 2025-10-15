@@ -252,7 +252,7 @@ class AllocationTableViewTests(TestCase):
             "department_number": "Whale-watching",
             "service_rate_category": "consumption",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_allocations = []

@@ -96,6 +96,12 @@ class AllocationForm(forms.Form):
         validators=[validate_prepaid_start_date],
         required=False,
     )
+    service_rate_category = forms.ChoiceField(
+        help_text="Service rate category options for the storage allocation",
+        label="Service Rate Category",
+        choices=SERVICE_RATE_CATEGORIES,
+        initial="consumption",
+    )
     storage_quota = forms.IntegerField(
         min_value=0,
         max_value=2000,

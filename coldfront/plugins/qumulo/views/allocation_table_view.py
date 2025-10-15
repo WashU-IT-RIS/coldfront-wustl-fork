@@ -111,10 +111,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocation=OuterRef("pk"), allocation_attribute_type=storage_name_type
             ).values("value")[:1]
 
-            storage_name_sub_q = AllocationAttribute.objects.filter(
-                allocation=OuterRef("pk"), allocation_attribute_type=storage_name_type
-            ).values("value")[:1]
-
             allocations = allocations.annotate(
                 department_number=Subquery(department_sub_q),
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
