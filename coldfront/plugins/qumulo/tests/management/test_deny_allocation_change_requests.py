@@ -33,8 +33,8 @@ class TestDenyAllocationChangeRequests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         self.alloc = create_allocation(self.project, self.user, self.form_data)

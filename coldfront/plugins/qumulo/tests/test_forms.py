@@ -76,8 +76,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.is_valid())
@@ -96,8 +96,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.is_valid())
@@ -116,8 +116,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["ro_users"].required)
@@ -137,8 +137,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.fields["storage_ticket"].required)
@@ -158,8 +158,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             # "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
         self.assertTrue(invalid_form.fields["billing_exempt"].required)
@@ -202,8 +202,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "Yes",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.is_valid())
@@ -222,8 +222,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.is_valid())
@@ -283,8 +283,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         valid_form = AllocationForm(data=valid_data, user_id=self.user.id)
         self.assertTrue(valid_form.fields["service_rate_category"].required)
@@ -304,8 +304,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["technical_contact"].required)
@@ -325,8 +325,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
             "technical_contact": "captain.crunch",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
@@ -347,8 +347,8 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["billing_contact"].required)
@@ -370,7 +370,7 @@ class AllocationFormTests(TestCase):
             "department_number": "Time Travel Services",
             "service_rate_category": "consumption",
             "billing_contact": "captain.crunch",
-            "billing_cycle": "monthly"
+            "billing_cycle": "monthly",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["billing_contact"].required)
@@ -439,8 +439,8 @@ class AllocationFormProjectChoiceTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         self.form_a = AllocationForm(data=self.data_a, user_id=self.user_a.id)
 
@@ -457,8 +457,8 @@ class AllocationFormProjectChoiceTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         self.form_b = AllocationForm(data=self.data_b, user_id=self.user_b.id)
 

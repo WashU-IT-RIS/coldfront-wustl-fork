@@ -274,8 +274,8 @@ class UpdateAllocationViewTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
         storage_allocation = create_allocation(self.project, self.user, form_data)
 
@@ -316,8 +316,8 @@ class UpdateAllocationViewTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         storage_allocation = create_allocation(self.project, self.user, form_data)
@@ -369,8 +369,8 @@ class UpdateAllocationViewTests(TestCase):
             "cost_center": "Uncle Pennybags MUTATE",
             "billing_exempt": "No",
             "department_number": "Time Travel Services MUTATE",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
             "technical_contact": "it.guru MUTATE",
             "billing_contact": "finance.guru MUTATE",
         }
@@ -607,8 +607,8 @@ class UpdateAllocationViewTests(TestCase):
             "cost_center": "Caroline Cost Center",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
             "technical_contact": "it.guru",
             "billing_contact": "finance.guru",
         }

@@ -251,8 +251,8 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Whale-watching",
             "service_rate_category": "consumption",
-            "billing_cycle": "monthly",
             "service_rate_category": "consumption",
+            "billing_cycle": "monthly",
         }
 
         other_allocations = []
