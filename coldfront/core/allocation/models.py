@@ -73,7 +73,7 @@ class AllocationQuerySet(models.QuerySet):
 
     def consumption(self):
         return self.filter(
-            allocationattribute__allocation_attribute_type__name="service_rate",
+            allocationattribute__allocation_attribute_type__name="service_rate_category",
             allocationattribute__value="consumption",
         )
 
