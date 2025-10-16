@@ -81,14 +81,13 @@ class MigrateToColdfront:
 
         pi_user = self.__get_or_create_user(fields)
         project, created = self.__get_or_create_project(pi_user)
-        if resource_name:
-            resource = Resource.objects.get(name=resource_name)
-        else:
-            resource = self.__get_resource()
+        resource_type = self.__get_resource(resource_name)
         if created:
             self.__create_project_user(project, pi_user)
             self.__create_project_attributes(fields, project)
-        allocation = self.__create_allocation(key, fields, project, pi_user, resource)
+        allocation = self.__create_allocation(
+            key, fields, project, pi_user, resource_type
+        )
         self.__create_allocation_attributes(fields, allocation)
         return {
             "allocation_id": allocation.id,
@@ -129,8 +128,8 @@ class MigrateToColdfront:
 
         return True
 
-    def __get_resource(self) -> Resource:
-        resource = Resource.objects.get(name="Storage2")
+    def __get_resource(self, resource_name: str) -> Resource:
+        resource = Resource.objects.get(name=resource_name)
         if not resource:
             raise Exception("Qumulo resource not found")
         return resource
