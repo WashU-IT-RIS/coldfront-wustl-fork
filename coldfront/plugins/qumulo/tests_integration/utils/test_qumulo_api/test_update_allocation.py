@@ -1,5 +1,6 @@
 from django.test import TestCase, tag
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils import (
     create_test_export,
 )
@@ -8,7 +9,7 @@ from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils impo
 class TestUpdateAllocation(TestCase):
     @tag("integration")
     def test_update_allocation_logs_error(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         export_fs_path = "/test-project/update-allocation"
         name = "random"
         create_test_export(qumulo_api, export_fs_path)
@@ -34,3 +35,4 @@ class TestUpdateAllocation(TestCase):
         self.assertIsNotNone(export_id)
 
         self.assertEquals(quota["limit"], str(new_limit_in_bytes))
+        qumulo_api.rc.fs.delete(export_fs_path)

@@ -1,6 +1,7 @@
 from django.test import TestCase
 from unittest.mock import patch, MagicMock, PropertyMock
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
 @patch("coldfront.plugins.qumulo.utils.qumulo_api.RestClient")
@@ -14,7 +15,7 @@ class CreateQuota(TestCase):
 
         fs_path = "foo"
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
         qumulo_instance.create_quota(fs_path=fs_path, limit_in_bytes=10**9)
 
         mock_fs.return_value.get_file_attr.assert_called_once_with(path=fs_path)
@@ -31,7 +32,7 @@ class CreateQuota(TestCase):
         limit_in_bytes = 10**9
         mock_fs.return_value.get_file_attr.return_value = {"id": id}
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
         qumulo_instance.create_quota(fs_path=fs_path, limit_in_bytes=limit_in_bytes)
 
         mock_quota.return_value.create_quota.assert_called_once_with(id, limit_in_bytes)
