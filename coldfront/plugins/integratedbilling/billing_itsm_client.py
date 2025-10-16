@@ -22,7 +22,7 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
 
 
 # helper function to get the default billing date (first day of the current month)
-def _get_default_billing_date() -> date:
+def _get_default_usage_date() -> date:
     today = datetime.now().date()
     return today.replace(day=1)
 
@@ -36,7 +36,7 @@ ITSM_QUERY_KEY = "provision_usage_creation_date"  # Key for filtering billing da
 class BillingItsmClient:
     def __init__(self, usage_date: date = None):
         self.handler = ItsmClientHandler()
-        self.billing_date = usage_date or _get_default_billing_date()
+        self.usage_date = usage_date or _get_default_usage_date()
 
     def get_billing_usages(self) -> list[dict[str, Any]]:
         attributes = self.__get_attributes()
@@ -48,5 +48,5 @@ class BillingItsmClient:
         return ",".join(ITSM_ATTRIBUTES_FOR_BILLING)
 
     def __get_filters(self) -> str:
-        billing_date = self.billing_date.strftime("%Y-%m-%d")
-        return f'{{"{ITSM_QUERY_KEY}":"{billing_date}","service_id":{ITSM_ACTIVE_ALLOCATION_SERVICE_ID}}}'
+        usage_date = self.usage_date.strftime("%Y-%m-%d")
+        return f'{{"{ITSM_QUERY_KEY}":"{usage_date}","service_id":{ITSM_ACTIVE_ALLOCATION_SERVICE_ID}}}'
