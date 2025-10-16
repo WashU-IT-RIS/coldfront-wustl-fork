@@ -13,6 +13,11 @@ class Command(BaseCommand):
         parser.add_argument(
             "fileset", type=str, help="The fileset_name or fileset_alias"
         )
+
+        parser.add_argument(
+            "resource_name", type=str, help="The resource_name (Ex: Storage2)"
+        )
+
         parser.add_argument(
             "--fileset_alias",
             action="store_true",
@@ -34,6 +39,9 @@ class Command(BaseCommand):
         fileset = options["fileset"]
         ic(fileset)
 
+        resource_name = options["resource_name"]
+        ic(resource_name)
+
         find_by_alias = options["fileset_alias"]
         ic(find_by_alias)
 
@@ -45,10 +53,16 @@ class Command(BaseCommand):
 
         migrate_from_itsm_to_coldfront = MigrateToColdfront(dry_run)
         if find_by_alias:
-            result = migrate_from_itsm_to_coldfront.by_fileset_alias(fileset)
+            result = migrate_from_itsm_to_coldfront.by_fileset_alias(
+                fileset, resource_name
+            )
         elif find_by_storage_provision_name:
-            result = migrate_from_itsm_to_coldfront.by_storage_provision_name(fileset)
+            result = migrate_from_itsm_to_coldfront.by_storage_provision_name(
+                fileset, resource_name
+            )
         else:
-            result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset)
+            result = migrate_from_itsm_to_coldfront.by_fileset_name(
+                fileset, resource_name
+            )
 
         ic(result)

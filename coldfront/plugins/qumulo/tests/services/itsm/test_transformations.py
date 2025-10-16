@@ -61,13 +61,13 @@ class TestValidators(TestCase):
         itsm_fileset_name = "jiaoy_active"
         self.assertEqual(
             fileset_name_to_storage_export_path(itsm_fileset_name),
-            "/storage2-test/jiaoy",
+            "jiaoy",
         )
 
         itsm_fileset_alias = "gc6159"
         self.assertEqual(
             fileset_name_to_storage_export_path(itsm_fileset_alias),
-            "/storage2-test/gc6159",
+            "gc6159",
         )
 
     @mock.patch.dict(
@@ -77,13 +77,13 @@ class TestValidators(TestCase):
         itsm_fileset_name = "jiaoy_active"
         self.assertEqual(
             fileset_name_to_storage_filesystem_path(itsm_fileset_name),
-            "/storage2-test/jiaoy",
+            "jiaoy",
         )
 
         itsm_fileset_alias = "gc6159"
         self.assertEqual(
             fileset_name_to_storage_filesystem_path(itsm_fileset_alias),
-            "/storage2-test/gc6159",
+            "gc6159",
         )
 
     def test_string_parsing_quota_and_unit_to_integer(self):
