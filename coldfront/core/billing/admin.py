@@ -15,7 +15,7 @@ class AllocationUsageAdmin(SimpleHistoryAdmin):
         'billing_contact',
         'fileset_name',
         'service_rate_category',
-        'usage',
+        'usage_tb',
         'funding_number',
         'exempt',
         'subsidized',
@@ -23,8 +23,7 @@ class AllocationUsageAdmin(SimpleHistoryAdmin):
         'parent_id_key',
         'quota',
         'billing_cycle',
-        'usage_timestamp',
-        'ingestion_date',
+        'usage_date',
         'storage_cluster',
     )
     search_fields = (
@@ -45,19 +44,18 @@ class AllocationUsageAdmin(SimpleHistoryAdmin):
         'is_condo_group',
         'storage_cluster',
     )
-    ordering = ('-usage_timestamp', 'sponsor_pi', 'service_rate_category')
-    date_hierarchy = 'usage_timestamp'
+    ordering = ('-usage_date', 'sponsor_pi', 'service_rate_category')
+    date_hierarchy = 'usage_date'
     fieldsets = (
         (None, {
             'fields': (
                 ('external_key', 'source'),
                 ('sponsor_pi', 'billing_contact'),
-                ('fileset_name', 'service_rate_category', 'usage'),
+                ('fileset_name', 'service_rate_category', 'usage_tb'),
                 ('funding_number', 'exempt', 'subsidized'),
                 ('is_condo_group', 'parent_id_key'),
                 ('quota', 'billing_cycle'),
-                ('usage_timestamp', 'ingestion_date'),
-                'storage_cluster',
+                ('usage_date', 'storage_cluster'),
             ),
             'description': textwrap.dedent("""
                 <p class="help">
