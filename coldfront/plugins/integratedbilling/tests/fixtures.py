@@ -3,7 +3,7 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
     "sponsor",
     "fileset_name",
     "service_rate_category",
-    "amount"
+    "amount",
     "funding_number",
     "exempt",
     "subsidized",
