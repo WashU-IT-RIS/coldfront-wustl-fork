@@ -1,5 +1,5 @@
 import os
-from typing import Optional, Union
+from typing import Any, Optional, Union
 import requests
 
 
@@ -13,7 +13,7 @@ class ItsmClientHandler:
         endpoint_path = os.environ.get("ITSM_SERVICE_PROVISION_ENDPOINT")
         self.url = f"{protocol}://{self.host}:{port}{endpoint_path}"
 
-    def get_data(self, attributes: str, filters: str) -> str:
+    def get_data(self, attributes: str, filters: str) -> list[dict[str, Any]]:
         session = self._get_session()
         filtered_url = self._get_filtered_url(attributes, filters)
         response = session.get(filtered_url, verify=self._get_verify_certificate())
