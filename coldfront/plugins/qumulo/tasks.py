@@ -1,8 +1,11 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
 
+import os
 import json
 import logging
+import time
+from datetime import datetime
 
 from coldfront.config.env import ENV
 from coldfront.core.allocation.models import (
@@ -21,13 +24,10 @@ from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 from qumulo.lib.request import RequestError
 
-import time
-from datetime import datetime
-
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 SECONDS_IN_AN_HOUR = 60 * 60
@@ -38,17 +38,22 @@ def poll_ad_group(
     acl_allocation: Allocation,
     expiration_seconds: int = SECONDS_IN_A_DAY,
 ) -> None:
-    qumulo_api = QumuloAPI()
+    storage_allocation = Allocation.objects.get(
+        pk=acl_allocation.get_attribute(name="storage_allocation_pk")
+    )
+    qumulo_api = StorageControllerFactory().create_connection(
+        storage_allocation.resources.first().name
+    )
 
     storage_acl_name = acl_allocation.get_attribute("storage_acl_name")
-    group_dn = ActiveDirectoryAPI.generate_group_dn(storage_acl_name)
+    group_dn = ActiveDirectoryAPI.generate_group_dn(storage_acl_name).strip()
 
     success = False
 
     try:
         qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
         success = True
-    except RequestError:
+    except RequestError as qumulo_request_error:
         logger.warn(f'Allocation Group "{group_dn}" not found')
         success = False
 
@@ -91,8 +96,10 @@ def conditionally_update_storage_allocation_status(allocation: Allocation) -> No
 
 
 def conditionally_update_storage_allocation_statuses() -> None:
-    resource = Resource.objects.get(name="Storage2")
-    allocations = Allocation.objects.filter(status__name="Pending", resources=resource)
+    storage_resources = Resource.objects.filter(resource_type__name="Storage")
+    allocations = Allocation.objects.filter(
+        status__name="Pending", resources__in=storage_resources
+    )
     logger.warn(f"Checking {len(allocations)} qumulo allocations")
 
     for allocation in allocations:
@@ -103,14 +110,20 @@ def conditionally_update_storage_allocation_statuses() -> None:
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
-    qumulo_api = QumuloAPI()
-    quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
-    base_allocation_quota_usages = list(
-        filter(
-            lambda quota_usage: AclAllocations.is_base_allocation(quota_usage["path"]),
-            quota_usages,
+    connection_info = json.loads(os.environ.get("QUMULO_INFO", "{}"))
+
+    base_allocation_quota_usages = []
+    for storage_key in connection_info.keys():
+        qumulo_api = StorageControllerFactory().create_connection(storage_key)
+        quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
+        base_allocation_quota_usages += list(
+            filter(
+                lambda quota_usage: AclAllocations.is_base_allocation(
+                    quota_usage["path"], storage_key
+                ),
+                quota_usages,
+            )
         )
-    )
 
     __set_daily_quota_usages(base_allocation_quota_usages, logger)
     __validate_results(base_allocation_quota_usages, logger)
@@ -366,7 +379,9 @@ class ResetAcl:
     # or dependent objects (SSL-related) "couldn't be pickled"
     def _setup_qumulo_api(self):
         if self.qumulo_api is None:
-            self.qumulo_api = QumuloAPI()
+            self.qumulo_api = StorageControllerFactory().create_connection(
+                self.allocation.resources.first().name
+            )
 
     def _set_directory_content_acls(self, contents):
         self._setup_qumulo_api()
