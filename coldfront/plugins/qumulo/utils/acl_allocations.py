@@ -17,6 +17,7 @@ from pathlib import PurePath
 
 import copy
 import os
+import json
 from dotenv import load_dotenv
 
 load_dotenv(override=True)
@@ -91,16 +92,21 @@ class AclAllocations:
         return list(access_allocations)
 
     @staticmethod
-    def is_base_allocation(path: str):
-        STORAGE2_PATH = os.environ.get("STORAGE2_PATH").rstrip("/")
+    def is_base_allocation(path: str, strorage_info: str) -> bool:
+        connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+        storage_path = connection_info[strorage_info].get("path", "").rstrip(" /")
 
         purePath = PurePath(path)
 
-        return purePath.match(f"{STORAGE2_PATH}/*/")
+        return purePath.match(f"{storage_path}/*/")
 
     @staticmethod
     def remove_acl_access(allocation: Allocation):
-        qumulo_api = QumuloAPI()
+        from coldfront.plugins.qumulo.utils.storage_controller import (
+            StorageControllerFactory,
+        )
+
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         acl_allocations = AclAllocations.get_access_allocations(allocation)
         fs_path = allocation.get_attribute(name="storage_filesystem_path")
 
@@ -161,12 +167,14 @@ class AclAllocations:
                 ro_groupname = AclAllocations.get_allocation_rwro_group_name(
                     access_allocations, "ro"
                 )
+
                 AclAllocations.set_traverse_acl(
                     fs_path=fs_path,
                     rw_groupname=rw_groupname,
                     ro_groupname=ro_groupname,
                     qumulo_api=qumulo_api,
                     is_base_allocation=False,
+                    resource_name=allocation.resources.first().name,
                 )
         return AclAllocations.set_or_reset_allocation_acls(allocation, qumulo_api, True)
 
@@ -200,6 +208,7 @@ class AclAllocations:
             ro_groupname=ro_groupname,
             qumulo_api=qumulo_api,
             is_base_allocation=is_base_allocation,
+            resource_name=allocation.resources.first().name,
         )
 
         acl = qumulo_api.rc.fs.get_acl_v2(fs_path)
@@ -270,15 +279,19 @@ class AclAllocations:
         ro_groupname: str,
         is_base_allocation: bool,
         qumulo_api: QumuloAPI,
+        resource_name: str,
     ):
         if is_base_allocation:
             fs_path = f"{fs_path}/Active"
 
         path_parents = list(map(lambda parent: str(parent), PurePath(fs_path).parents))
-        storage_env_path = f'{os.environ.get("STORAGE2_PATH", "").rstrip(" /")}/'
+
+        connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+        storage_path = connection_info[resource_name].get("path").strip(" /")
+        storage_path = f"/{storage_path}/"
 
         for path in path_parents:
-            if path.startswith(f"{storage_env_path}"):
+            if path.startswith(f"{storage_path}"):
                 traverse_acl = qumulo_api.rc.fs.get_acl_v2(path)
                 aces = copy.deepcopy(traverse_acl["aces"])
                 aces.extend(
