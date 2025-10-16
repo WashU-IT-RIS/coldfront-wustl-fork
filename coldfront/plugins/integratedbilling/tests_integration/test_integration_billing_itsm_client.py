@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 from django.test import TestCase, tag
 
 from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmClient
@@ -23,6 +24,7 @@ class TestIntegrationBillingItsmClient(TestCase):
         self.assertIsNot(data, empty_list)
         service_provision_usage = data[0]
         self.assertIsInstance(service_provision_usage, dict)
+        self.assertIsNot(service_provision_usage, {})
         for key in ITSM_ATTRIBUTES_FOR_BILLING:
             self.assertIn(key, service_provision_usage.keys())
 
