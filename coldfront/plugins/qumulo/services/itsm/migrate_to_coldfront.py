@@ -79,9 +79,9 @@ class MigrateToColdfront:
                 "itsm_allocation": itsm_allocation,
             }
 
+        resource_type = self.__get_resource(resource_name)
         pi_user = self.__get_or_create_user(fields)
         project, created = self.__get_or_create_project(pi_user)
-        resource_type = self.__get_resource(resource_name)
         if created:
             self.__create_project_user(project, pi_user)
             self.__create_project_attributes(fields, project)
