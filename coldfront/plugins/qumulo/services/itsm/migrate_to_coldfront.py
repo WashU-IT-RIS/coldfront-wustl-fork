@@ -207,6 +207,7 @@ class MigrateToColdfront:
         attributes_for_allocation = filter(
             lambda field: field.entity == "allocation_form", fields
         )
+        # "example_lab/foo/bar_active" -> "bar"
         seed_path = key.split("_active")[0].rsplit("/", 1)[-1]
         qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
         base_path = qumulo_info[resource.name]["path"]
