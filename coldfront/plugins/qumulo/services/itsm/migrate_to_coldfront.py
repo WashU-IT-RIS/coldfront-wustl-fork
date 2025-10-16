@@ -210,6 +210,7 @@ class MigrateToColdfront:
         seed_path = key.split("_active")[0].rsplit("/", 1)[-1]
         qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
         base_path = qumulo_info[resource.name]["path"]
+
         allocation_data = {}
         allocation_data["project_pk"] = project.id
         allocation_data["ro_users"] = []
