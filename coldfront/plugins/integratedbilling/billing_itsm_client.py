@@ -35,9 +35,9 @@ ITSM_QUERY_KEY = "provision_usage_creation_date"  # Key for filtering billing da
 
 
 class BillingItsmClient:
-    def __init__(self, billing_date: date = None):
+    def __init__(self, usage_date: date = None):
         self.handler = ItsmClientHandler()
-        self.billing_date = billing_date or _get_default_billing_date()
+        self.billing_date = usage_date or _get_default_billing_date()
 
     def get_billing_usages(self) -> list[dict[str, Any]]:
         attributes = self.__get_attributes()
