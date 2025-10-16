@@ -25,8 +25,9 @@ class TriggerMigrationsView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         migrate_from_itsm_to_coldfront = MigrateToColdfront()
         display_message = "Allocation metadata migrated"
         seed_path = allocation_name.split("_active")[0].rsplit("/", 1)[-1]
-        validate_filesystem_path_unique(seed_path, resource_name)
+
         try:
+            validate_filesystem_path_unique(seed_path, resource_name)
             migrate_from_itsm_to_coldfront.by_storage_provision_name(
                 allocation_name, resource_name
             )
