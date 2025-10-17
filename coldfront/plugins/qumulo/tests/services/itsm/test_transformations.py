@@ -54,32 +54,36 @@ class TestValidators(TestCase):
             fileset_name_to_storage_name(itsm_fileset_name_bad), "jiaoy"
         )
 
-    @mock.patch.dict(os.environ, {"STORAGE2_PATH": "/storage2-test"})
+    @mock.patch.dict(
+        os.environ, {"QUMULO_INFO": '{"Storage2": {"path": "/storage2-test"}}'}
+    )
     def test_fileset_name_to_storage_export_path(self):
         itsm_fileset_name = "jiaoy_active"
         self.assertEqual(
             fileset_name_to_storage_export_path(itsm_fileset_name),
-            "/storage2-test/jiaoy",
+            "jiaoy",
         )
 
         itsm_fileset_alias = "gc6159"
         self.assertEqual(
             fileset_name_to_storage_export_path(itsm_fileset_alias),
-            "/storage2-test/gc6159",
+            "gc6159",
         )
 
-    @mock.patch.dict(os.environ, {"STORAGE2_PATH": "/storage2-test"})
+    @mock.patch.dict(
+        os.environ, {"QUMULO_INFO": '{"Storage2": {"path": "/storage2-test"}}'}
+    )
     def test_fileset_name_to_storage_filesystem_path(self):
         itsm_fileset_name = "jiaoy_active"
         self.assertEqual(
             fileset_name_to_storage_filesystem_path(itsm_fileset_name),
-            "/storage2-test/jiaoy",
+            "jiaoy",
         )
 
         itsm_fileset_alias = "gc6159"
         self.assertEqual(
             fileset_name_to_storage_filesystem_path(itsm_fileset_alias),
-            "/storage2-test/gc6159",
+            "gc6159",
         )
 
     def test_string_parsing_quota_and_unit_to_integer(self):

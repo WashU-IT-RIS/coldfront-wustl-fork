@@ -3,12 +3,13 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils import (
     create_test_export,
 )
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
 class TestDeleteQuota(TestCase):
     @tag("integration")
     def test_deletes_a_quota(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         export_fs_path = "/test/test-project"
         create_test_export(qumulo_api, export_fs_path)
 
@@ -19,6 +20,7 @@ class TestDeleteQuota(TestCase):
         get_quotas_res = qumulo_api.rc.quota.get_all_quotas()
         export_id = qumulo_api.get_id(protocol="nfs", export_path=export_fs_path)
         qumulo_api.delete_nfs_export(export_id)
+        qumulo_api.rc.fs.delete(export_fs_path)
 
         for page in get_quotas_res:
             for quota in page["quotas"]:
