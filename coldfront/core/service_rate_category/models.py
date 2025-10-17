@@ -16,6 +16,8 @@ class Service(TimeStampedModel):
 
     history = HistoricalRecords()
 
+    def __str__(self):
+        return self.name
 
 class ServiceRateCategory(TimeStampedModel):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
