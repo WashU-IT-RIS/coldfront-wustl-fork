@@ -1,0 +1,44 @@
+2025:
+  storage2:
+    models:
+      consumption:
+        description: Less than 100TB
+        unit_rate: 1
+        unit: TB
+        cycle: month
+        tiers:
+          - active:
+              rate: 13
+          - archive:
+              rate: 5
+      subscription:
+        100:
+          description: 100TB increments
+          unit_rate: 100
+          unit: TB
+          cycle: month
+          tiers:
+            - active:
+                rate: 634
+            - archive:
+                rate: 264
+        500:
+          description: 500TB increments
+          unit_rate: 500
+          unit: TB
+          cycle: month
+          tiers:
+            - active:
+                rate: 13
+            - archive:
+                rate: 5
+      condo:
+        description: 500TB increments
+        unit_rate: 500
+        unit: TB
+        cycle: month
+        tiers:
+          - active:
+              rate: 529
+          - archive:
+              rate: 211
