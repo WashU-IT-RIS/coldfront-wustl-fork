@@ -13,4 +13,5 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
     "billing_cycle",
     "billing_contact",
     "status",
+    "provision_usage_creation_date",
 ]
