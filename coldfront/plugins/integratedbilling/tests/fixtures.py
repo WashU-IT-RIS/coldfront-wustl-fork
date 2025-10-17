@@ -11,5 +11,7 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
     "parent_id",
     "quota",
     "billing_cycle",
+    "billing_contact",
     "status",
+    "provision_usage_creation_date",
 ]
