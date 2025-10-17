@@ -12,9 +12,18 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode",
         "editor.formatOnSave": true
     },
-    "black-formatter.cwd": "${workspaceFolder}",
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./coldfront",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true,
+    // "black-formatter.cwd": "${workspaceFolder}",
     // "black-formatter.args": [
     //     "['--exclude','coldfront/.*']",
-    //     "['--include','coldfront/.*/plugins/qumulo/.*']"
-    // ]
+    //    "['--include','coldfront/.*/plugins/qumulo/.*']"
+    //],
 }
