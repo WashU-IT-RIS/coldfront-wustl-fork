@@ -6,5 +6,11 @@ class TriggerMigrationsForm(forms.Form):
         label="Allocation Name",
         max_length=100,
         required=True,
-        help_text="Type the allocation name here!",
+        help_text="Type the allocation name here",
+    )
+    allocation_resource_name = forms.ChoiceField(
+        label="Resource Name",
+        choices=[("Storage2", "Storage2"), ("Storage3", "Storage3")],
+        required=True,
+        help_text="Select the resource type for the allocation",
     )
