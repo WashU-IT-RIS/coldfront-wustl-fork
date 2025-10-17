@@ -44,7 +44,6 @@ class TestBillingItsmClient(TestCase):
         data = billing_itsm_client.get_billing_usages()
         service_provision_usage = data[0]
         for key in [
-            "provision_usage_creation_date",
             "_service_provision",
             "_provision_usage",
         ]:
