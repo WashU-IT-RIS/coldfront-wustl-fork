@@ -15,7 +15,7 @@ class Command(BaseCommand):
             name="Storage2",
             defaults={"description": "Storage 2 placeholder description"},
         )
-        compute_2_service = Service.objects.update_or_create(
+        Service.objects.update_or_create(
             name="Compute2",
             defaults={"description": "Compute 2 placeholder description"},
         )
