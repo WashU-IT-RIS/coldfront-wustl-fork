@@ -1,5 +1,6 @@
 import factory
 from faker import Faker
+from django.utils import timezone
 from coldfront.core.billing.models import AllocationUsage
 
 fake = Faker()
@@ -14,7 +15,7 @@ class AllocationUsageFactory(factory.django.DjangoModelFactory):
     billing_contact = factory.LazyAttribute(lambda _: fake.email())
     fileset_name = factory.LazyAttribute(lambda _: fake.word())
     service_rate_category = factory.LazyAttribute(lambda _: fake.word())
-    usage = factory.LazyAttribute(lambda _: str(fake.pydecimal(left_digits=2, right_digits=6, positive=True)))
+    usage_tb = factory.LazyAttribute(lambda _: str(fake.pydecimal(left_digits=2, right_digits=6, positive=True)))
     funding_number = factory.LazyAttribute(lambda _: fake.bothify(text='??####'))
     exempt = factory.LazyAttribute(lambda _: fake.boolean())
     subsidized = factory.LazyAttribute(lambda _: fake.boolean())
@@ -22,6 +23,5 @@ class AllocationUsageFactory(factory.django.DjangoModelFactory):
     parent_id_key = factory.Sequence(lambda n: n)
     quota = factory.LazyAttribute(lambda _: str(fake.random_int(min=1, max=100)))
     billing_cycle = factory.LazyAttribute(lambda _: fake.word())
-    usage_timestamp = factory.LazyAttribute(lambda _: fake.date_time_this_year())
-    ingestion_date = factory.LazyAttribute(lambda _: fake.date_time_this_year())
+    usage_date = factory.LazyAttribute(lambda _: fake.date_this_year())
     storage_cluster = factory.LazyAttribute(lambda _: fake.word())
