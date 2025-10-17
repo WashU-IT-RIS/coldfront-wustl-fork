@@ -15,6 +15,12 @@ class Command(BaseCommand):
             name="Storage2",
             defaults={"description": "Storage 2 placeholder description"},
         )
+
+        storage_1_service, _ = Service.objects.update_or_create(
+            name="Storage1",
+            defaults={"description": "Storage 1 placeholder description"},
+        )
+
         Service.objects.update_or_create(
             name="Compute2",
             defaults={"description": "Compute 2 placeholder description"},
