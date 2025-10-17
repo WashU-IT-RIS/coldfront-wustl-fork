@@ -45,4 +45,6 @@ class ServiceRateCategoryTier(TimeStampedModel):
     unit = models.CharField(max_length=255)
     cycle = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.name
     history = HistoricalRecords()
