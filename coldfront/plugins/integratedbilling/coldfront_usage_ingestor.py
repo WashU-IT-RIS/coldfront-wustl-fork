@@ -1,4 +1,6 @@
 from typing import Union
+from simple_history.utils import bulk_create_with_history
+
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
@@ -6,18 +8,24 @@ from coldfront.core.allocation.models import (
 )
 from django.db.models.query import QuerySet
 from django.db.models.expressions import OuterRef, Star, Subquery
-from datetime import date
+from datetime import date, datetime
 
 from coldfront.core.billing.models import AllocationUsage
+from coldfront.core.resource.models import Resource
 from coldfront.core.service_rate_category.models import Service
 from coldfront.plugins.integratedbilling.constants import BillingDataSources
 
 
+# helper function to get the default billing date (first day of the current month)
+def _get_default_usage_date() -> date:
+    today = datetime.now().date()
+    return today.replace(day=1)
+
+
 class ColdfrontUsageIngestor:
 
-    def __init__(self, usage_date: date):
-        self.usage_date = usage_date
-        self.service = Service.objects.get(name="Storage2")
+    def __init__(self, usage_date: date = None) -> None:
+        self.usage_date = usage_date or _get_default_usage_date()
         self.source = BillingDataSources.COLDFRONT.value
 
     def process_usages(self) -> bool:
@@ -41,6 +49,7 @@ class ColdfrontUsageIngestor:
             .consumption()
             .annotate(**sub_queries)
             .filter(usage_bytes__isnull=False)
+            .select_related("project__pi")
         )
 
         return active_allocations_with_usage
@@ -48,7 +57,7 @@ class ColdfrontUsageIngestor:
     def __create_allocation_usage_records(
         self, active_allocations_with_usages: QuerySet
     ) -> list[AllocationUsage]:
-        usage_records = []
+        saved_usages = []
         for allocation_with_usage in active_allocations_with_usages:
             amount_tb = self.__convert_to_amount_usage_to_tb(
                 allocation_with_usage.usage_bytes
@@ -56,9 +65,9 @@ class ColdfrontUsageIngestor:
             record = AllocationUsage(
                 external_key=allocation_with_usage.pk,
                 source=self.source,
-                sponsor_pi=allocation_with_usage.sponsor_pi,
+                sponsor_pi=allocation_with_usage.project.pi,
                 billing_contact=allocation_with_usage.billing_contact,
-                fileset_name=allocation_with_usage.fileset_name,
+                fileset_name=allocation_with_usage.storage_filesystem_path,
                 service_rate_category=allocation_with_usage.service_rate_category,
                 usage_tb=amount_tb,
                 funding_number=allocation_with_usage.funding_number,
@@ -69,11 +78,12 @@ class ColdfrontUsageIngestor:
                 quota=allocation_with_usage.quota,
                 billing_cycle=allocation_with_usage.billing_cycle,
                 usage_date=self.usage_date,
-                storage_cluster=self.service.name,
+                storage_cluster=allocation_with_usage.storage_cluster,
             )
+            record.save()
+            saved_usages.append(record)
 
-            usage_records.append(record)
-        return usage_records
+        return saved_usages
 
     def __convert_to_amount_usage_to_tb(self, amount_bytes: int) -> Union[float, None]:
         try:

@@ -1,8 +1,12 @@
+from datetime import datetime
 import json
 from unittest import mock
 from django.test import TestCase
 from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
-from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
+
+from coldfront.plugins.integratedbilling.tests.fixtures import (
+    create_coldfront_allocations_with_usages,
+)
 
 
 class TestReportGenerator(TestCase):
@@ -11,8 +15,11 @@ class TestReportGenerator(TestCase):
         "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
     )
     def setUp(self, mock_report_generator: mock.MagicMock) -> None:
-        build_models()
+        self.ingestion_date = datetime(2025, 10, 1)
+        # source data setup Coldfront allocations with usages
+        create_coldfront_allocations_with_usages(self.ingestion_date)
 
+        # source data setup ITSM mock data
         with open(
             "coldfront/plugins/integratedbilling/static/mock_monthly_billing_data_current_month.json",
             "r",
@@ -39,5 +46,3 @@ class TestReportGenerator(TestCase):
         self.assertIn("date", first_row)
         self.assertIn("storage_cluster", first_row)
         self.assertIn("usage_tb", first_row)
-            
-

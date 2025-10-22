@@ -45,7 +45,7 @@ class ReportGenerator:
     # Private methods
     def __get_usages(self):
         monthly_usages = AllocationUsage.objects.monthly_billable(
-            self.client.usage_date
+            self.client.usage_date,
         ).consumption()
         return monthly_usages
 

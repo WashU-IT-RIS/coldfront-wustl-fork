@@ -1,10 +1,13 @@
-from ast import Constant
-from datetime import date, datetime
+from datetime import datetime
 from time import sleep
 from typing import Union
-from coldfront.core.service_rate_category.models import Service
+from simple_history.utils import bulk_create_with_history
+
 from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmClient
-from coldfront.plugins.integratedbilling.constants import BillingDataSources
+from coldfront.plugins.integratedbilling.constants import (
+    BillingDataSources,
+    StorageClusters,
+)
 from coldfront.core.billing.models import AllocationUsage
 
 
@@ -12,7 +15,7 @@ class ItsmUsageIngestor:
 
     def __init__(self, client: BillingItsmClient):
         self.client = client
-        self.service = Service.objects.get(name="Storage1")
+        self.storage_cluster = StorageClusters.STORAGE1.value
         self.source = BillingDataSources.ITSM.value
 
     def process_usages(self) -> bool:
@@ -67,7 +70,7 @@ class ItsmUsageIngestor:
     def __create_allocation_usage_records(
         self, valid_usages: list[dict]
     ) -> list[AllocationUsage]:
-        usage_records = []
+        saved_usages = []
         for usage in valid_usages:
             amount_tb = self.__convert_to_amount_usage_to_tb(usage.get("amount"))
             billing_contact = self.__get_billing_contact(usage)
@@ -89,12 +92,9 @@ class ItsmUsageIngestor:
                 usage_date=datetime.strptime(
                     usage.get("provision_usage_creation_date"), "%Y-%m-%dT%H:%M:%S.%fZ"
                 ).date(),
-                storage_cluster=self.service.name,
+                storage_cluster=self.storage_cluster,
             )
-            usage_records.append(record)
+            record.save()
+            saved_usages.append(record)
 
-        if not usage_records:
-            return []
-
-        created_usages = AllocationUsage.objects.bulk_create(usage_records)
-        return created_usages
+        return saved_usages

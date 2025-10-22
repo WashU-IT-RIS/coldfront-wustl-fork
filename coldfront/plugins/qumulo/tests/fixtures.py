@@ -40,13 +40,13 @@ def create_metadata_for_testing() -> None:
 
 def create_ris_project_and_allocations_storage2(
     path: str,
-) -> Tuple[Project, list[Allocation]]:
+) -> Tuple[Project, dict[str, Allocation]]:
     return __create_ris_project_and_allocations(Storage2Factory, path)
 
 
 def create_ris_project_and_allocations_storage3(
     path: str,
-) -> Tuple[Project, list[Allocation]]:
+) -> Tuple[Project, dict[str, Allocation]]:
     return __create_ris_project_and_allocations(Storage3Factory, path)
 
 
@@ -92,7 +92,7 @@ def create_attribute_types_for_ris_allocations() -> None:
 def __create_ris_project_and_allocations(
     storage_factory: Callable[[], Union[Storage2Factory, Storage3Factory]],
     path: str,
-) -> Tuple[Project, list[Allocation]]:
+) -> Tuple[Project, dict[str, Allocation]]:
     project = RisProjectFactory()
 
     ProjectUserFactory(
@@ -114,10 +114,14 @@ def __create_ris_project_and_allocations(
 
     storage_allocation = storage_factory(project=project)
 
-    AllocationAttributeFactory(
-        allocation=storage_allocation,
-        allocation_attribute_type__name="storage_filesystem_path",
-        value=path,
+    # AllocationAttributeFactory(
+    #     allocation=storage_allocation,
+    #     allocation_attribute_type__name="storage_filesystem_path",
+    #     value=path,
+    # )
+
+    _create_allocations_attribute_for_storage_allocation(
+        storage_allocation, path, project.pi.username
     )
 
     AllocationUserFactory(
@@ -140,7 +144,11 @@ def __create_ris_project_and_allocations(
     )
     return (
         project,
-        [storage_allocation, rw_group, ro_group],
+        {
+            "storage_allocation": storage_allocation,
+            "rw_allocation": rw_group,
+            "ro_allocation": ro_group,
+        },
     )
 
 
@@ -213,4 +221,38 @@ def _create_allocation_attribute_types(attribute_types: list[Tuple[str, str]]) -
         AllocationAttributeTypeFactory(
             name=allocation_attribute_name,
             attribute_type=AAttributeTypeFactory(name=allocation_attribute_type),
+        )
+
+
+def _create_allocations_attribute_for_storage_allocation(
+    storage_allocation: Allocation,
+    path: str,
+    billing_contact: str,
+) -> None:
+    storage_allocation_attribute_names = [
+        ("storage_name", "Text"),
+        ("storage_ticket", "ITSD-22222"),
+        ("storage_quota", 5),
+        ("storage_protocols", "SMB"),
+        ("storage_filesystem_path", path),
+        ("storage_export_path", path),
+        ("cost_center", "COST-12345"),
+        ("department_number", "Dept-67890"),
+        ("billing_contact", billing_contact),
+        ("service_rate_category", "consumption"),
+        ("secure", "Yes"),
+        ("audit", "Yes/No"),
+        ("billing_startdate", "Date"),
+        ("sponsor_department_number", "Text"),
+        ("billing_exempt", "No"),
+        ("billing_cycle", "monthly"),
+        ("subsidized", "No"),
+    ]
+
+    for attribute_name, value in storage_allocation_attribute_names:
+        allocation_attribute_type = AllocationAttributeTypeFactory(name=attribute_name)
+        AllocationAttributeFactory(
+            allocation=storage_allocation,
+            allocation_attribute_type=allocation_attribute_type,
+            value=value,
         )

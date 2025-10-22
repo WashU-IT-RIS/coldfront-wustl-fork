@@ -3,17 +3,11 @@ import factory
 from factory.django import DjangoModelFactory
 
 from coldfront.core.allocation.models import Allocation
-from coldfront.core.project.models import ProjectAttribute
-from coldfront.core.resource.models import ResourceType, Resource
 from coldfront.core.test_helpers.factories import (
     AllocationStatusChoiceFactory,
-    AllocationUserFactory,
-    AllocationUserStatusChoiceFactory,
     FieldOfScienceFactory,
     ProjectFactory,
     ProjectStatusChoiceFactory,
-    ProjectUserRoleChoiceFactory,
-    ProjectUserStatusChoiceFactory,
     ResourceFactory,
     ResourceTypeFactory,
     UserFactory,
@@ -129,6 +123,6 @@ class ReadOnlyGroupFactory(RisAllocationFactory):
             return None
 
         resources = extracted or (
-            ResourceFactory(name="rw", resource_type=ResourceTypeFactory(name="ACL")),
+            ResourceFactory(name="ro", resource_type=ResourceTypeFactory(name="ACL")),
         )
         self.resources.add(*resources)
