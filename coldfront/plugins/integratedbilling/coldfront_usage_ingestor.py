@@ -48,10 +48,8 @@ class ColdfrontUsageIngestor:
             .active_storage()
             .consumption()
             .annotate(**sub_queries)
-            .filter(usage_bytes__isnull=False)
             .select_related("project__pi")
         )
-
         return active_allocations_with_usage
 
     def __create_allocation_usage_records(
@@ -62,25 +60,32 @@ class ColdfrontUsageIngestor:
             amount_tb = self.__convert_to_amount_usage_to_tb(
                 allocation_with_usage.usage_bytes
             )
-            record = AllocationUsage(
+            record = AllocationUsage.objects.update_or_create(
                 external_key=allocation_with_usage.pk,
                 source=self.source,
-                sponsor_pi=allocation_with_usage.project.pi,
-                billing_contact=allocation_with_usage.billing_contact,
-                fileset_name=allocation_with_usage.storage_filesystem_path,
-                service_rate_category=allocation_with_usage.service_rate_category,
-                usage_tb=amount_tb,
-                funding_number=allocation_with_usage.funding_number,
-                exempt=allocation_with_usage.billing_exempt,
-                subsidized=allocation_with_usage.subsidized,
-                is_condo_group=allocation_with_usage.is_condo_group,
-                parent_id_key=allocation_with_usage.parent_id_key,
-                quota=allocation_with_usage.quota,
-                billing_cycle=allocation_with_usage.billing_cycle,
                 usage_date=self.usage_date,
-                storage_cluster=allocation_with_usage.storage_cluster,
+                defaults={
+                    "sponsor_pi": allocation_with_usage.project.pi,
+                    "billing_contact": allocation_with_usage.billing_contact,
+                    "fileset_name": allocation_with_usage.storage_filesystem_path,
+                    "service_rate_category": allocation_with_usage.service_rate_category,
+                    "usage_tb": amount_tb,
+                    "funding_number": allocation_with_usage.funding_number,
+                    "exempt": self.__to_boolean_or_none(
+                        allocation_with_usage.billing_exempt
+                    ),
+                    "subsidized": self.__to_boolean_or_none(
+                        allocation_with_usage.subsidized
+                    ),
+                    "is_condo_group": self.__to_boolean_or_none(
+                        allocation_with_usage.is_condo_group
+                    ),
+                    "parent_id_key": None,
+                    "quota": allocation_with_usage.storage_quota,
+                    "billing_cycle": allocation_with_usage.billing_cycle,
+                    "storage_cluster": allocation_with_usage.resources.name,
+                },
             )
-            record.save()
             saved_usages.append(record)
 
         return saved_usages
@@ -91,6 +96,14 @@ class ColdfrontUsageIngestor:
             return round(amount_tb, 6)
         except (TypeError, ValueError):
             return None
+
+    def __to_boolean_or_none(self, value: str) -> bool:
+        if str(value) in ["Yes", "True", "true", "1"]:
+            return True
+        if str(value) in ["No", "False", "false", "0"]:
+            return False
+
+        return None
 
     def __get_subqueries(self, usage_date: date = None) -> dict:
         sub_queries = {}
