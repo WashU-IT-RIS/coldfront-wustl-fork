@@ -61,7 +61,8 @@ class ItsmUsageIngestor:
             amount_kb = int(amount_kb_with_unit.replace("KB", "").replace(",", ""))
             amount_tb = float(amount_kb) / 1_000_000_000  # 1024**3 perhaps
             return round(amount_tb, 6)
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as e:
+            breakpoint()
             return None
 
     def __get_billing_contact(self, usage: dict) -> str:
@@ -74,27 +75,28 @@ class ItsmUsageIngestor:
         for usage in valid_usages:
             amount_tb = self.__convert_to_amount_usage_to_tb(usage.get("amount"))
             billing_contact = self.__get_billing_contact(usage)
-            record = AllocationUsage(
+            record = AllocationUsage.objects.update_or_create(
                 external_key=usage.get("id"),
                 source=self.source,
-                sponsor_pi=usage.get("sponsor"),
-                billing_contact=billing_contact,
-                fileset_name=usage.get("fileset_name"),
-                service_rate_category=usage.get("service_rate_category"),
-                usage_tb=amount_tb,
-                funding_number=usage.get("funding_number") or "NOT PROVIDED",
-                exempt=usage.get("exempt"),
-                subsidized=usage.get("subsidized"),
-                is_condo_group=usage.get("is_condo_group"),
-                parent_id_key=usage.get("parent_id"),
-                quota=usage.get("quota"),
-                billing_cycle=usage.get("billing_cycle"),
                 usage_date=datetime.strptime(
                     usage.get("provision_usage_creation_date"), "%Y-%m-%dT%H:%M:%S.%fZ"
                 ).date(),
-                storage_cluster=self.storage_cluster,
+                defaults={
+                    "sponsor_pi": usage.get("sponsor"),
+                    "billing_contact": billing_contact,
+                    "fileset_name": usage.get("fileset_name"),
+                    "service_rate_category": usage.get("service_rate_category"),
+                    "usage_tb": amount_tb,
+                    "funding_number": usage.get("funding_number") or "NOT PROVIDED",
+                    "exempt": usage.get("exempt"),
+                    "subsidized": usage.get("subsidized"),
+                    "is_condo_group": usage.get("is_condo_group"),
+                    "parent_id_key": usage.get("parent_id"),
+                    "quota": usage.get("quota"),
+                    "billing_cycle": usage.get("billing_cycle"),
+                    "storage_cluster": self.storage_cluster,
+                },
             )
-            record.save()
             saved_usages.append(record)
 
         return saved_usages
