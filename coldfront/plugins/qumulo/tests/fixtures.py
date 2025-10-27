@@ -1,4 +1,4 @@
-from typing import Callable, Tuple, Union
+from typing import Any, Callable, Tuple, Union
 
 from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import Project, ProjectAttributeType
@@ -39,15 +39,21 @@ def create_metadata_for_testing() -> None:
 
 
 def create_ris_project_and_allocations_storage2(
-    path: str,
+    storage_filesystem_path: str,
+    **kwargs: dict[str, Any],
 ) -> Tuple[Project, dict[str, Allocation]]:
-    return __create_ris_project_and_allocations(Storage2Factory, path)
+    return __create_ris_project_and_allocations(
+        Storage2Factory, storage_filesystem_path, **kwargs
+    )
 
 
 def create_ris_project_and_allocations_storage3(
-    path: str,
+    storage_filesystem_path: str,
+    **kwargs: dict[str, Any],
 ) -> Tuple[Project, dict[str, Allocation]]:
-    return __create_ris_project_and_allocations(Storage3Factory, path)
+    return __create_ris_project_and_allocations(
+        Storage3Factory, storage_filesystem_path, **kwargs
+    )
 
 
 def create_project_choices() -> None:
@@ -91,10 +97,10 @@ def create_attribute_types_for_ris_allocations() -> None:
 
 def __create_ris_project_and_allocations(
     storage_factory: Callable[[], Union[Storage2Factory, Storage3Factory]],
-    path: str,
+    storage_filesystem_path: str,
+    **kwargs: dict[str, Any],
 ) -> Tuple[Project, dict[str, Allocation]]:
     project = RisProjectFactory()
-
     ProjectUserFactory(
         project=project,
         user=project.pi,
@@ -112,16 +118,20 @@ def __create_ris_project_and_allocations(
         proj_attr_type=sponsor_department_number,
     )
 
-    storage_allocation = storage_factory(project=project)
+    storage_allocation = storage_factory(project=project, **kwargs)
 
     # AllocationAttributeFactory(
     #     allocation=storage_allocation,
     #     allocation_attribute_type__name="storage_filesystem_path",
-    #     value=path,
+    #     value=storage_filesystem_path,
     # )
 
+    kwargs_allocation_attributes = {
+        "billing_contact": project.pi.email,
+        **kwargs,
+    }
     _create_allocations_attribute_for_storage_allocation(
-        storage_allocation, path, project.pi.username
+        storage_allocation, storage_filesystem_path, **kwargs_allocation_attributes
     )
 
     AllocationUserFactory(
@@ -226,27 +236,28 @@ def _create_allocation_attribute_types(attribute_types: list[Tuple[str, str]]) -
 
 def _create_allocations_attribute_for_storage_allocation(
     storage_allocation: Allocation,
-    path: str,
-    billing_contact: str,
+    storage_filesystem_path: str,
+    **kwargs: dict[str, Any],
 ) -> None:
+    # TODO refactor to use a dataclass or similar for options
     storage_allocation_attribute_names = [
-        ("storage_name", "Text"),
-        ("storage_ticket", "ITSD-22222"),
-        ("storage_quota", 5),
-        ("storage_protocols", "SMB"),
-        ("storage_filesystem_path", path),
-        ("storage_export_path", path),
-        ("cost_center", "COST-12345"),
-        ("department_number", "Dept-67890"),
-        ("billing_contact", billing_contact),
-        ("service_rate_category", "consumption"),
-        ("secure", "Yes"),
-        ("audit", "Yes/No"),
-        ("billing_startdate", "Date"),
-        ("sponsor_department_number", "Text"),
-        ("billing_exempt", "No"),
-        ("billing_cycle", "monthly"),
-        ("subsidized", "No"),
+        ("storage_name", kwargs.get("storage_name", "Text")),
+        ("storage_ticket", kwargs.get("storage_ticket", "ITSD-22222")),
+        ("storage_quota", kwargs.get("storage_quota", 5)),
+        ("storage_protocols", kwargs.get("storage_protocols", "SMB")),
+        ("storage_filesystem_path", storage_filesystem_path),
+        ("storage_export_path", storage_filesystem_path),
+        ("cost_center", kwargs.get("cost_center", "COST-12345")),
+        ("department_number", kwargs.get("department_number", "Dept-67890")),
+        ("billing_contact", kwargs.get("billing_contact", "")),
+        ("service_rate_category", kwargs.get("service_rate_category", "consumption")),
+        ("secure", kwargs.get("secure", "Yes")),
+        ("audit", kwargs.get("audit", "Yes/No")),
+        ("billing_startdate", kwargs.get("billing_startdate", "Date")),
+        ("sponsor_department_number", kwargs.get("sponsor_department_number", "Text")),
+        ("billing_exempt", kwargs.get("billing_exempt", "No")),
+        ("billing_cycle", kwargs.get("billing_cycle", "monthly")),
+        ("subsidized", kwargs.get("subsidized", "No")),
     ]
 
     for attribute_name, value in storage_allocation_attribute_names:

@@ -323,8 +323,12 @@ def create_coldfront_allocations_with_usages(
     ingestion_date: datetime,
 ) -> None:
     create_metadata_for_testing()
-    for path, usage_bytes in zip(COLDFRONT_PATH_FIXTURES, USAGES_IN_BYTES):
-        _, allocations = create_ris_project_and_allocations_storage2(path)
+    for storage_filesystem_path, usage_bytes in zip(
+        COLDFRONT_PATH_FIXTURES, USAGES_IN_BYTES
+    ):
+        _, allocations = create_ris_project_and_allocations_storage2(
+            storage_filesystem_path=storage_filesystem_path
+        )
         AllocationAttributeUsageFactory(
             allocation_attribute=allocations[
                 "storage_allocation"
@@ -337,39 +341,36 @@ def create_coldfront_allocations_with_usages(
 
     # active storage3 allocation
     _, allocations = create_ris_project_and_allocations_storage3(
-        "/storage3/fs1/testuser"
+        storage_filesystem_path="/storage3/fs1/testuser",
     )
-
     AllocationAttributeUsageFactory(
-        allocation_attribute=allocations["storage_allocation"].allocationattribute_set.get(
-            allocation_attribute_type__name="storage_quota"
-        ),
+        allocation_attribute=allocations[
+            "storage_allocation"
+        ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=36829437952,
         created=ingestion_date,
     )
 
     # inactive storage3 allocation
     _, allocations = create_ris_project_and_allocations_storage3(
-        "/storage3/fs1/inactiveuser"
+        storage_filesystem_path="/storage3/fs1/inactiveuser", pending=True
     )
-
     AllocationAttributeUsageFactory(
-        allocation_attribute=allocations["storage_allocation"].allocationattribute_set.get(
-            allocation_attribute_type__name="storage_quota"
-        ),
+        allocation_attribute=allocations[
+            "storage_allocation"
+        ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=20480,
         created=ingestion_date,
     )
 
-    # inactive storage2 allocation
+    # pending storage2 allocation
     _, allocations = create_ris_project_and_allocations_storage2(
-        "/storage2/fs1/inactiveuser2"
+        "/storage2/fs1/inactiveuser2", pending=True
     )
     AllocationAttributeUsageFactory(
-        allocation_attribute=allocations["storage_allocation"].allocationattribute_set.get(
-            allocation_attribute_type__name="storage_quota"
-        ),
+        allocation_attribute=allocations[
+            "storage_allocation"
+        ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=20480,
         created=ingestion_date,
-    )   
-
+    )

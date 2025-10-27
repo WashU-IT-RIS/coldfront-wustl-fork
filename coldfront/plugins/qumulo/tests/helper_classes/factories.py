@@ -51,6 +51,11 @@ class RisAllocationFactory(DjangoModelFactory):
             status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
         )
 
+        pending = factory.Trait(
+            justification="",
+            status=factory.SubFactory(AllocationStatusChoiceFactory, name="Pending"),
+        )
+
 
 class Storage2Factory(RisAllocationFactory):
     storage = True
@@ -84,20 +89,20 @@ class Storage3Factory(RisAllocationFactory):
         self.resources.add(*resources)
 
 
-class Storage3Factory(RisAllocationFactory):
-    storage = True
+class Storage2PendingFactory(Storage2Factory):
+    pending = True
 
-    @factory.post_generation
-    def resources(self, create, extracted, **kwargs):
-        if not create:
-            return None
 
-        resources = extracted or (
-            ResourceFactory(
-                name="Storage3", resource_type=ResourceTypeFactory(name="Storage")
-            ),
-        )
-        self.resources.add(*resources)
+class Storage3PendingFactory(Storage3Factory):
+    pending = True
+
+
+class Storage2ExemptFactory(Storage2Factory):
+    exempt = True
+
+
+class Storage3ExemptFactory(Storage3Factory):
+    exempt = True
 
 
 class ReadWriteGroupFactory(RisAllocationFactory):
