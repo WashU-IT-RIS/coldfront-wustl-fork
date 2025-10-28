@@ -531,7 +531,7 @@ class ProjectUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestM
        
     def form_valid(self, form):
         sponsor_department_attribute = self.get_object().projectattribute_set.filter(proj_attr_type__name="sponsor_department_number").first()
-        sponsor_department_attribute.value = form.cleaned_data.get('sponsor_department_number', 'Unknown')
+        sponsor_department_attribute.value = form.cleaned_data.get('sponsor_department_number', '')
         sponsor_department_attribute.save()
             
         return super().form_valid(form)   
@@ -540,7 +540,7 @@ class ProjectUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestM
         kwargs = super().get_form_kwargs()
         
         sponsor_department_attribute = self.object.projectattribute_set.filter(proj_attr_type__name="sponsor_department_number").first()
-        kwargs['initial']['sponsor_department_number'] = sponsor_department_attribute.value
+        kwargs['initial']['sponsor_department_number'] = sponsor_department_attribute.value if sponsor_department_attribute else ''
         
         return kwargs
 
