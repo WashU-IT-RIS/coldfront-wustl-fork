@@ -1,4 +1,3 @@
-from datetime import datetime
 from coldfront.core.test_helpers.factories import AllocationAttributeUsageFactory
 
 from coldfront.plugins.qumulo.tests.fixtures import (
@@ -319,9 +318,7 @@ USAGES_IN_BYTES = [
 ]
 
 
-def create_coldfront_allocations_with_usages(
-    ingestion_date: datetime,
-) -> None:
+def create_coldfront_allocations_with_usages() -> None:
     create_metadata_for_testing()
     for storage_filesystem_path, usage_bytes in zip(
         COLDFRONT_PATH_FIXTURES, USAGES_IN_BYTES
@@ -336,7 +333,6 @@ def create_coldfront_allocations_with_usages(
                 allocation_attribute_type__name="storage_quota"
             ),
             value=int(usage_bytes),
-            created=ingestion_date,
         )
 
     # active storage3 allocation
@@ -348,7 +344,6 @@ def create_coldfront_allocations_with_usages(
             "storage_allocation"
         ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=36829437952,
-        created=ingestion_date,
     )
 
     # inactive storage3 allocation
@@ -360,7 +355,6 @@ def create_coldfront_allocations_with_usages(
             "storage_allocation"
         ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=20480,
-        created=ingestion_date,
     )
 
     # pending storage2 allocation
@@ -372,5 +366,4 @@ def create_coldfront_allocations_with_usages(
             "storage_allocation"
         ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=20480,
-        created=ingestion_date,
     )

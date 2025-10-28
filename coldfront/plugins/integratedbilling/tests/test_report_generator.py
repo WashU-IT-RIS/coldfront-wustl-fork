@@ -1,4 +1,5 @@
 from datetime import datetime
+from freezegun import freeze_time
 import json
 from unittest import mock
 from django.test import TestCase
@@ -15,9 +16,10 @@ class TestReportGenerator(TestCase):
         "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
     )
     def setUp(self, mock_report_generator: mock.MagicMock) -> None:
-        self.ingestion_date = datetime(2025, 10, 1)
+        self.ingestion_date = datetime(2025, 10, 1, 0, 0, 0, tzinfo=None).date()
         # source data setup Coldfront allocations with usages
-        create_coldfront_allocations_with_usages(self.ingestion_date)
+        with freeze_time(self.ingestion_date):
+            create_coldfront_allocations_with_usages()
 
         # source data setup ITSM mock data
         with open(

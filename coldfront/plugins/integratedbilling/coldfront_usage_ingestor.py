@@ -1,5 +1,6 @@
 from typing import Union
-from simple_history.utils import bulk_create_with_history
+
+from pytz import UTC
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -11,15 +12,13 @@ from django.db.models.expressions import OuterRef, Star, Subquery
 from datetime import date, datetime
 
 from coldfront.core.billing.models import AllocationUsage
-from coldfront.core.resource.models import Resource
-from coldfront.core.service_rate_category.models import Service
 from coldfront.plugins.integratedbilling.constants import BillingDataSources
 
 
 # helper function to get the default billing date (first day of the current month)
-def _get_default_usage_date() -> date:
-    today = datetime.now().date()
-    return today.replace(day=1)
+def _get_default_usage_date() -> datetime:
+    today = datetime.now()
+    return today.replace(day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=UTC)
 
 
 class ColdfrontUsageIngestor:
@@ -41,16 +40,16 @@ class ColdfrontUsageIngestor:
 
         return True
 
-    def __ingest_usage_data(self, usage_date: date) -> QuerySet:
+    def __ingest_usage_data(self, usage_date: datetime) -> QuerySet:
         sub_queries = self.__get_subqueries(usage_date)
-        active_allocations_with_usage = (
+        active_allocations_with_usages = (
             Allocation.objects.parents()
             .active_storage()
             .consumption()
             .annotate(**sub_queries)
             .select_related("project__pi")
         )
-        return active_allocations_with_usage
+        return active_allocations_with_usages
 
     def __create_allocation_usage_records(
         self, active_allocations_with_usages: QuerySet
@@ -70,20 +69,25 @@ class ColdfrontUsageIngestor:
                     "fileset_name": allocation_with_usage.storage_filesystem_path,
                     "service_rate_category": allocation_with_usage.service_rate_category,
                     "usage_tb": amount_tb,
-                    "funding_number": allocation_with_usage.funding_number,
-                    "exempt": self.__to_boolean_or_none(
-                        allocation_with_usage.billing_exempt
+                    "funding_number": allocation_with_usage.funding_number
+                    or "NOT PROVIDED",
+                    "exempt": self.__to_boolean(
+                        allocation_with_usage.billing_exempt, default=None
                     ),
-                    "subsidized": self.__to_boolean_or_none(
-                        allocation_with_usage.subsidized
+                    "subsidized": self.__to_boolean(
+                        allocation_with_usage.subsidized, default=None
                     ),
-                    "is_condo_group": self.__to_boolean_or_none(
+                    "is_condo_group": self.__to_boolean(
                         allocation_with_usage.is_condo_group
                     ),
                     "parent_id_key": None,
                     "quota": allocation_with_usage.storage_quota,
                     "billing_cycle": allocation_with_usage.billing_cycle,
-                    "storage_cluster": allocation_with_usage.resources.name,
+                    "storage_cluster": allocation_with_usage.resources.filter(
+                        name__startswith="Storage"
+                    )
+                    .first()
+                    .name,
                 },
             )
             saved_usages.append(record)
@@ -97,15 +101,16 @@ class ColdfrontUsageIngestor:
         except (TypeError, ValueError):
             return None
 
-    def __to_boolean_or_none(self, value: str) -> bool:
+    def __to_boolean(self, value: str, default: bool = False) -> bool:
         if str(value) in ["Yes", "True", "true", "1"]:
             return True
         if str(value) in ["No", "False", "false", "0"]:
             return False
+        return default
 
         return None
 
-    def __get_subqueries(self, usage_date: date = None) -> dict:
+    def __get_subqueries(self, usage_date: datetime) -> dict:
         sub_queries = {}
         for key in [
             "storage_filesystem_path",
@@ -128,7 +133,7 @@ class ColdfrontUsageIngestor:
                 AllocationAttributeUsage.history.filter(
                     allocation_attribute__allocation=OuterRef("pk"),
                     allocation_attribute__allocation_attribute_type__name="storage_quota",
-                    history_date__date=usage_date,
+                    history_date=usage_date,
                 ).values("value")
             )
             sub_queries["usage_bytes"] = usage_subquery
