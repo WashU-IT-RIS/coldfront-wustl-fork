@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from freezegun import freeze_time
 import json
 from unittest import mock
@@ -16,7 +16,8 @@ class TestReportGenerator(TestCase):
         "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
     )
     def setUp(self, mock_report_generator: mock.MagicMock) -> None:
-        self.ingestion_date = datetime(2025, 10, 1, 0, 0, 0, tzinfo=None).date()
+        self.ingestion_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
+        self.report_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
         # source data setup Coldfront allocations with usages
         with freeze_time(self.ingestion_date):
             create_coldfront_allocations_with_usages()
@@ -26,7 +27,7 @@ class TestReportGenerator(TestCase):
             "coldfront/plugins/integratedbilling/static/mock_monthly_billing_data_current_month.json",
             "r",
         ) as file:
-            report_generator = ReportGenerator()
+            report_generator = ReportGenerator(self.report_date)
             mock_data = json.load(file)
             report_generator.client.handler.get_data.return_value = mock_data
             self.mock_report_generator = report_generator

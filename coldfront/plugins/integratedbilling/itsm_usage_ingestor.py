@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from time import sleep
 from typing import Union
-from simple_history.utils import bulk_create_with_history
 
 from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmClient
 from coldfront.plugins.integratedbilling.constants import (
@@ -61,8 +60,7 @@ class ItsmUsageIngestor:
             amount_kb = int(amount_kb_with_unit.replace("KB", "").replace(",", ""))
             amount_tb = float(amount_kb) / 1_000_000_000  # 1024**3 perhaps
             return round(amount_tb, 6)
-        except (TypeError, ValueError) as e:
-            breakpoint()
+        except (TypeError, ValueError):
             return None
 
     def __get_billing_contact(self, usage: dict) -> str:
@@ -80,7 +78,7 @@ class ItsmUsageIngestor:
                 source=self.source,
                 usage_date=datetime.strptime(
                     usage.get("provision_usage_creation_date"), "%Y-%m-%dT%H:%M:%S.%fZ"
-                ).date(),
+                ).replace(hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc).date(),
                 defaults={
                     "sponsor_pi": usage.get("sponsor"),
                     "billing_contact": billing_contact,

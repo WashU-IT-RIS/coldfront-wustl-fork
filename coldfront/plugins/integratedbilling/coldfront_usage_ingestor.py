@@ -1,29 +1,29 @@
 from typing import Union
 
-from pytz import UTC
-
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeUsage,
 )
 from django.db.models.query import QuerySet
-from django.db.models.expressions import OuterRef, Star, Subquery
-from datetime import date, datetime
+from django.db.models.expressions import OuterRef, Subquery
+from datetime import date, datetime, timezone
 
 from coldfront.core.billing.models import AllocationUsage
 from coldfront.plugins.integratedbilling.constants import BillingDataSources
 
 
 # helper function to get the default billing date (first day of the current month)
-def _get_default_usage_date() -> datetime:
+def _get_default_usage_date() -> date:
     today = datetime.now()
-    return today.replace(day=1, hour=0, minute=0, second=0, microsecond=0, tzinfo=UTC)
+    return today.replace(
+        day=1, hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+    ).date()
 
 
 class ColdfrontUsageIngestor:
 
-    def __init__(self, usage_date: date = None) -> None:
+    def __init__(self, usage_date: datetime = None) -> None:
         self.usage_date = usage_date or _get_default_usage_date()
         self.source = BillingDataSources.COLDFRONT.value
 
@@ -35,6 +35,7 @@ class ColdfrontUsageIngestor:
         created_usages = self.__create_allocation_usage_records(
             active_allocations_with_usages
         )
+
         if not created_usages:
             return False
 
@@ -62,7 +63,7 @@ class ColdfrontUsageIngestor:
             record = AllocationUsage.objects.update_or_create(
                 external_key=allocation_with_usage.pk,
                 source=self.source,
-                usage_date=self.usage_date,
+                usage_date=self.usage_date.date(),
                 defaults={
                     "sponsor_pi": allocation_with_usage.project.pi,
                     "billing_contact": allocation_with_usage.billing_contact,
