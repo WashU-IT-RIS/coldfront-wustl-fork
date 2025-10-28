@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 
 from coldfront.core.allocation.models import *
@@ -43,7 +44,7 @@ class AllocationUsageQuerySet(models.QuerySet):
 
     # From the queryset of monthly_billable consumption allocations
     def _is_all_subsidized_valid(self) -> bool:
-        pis = self.values_list('sponsor_pi', flat=True).distinct()
+        pis = self.values_list("sponsor_pi", flat=True).distinct()
         for pi in pis:
             if not self._is_subsidized_valid_by_pi(pi):
                 return False  # Found a PI with more than one subsidized allocation
@@ -59,7 +60,7 @@ class AllocationUsageQuerySet(models.QuerySet):
         if not self._is_all_subsidized_valid():
             return False  # Found a PI with more than one subsidized allocation
 
-        pis = self.values_list('sponsor_pi', flat=True).distinct()
+        pis = self.values_list("sponsor_pi", flat=True).distinct()
         for pi in pis:
             if self._count_subsidized_by_pi(pi) == 0:
                 if not self._set_subsidized_by_pi(pi):
@@ -69,7 +70,7 @@ class AllocationUsageQuerySet(models.QuerySet):
     # From the queryset of monthly_billable consumption allocations
     def _set_subsidized_by_pi(self, sponsor_pi) -> bool:
         # No subsidized allocation for this PI, set the first one by external_key
-        first_alloc = self.by_pi(sponsor_pi).order_by('external_key').first()
+        first_alloc = self.by_pi(sponsor_pi).order_by("external_key").first()
         if first_alloc:
             first_alloc.subsidized = True
             first_alloc.save()
@@ -112,7 +113,7 @@ class AllocationUsage(TimeStampedModel):
             "fileset_name",
         ]
 
-        unique_together = (('storage_cluster', 'fileset_name', 'usage_date'),)
+        unique_together = (("storage_cluster", "fileset_name", "usage_date"),)
 
     external_key=models.IntegerField()
     source=models.CharField(max_length=256)
@@ -132,3 +133,130 @@ class AllocationUsage(TimeStampedModel):
     storage_cluster=models.CharField(max_length=256)
     objects = AllocationUsageQuerySet.as_manager()
     history = HistoricalRecords()
+
+
+class MonthlyStorageBilling(AllocationUsage):
+    """A data model for monthly storage billing.
+
+    Additional Attributes Besides Those Inherited from AllocationUsage:
+        *delivery_date (str): indicates the beginning date of the service for monthly billing (ex. 2024-05-01)
+        *tier (str): indicates the service tier of the allocation (ex. Active, Archive)
+        *billing_unit (str): indicates the billing unit of the service (ex. TB)
+        *unit_rate (str): indicates the unit rate of the service
+        *billing_amount (str): indicates the total dollar amount of the service for the monthly billing
+    """
+
+    class Meta:
+        managed = False  # This model does not create a database table
+
+    HEADER_LINE_NO = 5
+
+    @classmethod
+    def _copy_template_headers_to_file(cls, template_filepath, target_filepath):
+        """
+        Copies the first line (header) from a template file to a target file.
+        """
+        try:
+            # Read the template headers
+            with open(template_filepath, "r") as template_file:
+                headers = []
+                for _ in range(cls.HEADER_LINE_NO):
+                    line = template_file.readline().strip()  # Read a line and remove trailing whitespace
+                    if not line:  # Handle cases where the template file has fewer than 5 lines
+                        break
+                    headers.append(line + "\n")
+
+            # Write headers to output file
+            with open(target_filepath, "w") as target_file:
+                target_file.writelines(headers)
+
+            print(f"Header successfully copied from '{template_filepath}' to '{target_filepath}'.")
+
+        except FileNotFoundError:
+            print("Error: One of the files was not found.")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+    @classmethod
+    def _read_billing_entry_template(cls, template_filepath):
+        """
+        Reads and returns the template of billing entry from the template file.
+        """
+
+        billing_entry_line_no = cls.HEADER_LINE_NO + 1  # Line number where billing entry is expected
+        try:
+            with open(template_filepath, "r") as template_file:
+                lines = template_file.readlines()
+                if 0 < billing_entry_line_no <= len(lines):
+                    billing_entry = lines[billing_entry_line_no - 1].strip()
+                    return billing_entry
+                else:
+                    print("Error: Template file does not contain enough lines for billing entry.")
+                    return None
+
+        except FileNotFoundError:
+            print("Error: Template file not found.")
+            return None
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return None 
+
+    @classmethod
+    def _get_fiscal_year(cls):
+        """
+        Given a date, return the fiscal year as an integer.
+        Fiscal year starts on July 1st.
+        """
+        month = datetime.now().month
+        fiscal_year = datetime.now().year
+        if month >= 7:
+            fiscal_year = datetime.now().year + 1
+
+        return "FY" + str(fiscal_year)[-2:]
+
+    @classmethod
+    def generate_report(cls, billing_objects, template_path, output_path):
+        """
+        Apply a list of monthly storage billing objects to the template and write to a CSV file.
+        """
+        # Read the template header
+        if not template_path:
+            template_path = "./coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
+
+        if not output_path:
+            output_path = "./billing_report.csv"
+
+        cls._copy_template_headers_to_file(template_path, output_path)
+
+        # Build billing entries from the template
+        billing_entry_template = cls._read_billing_entry_template(template_path)
+        if not billing_entry_template:
+            print("Error: Could not read billing entry template.")
+            return
+
+        spreadsheet_key = 1
+        document_date = datetime.now().date().strftime("%Y-%m-%d")
+        fiscal_year = cls._get_fiscal_year()
+        billing_month = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d").strftime("%B")
+        with open(output_path, "a") as output_file:
+            for obj in billing_objects:
+                # Replace placeholders in the template with actual values
+                billing_entry = billing_entry_template.format(
+                    spreadsheet_key=spreadsheet_key,
+                    document_date=document_date,
+                    fiscal_year=fiscal_year,
+                    billing_month=billing_month,
+                    sponsor_pi=obj.sponsor_pi,
+                    storage_cluster=obj.storage_cluster,
+                    tier=obj.tier,
+                    service_rate_category=obj.service_rate_category,
+                    usage_tb=obj.usage_tb,
+                    unit_rate=obj.unit_rate,
+                    billing_unit=obj.billing_unit,
+                    billing_amount=obj.billing_amount,
+                    delivery_date=obj.delivery_date,
+                    fileset_name=obj.fileset_name,
+                    funding_number=obj.funding_number,
+                )
+                output_file.write(billing_entry + "\n")
+                spreadsheet_key += 1

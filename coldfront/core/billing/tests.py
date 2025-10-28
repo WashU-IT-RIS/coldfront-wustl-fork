@@ -1,7 +1,10 @@
-import datetime
+import os
+import tempfile
+from datetime import datetime, date
+from unittest import mock
 from django.test import TestCase
 from .factories import AllocationUsageFactory
-from coldfront.core.billing.models import AllocationUsage
+from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
 
 class AllocationUsageModelTest(TestCase):
     def test_allocation_usage_factory_creates_valid_instance(self):
@@ -40,7 +43,7 @@ class AllocationUsageModelTest(TestCase):
 
 class AllocationUsageQuerySetTest(TestCase):
     def setUp(self):
-        self.usage_date = datetime.date(2024, 6, 1)
+        self.usage_date = date(2024, 6, 1)
         self.pi1 = "pi1"
         self.pi2 = "pi2"
         self.fileset1 = "filesetA"
@@ -181,3 +184,88 @@ class AllocationUsageQuerySetTest(TestCase):
         self.assertTrue(result)
         qs_refresh = AllocationUsage.objects.monthly_billable(self.usage_date).consumption()
         self.assertEqual(qs_refresh._count_subsidized_by_pi(self.pi2), 1)
+
+
+class MonthlyStorageBillingTests(TestCase):
+    def setUp(self):
+        # Create a fake MonthlyStorageBilling object using AllocationUsageFactory
+        self.billing_obj = AllocationUsageFactory.build()
+        # Add extra attributes for MonthlyStorageBilling
+        self.billing_obj.delivery_date = datetime.now().strftime("%Y-%m-%d")
+        self.billing_obj.tier = "Active"
+        self.billing_obj.billing_unit = "TB"
+        self.billing_obj.unit_rate = "10.00"
+        self.billing_obj.billing_amount = "100.00"
+
+    def test__copy_template_headers_to_file(self):
+        # Create a temp template file with 5 header lines
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as template, \
+             tempfile.NamedTemporaryFile(mode="r+", delete=False) as target:
+            headers = [f"header{i}\n" for i in range(1, 6)]
+            template.writelines(headers)
+            template.flush()
+            MonthlyStorageBilling._copy_template_headers_to_file(template.name, target.name)
+            target.seek(0)
+            content = target.readlines()
+            self.assertEqual([h.strip() for h in content], [h.strip() for h in headers])
+        os.remove(template.name)
+        os.remove(target.name)
+
+    def test__read_billing_entry_template(self):
+        # Create a temp template file with 6 lines, 6th is billing entry
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as template:
+            lines = [f"header{i}\n" for i in range(1, 6)]
+            billing_entry = "entry_line"
+            lines.append(billing_entry + "\n")
+            template.writelines(lines)
+            template.flush()
+            result = MonthlyStorageBilling._read_billing_entry_template(template.name)
+            self.assertEqual(result, billing_entry)
+        os.remove(template.name)
+
+    def test__get_fiscal_year(self):
+        # Patch datetime to June and July to test fiscal year logic
+        with mock.patch("coldfront.core.billing.models.datetime") as mock_dt:
+            mock_dt.now.return_value = datetime(2024, 6, 1)
+            fy = MonthlyStorageBilling._get_fiscal_year()
+            self.assertEqual(fy, "FY24")
+            mock_dt.now.return_value = datetime(2024, 7, 1)
+            fy = MonthlyStorageBilling._get_fiscal_year()
+            self.assertEqual(fy, "FY25")
+
+    def test_generate_report(self):
+        # Prepare template file with 6 lines, 6th is billing entry with placeholders
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False) as template, \
+             tempfile.NamedTemporaryFile(mode="r+", delete=False) as output:
+            headers = [f"header{i}\n" for i in range(1, 6)]
+            entry_template = (
+                "{spreadsheet_key},{document_date},{fiscal_year},{billing_month},"
+                "{sponsor_pi},{storage_cluster},{tier},{service_rate_category},"
+                "{usage_tb},{unit_rate},{billing_unit},{billing_amount},"
+                "{delivery_date},{fileset_name},{funding_number}"
+            )
+            template.writelines(headers)
+            template.write(entry_template + "\n")
+            template.flush()
+            # Set delivery_date for billing_obj to match template
+            self.billing_obj.delivery_date = "2024-05-01"
+            self.billing_obj.tier = "Active"
+            self.billing_obj.billing_unit = "TB"
+            self.billing_obj.unit_rate = "10.00"
+            self.billing_obj.billing_amount = "100.00"
+            billing_objects = [self.billing_obj]
+            MonthlyStorageBilling.generate_report(
+                billing_objects, template.name, output.name
+            )
+            output.seek(0)
+            lines = output.readlines()
+            # Check headers
+            self.assertEqual([l.strip() for l in lines[:5]], [h.strip() for h in headers])
+            # Check billing entry line
+            entry_line = lines[5].strip()
+            self.assertIn(self.billing_obj.sponsor_pi, entry_line)
+            self.assertIn(self.billing_obj.storage_cluster, entry_line)
+            self.assertIn("Active", entry_line)
+            self.assertIn("TB", entry_line)
+        os.remove(template.name)
+        os.remove(output.name)
