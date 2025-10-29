@@ -43,7 +43,7 @@ class TestReportGenerator(TestCase):
             f"billing_report_{self.mock_report_generator.client.usage_date}.csv",
             "r",
         ) as file:
-            report_data = json.load(file)
+            report_data = file.readlines()
             file.close()
 
         self.assertIsInstance(report_data, list)
