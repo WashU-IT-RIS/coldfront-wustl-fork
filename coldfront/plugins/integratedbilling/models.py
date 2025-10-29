@@ -3,30 +3,28 @@ from django.db import models
 from model_utils.models import TimeStampedModel
 from simple_history.models import HistoricalRecords
 
+
 class ServiceRateCategoryQuerySet(models.QuerySet):
     def current_rates(self):
         today = date.today()
         return self.filter(start_date__lte=today, end_date__gte=today)
-    
-    def for_model(self, model_name):
+
+    def for_model(self, model_name: str) -> models.QuerySet:
         return self.filter(model_name=model_name)
+
+    def for_tier(self, tier_name: str) -> models.QuerySet:
+        return self.filter(tier_name=tier_name)
+
+    def for_cycle(self, cycle: str) -> models.QuerySet:
+        return self.filter(cycle=cycle)
 
 
 class CurrentRatesManager(models.Manager):
-    def get_queryset(self):
-        return ServiceRateCategoryQuerySet(self.model, using=self._db)
-
-    def current_rates(self):
-        return self.get_queryset().current_rates()
-
-    def for_model(self, model_name):
-        return self.get_queryset().for_model(model_name)
-    
-    def monthly_rates(self):
-        return self.current_rates().filter(cycle="month")
-    
-    def current_for_model(self, model_name):
-        return self.current_rates().filter(model_name=model_name)
+    def get_queryset(self) -> ServiceRateCategoryQuerySet:
+        today = date.today()
+        return ServiceRateCategoryQuerySet(self.model, using=self._db).filter(
+            start_date__lte=today, end_date__gte=today
+        )
 
 
 class ServiceRateCategory(TimeStampedModel):
@@ -42,8 +40,11 @@ class ServiceRateCategory(TimeStampedModel):
     cycle = models.CharField(max_length=255)
 
     objects = models.Manager()
-    current = CurrentRatesManager()
+    current_rates = CurrentRatesManager()
     history = HistoricalRecords()
 
     class Meta:
         verbose_name_plural = "service rate categories"
+
+    def __str__(self) -> str:
+        return f"{self.model_name} - {self.tier_name} - {self.cycle} ({self.start_date} to {self.end_date})"

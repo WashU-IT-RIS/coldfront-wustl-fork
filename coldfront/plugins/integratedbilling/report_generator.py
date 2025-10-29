@@ -1,5 +1,5 @@
 import json
-from coldfront.core.billing.models import AllocationUsage
+from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.coldfront_usage_ingestor import (
     ColdfrontUsageIngestor,
 )
@@ -8,7 +8,6 @@ from coldfront.plugins.integratedbilling.itsm_usage_ingestor import (
     ItsmUsageIngestor,
 )
 from coldfront.plugins.integratedbilling.models import ServiceRateCategory
-
 
 
 class ReportGenerator:
@@ -32,7 +31,7 @@ class ReportGenerator:
         filtered_allocation_usages = self.__get_allocation_usages()
 
         # set the subsidies if applicable
-        # filtered_allocation_usages.set_and_validate_all_subsidized()
+        filtered_allocation_usages.set_and_validate_all_subsidized()
 
         # calculate costs
         calculated_usage_costs = self.__calculate_usage_cost(filtered_allocation_usages)
@@ -56,15 +55,13 @@ class ReportGenerator:
     def __send_report(self, report_data):
         print("Report not sent since this is a placeholder method.")
 
-    def __save_report(self, report_data, file_path):
-        with open(file_path, "w") as file:
-            json.dump(report_data, file, indent=4)
-            file.close()
+    def __save_report(self, billing_objects: list, file_path: str) -> None:
+        MonthlyStorageBilling.generate_report(billing_objects, None, file_path)
 
-    def __log_report_generation(self, status, details):
+    def __log_report_generation(self, status: str, details: dict) -> None:
         print(f"Report Generation Status: {status}, Details: {details}")
 
-    def __generate_summary(self, usages):
+    def __generate_summary(self, usages) -> dict:
         summary = {
             "total_usages": usages.count(),
             "total_amount_tb": sum(usage.usage_tb for usage in usages),
@@ -72,21 +69,23 @@ class ReportGenerator:
         }
         return summary
 
-    def __calculate_usage_cost(self, usages: AllocationUsage) -> list:
-        calculated_costs = []
-        for usage in usages:
-            rate_category = ServiceRateCategory.current.for_model(
-                usage
-            ).first()
-            if rate_category:
-                cost = usage.usage_tb * rate_category.rate
-            else:
-                cost = 0
-            calculated_costs.append(
-                {
-                    "allocation_id": usage.allocation_id,
-                    "usage_tb": usage.usage_tb,
-                    "cost": cost,
-                }
+    def __calculate_usage_cost(self, usages) -> list:
+        
+        for billing_object in usages:
+            tier_name = "active" # billing_object.tier_name
+            model_name = billing_object.service_rate_category
+            billing_cycle = billing_object.billing_cycle
+            print(f"Calculating cost for Usage ID {billing_object.id}: Tier={tier_name}, Model={model_name}, Cycle={billing_cycle}")
+            rate_category = (
+                ServiceRateCategory.current_rates.all()
+                .for_tier(tier_name)
+                .for_cycle(billing_cycle)
+                .get()
             )
-        return calculated_costs
+            if rate_category:
+                billing_object.calculated_cost = (
+                    billing_object.usage_tb * rate_category.rate
+                )
+            else:
+                billing_object.calculated_cost = 0
+        return usages
