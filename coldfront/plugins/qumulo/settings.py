@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     "coldfront.core.allocation",
     "coldfront.core.billing",
     "coldfront.core.user",
-    "coldfront.core.service_rate_category",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

@@ -3,6 +3,7 @@ from freezegun import freeze_time
 import json
 from unittest import mock
 from django.test import TestCase
+from coldfront.plugins.integratedbilling.factories import ServiceRateCategoryFactory
 from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
 
 from coldfront.plugins.integratedbilling.tests.fixtures import (
@@ -18,6 +19,9 @@ class TestReportGenerator(TestCase):
     def setUp(self, mock_report_generator: mock.MagicMock) -> None:
         self.ingestion_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
         self.report_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
+        ServiceRateCategoryFactory(current_service_rate=True, archive_service=True)
+        ServiceRateCategoryFactory(current_service_rate=True, active_service=True)
+
         # source data setup Coldfront allocations with usages
         with freeze_time(self.ingestion_date):
             create_coldfront_allocations_with_usages()

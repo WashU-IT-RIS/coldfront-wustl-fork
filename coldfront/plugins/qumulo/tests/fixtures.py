@@ -120,12 +120,6 @@ def __create_ris_project_and_allocations(
 
     storage_allocation = storage_factory(project=project, **kwargs)
 
-    # AllocationAttributeFactory(
-    #     allocation=storage_allocation,
-    #     allocation_attribute_type__name="storage_filesystem_path",
-    #     value=storage_filesystem_path,
-    # )
-
     kwargs_allocation_attributes = {
         "billing_contact": project.pi.email,
         **kwargs,

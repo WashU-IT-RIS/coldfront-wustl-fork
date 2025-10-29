@@ -346,7 +346,7 @@ def create_coldfront_allocations_with_usages() -> None:
         value=36829437952,
     )
 
-    # inactive storage3 allocation
+    # pending storage3 allocation
     _, allocations = create_ris_project_and_allocations_storage3(
         storage_filesystem_path="/storage3/fs1/inactiveuser", pending=True
     )

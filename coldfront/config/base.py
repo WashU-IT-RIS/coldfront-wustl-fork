@@ -75,7 +75,6 @@ INSTALLED_APPS += [
     "coldfront.core.grant",
     "coldfront.core.publication",
     "coldfront.core.research_output",
-    "coldfront.core.service_rate_category",
 ]
 
 # ------------------------------------------------------------------------------
