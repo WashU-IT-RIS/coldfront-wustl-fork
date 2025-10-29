@@ -223,14 +223,18 @@ class MonthlyStorageBillingTests(TestCase):
             self.assertEqual(result, billing_entry)
         os.remove(template.name)
 
-    def test__get_fiscal_year(self):
+    def test__get_fiscal_year_by_delivery_date(self):
         # Patch datetime to June and July to test fiscal year logic
         with mock.patch("coldfront.core.billing.models.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2024, 6, 1)
-            fy = MonthlyStorageBilling._get_fiscal_year()
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 5, 1).date())
             self.assertEqual(fy, "FY24")
             mock_dt.now.return_value = datetime(2024, 7, 1)
-            fy = MonthlyStorageBilling._get_fiscal_year()
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 5, 1).date())
+            self.assertEqual(fy, "FY24")
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 6, 1).date())
+            self.assertEqual(fy, "FY25")
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 12, 1).date())
             self.assertEqual(fy, "FY25")
 
     def test_generate_report(self):
