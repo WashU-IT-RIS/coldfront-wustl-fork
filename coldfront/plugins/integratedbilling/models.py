@@ -30,6 +30,7 @@ class CurrentRatesManager(models.Manager):
 
 
 class ServiceRateCategory(TimeStampedModel):
+    tier_name = models.CharField(max_length=255)
     model_name = models.CharField(max_length=255)
     model_display_name = models.CharField(max_length=255)
     model_description = models.CharField(max_length=255)
