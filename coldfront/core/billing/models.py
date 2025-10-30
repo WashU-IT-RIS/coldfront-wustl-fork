@@ -15,7 +15,7 @@ class AllocationUsageQuerySet(models.QuerySet):
         return self.filter(usage_date=usage_date,
                            exempt=False,
                            billing_cycle="monthly",
-                           ).order_by()
+                           )
 
     def with_usage_date(self, usage_date):
         return self.filter(usage_date=usage_date)
@@ -140,6 +140,7 @@ class MonthlyStorageBilling(AllocationUsage):
 
     Additional Attributes Besides Those Inherited from AllocationUsage:
         *delivery_date (str): indicates the beginning date of the service for monthly billing (ex. 2024-05-01)
+        *billable_usage_tb (str): indicates the billable usage in TB after applying subsidised discount if applicable
         *tier (str): indicates the service tier of the allocation (ex. Active, Archive)
         *billing_unit (str): indicates the billing unit of the service (ex. TB)
         *unit_rate (str): indicates the unit rate of the service
@@ -238,7 +239,7 @@ class MonthlyStorageBilling(AllocationUsage):
             return
 
         spreadsheet_key = 1
-        document_date = datetime.now().date().strftime("%Y-%m-%d")
+        document_date = datetime.now().date().strftime("%m/%d/%Y")
         a_delivery_date = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d")
         fiscal_year = cls._get_fiscal_year_by_delivery_date(a_delivery_date)
         billing_month = a_delivery_date.strftime("%B")
@@ -254,10 +255,10 @@ class MonthlyStorageBilling(AllocationUsage):
                     storage_cluster=obj.storage_cluster,
                     tier=obj.tier,
                     service_rate_category=obj.service_rate_category,
-                    usage_tb=obj.usage_tb,
+                    billable_usage_tb=obj.billable_usage_tb,
                     unit_rate=obj.unit_rate,
                     billing_unit=obj.billing_unit,
-                    billing_amount=obj.billing_amount,
+                    billing_amount=round(float(obj.billing_amount), 2),
                     delivery_date=obj.delivery_date,
                     fileset_name=obj.fileset_name,
                     funding_number=obj.funding_number,

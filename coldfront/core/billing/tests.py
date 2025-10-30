@@ -188,14 +188,32 @@ class AllocationUsageQuerySetTest(TestCase):
 
 class MonthlyStorageBillingTests(TestCase):
     def setUp(self):
+        a_delivery_date = date(2024, 5, 1).strftime("%Y-%m-%d")
+        a_usage_date = date(2024, 6, 1)
         # Create a fake MonthlyStorageBilling object using AllocationUsageFactory
-        self.billing_obj = AllocationUsageFactory.build()
+        self.billing_obj1 = AllocationUsageFactory.build(
+            usage_date=a_usage_date
+        )
         # Add extra attributes for MonthlyStorageBilling
-        self.billing_obj.delivery_date = datetime.now().strftime("%Y-%m-%d")
-        self.billing_obj.tier = "Active"
-        self.billing_obj.billing_unit = "TB"
-        self.billing_obj.unit_rate = "10.00"
-        self.billing_obj.billing_amount = "100.00"
+        self.billing_obj1.delivery_date = a_delivery_date
+        self.billing_obj1.billable_usage_tb = self.billing_obj1.usage_tb
+        self.billing_obj1.tier = "Active"
+        self.billing_obj1.billing_unit = "TB"
+        self.billing_obj1.unit_rate = "10.00"
+        self.billing_obj1.billing_amount = "100.00"
+
+        # Create a fake MonthlyStorageBilling object using AllocationUsageFactory
+        self.billing_obj2 = AllocationUsageFactory.build(
+            usage_date=a_usage_date
+        )
+
+        # Add extra attributes for MonthlyStorageBilling
+        self.billing_obj2.delivery_date = a_delivery_date
+        self.billing_obj2.billable_usage_tb = self.billing_obj2.usage_tb
+        self.billing_obj2.tier = "Active"
+        self.billing_obj2.billing_unit = "TB"
+        self.billing_obj2.unit_rate = "10.00"
+        self.billing_obj2.billing_amount = "314.159265"
 
     def test__copy_template_headers_to_file(self):
         # Create a temp template file with 5 header lines
@@ -245,19 +263,14 @@ class MonthlyStorageBillingTests(TestCase):
             entry_template = (
                 "{spreadsheet_key},{document_date},{fiscal_year},{billing_month},"
                 "{sponsor_pi},{storage_cluster},{tier},{service_rate_category},"
-                "{usage_tb},{unit_rate},{billing_unit},{billing_amount},"
+                "{billable_usage_tb},{unit_rate},{billing_unit},{billing_amount},"
                 "{delivery_date},{fileset_name},{funding_number}"
             )
             template.writelines(headers)
             template.write(entry_template + "\n")
             template.flush()
-            # Set delivery_date for billing_obj to match template
-            self.billing_obj.delivery_date = "2024-05-01"
-            self.billing_obj.tier = "Active"
-            self.billing_obj.billing_unit = "TB"
-            self.billing_obj.unit_rate = "10.00"
-            self.billing_obj.billing_amount = "100.00"
-            billing_objects = [self.billing_obj]
+
+            billing_objects = [self.billing_obj1, self.billing_obj2]
             MonthlyStorageBilling.generate_report(
                 billing_objects, template.name, output.name
             )
@@ -267,9 +280,11 @@ class MonthlyStorageBillingTests(TestCase):
             self.assertEqual([l.strip() for l in lines[:5]], [h.strip() for h in headers])
             # Check billing entry line
             entry_line = lines[5].strip()
-            self.assertIn(self.billing_obj.sponsor_pi, entry_line)
-            self.assertIn(self.billing_obj.storage_cluster, entry_line)
+            self.assertIn(self.billing_obj1.sponsor_pi, entry_line)
+            self.assertIn(self.billing_obj1.storage_cluster, entry_line)
             self.assertIn("Active", entry_line)
             self.assertIn("TB", entry_line)
+            entry_line = lines[6].strip()
+            self.assertIn(",314.16,", entry_line)
         os.remove(template.name)
         os.remove(output.name)
