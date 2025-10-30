@@ -78,14 +78,18 @@ class ItsmUsageIngestor:
                 source=self.source,
                 usage_date=datetime.strptime(
                     usage.get("provision_usage_creation_date"), "%Y-%m-%dT%H:%M:%S.%fZ"
-                ).replace(hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc).date(),
+                )
+                .replace(
+                    hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+                )
+                .date(),
                 defaults={
                     "sponsor_pi": usage.get("sponsor"),
                     "billing_contact": billing_contact,
                     "fileset_name": usage.get("fileset_name"),
                     "service_rate_category": usage.get("service_rate_category"),
                     "usage_tb": amount_tb,
-                    "funding_number": usage.get("funding_number") or "NOT PROVIDED",
+                    "funding_number": self.__get_funding_number(usage),
                     "exempt": usage.get("exempt"),
                     "subsidized": usage.get("subsidized"),
                     "is_condo_group": usage.get("is_condo_group"),
@@ -98,3 +102,7 @@ class ItsmUsageIngestor:
             saved_usages.append(record)
 
         return saved_usages
+
+    # TODO: should we ask for funding number if not present from Research Facilitators?
+    def __get_funding_number(self, usage: dict) -> str:
+        return usage.get("funding_number") or ""

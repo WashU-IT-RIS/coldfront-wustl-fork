@@ -70,8 +70,7 @@ class ColdfrontUsageIngestor:
                     "fileset_name": allocation_with_usage.storage_filesystem_path,
                     "service_rate_category": allocation_with_usage.service_rate_category,
                     "usage_tb": amount_tb,
-                    "funding_number": allocation_with_usage.funding_number
-                    or "NOT PROVIDED",
+                    "funding_number": allocation_with_usage.cost_center,
                     "exempt": self.__to_boolean(
                         allocation_with_usage.billing_exempt, default=None
                     ),
@@ -118,7 +117,7 @@ class ColdfrontUsageIngestor:
             "is_condo_group",
             "billing_contact",
             "service_rate_category",
-            "funding_number",
+            "cost_center",
             "billing_exempt",
             "subsidized",
             "storage_quota",

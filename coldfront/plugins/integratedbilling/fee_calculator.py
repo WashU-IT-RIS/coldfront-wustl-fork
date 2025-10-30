@@ -45,6 +45,9 @@ def get_billing_objects(
 
         billing_object.calculated_cost = calculate_fee(billing_object, rate_category)
 
+        if billing_object.calculated_cost <= Decimal("0.00"):
+            continue
+
         billing_object.delivery_date = __get_delivery_date(
             billing_object.usage_date
         )  # (str): indicates the beginning date of the service for monthly billing (ex. 2024-05-01)
@@ -68,7 +71,7 @@ def get_billing_objects(
 def calculate_fee(
     billing_object: MonthlyStorageBilling, rate_category: ServiceRateCategory
 ) -> float:
-    return billing_object.billable_usage_tb * rate_category.rate
+    return round(billing_object.billable_usage_tb * rate_category.rate, 2)
 
 
 def __get_delivery_date(usage_date: date) -> str:
