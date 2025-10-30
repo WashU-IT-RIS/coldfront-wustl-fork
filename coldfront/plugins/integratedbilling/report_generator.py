@@ -1,4 +1,4 @@
-import json
+import datetime
 from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.coldfront_usage_ingestor import (
     ColdfrontUsageIngestor,
@@ -7,7 +7,7 @@ from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmC
 from coldfront.plugins.integratedbilling.itsm_usage_ingestor import (
     ItsmUsageIngestor,
 )
-from coldfront.plugins.integratedbilling.models import ServiceRateCategory
+from coldfront.plugins.integratedbilling.rate_calculator import get_billing_objects
 
 
 class ReportGenerator:
@@ -16,6 +16,7 @@ class ReportGenerator:
         self.client = BillingItsmClient(usage_date)
         self.itsm_usage_ingestion = ItsmUsageIngestor(self.client)
         self.coldfront_usage_ingestion = ColdfrontUsageIngestor(usage_date)
+        self.report_date = datetime.date.today().strftime("%Y-%m-%d")
 
     def generate(self, ingest_usages=True) -> None:
         if ingest_usages:
@@ -69,41 +70,6 @@ class ReportGenerator:
         }
         return summary
 
-    def __calculate_usage_cost(self, usages) -> list:
-        billing_objects = []
-        for billing_object in usages:
-            tier_name = "active"  # billing_object.tier_name
-            model_name = billing_object.service_rate_category
-            billing_cycle = billing_object.billing_cycle
-            print(
-                f"Calculating cost for Usage ID {billing_object.id}: Tier={tier_name}, Model={model_name}, Cycle={billing_cycle}"
-            )
-            rate_category = (
-                ServiceRateCategory.current_rates.all()
-                .for_tier(tier_name)
-                .for_cycle(billing_cycle)
-                .get()
-            )
-            if rate_category:
-                billing_object.calculated_cost = (
-                    billing_object.usage_tb * rate_category.rate
-                )
-            else:
-                billing_object.calculated_cost = 0
-
-            billing_object.delivery_date = "2024-05-01"  # (str): indicates the beginning date of the service for monthly billing (ex. 2024-05-01)
-            billing_object.tier = (
-                rate_category.tier_name
-            )  # (str): indicates the service tier of the allocation (ex. Active, Archive)
-            billing_object.billing_unit = (
-                rate_category.unit
-            )  # (str): indicates the billing unit of the service (ex. TB)
-            billing_object.unit_rate = (
-                rate_category.rate
-            )  # (str): indicates the unit rate of the service
-            billing_object.billing_amount = (
-                billing_object.calculated_cost
-            )  # (str): indicates the total dollar amount of the service for the monthly billing
-            billing_objects.append(billing_object)
-        breakpoint()
+    def __calculate_usage_cost(self, usages) -> list[MonthlyStorageBilling]:
+        billing_objects = get_billing_objects(usages, self.report_date)
         return billing_objects

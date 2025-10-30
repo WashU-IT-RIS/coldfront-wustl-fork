@@ -48,8 +48,11 @@ class TestReportGenerator(TestCase):
 
         self.assertIsInstance(report_data, list)
         self.assertGreater(len(report_data), 0)
-        first_row = report_data[0]
-        self.assertIsInstance(first_row, dict)
+        first_row = report_data[0].split(",")
+        self.assertIn("allocation_id", first_row)
+        self.assertIn("project_name", first_row)
+        self.assertIn("sponsor_pi", first_row)
+        self.assertIn("billing_contact", first_row) 
         self.assertIn("date", first_row)
         self.assertIn("storage_cluster", first_row)
         self.assertIn("usage_tb", first_row)
