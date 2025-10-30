@@ -49,6 +49,7 @@ class AllocationUsageQuerySetTest(TestCase):
         self.fileset1 = "filesetA"
         self.fileset2 = "filesetB"
         self.fileset3 = "filesetC"
+        self.fileset4 = "filesetD"
         # Create various AllocationUsage instances
         self.alloc1 = AllocationUsageFactory(
             usage_date=self.usage_date,
@@ -96,6 +97,16 @@ class AllocationUsageQuerySetTest(TestCase):
             subsidized=False,
         )
 
+        self.alloc6 = AllocationUsageFactory(
+            usage_date=self.usage_date,
+            exempt=False,
+            billing_cycle="monthly",
+            service_rate_category="condo",
+            sponsor_pi=self.pi2,
+            fileset_name=self.fileset4,
+            subsidized=False,
+        )
+
     def test_monthly_billable(self):
         qs = AllocationUsage.objects.monthly_billable(self.usage_date)
         self.assertIn(self.alloc1, qs)
@@ -106,7 +117,7 @@ class AllocationUsageQuerySetTest(TestCase):
 
     def test_with_usage_date(self):
         qs = AllocationUsage.objects.with_usage_date(self.usage_date)
-        self.assertEqual(qs.count(), 5)
+        self.assertEqual(qs.count(), 6)
 
     def test_not_exempt(self):
         qs = AllocationUsage.objects.not_exempt()

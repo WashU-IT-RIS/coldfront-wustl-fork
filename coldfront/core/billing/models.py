@@ -13,8 +13,11 @@ class AllocationUsageQuerySet(models.QuerySet):
 
     def monthly_billable(self, usage_date):
         return self.filter(usage_date=usage_date,
+                           usage_tb__gt=0,
                            exempt=False,
                            billing_cycle="monthly",
+                           ).exclude(
+                               service_rate_category="condo",
                            )
 
     def with_usage_date(self, usage_date):
@@ -33,6 +36,9 @@ class AllocationUsageQuerySet(models.QuerySet):
 
     def by_pi(self, sponsor_pi):
         return self.filter(sponsor_pi=sponsor_pi)
+
+    def only_positive_usage(self):
+        return self.filter(usage_tb__gt=0)
 
 
     # From the queryset of monthly_billable consumption allocations
@@ -93,7 +99,7 @@ class AllocationUsage(TimeStampedModel):
         billing_contact (str): indicates who is the main contact for billing issues
         fileset_name (str): represents the commonly used name of the allocation
         service_rate_category (str): indicates the billing rate of the allocation (ex. consumption, subscription, condo)
-        usage_tb (str): indicates the consumption of the allocation in TB at the point of time, usage_date
+        usage_tb (decimal): indicates the consumption of the allocation in TB at the point of time, usage_date
         funding_number (str): indicates the funding source aka cost center number
         exempt (bool): indicates if the fee is waived by RIS
         subsidized (bool): indicates if the allocation with consumption rate will receive 5TB discount
