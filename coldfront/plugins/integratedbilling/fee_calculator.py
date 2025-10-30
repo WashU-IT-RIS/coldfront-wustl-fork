@@ -15,11 +15,19 @@ def get_billing_objects(
     billing_objects = []
     for billing_object in usages:
         # print(f"Processing Usage ID {billing_object.id} with {billing_object.usage_tb} TB used.")
+        billing_object.billable_usage_tb = billing_object.usage_tb
         if billing_object.subsidized:
-            billing_object.usage_tb = max(
+            billing_object.billable_usage_tb = max(
                 Decimal("0.0"), (billing_object.usage_tb - SUBSIDIZED_AMOUNT_TB)
             )
-        if billing_object.usage_tb == Decimal("0.0"):
+
+        if billing_object.billable_usage_tb == Decimal("0.0"):
+            continue
+
+        if billing_object.billable_usage_tb < Decimal("0.0"):
+            print(
+                f"Warning: Usage TB for AllocationUsage ID {billing_object.id} is negative. Skipping."
+            )
             continue
 
         tier_name = "active"  # billing_object.tier
@@ -33,7 +41,7 @@ def get_billing_objects(
             .for_model(model_name)
             .get()
         )
-        billing_object.calculated_cost = __calculate_rate(billing_object, rate_category)
+        billing_object.calculated_cost = __calculate_fee(billing_object, rate_category)
 
         billing_object.delivery_date = report_date_str  # (str): indicates the beginning date of the service for monthly billing (ex. 2024-05-01)
         billing_object.tier = (
@@ -53,7 +61,7 @@ def get_billing_objects(
     return billing_objects
 
 
-def __calculate_rate(
+def __calculate_fee(
     billing_object: MonthlyStorageBilling, rate_category: ServiceRateCategory
 ) -> float:
-    return billing_object.usage_tb * rate_category.rate
+    return billing_object.billable_usage_tb * rate_category.rate

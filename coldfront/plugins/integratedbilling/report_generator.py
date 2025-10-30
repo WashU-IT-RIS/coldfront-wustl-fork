@@ -7,7 +7,7 @@ from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmC
 from coldfront.plugins.integratedbilling.itsm_usage_ingestor import (
     ItsmUsageIngestor,
 )
-from coldfront.plugins.integratedbilling.rate_calculator import get_billing_objects
+from coldfront.plugins.integratedbilling.fee_calculator import get_billing_objects
 
 
 class ReportGenerator:
@@ -35,7 +35,7 @@ class ReportGenerator:
         filtered_allocation_usages.set_and_validate_all_subsidized()
 
         # calculate costs
-        calculated_usage_costs = self.__calculate_usage_cost(filtered_allocation_usages)
+        calculated_usage_costs = self.__calculate_usage_fee(filtered_allocation_usages)
 
         self.__save_report(
             calculated_usage_costs, f"billing_report_{self.client.usage_date}.csv"
@@ -52,8 +52,10 @@ class ReportGenerator:
             self.client.usage_date,
         )
         return monthly_usages
-    
-    def __calculate_usage_cost(self, usages) -> list[MonthlyStorageBilling]:
+
+    def __calculate_usage_fee(
+        self, usages: list[AllocationUsage]
+    ) -> list[MonthlyStorageBilling]:
         billing_objects = get_billing_objects(usages, self.report_date)
         return billing_objects
 
@@ -61,7 +63,9 @@ class ReportGenerator:
         print("Report not sent since this is a placeholder method.")
 
     def __save_report(self, billing_objects: list, file_path: str) -> None:
-        MonthlyStorageBilling.generate_report(billing_objects, None, file_path)
+        MonthlyStorageBilling.generate_report(
+            billing_objects, template_path=None, output_path=file_path
+        )
 
     def __log_report_generation(self, status: str, details: dict) -> None:
         print(f"Report Generation Status: {status}, Details: {details}")

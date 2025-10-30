@@ -22,7 +22,7 @@ class TestReportGenerator(TestCase):
         ServiceRateCategoryFactory(current_service_rate=True, archive_service=True)
         ServiceRateCategoryFactory(current_service_rate=True, active_service=True)
 
-        # source data setup Coldfront allocations with usages
+        # source data setup Coldfront allocations with usages recorded on the first day of the month
         with freeze_time(self.ingestion_date):
             create_coldfront_allocations_with_usages()
 

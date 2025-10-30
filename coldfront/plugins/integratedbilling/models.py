@@ -5,6 +5,7 @@ from simple_history.models import HistoricalRecords
 
 
 class ServiceRateCategoryQuerySet(models.QuerySet):
+    # TODO: fast follow, it should use the usage_date instead of today's date
     def current_rates(self):
         today = date.today()
         return self.filter(start_date__lte=today, end_date__gte=today)
