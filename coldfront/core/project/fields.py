@@ -12,6 +12,11 @@ class PrincipalInvestigatorField(forms.CharField):
     
     def to_python(self, value):
         return User.objects.get_or_create(username=value)[0]
+    
+    def prepare_value(self, value):
+        if value is None:
+            return ""
+        return User.objects.get(pk=value).username
 
     def clean(self, value):
         try:
