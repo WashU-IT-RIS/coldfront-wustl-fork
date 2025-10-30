@@ -202,28 +202,31 @@ class MonthlyStorageBilling(AllocationUsage):
             return None 
 
     @classmethod
-    def _get_fiscal_year(cls):
+    def _get_fiscal_year_by_delivery_date(cls, delivery_date):
         """
-        Given a date, return the fiscal year as an integer.
-        Fiscal year starts on July 1st.
+        Given a date, return the fiscal year as a combined string of
+        'FY' and the last 2 digit of the year.
+        Fiscal year starts on July 1st,
+        where the service delivery starts on June 1st.
         """
-        month = datetime.now().month
-        fiscal_year = datetime.now().year
-        if month >= 7:
-            fiscal_year = datetime.now().year + 1
+
+        month = delivery_date.month
+        fiscal_year = delivery_date.year
+        if month >= 6:
+            fiscal_year = delivery_date.year + 1
 
         return "FY" + str(fiscal_year)[-2:]
 
     @classmethod
-    def generate_report(cls, billing_objects, template_path, output_path):
+    def generate_report(cls, billing_objects, template_path=None, output_path=None):
         """
         Apply a list of monthly storage billing objects to the template and write to a CSV file.
         """
         # Read the template header
-        if not template_path:
+        if template_path is None:
             template_path = "./coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
 
-        if not output_path:
+        if output_path is None:
             output_path = "./billing_report.csv"
 
         cls._copy_template_headers_to_file(template_path, output_path)
@@ -236,8 +239,9 @@ class MonthlyStorageBilling(AllocationUsage):
 
         spreadsheet_key = 1
         document_date = datetime.now().date().strftime("%Y-%m-%d")
-        fiscal_year = cls._get_fiscal_year()
-        billing_month = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d").strftime("%B")
+        a_delivery_date = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d")
+        fiscal_year = cls._get_fiscal_year_by_delivery_date(a_delivery_date)
+        billing_month = a_delivery_date.strftime("%B")
         with open(output_path, "a") as output_file:
             for obj in billing_objects:
                 # Replace placeholders in the template with actual values
