@@ -52,6 +52,10 @@ class ReportGenerator:
             self.client.usage_date,
         )
         return monthly_usages
+    
+    def __calculate_usage_cost(self, usages) -> list[MonthlyStorageBilling]:
+        billing_objects = get_billing_objects(usages, self.report_date)
+        return billing_objects
 
     def __send_report(self, report_data):
         print("Report not sent since this is a placeholder method.")
@@ -69,7 +73,3 @@ class ReportGenerator:
             "total_subsidized": sum(1 for usage in usages if usage.subsidized),
         }
         return summary
-
-    def __calculate_usage_cost(self, usages) -> list[MonthlyStorageBilling]:
-        billing_objects = get_billing_objects(usages, self.report_date)
-        return billing_objects
