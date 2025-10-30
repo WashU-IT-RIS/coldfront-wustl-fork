@@ -34,7 +34,7 @@ class ServiceRateCategory(TimeStampedModel):
     model_description = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
-    rate = models.IntegerField()
+    rate = models.DecimalField(max_digits=10, decimal_places=2)
     unit_rate = models.IntegerField()
     unit = models.CharField(max_length=255)
     cycle = models.CharField(max_length=255)
