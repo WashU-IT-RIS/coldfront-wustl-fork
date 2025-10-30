@@ -16,7 +16,6 @@ class ReportGenerator:
         self.client = BillingItsmClient(usage_date)
         self.itsm_usage_ingestion = ItsmUsageIngestor(self.client)
         self.coldfront_usage_ingestion = ColdfrontUsageIngestor(usage_date)
-        self.report_date = datetime.date.today().strftime("%Y-%m-%d")
 
     def generate(self, ingest_usages=True) -> None:
         if ingest_usages:
@@ -56,7 +55,7 @@ class ReportGenerator:
     def __calculate_usage_fee(
         self, usages: list[AllocationUsage]
     ) -> list[MonthlyStorageBilling]:
-        billing_objects = get_billing_objects(usages, self.report_date)
+        billing_objects = get_billing_objects(usages)
         return billing_objects
 
     def __send_report(self, report_data):

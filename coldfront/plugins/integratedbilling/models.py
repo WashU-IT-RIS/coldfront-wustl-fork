@@ -5,10 +5,8 @@ from simple_history.models import HistoricalRecords
 
 
 class ServiceRateCategoryQuerySet(models.QuerySet):
-    # TODO: fast follow, it should use the usage_date instead of today's date
-    def current_rates(self):
-        today = date.today()
-        return self.filter(start_date__lte=today, end_date__gte=today)
+    def for_date(self, usage_date: date) -> models.QuerySet:
+        return self.filter(start_date__lte=usage_date, end_date__gte=usage_date)
 
     def for_model(self, model_name: str) -> models.QuerySet:
         return self.filter(model_name=model_name)
@@ -18,14 +16,6 @@ class ServiceRateCategoryQuerySet(models.QuerySet):
 
     def for_cycle(self, cycle: str) -> models.QuerySet:
         return self.filter(cycle=cycle)
-
-
-class CurrentRatesManager(models.Manager):
-    def get_queryset(self) -> ServiceRateCategoryQuerySet:
-        today = date.today()
-        return ServiceRateCategoryQuerySet(self.model, using=self._db).filter(
-            start_date__lte=today, end_date__gte=today
-        )
 
 
 class ServiceRateCategory(TimeStampedModel):
@@ -41,7 +31,7 @@ class ServiceRateCategory(TimeStampedModel):
     cycle = models.CharField(max_length=255)
 
     objects = models.Manager()
-    current_rates = CurrentRatesManager()
+    rates = ServiceRateCategoryQuerySet.as_manager()
     history = HistoricalRecords()
 
     class Meta:
