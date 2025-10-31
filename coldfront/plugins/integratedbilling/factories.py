@@ -35,10 +35,10 @@ class ServiceRateCategoryFactory(DjangoModelFactory):
         )
         current_service_rate = factory.Trait(
             start_date=factory.LazyFunction(
-                lambda: date.today().replace(day=1, month=1)
+                lambda: date(2025, 9, 1)
             ),
             end_date=factory.LazyFunction(
-                lambda: date.today().replace(day=31, month=12)
+                lambda: date(2026, 6, 30)
             ),
         )
         previous_service_rate = factory.Trait(

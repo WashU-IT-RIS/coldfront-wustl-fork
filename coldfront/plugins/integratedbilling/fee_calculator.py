@@ -35,8 +35,9 @@ def get_billing_objects(
         model_name = "consumption"  # billing_object.service_rate_category
         billing_cycle = billing_object.billing_cycle
 
+        delivery_date = __get_delivery_date(billing_object.usage_date)
         rate_category = (
-            ServiceRateCategory.rates.for_date(billing_object.usage_date)
+            ServiceRateCategory.rates.for_date(delivery_date)
             .for_tier(tier_name)
             .for_cycle(billing_cycle)
             .for_model(model_name)
@@ -48,8 +49,8 @@ def get_billing_objects(
         if billing_object.calculated_cost <= Decimal("0.00"):
             continue
 
-        billing_object.delivery_date = __get_delivery_date(
-            billing_object.usage_date
+        billing_object.delivery_date = delivery_date.strftime(
+            "%Y-%m-%d"
         )  # (str): indicates the beginning date of the service for monthly billing (ex. 2024-05-01)
         billing_object.tier = (
             rate_category.tier_name
@@ -75,8 +76,8 @@ def calculate_fee(
     return round(billing_object.billable_usage_tb * rate_category.rate, 2)
 
 
-def __get_delivery_date(usage_date: date) -> str:
+def __get_delivery_date(usage_date: date) -> date:
     first_of_previous_month = (usage_date.replace(day=1) - timedelta(days=1)).replace(
         day=1
     )
-    return first_of_previous_month.strftime("%Y-%m-%d")
+    return first_of_previous_month

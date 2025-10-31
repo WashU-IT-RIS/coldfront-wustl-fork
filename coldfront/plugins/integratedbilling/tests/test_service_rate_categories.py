@@ -70,7 +70,6 @@ class TestServiceRateCategories(TestCase):
             .for_model(model_name)
             .for_cycle(cycle)
         )
-        breakpoint()
         self.assertGreater(categories.count(), 0)  # Ensure at least one match exists
         for category in categories:
             assert category.model_name == model_name
