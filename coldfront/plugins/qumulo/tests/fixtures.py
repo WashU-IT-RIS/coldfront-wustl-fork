@@ -1,4 +1,7 @@
+from datetime import datetime, timezone
 from typing import Any, Callable, Tuple, Union
+
+import factory
 
 from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import Project, ProjectAttributeType
@@ -240,21 +243,36 @@ def _create_allocations_attribute_for_storage_allocation(
     **kwargs: dict[str, Any],
 ) -> None:
     # TODO refactor to use a dataclass or similar for options
+    billing_startdate = factory.fuzzy.FuzzyDateTime(start_dt=datetime.now(timezone.utc))
     storage_allocation_attribute_names = [
         ("storage_name", kwargs.get("storage_name")),
-        ("storage_ticket", kwargs.get("storage_ticket", "ITSD-22222")),
+        (
+            "storage_ticket",
+            kwargs.get("storage_ticket", factory.Sequence(lambda n: f"ITSD-{n}")),
+        ),
         ("storage_quota", kwargs.get("storage_quota", 5)),
         ("storage_protocols", kwargs.get("storage_protocols", "SMB")),
         ("storage_filesystem_path", storage_filesystem_path),
         ("storage_export_path", storage_filesystem_path),
-        ("cost_center", kwargs.get("cost_center", "COST-12345")),
-        ("department_number", kwargs.get("department_number", "Dept-67890")),
+        (
+            "cost_center",
+            kwargs.get("cost_center", factory.Sequence(lambda n: f"COST-{n}")),
+        ),
+        (
+            "department_number",
+            kwargs.get("department_number", factory.Sequence(lambda n: f"Dept-{n}")),
+        ),
         ("billing_contact", kwargs.get("billing_contact", "")),
         ("service_rate_category", kwargs.get("service_rate_category", "consumption")),
         ("secure", kwargs.get("secure", "Yes")),
-        ("audit", kwargs.get("audit", "Yes/No")),
-        ("billing_startdate", kwargs.get("billing_startdate", "Date")),
-        ("sponsor_department_number", kwargs.get("sponsor_department_number", "Text")),
+        ("audit", kwargs.get("audit", "Yes")),
+        ("billing_startdate", kwargs.get("billing_startdate", billing_startdate)),
+        (
+            "sponsor_department_number",
+            kwargs.get(
+                "sponsor_department_number", factory.Sequence(lambda n: f"Dept-{n}")
+            ),
+        ),
         ("billing_exempt", kwargs.get("billing_exempt", "No")),
         ("billing_cycle", kwargs.get("billing_cycle", "monthly")),
         ("subsidized", kwargs.get("subsidized", "No")),
