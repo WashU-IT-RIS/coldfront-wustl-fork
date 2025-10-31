@@ -104,7 +104,7 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="condo",
             sponsor_pi=self.pi2,
             fileset_name=self.fileset4,
-            subsidized=False,
+            subsidized=False
         )
 
     def test_monthly_billable(self):
@@ -150,6 +150,14 @@ class AllocationUsageQuerySetTest(TestCase):
         self.assertNotIn(self.alloc3, qs)
         self.assertNotIn(self.alloc4, qs)
         self.assertNotIn(self.alloc5, qs)
+
+    def test_manually_exempt_fileset(self):
+        qs = AllocationUsage.objects.manually_exempt_fileset(self.fileset1)
+        self.assertNotIn(self.alloc1, qs)
+        self.assertIn(self.alloc2, qs)
+        self.assertNotIn(self.alloc3, qs)
+        self.assertIn(self.alloc4, qs)
+        self.assertIn(self.alloc5, qs)
 
     def test__count_subsidized_by_pi(self):
         qs = AllocationUsage.objects.monthly_billable(self.usage_date).consumption()
