@@ -17,7 +17,7 @@ class Command(BaseCommand):
             rate=6.50,
             unit_rate="1",
             unit="TB",
-            cycle="month",
+            cycle="monthly",
         )
 
         ServiceRateCategory.objects.update_or_create(
@@ -29,5 +29,5 @@ class Command(BaseCommand):
             rate=3.15,
             unit_rate="1",
             unit="TB",
-            cycle="month",
+            cycle="monthly",
         )
