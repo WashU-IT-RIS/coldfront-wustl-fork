@@ -19,6 +19,7 @@ from coldfront.core.test_helpers.factories import (
     ResourceFactory,
     ResourceTypeFactory,
     AllocationUserFactory,
+    UserFactory,
 )
 
 from coldfront.core.test_helpers.factories import field_of_science_provider
@@ -40,19 +41,21 @@ def create_metadata_for_testing() -> None:
 
 def create_ris_project_and_allocations_storage2(
     storage_filesystem_path: str,
+    pi_username: str = None,
     **kwargs: dict[str, Any],
 ) -> Tuple[Project, dict[str, Allocation]]:
     return __create_ris_project_and_allocations(
-        Storage2Factory, storage_filesystem_path, **kwargs
+        Storage2Factory, storage_filesystem_path, pi_username=pi_username, **kwargs
     )
 
 
 def create_ris_project_and_allocations_storage3(
     storage_filesystem_path: str,
+    pi_username: str = None,
     **kwargs: dict[str, Any],
 ) -> Tuple[Project, dict[str, Allocation]]:
     return __create_ris_project_and_allocations(
-        Storage3Factory, storage_filesystem_path, **kwargs
+        Storage3Factory, storage_filesystem_path, pi_username=pi_username, **kwargs
     )
 
 
@@ -98,9 +101,11 @@ def create_attribute_types_for_ris_allocations() -> None:
 def __create_ris_project_and_allocations(
     storage_factory: Callable[[], Union[Storage2Factory, Storage3Factory]],
     storage_filesystem_path: str,
+    pi_username: str = None,
     **kwargs: dict[str, Any],
 ) -> Tuple[Project, dict[str, Allocation]]:
-    project = RisProjectFactory()
+    pi = UserFactory(username=pi_username) if pi_username else UserFactory()
+    project = RisProjectFactory(pi=pi)
     ProjectUserFactory(
         project=project,
         user=project.pi,
