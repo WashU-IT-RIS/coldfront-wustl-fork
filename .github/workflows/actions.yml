@@ -26,4 +26,5 @@ jobs:
         env:
           ENVIRONMENT: test
           PLUGIN_QUMULO: True
+          PLUGIN_INTEGRATEDBILLING: True
           QUMULO_INFO: '{"Storage2": {"path": "/storage2-dev/fs1", "host": "foo","port": "8000","user": "admin","pass": "bar" },"Storage3": {"host": "example.com","port": "8000","user": "baz","pass": "bar", "path": "/test/etc"}}'

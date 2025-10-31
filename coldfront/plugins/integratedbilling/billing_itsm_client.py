@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any
 
 from coldfront.plugins.qumulo.services.itsm.itsm_client_handler import ItsmClientHandler
@@ -24,8 +24,10 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
 
 # helper function to get the default billing date (first day of the current month)
 def _get_default_usage_date() -> date:
-    today = datetime.now().date()
-    return today.replace(day=1)
+    today = datetime.now()
+    return today.replace(
+        day=1, hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+    ).date()
 
 
 ITSM_ACTIVE_ALLOCATION_SERVICE_ID = (

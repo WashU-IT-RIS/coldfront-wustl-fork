@@ -20976,25 +20976,6 @@
         "_provision_usage": 4337109
     },
     {
-        "id": 15001530,
-        "sponsor": "rouse",
-        "fileset_name": "rouse_active",
-        "service_rate_category": "consumption",
-        "amount": "22738981776KB",
-        "funding_number": "null",
-        "exempt": true,
-        "subsidized": true,
-        "is_condo_group": false,
-        "parent_id": null,
-        "quota": "10T",
-        "billing_cycle": "monthly",
-        "billing_contact": "cspohl",
-        "status": "active",
-        "provision_usage_creation_date": "2025-10-01T00:00:00.000Z",
-        "_service_provision": 15001530,
-        "_provision_usage": 4337110
-    },
-    {
         "id": 15001412,
         "sponsor": "wang.c",
         "fileset_name": "wang.c_active",
