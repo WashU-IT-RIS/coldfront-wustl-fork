@@ -17,7 +17,7 @@ class ReportGenerator:
         self.itsm_usage_ingestion = ItsmUsageIngestor(self.client)
         self.coldfront_usage_ingestion = ColdfrontUsageIngestor(usage_date)
 
-    def generate(self, ingest_usages=True) -> None:
+    def generate(self, ingest_usages=True, dry_run=False) -> None:
         if ingest_usages:
             success = self.itsm_usage_ingestion.process_usages()
             if not success:
@@ -39,10 +39,15 @@ class ReportGenerator:
         self.__save_report(
             calculated_usage_costs, f"billing_report_{self.client.usage_date}.csv"
         )
-        self.__send_report(calculated_usage_costs)
 
         summary = self.__generate_summary(filtered_allocation_usages)
         self.__log_report_generation(status="Success", details=summary)
+
+        if dry_run:
+            return False
+
+        self.__send_report(calculated_usage_costs)
+
         return True
 
     # Private methods
@@ -57,9 +62,6 @@ class ReportGenerator:
     ) -> list[MonthlyStorageBilling]:
         billing_objects = get_billing_objects(usages)
         return billing_objects
-
-    def __send_report(self, report_data):
-        print("Report not sent since this is a placeholder method.")
 
     def __save_report(self, billing_objects: list, file_path: str) -> None:
         MonthlyStorageBilling.generate_report(
@@ -76,3 +78,6 @@ class ReportGenerator:
             "total_subsidized": sum(1 for usage in usages if usage.subsidized),
         }
         return summary
+
+    def __send_report(self, report_data):
+        print("Report not sent since this is a placeholder method.")
