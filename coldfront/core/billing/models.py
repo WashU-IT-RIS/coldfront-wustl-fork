@@ -84,8 +84,8 @@ class AllocationUsageQuerySet(models.QuerySet):
         return False
 
     def manually_exempt_fileset(self, fileset_name):
-        return self.filter(
-            fileset_name!=fileset_name,
+        return self.exclude(
+            fileset_name=fileset_name,
         )
 
 
