@@ -127,6 +127,7 @@ def __create_ris_project_and_allocations(
 
     kwargs_allocation_attributes = {
         "billing_contact": project.pi.email,
+        "storage_name": project.pi.username,
         **kwargs,
     }
     _create_allocations_attribute_for_storage_allocation(
@@ -240,7 +241,7 @@ def _create_allocations_attribute_for_storage_allocation(
 ) -> None:
     # TODO refactor to use a dataclass or similar for options
     storage_allocation_attribute_names = [
-        ("storage_name", kwargs.get("storage_name", "Text")),
+        ("storage_name", kwargs.get("storage_name")),
         ("storage_ticket", kwargs.get("storage_ticket", "ITSD-22222")),
         ("storage_quota", kwargs.get("storage_quota", 5)),
         ("storage_protocols", kwargs.get("storage_protocols", "SMB")),

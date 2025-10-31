@@ -56,18 +56,20 @@ class ColdfrontUsageIngestor:
         self, active_allocations_with_usages: QuerySet
     ) -> list[AllocationUsage]:
         saved_usages = []
+
         for allocation_with_usage in active_allocations_with_usages:
             amount_tb = self.__convert_to_amount_usage_to_tb(
                 allocation_with_usage.usage_bytes
             )
             record = AllocationUsage.objects.update_or_create(
-                external_key=allocation_with_usage.pk,
+                fileset_name=allocation_with_usage.storage_name,
                 source=self.source,
                 usage_date=self.usage_date.date(),
                 defaults={
-                    "sponsor_pi": allocation_with_usage.project.pi,
+                    "external_key": allocation_with_usage.pk,
+                    "sponsor_pi": allocation_with_usage.project.pi.username,
                     "billing_contact": allocation_with_usage.billing_contact,
-                    "fileset_name": allocation_with_usage.storage_filesystem_path,
+                    "fileset_name": allocation_with_usage.storage_name,
                     "service_rate_category": allocation_with_usage.service_rate_category,
                     "usage_tb": amount_tb,
                     "funding_number": allocation_with_usage.cost_center,
@@ -113,7 +115,7 @@ class ColdfrontUsageIngestor:
     def __get_subqueries(self, usage_date: datetime) -> dict:
         sub_queries = {}
         for key in [
-            "storage_filesystem_path",
+            "storage_name",
             "is_condo_group",
             "billing_contact",
             "service_rate_category",

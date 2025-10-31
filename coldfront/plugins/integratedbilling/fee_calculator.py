@@ -63,6 +63,7 @@ def get_billing_objects(
         billing_object.billing_amount = (
             billing_object.calculated_cost
         )  # (str): indicates the total dollar amount of the service for the monthly billing
+        billing_object.service_rate_category = model_name  # For now all are consumption TODO: remove service rate category from MonthlyStorageBilling model?
         billing_objects.append(billing_object)
 
     return billing_objects

@@ -45,7 +45,6 @@ class TestReportGenerator(TestCase):
         ) as file:
             report_data = file.readlines()
             file.close()
-
         self.assertIsInstance(report_data, list)
         self.assertGreater(len(report_data), 0)
         first_row = report_data[0].split(",")

@@ -74,7 +74,7 @@ class ItsmUsageIngestor:
             amount_tb = self.__convert_to_amount_usage_to_tb(usage.get("amount"))
             billing_contact = self.__get_billing_contact(usage)
             record = AllocationUsage.objects.update_or_create(
-                external_key=usage.get("id"),
+                fileset_name=usage.get("fileset_name"),
                 source=self.source,
                 usage_date=datetime.strptime(
                     usage.get("provision_usage_creation_date"), "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -84,6 +84,7 @@ class ItsmUsageIngestor:
                 )
                 .date(),
                 defaults={
+                    "external_key": usage.get("id"),
                     "sponsor_pi": usage.get("sponsor"),
                     "billing_contact": billing_contact,
                     "fileset_name": usage.get("fileset_name"),
