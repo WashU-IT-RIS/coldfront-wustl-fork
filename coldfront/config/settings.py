@@ -25,8 +25,6 @@ plugin_configs = {
     'PLUGIN_QUMULO': 'plugins/qumulo.py',
 }
 
-# Temporary addition of weeklyreportapp and integratedbilling plugins
-plugin_configs["PLUGIN_WEEKLYREPORTAPP"] = "plugins/weeklyreportapp.py"
 plugin_configs["PLUGIN_INTEGRATEDBILLING"] = "plugins/integratedbilling.py"
 
 

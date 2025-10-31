@@ -2,9 +2,9 @@ name: Run Tests
 
 on:
   push:
-    branches: [ main, staging ]
+    branches: [main, staging]
   pull_request:
-    branches: [ main, staging ]
+    branches: [main, staging]
   workflow_dispatch:
 
 jobs:
@@ -15,34 +15,16 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.9'
-
-      - name: create_ssh_key
-        run: |
-          mkdir ~/.ssh
-          echo "${{ secrets.RIS_COLDFRONT_DEPLOYMENT_KEY }}" > ~/.ssh/id_rsa
-          chmod 600  ~/.ssh/id_rsa
+          python-version: "3.9"
 
       - name: install python packages
         run: |
-          cat <<EOF> ~/.ssh/config
-          Host github.com
-            User git
-            IdentityFile ~/.ssh/id_rsa
-          EOF
-          pip install -e git+https://github.com/rg663/weeklyreportapppip#egg=weeklyreportapp
           pip install -r requirements.txt
-          pip install -e git+ssh://github.com/WashU-IT-RIS/coldfront-plugin-billing@feature/integrated-billing-scaffold#egg=integratedbilling
 
       - name: run tests
         run: python3 manage.py test --exclude-tag integration -b
         env:
           ENVIRONMENT: test
           PLUGIN_QUMULO: True
-          PLUGIN_WEEKLYREPORTAPP: True
           PLUGIN_INTEGRATEDBILLING: True
-          AD_USER_PASS: ADPassword@123
-          AD_USERNAME: ADUsername
-          AD_SERVER_NAME: accounts-ldap.wusm.wustl.edu
-          AD_GROUPS_OU: OU=QA,OU=RIS,OU=Groups,DC=accounts,DC=ad,DC=wustl,DC=edu
-          STORAGE2_PATH: /foo/bar
+          QUMULO_INFO: '{"Storage2": {"path": "/storage2-dev/fs1", "host": "foo","port": "8000","user": "admin","pass": "bar" },"Storage3": {"host": "example.com","port": "8000","user": "baz","pass": "bar", "path": "/test/etc"}}'

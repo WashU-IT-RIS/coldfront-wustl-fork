@@ -1,4 +1,4 @@
-import math, os
+import math, os, json
 from typing import Optional
 
 
@@ -8,17 +8,13 @@ def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # bisiademuyiwa_active --> /storage2/fs1/bisiademuyiwa
     # gc6159 --> /storage2/fs1/gc6159
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    storage_filesystem_path = f"{__get_storage2_base_path()}/{fileset_name_seed}"
-
-    return storage_filesystem_path
+    return fileset_name_seed
 
 
 def fileset_name_to_storage_export_path(fileset_name_or_alias) -> str:
     # TODO I cannot figure out from the code how to populate this.
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    export_path = f"{__get_storage2_base_path()}/{fileset_name_seed}"
-
-    return export_path
+    return fileset_name_seed
 
 
 # TODO what are the protocols for the allocations created from ITSM?
@@ -96,7 +92,3 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
 
     # throws ValueError: invalid literal for int() with base 10: value
     return bool(int(value))
-
-
-def __get_storage2_base_path():
-    return os.environ.get("STORAGE2_PATH")
