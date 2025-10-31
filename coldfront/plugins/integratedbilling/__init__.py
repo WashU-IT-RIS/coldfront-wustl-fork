@@ -1,1 +1,1 @@
-default_app_config = "coldfront.plugins.integratedbilling.apps.IntegratedBillingConfig"
+default_app_config = "coldfront.plugins.integratedbilling.apps.IntegratedbillingConfig"

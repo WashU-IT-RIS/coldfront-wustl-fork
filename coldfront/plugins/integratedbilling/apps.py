@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class IntegratedBillingConfig(AppConfig):
+class IntegratedbillingConfig(AppConfig):
     name = "coldfront.plugins.integratedbilling"
