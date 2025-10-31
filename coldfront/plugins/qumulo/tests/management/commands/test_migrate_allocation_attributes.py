@@ -42,7 +42,7 @@ class TestMigrateAllocationAttributes(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "subscription",
+            "service_rate_category": "subscription",
             "billing_cycle": "prepaid",
             "prepaid_time": 6,
             "prepaid_billing_date": self.calculate_past_date(),
@@ -59,7 +59,7 @@ class TestMigrateAllocationAttributes(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "subscription",
+            "service_rate_category": "subscription",
             "billing_cycle": "monthly",
         }
 
@@ -75,7 +75,7 @@ class TestMigrateAllocationAttributes(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "subscription",
+            "service_rate_category": "subscription",
         }
 
         self.client.force_login(self.user)
