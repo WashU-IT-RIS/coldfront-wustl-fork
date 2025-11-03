@@ -3,7 +3,7 @@ import json
 from django.test import TestCase, tag
 
 from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmClient
-from coldfront.plugins.integratedbilling.tests.fixtures import (
+from coldfront.plugins.qumulo.tests.fixtures_usages import (
     ITSM_ATTRIBUTES_FOR_BILLING,
 )
 
