@@ -20,11 +20,7 @@ class ItsmUsageIngestor:
     def process_usages(self) -> bool:
         usages = self.__ingest_usages()
         if usages is None:
-            # consider throwing an exception here
-            return False
-
-        if usages == []:
-            # No usages to process since the usages ITSM have not been processed
+            print("Failed to fetch ITSM usage data after multiple attempts.")
             return False
 
         valid_usages = [
@@ -36,12 +32,13 @@ class ItsmUsageIngestor:
         created_usages = self.__create_allocation_usage_records(valid_usages)
 
         if not created_usages:
-            return False
-
+            print(
+                "No ITSM allocation usage records were created since the data fetch was empty."
+            )
         return True
 
     # Private methods
-    def __ingest_usages(self) -> list[dict]:
+    def __ingest_usages(self) -> Union[list[dict], None]:
         # try accessing API 3 times before failing
         for _ in range(3):
             try:

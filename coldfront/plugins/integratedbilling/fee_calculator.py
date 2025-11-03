@@ -46,7 +46,7 @@ def get_billing_objects(
 
         billing_object.calculated_cost = calculate_fee(billing_object, rate_category)
 
-        if billing_object.calculated_cost <= Decimal("0.00"):
+        if billing_object.calculated_cost == Decimal("0.00"):
             continue
 
         billing_object.delivery_date = delivery_date.strftime(

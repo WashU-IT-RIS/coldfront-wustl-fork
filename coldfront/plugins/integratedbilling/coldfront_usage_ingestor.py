@@ -27,19 +27,15 @@ class ColdfrontUsageIngestor:
         self.usage_date = usage_date or _get_default_usage_date()
         self.source = BillingDataSources.COLDFRONT.value
 
-    def process_usages(self) -> bool:
+    def process_usages(self) -> None:
         active_allocations_with_usages = self.__ingest_usage_data(self.usage_date)
-        if not active_allocations_with_usages:
-            return False
 
         created_usages = self.__create_allocation_usage_records(
             active_allocations_with_usages
         )
 
         if not created_usages:
-            return False
-
-        return True
+            print("No Coldfront allocation usage records were created.")
 
     def __ingest_usage_data(self, usage_date: datetime) -> QuerySet:
         sub_queries = self.__get_subqueries(usage_date)

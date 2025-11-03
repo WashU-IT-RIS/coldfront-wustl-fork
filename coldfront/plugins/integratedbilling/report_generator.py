@@ -23,9 +23,7 @@ class ReportGenerator:
             if not success:
                 return False
 
-            success = self.coldfront_usage_ingestion.process_usages()
-            if not success:
-                return False
+            self.coldfront_usage_ingestion.process_usages()
 
         # get usages for month and filter as needed
         filtered_allocation_usages = self.__get_allocation_usages()
