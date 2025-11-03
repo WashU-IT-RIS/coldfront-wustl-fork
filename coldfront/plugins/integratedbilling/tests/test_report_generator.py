@@ -17,13 +17,12 @@ class TestReportGenerator(TestCase):
         "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
     )
     def setUp(self, mock_report_generator: mock.MagicMock) -> None:
-        self.ingestion_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
-        self.report_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
+        self.usage_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
         ServiceRateCategoryFactory(current_service_rate=True, archive_service=True)
         ServiceRateCategoryFactory(current_service_rate=True, active_service=True)
 
         # source data setup Coldfront allocations with usages recorded on the first day of the month
-        with freeze_time(self.ingestion_date):
+        with freeze_time(self.usage_date):
             create_coldfront_allocations_with_usages()
 
         # source data setup ITSM mock data
@@ -31,7 +30,7 @@ class TestReportGenerator(TestCase):
             "coldfront/plugins/integratedbilling/static/mock_monthly_billing_data_current_month.json",
             "r",
         ) as file:
-            report_generator = ReportGenerator(self.report_date)
+            report_generator = ReportGenerator(self.usage_date)
             mock_data = json.load(file)
             report_generator.client.handler.get_data.return_value = mock_data
             self.mock_report_generator = report_generator
@@ -47,11 +46,3 @@ class TestReportGenerator(TestCase):
             file.close()
         self.assertIsInstance(report_data, list)
         self.assertGreater(len(report_data), 0)
-        first_row = report_data[0].split(",")
-        # self.assertIn("allocation_id", first_row)
-        # self.assertIn("project_name", first_row)
-        # self.assertIn("sponsor_pi", first_row)
-        # self.assertIn("billing_contact", first_row) 
-        # self.assertIn("date", first_row)
-        # self.assertIn("storage_cluster", first_row)
-        # self.assertIn("usage_tb", first_row)
