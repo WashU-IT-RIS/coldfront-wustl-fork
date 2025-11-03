@@ -234,7 +234,7 @@ class MonthlyStorageBilling(AllocationUsage):
             template_path = "./coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
 
         if output_path is None:
-            output_path = "./billing_report.csv"
+            output_path = "/tmp/billing_report.csv"
 
         cls._copy_template_headers_to_file(template_path, output_path)
 
