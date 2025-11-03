@@ -1,7 +1,7 @@
-from datetime import date
+from datetime import date, datetime
 from icecream import ic
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from coldfront.plugins.integratedbilling.report_generator import (
     ReportGenerator,
@@ -13,7 +13,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser) -> None:
         parser.add_argument(
             "--usage-date",
-            action="store_true",
+            type=str,
             help="The usage_date (Ex: 2025-01-1), defaults to today if not provided",
         )
 
@@ -30,7 +30,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options) -> None:
-        usage_date = options["usage_date"] or date.today()
+        usage_date = self.__get_usage_date(options["usage_date"])
         ic(usage_date)
 
         ingest_data = options["ingest_data"] or True
@@ -43,3 +43,15 @@ class Command(BaseCommand):
         result = report_generator.generate(ingest_usages=ingest_data, dry_run=dry_run)
         ic(result)
         ic("Integrated Billing Report generation complete")
+
+    def __get_usage_date(self, usage_date_str: str) -> date:
+
+        if not usage_date_str:
+            return datetime.today().date()
+
+        try:
+            return datetime.strptime(usage_date_str, "%Y-%m-%d").date()
+        except ValueError:
+            raise CommandError(
+                f'Invalid date format for --usage-date: "{usage_date_str}". Please use YYYY-MM-DD.'
+            )
