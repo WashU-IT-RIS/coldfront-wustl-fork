@@ -6,9 +6,9 @@ class Command(BaseCommand):
     help = "Run setup script to initialize the Coldfront database"
 
     def handle(self, *args, **options):
-        print("Running Coldfront Plugin Qumulo setup script")
+        print("Running Coldfront Plugin Integrated Billing setup script")
         call_base_commands()
-        print("Coldfront Plugin Qumulo setup script complete")
+        print("Coldfront Plugin Integrated Billing setup script complete")
 
 
 def call_base_commands():
