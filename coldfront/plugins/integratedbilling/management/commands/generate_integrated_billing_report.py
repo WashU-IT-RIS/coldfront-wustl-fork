@@ -7,15 +7,21 @@ from coldfront.plugins.integratedbilling.report_generator import (
     ReportGenerator,
 )
 
+
 class Command(BaseCommand):
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
-            "usage_date", type=date, help="The usage_date (Ex: 2025-01-01)"
+            "--usage_date",
+            action="store_true",
+            type=date,
+            help="The usage_date (Ex: 2025-01-01), defaults to today if not provided",
         )
 
         parser.add_argument(
-            "ingest_data", type=bool, help="The ingest_data from ITSM and Coldfront"
+            "--ingest_data",
+            action="store_true",
+            help="Ingest_data from ITSM and Coldfront: (True or False) Defaults to True",
         )
 
         parser.add_argument(
@@ -25,7 +31,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options) -> None:
-        usage_date = options["usage_date"]  or date.today()
+        usage_date = options["usage_date"] or date.today()
         ic(usage_date)
 
         ingest_data = options["ingest_data"] or True
@@ -37,3 +43,4 @@ class Command(BaseCommand):
         report_generator = ReportGenerator(usage_date)
         result = report_generator.generate(ingest_usages=ingest_data, dry_run=dry_run)
         ic(result)
+        ic("Integrated Billing Report generation complete")
