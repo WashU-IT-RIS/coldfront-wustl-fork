@@ -18,4 +18,3 @@ def call_base_commands():
     call_command("add_qumulo_project_attribute_types")
     call_command("add_qumulo_allocation_attribute_type")
     call_command("add_allocation_status")
-    call_command("add_service_rate_categories_for_storage")
