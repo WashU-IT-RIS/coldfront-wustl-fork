@@ -12,13 +12,13 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser) -> None:
         parser.add_argument(
-            "--usage_date",
+            "--usage-date",
             action="store_true",
-            help="The usage_date (Ex: 2025-01-01), defaults to today if not provided",
+            help="The usage_date (Ex: 2025-01-1), defaults to today if not provided",
         )
 
         parser.add_argument(
-            "--ingest_data",
+            "--ingest-data",
             action="store_true",
             help="Ingest_data from ITSM and Coldfront: (True or False) Defaults to True",
         )
