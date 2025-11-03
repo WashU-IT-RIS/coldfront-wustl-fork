@@ -14,7 +14,6 @@ class Command(BaseCommand):
         parser.add_argument(
             "--usage_date",
             action="store_true",
-            type=date,
             help="The usage_date (Ex: 2025-01-01), defaults to today if not provided",
         )
 
