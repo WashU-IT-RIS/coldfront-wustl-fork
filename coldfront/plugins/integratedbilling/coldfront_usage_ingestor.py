@@ -59,8 +59,7 @@ class ColdfrontUsageIngestor:
             )
             if amount_tb is None:
                 print(
-                    f"WARNING:Skipping allocation {allocation_with_usage.storage_name} due to no available history usage amount.",
-                    vars(allocation_with_usage),
+                    f"WARNING:Skipping allocation {allocation_with_usage.pk}, {allocation_with_usage.storage_name} due to no available history usage amount.",
                 )
                 continue
 
