@@ -1,6 +1,5 @@
 from datetime import datetime
 from django.db import models
-from django.template import loader
 
 from coldfront.core.allocation.models import *
 from coldfront.core.project.models import *
@@ -233,16 +232,15 @@ class MonthlyStorageBilling(AllocationUsage):
         # Read the template header
         if template_path is None:
             #template_path = "./coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
-            template_path = "RIS-monthly-storage-active-billing-template.txt"
-        header_rows = loader.get_template(template_path)
+            template_path = "/opt/venv/lib/python3.9/site-packages/coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
 
         if output_path is None:
             output_path = "/tmp/billing_report.csv"
 
-        cls._copy_template_headers_to_file(header_rows, output_path)
+        cls._copy_template_headers_to_file(template_path, output_path)
 
         # Build billing entries from the template
-        billing_entry_template = cls._read_billing_entry_template(header_rows)
+        billing_entry_template = cls._read_billing_entry_template(template_path)
         if not billing_entry_template:
             print("Error: Could not read billing entry template.")
             return
