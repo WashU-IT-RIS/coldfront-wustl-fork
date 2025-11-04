@@ -21,8 +21,8 @@ class ServiceRateCategoryQuerySet(models.QuerySet):
 class ServiceRateCategory(TimeStampedModel):
     tier_name = models.CharField(max_length=255)
     model_name = models.CharField(max_length=255)
-    model_display_name = models.CharField(max_length=255)
-    model_description = models.CharField(max_length=255)
+    model_display_name = models.CharField(max_length=255, null=True, blank=True)
+    model_description = models.CharField(max_length=255, null=True, blank=True)
     start_date = models.DateField()
     end_date = models.DateField()
     rate = models.DecimalField(max_digits=10, decimal_places=2)
