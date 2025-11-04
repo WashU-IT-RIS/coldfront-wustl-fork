@@ -20,7 +20,7 @@ from coldfront.plugins.qumulo.management.commands.qumulo_plugin_setup import (
 )
 
 if ENV.bool(["PLUGIN_INTEGRATEDBILLING"], default=False):
-    from coldfront.plugins.integratedbilling.management.commands.integratedbillling_plugin_setup import (
+    from coldfront.plugins.integratedbilling.management.commands.integratedbilling_plugin_setup import (
         call_base_commands as integrated_billing_call_base_commands,
     )
 

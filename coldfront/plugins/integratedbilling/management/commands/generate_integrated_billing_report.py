@@ -34,7 +34,7 @@ class Command(BaseCommand):
         usage_date = self.__get_usage_date(options["usage_date"])
         ic(usage_date)
 
-        ingest_data = options["ingest_data"] or options["no_ingest_data"]
+        ingest_data = options["ingest_data"]
         if ingest_data is None:
             ingest_data = True
         ic(ingest_data)
