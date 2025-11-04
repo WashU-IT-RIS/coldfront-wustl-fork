@@ -2,6 +2,7 @@ from datetime import datetime
 from django.conf import settings
 from django.db import models
 
+from coldfront.config.env import PROJECT_ROOT
 from coldfront.core.allocation.models import *
 from coldfront.core.project.models import *
 from coldfront.core.resource.models import *
@@ -235,7 +236,7 @@ class MonthlyStorageBilling(AllocationUsage):
             #template_path = "./coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
             # TODO: Update the path below if the virtual environment path changes
             #template_path = "/opt/venv/lib/python3.9/site-packages/coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
-            template_path = f"{settings.ROOT_DIR}/coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
+            template_path = f"{PROJECT_ROOT()}/coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
 
         if output_path is None:
             output_path = "/tmp/billing_report.csv"
