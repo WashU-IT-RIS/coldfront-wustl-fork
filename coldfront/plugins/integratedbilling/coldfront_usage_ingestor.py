@@ -14,21 +14,21 @@ from coldfront.plugins.integratedbilling.constants import BillingDataSources
 
 
 # helper function to get the default billing date (first day of the current month)
-def _get_default_usage_date() -> date:
+def _get_default_usage_date() -> datetime:
     today = datetime.now()
     return today.replace(
         day=1, hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
-    ).date()
+    )
 
 
 class ColdfrontUsageIngestor:
 
     def __init__(self, usage_date: datetime = None) -> None:
-        self.usage_date = usage_date or _get_default_usage_date()
+        self.usage_date = (usage_date or _get_default_usage_date()).date()
         self.source = BillingDataSources.COLDFRONT.value
 
     def process_usages(self) -> None:
-        active_allocations_with_usages = self.__ingest_usage_data(self.usage_date)
+        active_allocations_with_usages = self.__ingest_usage_data()
 
         created_usages = self.__create_allocation_usage_records(
             active_allocations_with_usages
@@ -37,8 +37,8 @@ class ColdfrontUsageIngestor:
         if not created_usages:
             print("No Coldfront allocation usage records were created.")
 
-    def __ingest_usage_data(self, usage_date: datetime) -> QuerySet:
-        sub_queries = self.__get_subqueries(usage_date)
+    def __ingest_usage_data(self) -> QuerySet:
+        sub_queries = self.__get_subqueries()
         active_allocations_with_usages = (
             Allocation.objects.parents()
             .active_storage()
@@ -60,7 +60,7 @@ class ColdfrontUsageIngestor:
             record = AllocationUsage.objects.update_or_create(
                 fileset_name=allocation_with_usage.storage_name,
                 source=self.source,
-                usage_date=self.usage_date.date(),
+                usage_date=self.usage_date,
                 defaults={
                     "external_key": allocation_with_usage.pk,
                     "sponsor_pi": allocation_with_usage.project.pi.username,
@@ -108,7 +108,7 @@ class ColdfrontUsageIngestor:
 
         return None
 
-    def __get_subqueries(self, usage_date: datetime) -> dict:
+    def __get_subqueries(self) -> dict:
         sub_queries = {}
         for key in [
             "storage_name",
@@ -131,7 +131,7 @@ class ColdfrontUsageIngestor:
                 AllocationAttributeUsage.history.filter(
                     allocation_attribute__allocation=OuterRef("pk"),
                     allocation_attribute__allocation_attribute_type__name="storage_quota",
-                    history_date=usage_date,
+                    history_date__date=self.usage_date,
                 ).values("value")
             )
             sub_queries["usage_bytes"] = usage_subquery

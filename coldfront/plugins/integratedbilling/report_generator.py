@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.coldfront_usage_ingestor import (
     ColdfrontUsageIngestor,
@@ -12,7 +12,7 @@ from coldfront.plugins.integratedbilling.fee_calculator import get_billing_objec
 
 class ReportGenerator:
 
-    def __init__(self, usage_date=None):
+    def __init__(self, usage_date:datetime=None):
         self.client = BillingItsmClient(usage_date)
         self.itsm_usage_ingestion = ItsmUsageIngestor(self.client)
         self.coldfront_usage_ingestion = ColdfrontUsageIngestor(usage_date)

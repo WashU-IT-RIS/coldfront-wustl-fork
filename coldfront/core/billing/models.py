@@ -232,6 +232,7 @@ class MonthlyStorageBilling(AllocationUsage):
         # Read the template header
         if template_path is None:
             #template_path = "./coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
+            # TODO: Update the path below if the virtual environment path changes
             template_path = "/opt/venv/lib/python3.9/site-packages/coldfront/core/billing/templates/RIS-monthly-storage-active-billing-template.csv"
 
         if output_path is None:
