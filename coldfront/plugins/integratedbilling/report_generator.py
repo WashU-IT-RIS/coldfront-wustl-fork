@@ -35,7 +35,7 @@ class ReportGenerator:
         calculated_usage_costs = self.__calculate_usage_fee(filtered_allocation_usages)
 
         self.__save_report(
-            calculated_usage_costs, f"billing_report_{self.client.usage_date}.csv"
+            calculated_usage_costs, f"/tmp/billing_report_{self.client.usage_date}.csv"
         )
 
         summary = self.__generate_summary(filtered_allocation_usages)
