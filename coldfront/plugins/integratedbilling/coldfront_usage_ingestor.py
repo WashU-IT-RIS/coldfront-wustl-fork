@@ -57,6 +57,13 @@ class ColdfrontUsageIngestor:
             amount_tb = self.__convert_to_amount_usage_to_tb(
                 allocation_with_usage.usage_bytes
             )
+            if amount_tb is None:
+                print(
+                    f"WARNING:Skipping allocation {allocation_with_usage.storage_name} due to no available history usage amount.",
+                    vars(allocation_with_usage),
+                )
+                continue
+
             record = AllocationUsage.objects.update_or_create(
                 fileset_name=allocation_with_usage.storage_name,
                 source=self.source,
