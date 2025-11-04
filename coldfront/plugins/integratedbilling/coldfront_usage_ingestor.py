@@ -131,7 +131,7 @@ class ColdfrontUsageIngestor:
                 AllocationAttributeUsage.history.filter(
                     allocation_attribute__allocation=OuterRef("pk"),
                     allocation_attribute__allocation_attribute_type__name="storage_quota",
-                    history_date__date=self.usage_date,
+                    history_date=self.usage_date,
                 ).values("value")
             )
             sub_queries["usage_bytes"] = usage_subquery
