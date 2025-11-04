@@ -46,7 +46,7 @@ class TestResetAcl(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         return create_allocation(
