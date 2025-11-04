@@ -47,13 +47,13 @@ class Command(BaseCommand):
         ic(result)
         ic("Integrated Billing Report generation complete")
 
-    def __get_usage_date(self, usage_date_str: str) -> date:
+    def __get_usage_date(self, usage_date_str: str) -> datetime:
 
         if not usage_date_str:
-            return datetime.today().date()
+            return datetime.today()
 
         try:
-            return datetime.strptime(usage_date_str, "%Y-%m-%d").date()
+            return datetime.strptime(usage_date_str, "%Y-%m-%d")
         except ValueError:
             raise CommandError(
                 f'Invalid date format for --usage-date: "{usage_date_str}". Please use YYYY-MM-DD.'
