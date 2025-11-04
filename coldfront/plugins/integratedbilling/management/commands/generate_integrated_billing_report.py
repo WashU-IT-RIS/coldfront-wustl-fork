@@ -1,3 +1,4 @@
+import argparse
 from datetime import date, datetime
 from icecream import ic
 
@@ -19,7 +20,7 @@ class Command(BaseCommand):
 
         parser.add_argument(
             "--ingest-data",
-            action="store_true",
+            action=argparse.BooleanOptionalAction,
             help="Ingest_data from ITSM and Coldfront: (True or False) Defaults to True",
         )
 
@@ -33,7 +34,9 @@ class Command(BaseCommand):
         usage_date = self.__get_usage_date(options["usage_date"])
         ic(usage_date)
 
-        ingest_data = options["ingest_data"] or True
+        ingest_data = options["ingest_data"] or options["no_ingest_data"]
+        if ingest_data is None:
+            ingest_data = True
         ic(ingest_data)
 
         dry_run = options["dry_run"] or False
