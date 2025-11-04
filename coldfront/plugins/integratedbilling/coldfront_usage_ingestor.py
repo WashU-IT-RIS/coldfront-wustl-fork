@@ -57,6 +57,7 @@ class ColdfrontUsageIngestor:
             amount_tb = self.__convert_to_amount_usage_to_tb(
                 allocation_with_usage.usage_bytes
             )
+            print(vars(allocation_with_usage))
             if amount_tb is None:
                 print(
                     f"WARNING:Skipping allocation {allocation_with_usage.pk}, {allocation_with_usage.storage_name} due to no available history usage amount.",
@@ -137,7 +138,8 @@ class ColdfrontUsageIngestor:
                 AllocationAttributeUsage.history.filter(
                     allocation_attribute__allocation=OuterRef("pk"),
                     allocation_attribute__allocation_attribute_type__name="storage_quota",
-                    history_date=self.usage_date,
+                    history_date__date__lte=self.usage_date,
+                    history_date__date__gte=self.usage_date,
                 ).values("value")
             )
             sub_queries["usage_bytes"] = usage_subquery
