@@ -10,6 +10,7 @@ from coldfront.core.billing.models import (AllocationUsage)
 class AllocationUsageAdmin(SimpleHistoryAdmin):
     list_display = (
         'external_key',
+        'tier',
         'source',
         'sponsor_pi',
         'billing_contact',
@@ -37,12 +38,14 @@ class AllocationUsageAdmin(SimpleHistoryAdmin):
         'quota',
         'billing_cycle',
         'storage_cluster',
+        'tier',
     )
     list_filter = (
         'exempt',
         'subsidized',
         'is_condo_group',
         'storage_cluster',
+        'tier',
     )
     ordering = ('-usage_date', 'sponsor_pi', 'service_rate_category')
     date_hierarchy = 'usage_date'
