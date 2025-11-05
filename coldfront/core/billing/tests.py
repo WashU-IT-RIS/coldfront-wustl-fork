@@ -3,7 +3,8 @@ import tempfile
 from datetime import datetime, date
 from unittest import mock
 from django.test import TestCase
-from .factories import AllocationUsageFactory
+from coldfront.config.env import PROJECT_ROOT
+from coldfront.core.billing.factories import AllocationUsageFactory
 from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
 
 class AllocationUsageModelTest(TestCase):
@@ -254,6 +255,13 @@ class MonthlyStorageBillingTests(TestCase):
         self.billing_obj2.unit_rate = "10.00"
         self.billing_obj2.billing_amount = "314.159265"
 
+    def test_template_file_exists(self):
+        template_path = os.path.join(
+            PROJECT_ROOT(),
+            "coldfront/core/billing/templates/RIS-monthly-storage-billing-template.csv"
+        )
+        self.assertTrue(os.path.exists(template_path), f"Template file not found: {template_path}")
+
     def test__copy_template_headers_to_file(self):
         # Create a temp template file with 5 header lines
         with tempfile.NamedTemporaryFile(mode="w+", delete=False) as template, \
@@ -293,6 +301,30 @@ class MonthlyStorageBillingTests(TestCase):
             self.assertEqual(fy, "FY25")
             fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 12, 1).date())
             self.assertEqual(fy, "FY25")
+
+    def test_generate_report_default_file_paths(self):
+        billing_objects = [self.billing_obj1, self.billing_obj2]
+        try:
+            MonthlyStorageBilling.generate_report(billing_objects)
+        except Exception as e:
+            self.fail(f"generate_report raised an exception unexpectedly: {e}")
+        finally:
+            # Clean up the default output file if created
+            default_output_path = "/tmp/billing_report.csv"
+            if os.path.exists(default_output_path):
+                os.remove(default_output_path)
+
+    def test_generate_report_default_templaet_path(self):
+        billing_objects = [self.billing_obj1, self.billing_obj2]
+        try:
+            MonthlyStorageBilling.generate_report(billing_objects, output_path="/tmp/test_billing_report.csv")
+        except Exception as e:
+            self.fail(f"generate_report raised an exception unexpectedly: {e}")
+        finally:
+            # Clean up the test output file if created
+            test_output_path = "/tmp/test_billing_report.csv"
+            if os.path.exists(test_output_path):
+                os.remove(test_output_path)
 
     def test_generate_report(self):
         # Prepare template file with 6 lines, 6th is billing entry with placeholders
