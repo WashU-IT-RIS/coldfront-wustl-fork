@@ -96,7 +96,7 @@ class ColdfrontUsageIngestor:
 
     def __convert_to_amount_usage_to_tb(self, amount_bytes: int) -> Union[float, None]:
         try:
-            amount_tb = float(amount_bytes) / 1_000_000_000_000  # 1024**4 perhaps
+            amount_tb = float(amount_bytes) / 1_099_511_627_776  # 2**40 or 1024**4
             return round(amount_tb, 6)
         except (TypeError, ValueError):
             return None
