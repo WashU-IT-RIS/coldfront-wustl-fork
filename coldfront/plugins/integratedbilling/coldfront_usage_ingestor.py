@@ -15,7 +15,7 @@ from coldfront.plugins.integratedbilling.constants import BillingDataSources
 
 class ColdfrontUsageIngestor:
 
-    def __init__(self, usage_date: date = None) -> None:
+    def __init__(self, usage_date: date) -> None:
         self.usage_date = usage_date
         self.source = BillingDataSources.COLDFRONT.value
 
