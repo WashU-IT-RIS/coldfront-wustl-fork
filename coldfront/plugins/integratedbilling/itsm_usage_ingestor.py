@@ -55,7 +55,7 @@ class ItsmUsageIngestor:
     ) -> Union[float, None]:
         try:
             amount_kb = int(amount_kb_with_unit.replace("KB", "").replace(",", ""))
-            amount_tb = float(amount_kb) / 1_000_000_000  # 1024**3 perhaps
+            amount_tb = float(amount_kb) / 1_073_741_824  # 2**30 or 1024**3
             return round(amount_tb, 6)
         except (TypeError, ValueError):
             return None
