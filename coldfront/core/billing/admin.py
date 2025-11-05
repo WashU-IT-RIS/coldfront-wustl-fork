@@ -52,7 +52,7 @@ class AllocationUsageAdmin(SimpleHistoryAdmin):
     fieldsets = (
         (None, {
             'fields': (
-                ('external_key', 'source'),
+                ('external_key', 'source', 'tier'),
                 ('sponsor_pi', 'billing_contact'),
                 ('fileset_name', 'service_rate_category', 'usage_tb'),
                 ('funding_number', 'exempt', 'subsidized'),
