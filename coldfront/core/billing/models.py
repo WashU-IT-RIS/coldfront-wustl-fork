@@ -13,8 +13,9 @@ from simple_history.models import HistoricalRecords
 
 class AllocationUsageQuerySet(models.QuerySet):
 
-    def monthly_billable(self, usage_date):
+    def monthly_billable(self, usage_date, tier="Active"):
         return self.filter(usage_date=usage_date,
+                           tier=tier,
                            usage_tb__gt=0,
                            exempt=False,
                            billing_cycle="monthly",
@@ -97,6 +98,7 @@ class AllocationUsage(TimeStampedModel):
     Attribute:
         external_key (int): links to the primary key of the allocation to its source system
         source (str): indicates the source system of the usage (ex. ITSM, ColdFront)
+        tier (str): indicates the service tier of the allocation (ex. Active, Archive)
         sponsor_pi (str): indicates who is primarily responsible for the allocation. Usually a WUSTLkey.
         billing_contact (str): indicates who is the main contact for billing issues
         fileset_name (str): represents the commonly used name of the allocation
@@ -115,16 +117,18 @@ class AllocationUsage(TimeStampedModel):
 
     class Meta:
         ordering=[
+            "tier",
             "usage_date",
             "sponsor_pi",
             "service_rate_category",
             "fileset_name",
         ]
 
-        unique_together = (("storage_cluster", "fileset_name", "usage_date"),)
+        unique_together = (("tier", "storage_cluster", "fileset_name", "usage_date"),)
 
     external_key=models.IntegerField()
     source=models.CharField(max_length=256)
+    tier=models.CharField(max_length=256)
     sponsor_pi=models.CharField(max_length=512)
     billing_contact=models.CharField(max_length=512)
     fileset_name=models.CharField(max_length=256)
@@ -149,7 +153,6 @@ class MonthlyStorageBilling(AllocationUsage):
     Additional Attributes Besides Those Inherited from AllocationUsage:
         *delivery_date (str): indicates the beginning date of the service for monthly billing (ex. 2024-05-01)
         *billable_usage_tb (str): indicates the billable usage in TB after applying subsidised discount if applicable
-        *tier (str): indicates the service tier of the allocation (ex. Active, Archive)
         *billing_unit (str): indicates the billing unit of the service (ex. TB)
         *unit_rate (str): indicates the unit rate of the service
         *billing_amount (str): indicates the total dollar amount of the service for the monthly billing

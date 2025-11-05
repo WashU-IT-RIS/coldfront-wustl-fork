@@ -10,7 +10,8 @@ class AllocationUsageFactory(factory.django.DjangoModelFactory):
         model = AllocationUsage
 
     external_key = factory.Sequence(lambda n: n)
-    source = factory.LazyAttribute(lambda _: fake.word())
+    source = factory.LazyAttribute(lambda _: fake.random_element(elements=['ITSM', 'ColdFront', 'Other']))
+    tier = factory.LazyAttribute(lambda _: fake.random_element(elements=['Active', 'Archive']))
     sponsor_pi = factory.LazyAttribute(lambda _: fake.name())
     billing_contact = factory.LazyAttribute(lambda _: fake.email())
     fileset_name = factory.LazyAttribute(lambda _: fake.word())
@@ -22,6 +23,6 @@ class AllocationUsageFactory(factory.django.DjangoModelFactory):
     is_condo_group = factory.LazyAttribute(lambda _: fake.boolean())
     parent_id_key = factory.Sequence(lambda n: n)
     quota = factory.LazyAttribute(lambda _: str(fake.random_int(min=1, max=100)))
-    billing_cycle = factory.LazyAttribute(lambda _: fake.word())
+    billing_cycle = factory.LazyAttribute(lambda _: fake.random_element(elements=['monthly', 'prepaid']))
     usage_date = factory.LazyAttribute(lambda _: fake.date_this_year())
-    storage_cluster = factory.LazyAttribute(lambda _: fake.word())
+    storage_cluster = factory.LazyAttribute(lambda _: fake.random_element(elements=['Storage1', 'Storage2', 'Storage3']))

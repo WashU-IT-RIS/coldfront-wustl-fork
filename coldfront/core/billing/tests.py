@@ -12,6 +12,7 @@ class AllocationUsageModelTest(TestCase):
         self.assertIsInstance(usage, AllocationUsage)
         self.assertTrue(isinstance(usage.external_key, int))
         self.assertTrue(isinstance(usage.source, str))
+        self.assertTrue(isinstance(usage.tier, str))
         self.assertTrue(isinstance(usage.sponsor_pi, str))
         self.assertTrue(isinstance(usage.billing_contact, str))
         self.assertTrue(isinstance(usage.fileset_name, str))
@@ -30,6 +31,7 @@ class AllocationUsageModelTest(TestCase):
     def test_allocation_usage_str_fields_not_empty(self):
         usage = AllocationUsageFactory()
         self.assertNotEqual(usage.source, "")
+        self.assertNotEqual(usage.tier, "")
         self.assertNotEqual(usage.sponsor_pi, "")
         self.assertNotEqual(usage.billing_contact, "")
         self.assertNotEqual(usage.fileset_name, "")
@@ -44,6 +46,10 @@ class AllocationUsageModelTest(TestCase):
 class AllocationUsageQuerySetTest(TestCase):
     def setUp(self):
         self.usage_date = date(2024, 6, 1)
+        self.tier_active = "Active"
+        self.storage_cluster1 = "Storage1"
+        self.storage_cluster2 = "Storage2"
+        self.storage_cluster3 = "Storage3"
         self.pi1 = "pi1"
         self.pi2 = "pi2"
         self.fileset1 = "filesetA"
@@ -52,57 +58,69 @@ class AllocationUsageQuerySetTest(TestCase):
         self.fileset4 = "filesetD"
         # Create various AllocationUsage instances
         self.alloc1 = AllocationUsageFactory(
+            tier=self.tier_active,
             usage_date=self.usage_date,
             exempt=False,
             billing_cycle="monthly",
             service_rate_category="consumption",
             sponsor_pi=self.pi1,
+            storage_cluster=self.storage_cluster1,
             fileset_name=self.fileset1,
             subsidized=False,
         )
         self.alloc2 = AllocationUsageFactory(
+            tier=self.tier_active,
             usage_date=self.usage_date,
             exempt=False,
             billing_cycle="monthly",
             service_rate_category="consumption",
             sponsor_pi=self.pi1,
+            storage_cluster=self.storage_cluster2,
             fileset_name=self.fileset2,
             subsidized=True,
         )
         self.alloc3 = AllocationUsageFactory(
+            tier=self.tier_active,
             usage_date=self.usage_date,
             exempt=True,
             billing_cycle="monthly",
             service_rate_category="consumption",
             sponsor_pi=self.pi2,
+            storage_cluster=self.storage_cluster3,
             fileset_name=self.fileset1,
             subsidized=False,
         )
         self.alloc4 = AllocationUsageFactory(
+            tier=self.tier_active,
             usage_date=self.usage_date,
             exempt=False,
             billing_cycle="prepaid",
             service_rate_category="subscription",
             sponsor_pi=self.pi2,
+            storage_cluster=self.storage_cluster3,
             fileset_name=self.fileset2,
             subsidized=False,
         )
         self.alloc5 = AllocationUsageFactory(
+            tier=self.tier_active,
             usage_date=self.usage_date,
             exempt=False,
             billing_cycle="monthly",
             service_rate_category="consumption",
             sponsor_pi=self.pi2,
+            storage_cluster=self.storage_cluster3,
             fileset_name=self.fileset3,
             subsidized=False,
         )
 
         self.alloc6 = AllocationUsageFactory(
+            tier=self.tier_active,
             usage_date=self.usage_date,
             exempt=False,
             billing_cycle="monthly",
             service_rate_category="condo",
             sponsor_pi=self.pi2,
+            storage_cluster=self.storage_cluster3,
             fileset_name=self.fileset4,
             subsidized=False
         )
@@ -176,11 +194,13 @@ class AllocationUsageQuerySetTest(TestCase):
         self.assertTrue(qs._is_all_subsidized_valid())
         # Add another subsidized for pi1 to make it invalid
         AllocationUsageFactory(
+            tier=self.tier_active,
             usage_date=self.usage_date,
             exempt=False,
             billing_cycle="monthly",
             service_rate_category="consumption",
             sponsor_pi=self.pi1,
+            storage_cluster=self.storage_cluster1,
             fileset_name="filesetD",
             subsidized=True,
         )
@@ -211,25 +231,25 @@ class MonthlyStorageBillingTests(TestCase):
         a_usage_date = date(2024, 6, 1)
         # Create a fake MonthlyStorageBilling object using AllocationUsageFactory
         self.billing_obj1 = AllocationUsageFactory.build(
+            tier="Active",
             usage_date=a_usage_date
         )
         # Add extra attributes for MonthlyStorageBilling
         self.billing_obj1.delivery_date = a_delivery_date
         self.billing_obj1.billable_usage_tb = self.billing_obj1.usage_tb
-        self.billing_obj1.tier = "Active"
         self.billing_obj1.billing_unit = "TB"
         self.billing_obj1.unit_rate = "10.00"
         self.billing_obj1.billing_amount = "100.00"
 
         # Create a fake MonthlyStorageBilling object using AllocationUsageFactory
         self.billing_obj2 = AllocationUsageFactory.build(
+            tier="Active",
             usage_date=a_usage_date
         )
 
         # Add extra attributes for MonthlyStorageBilling
         self.billing_obj2.delivery_date = a_delivery_date
         self.billing_obj2.billable_usage_tb = self.billing_obj2.usage_tb
-        self.billing_obj2.tier = "Active"
         self.billing_obj2.billing_unit = "TB"
         self.billing_obj2.unit_rate = "10.00"
         self.billing_obj2.billing_amount = "314.159265"
