@@ -13,18 +13,10 @@ from coldfront.core.billing.models import AllocationUsage
 from coldfront.plugins.integratedbilling.constants import BillingDataSources
 
 
-# helper function to get the default billing date (first day of the current month)
-def _get_default_usage_date() -> datetime:
-    today = datetime.now()
-    return today.replace(
-        day=1, hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
-    )
-
-
 class ColdfrontUsageIngestor:
 
     def __init__(self, usage_date: datetime = None) -> None:
-        self.usage_date = (usage_date or _get_default_usage_date()).date()
+        self.usage_date = usage_date
         self.source = BillingDataSources.COLDFRONT.value
 
     def process_usages(self) -> None:
@@ -42,7 +34,6 @@ class ColdfrontUsageIngestor:
         active_allocations_with_usages = (
             Allocation.objects.parents()
             .active_storage()
-            .consumption()
             .annotate(**sub_queries)
             .select_related("project__pi")
         )
@@ -57,7 +48,7 @@ class ColdfrontUsageIngestor:
             amount_tb = self.__convert_to_amount_usage_to_tb(
                 allocation_with_usage.usage_bytes
             )
-            print(vars(allocation_with_usage))
+
             if amount_tb is None:
                 print(
                     f"WARNING:Skipping allocation {allocation_with_usage.pk}, {allocation_with_usage.storage_name} due to no available history usage amount.",
@@ -71,19 +62,20 @@ class ColdfrontUsageIngestor:
                 defaults={
                     "external_key": allocation_with_usage.pk,
                     "sponsor_pi": allocation_with_usage.project.pi.username,
-                    "billing_contact": allocation_with_usage.billing_contact,
+                    "billing_contact": allocation_with_usage.billing_contact
+                    or allocation_with_usage.project.pi.username,
                     "fileset_name": allocation_with_usage.storage_name,
                     "service_rate_category": allocation_with_usage.service_rate_category,
                     "usage_tb": amount_tb,
                     "funding_number": allocation_with_usage.cost_center,
                     "exempt": self.__to_boolean(
-                        allocation_with_usage.billing_exempt, default=None
+                        allocation_with_usage.billing_exempt, default=False
                     ),
                     "subsidized": self.__to_boolean(
-                        allocation_with_usage.subsidized, default=None
+                        allocation_with_usage.subsidized, default=False
                     ),
                     "is_condo_group": self.__to_boolean(
-                        allocation_with_usage.is_condo_group
+                        allocation_with_usage.is_condo_group, default=False
                     ),
                     "parent_id_key": None,
                     "quota": allocation_with_usage.storage_quota,
@@ -91,8 +83,9 @@ class ColdfrontUsageIngestor:
                     "storage_cluster": allocation_with_usage.resources.filter(
                         name__startswith="Storage"
                     )
-                    .first()
+                    .get()
                     .name,
+                    "tier": self.__get_tier(allocation_with_usage),
                 },
             )
             saved_usages.append(record)
@@ -106,14 +99,12 @@ class ColdfrontUsageIngestor:
         except (TypeError, ValueError):
             return None
 
-    def __to_boolean(self, value: str, default: bool = False) -> bool:
+    def __to_boolean(self, value: str, default: bool) -> bool:
         if str(value) in ["Yes", "True", "true", "1"]:
             return True
         if str(value) in ["No", "False", "false", "0"]:
             return False
         return default
-
-        return None
 
     def __get_subqueries(self) -> dict:
         sub_queries = {}
@@ -140,8 +131,17 @@ class ColdfrontUsageIngestor:
                     allocation_attribute__allocation_attribute_type__name="storage_quota",
                     history_date__date__lte=self.usage_date,
                     history_date__date__gte=self.usage_date,
-                ).values("value")
+                ).values("value")[:1]
             )
             sub_queries["usage_bytes"] = usage_subquery
 
         return sub_queries
+
+    def __get_tier(self, allocation_with_usage: Allocation) -> str:
+        # tier_attribute = AllocationAttribute.objects.filter(
+        #     allocation=allocation_with_usage,
+        #     allocation_attribute_type__name="tier",
+        # ).first()
+        # if tier_attribute:
+        #     return tier_attribute.value.lower()
+        return "active"

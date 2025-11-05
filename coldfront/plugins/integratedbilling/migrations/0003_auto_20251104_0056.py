@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('integratedbilling', '0002_auto_20251104_0041'),
+        ("integratedbilling", "0002_auto_20251104_0041"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='historicalserviceratecategory',
-            name='model_description',
+            model_name="historicalserviceratecategory",
+            name="model_description",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='historicalserviceratecategory',
-            name='model_display_name',
+            model_name="historicalserviceratecategory",
+            name="model_display_name",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='serviceratecategory',
-            name='model_description',
+            model_name="serviceratecategory",
+            name="model_description",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AlterField(
-            model_name='serviceratecategory',
-            name='model_display_name',
+            model_name="serviceratecategory",
+            name="model_display_name",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

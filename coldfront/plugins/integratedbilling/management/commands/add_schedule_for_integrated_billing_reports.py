@@ -25,7 +25,7 @@ class Command(BaseCommand):
 
 
 def generate_integrated_billing_report() -> None:
-    from coldfront.plugins.integratedbilling.report_generator import ReportGenerator   
+    from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
 
     usage_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     report_generator = ReportGenerator(usage_date)

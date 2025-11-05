@@ -5,6 +5,7 @@ class BillingDataSources(Enum):
     ITSM = "ITSM"
     COLDFRONT = "Coldfront"
 
+
 class StorageClusters(Enum):
     STORAGE1 = "Storage1"
     STORAGE2 = "Storage2"

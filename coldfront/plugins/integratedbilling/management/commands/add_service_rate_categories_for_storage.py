@@ -18,7 +18,7 @@ class Command(BaseCommand):
                 "cycle": "monthly",
                 "unit": "TB",
                 "tier_name": "active",
-            }
+            },
         )
 
         ServiceRateCategory.objects.update_or_create(
@@ -31,5 +31,5 @@ class Command(BaseCommand):
                 "cycle": "monthly",
                 "unit": "TB",
                 "tier_name": "archive",
-            }
+            },
         )

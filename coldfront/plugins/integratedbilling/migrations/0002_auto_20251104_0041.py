@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('integratedbilling', '0001_initial'),
+        ("integratedbilling", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='historicalserviceratecategory',
-            name='rate',
+            model_name="historicalserviceratecategory",
+            name="rate",
             field=models.DecimalField(decimal_places=2, max_digits=10),
         ),
         migrations.AlterField(
-            model_name='serviceratecategory',
-            name='rate',
+            model_name="serviceratecategory",
+            name="rate",
             field=models.DecimalField(decimal_places=2, max_digits=10),
         ),
     ]

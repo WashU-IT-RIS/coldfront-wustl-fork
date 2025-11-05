@@ -10,7 +10,7 @@ SUBSIDIZED_AMOUNT_TB = Decimal(
 
 
 def get_billing_objects(
-    usages: list[MonthlyStorageBilling],
+    usages: list[MonthlyStorageBilling], delivery_date: date
 ) -> list[MonthlyStorageBilling]:
     billing_objects = []
     for billing_object in usages:
@@ -31,11 +31,11 @@ def get_billing_objects(
         if billing_object.billable_usage_tb == Decimal("0.0"):
             continue
 
-        tier_name = "active"  # billing_object.tier
+        tier_name = billing_object.tier
+        # For now all are consumption TODO: remove service rate category from MonthlyStorageBilling model?
         model_name = "consumption"  # billing_object.service_rate_category
         billing_cycle = billing_object.billing_cycle
 
-        delivery_date = __get_delivery_date(billing_object.usage_date)
         rate_category = (
             ServiceRateCategory.rates.for_date(delivery_date)
             .for_tier(tier_name)
@@ -64,7 +64,7 @@ def get_billing_objects(
         billing_object.billing_amount = (
             billing_object.calculated_cost
         )  # (str): indicates the total dollar amount of the service for the monthly billing
-        billing_object.service_rate_category = model_name  # For now all are consumption TODO: remove service rate category from MonthlyStorageBilling model?
+        billing_object.service_rate_category = model_name
         billing_objects.append(billing_object)
 
     return billing_objects
@@ -74,10 +74,3 @@ def calculate_fee(
     billing_object: MonthlyStorageBilling, rate_category: ServiceRateCategory
 ) -> float:
     return round(billing_object.billable_usage_tb * rate_category.rate, 2)
-
-
-def __get_delivery_date(usage_date: date) -> date:
-    first_of_previous_month = (usage_date.replace(day=1) - timedelta(days=1)).replace(
-        day=1
-    )
-    return first_of_previous_month

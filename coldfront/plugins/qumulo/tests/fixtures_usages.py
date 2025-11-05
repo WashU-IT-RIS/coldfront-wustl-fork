@@ -23,6 +23,7 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
     "billing_contact",
     "status",
     "provision_usage_creation_date",
+    "service_id"
 ]
 
 COLDFRONT_PATH_FIXTURES = [

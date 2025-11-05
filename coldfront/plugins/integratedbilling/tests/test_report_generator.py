@@ -39,7 +39,7 @@ class TestReportGenerator(TestCase):
         self.mock_report_generator.generate()
         # check that report file is created
         with open(
-            f"/tmp/billing_report_{self.mock_report_generator.client.usage_date}.csv",
+            f"/tmp/RIS-{self.mock_report_generator.delivery_month}-storage-{self.mock_report_generator.tier}-billing.csv",
             "r",
         ) as file:
             report_data = file.readlines()

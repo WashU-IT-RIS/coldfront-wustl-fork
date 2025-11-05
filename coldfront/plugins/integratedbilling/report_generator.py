@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta, timezone
 from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.coldfront_usage_ingestor import (
     ColdfrontUsageIngestor,
@@ -11,11 +11,19 @@ from coldfront.plugins.integratedbilling.fee_calculator import get_billing_objec
 
 
 class ReportGenerator:
-
-    def __init__(self, usage_date:datetime=None):
+    def __init__(
+        self,
+        usage_date: datetime = None,
+        delivery_date: datetime = None,
+        tier: str = "active",
+    ) -> None:
+        self.usage_date = (usage_date or _get_default_usage_date()).date()
         self.client = BillingItsmClient(usage_date)
         self.itsm_usage_ingestion = ItsmUsageIngestor(self.client)
         self.coldfront_usage_ingestion = ColdfrontUsageIngestor(usage_date)
+        self.tier = tier
+        self.delivery_date = delivery_date or self.__get_delivery_date()
+        self.delivery_month = self.delivery_date.strftime("%B")
 
     def generate(self, ingest_usages=True, dry_run=False) -> None:
         if ingest_usages:
@@ -35,12 +43,13 @@ class ReportGenerator:
         calculated_usage_costs = self.__calculate_usage_fee(filtered_allocation_usages)
 
         self.__save_report(
-            calculated_usage_costs, f"/tmp/billing_report_{self.client.usage_date}.csv"
+            calculated_usage_costs,
         )
 
         summary = self.__generate_summary(filtered_allocation_usages)
         self.__log_report_generation(status="Success", details=summary)
 
+        # do not send report if dry run
         if dry_run:
             return False
 
@@ -51,17 +60,19 @@ class ReportGenerator:
     # Private methods
     def __get_allocation_usages(self):
         monthly_usages = AllocationUsage.objects.monthly_billable(
-            self.client.usage_date,
+            self.usage_date,
+            self.tier,
         )
         return monthly_usages
 
     def __calculate_usage_fee(
         self, usages: list[AllocationUsage]
     ) -> list[MonthlyStorageBilling]:
-        billing_objects = get_billing_objects(usages)
+        billing_objects = get_billing_objects(usages, self.delivery_date)
         return billing_objects
 
-    def __save_report(self, billing_objects: list, file_path: str) -> None:
+    def __save_report(self, billing_objects: list, file_path: str = None) -> None:
+        file_path = file_path or self.__get_report_file_name()
         MonthlyStorageBilling.generate_report(
             billing_objects, template_path=None, output_path=file_path
         )
@@ -78,4 +89,21 @@ class ReportGenerator:
         return summary
 
     def __send_report(self, report_data):
-        print("Report not sent since this is a placeholder method.")
+        print("Report not sent since the implementation is pending.")
+
+    def __get_delivery_date(self) -> date:
+        first_of_previous_month = (
+            self.usage_date.replace(day=1) - timedelta(days=1)
+        ).replace(day=1)
+        return first_of_previous_month
+
+    def __get_report_file_name(self) -> str:
+        return f"/tmp/RIS-{self.delivery_month}-storage-{self.tier}-billing.csv"
+
+
+# helper function to get the default billing date (first day of the current month)
+def _get_default_usage_date() -> datetime:
+    today = datetime.now()
+    return today.replace(
+        day=1, hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
+    )

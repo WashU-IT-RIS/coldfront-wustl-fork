@@ -95,6 +95,7 @@ class ItsmUsageIngestor:
                     "quota": usage.get("quota"),
                     "billing_cycle": usage.get("billing_cycle"),
                     "storage_cluster": self.storage_cluster,
+                    "tier": self.__get_tier(usage),
                 },
             )
             saved_usages.append(record)
@@ -104,3 +105,11 @@ class ItsmUsageIngestor:
     # TODO: should we ask for funding number if not present from Research Facilitators?
     def __get_funding_number(self, usage: dict) -> str:
         return usage.get("funding_number") or ""
+
+    def __get_tier(self, usage: dict) -> str:
+        if service_id := usage.get("service_id"):
+            if int(service_id) == 2:
+                return "archive"
+            if int(service_id) == 1:
+                return "active"
+        return "active"
