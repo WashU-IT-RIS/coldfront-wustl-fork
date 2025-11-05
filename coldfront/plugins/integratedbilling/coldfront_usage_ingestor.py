@@ -65,7 +65,9 @@ class ColdfrontUsageIngestor:
                     "billing_contact": allocation_with_usage.billing_contact
                     or allocation_with_usage.project.pi.username,
                     "fileset_name": allocation_with_usage.storage_name,
-                    "service_rate_category": allocation_with_usage.service_rate_category,
+                    "service_rate_category": self.__get_service_rate_category(
+                        allocation_with_usage
+                    ),
                     "usage_tb": amount_tb,
                     "funding_number": allocation_with_usage.cost_center,
                     "exempt": self.__to_boolean(
@@ -145,3 +147,7 @@ class ColdfrontUsageIngestor:
         # if tier_attribute:
         #     return tier_attribute.value.lower()
         return "active"
+
+    # TODO: implement logic to set missing service rate category in allocation attributes
+    def __get_service_rate_category(self, allocation_with_usage: Allocation) -> str:
+        return allocation_with_usage.service_rate_category or "consumption"
