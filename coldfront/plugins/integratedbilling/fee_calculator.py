@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 from coldfront.core.billing.models import MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.models import ServiceRateCategory

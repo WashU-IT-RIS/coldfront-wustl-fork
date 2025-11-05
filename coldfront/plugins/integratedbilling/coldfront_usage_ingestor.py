@@ -7,7 +7,7 @@ from coldfront.core.allocation.models import (
 )
 from django.db.models.query import QuerySet
 from django.db.models.expressions import OuterRef, Subquery
-from datetime import date, datetime, timezone
+from datetime import date
 
 from coldfront.core.billing.models import AllocationUsage
 from coldfront.plugins.integratedbilling.constants import BillingDataSources
@@ -15,7 +15,7 @@ from coldfront.plugins.integratedbilling.constants import BillingDataSources
 
 class ColdfrontUsageIngestor:
 
-    def __init__(self, usage_date: datetime = None) -> None:
+    def __init__(self, usage_date: date = None) -> None:
         self.usage_date = usage_date
         self.source = BillingDataSources.COLDFRONT.value
 

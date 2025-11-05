@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date
 from typing import Any
 
 from coldfront.plugins.qumulo.services.itsm.itsm_client_handler import ItsmClientHandler
@@ -30,7 +30,7 @@ ITSM_QUERY_KEY = "provision_usage_creation_date"  # Key for filtering billing da
 
 
 class BillingItsmClient:
-    def __init__(self, usage_date: date = None):
+    def __init__(self, usage_date: date):
         self.handler = ItsmClientHandler()
         self.usage_date = usage_date
 
