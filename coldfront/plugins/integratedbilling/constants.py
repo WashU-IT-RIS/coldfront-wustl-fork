@@ -11,7 +11,7 @@ class StorageClusters(Enum):
     STORAGE2 = "Storage2"
     STORAGE3 = "Storage3"
 
-class ServiceRateTiers(Enum):
-    active = 1
-    archive = 2
 
+class ServiceTiers(Enum):
+    Active = 1
+    Archive = 2

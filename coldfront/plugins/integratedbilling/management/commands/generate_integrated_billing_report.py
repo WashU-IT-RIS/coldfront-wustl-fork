@@ -4,7 +4,7 @@ from icecream import ic
 
 from django.core.management.base import BaseCommand, CommandError
 
-from coldfront.plugins.integratedbilling.constants import ServiceRateTiers
+from coldfront.plugins.integratedbilling.constants import ServiceTiers
 from coldfront.plugins.integratedbilling.report_generator import (
     ReportGenerator,
 )
@@ -28,14 +28,14 @@ class Command(BaseCommand):
         parser.add_argument(
             "--tier",
             type=str,
-            default=ServiceRateTiers.active.name,
-            help="The tier to filter by (Ex: active, archive), defaults to 'active' if not provided",
+            default=ServiceTiers.Active.name,
+            help="The tier to filter by (Ex: Active, Archive), defaults to 'Active' if not provided",
         )
 
         parser.add_argument(
             "--delivery-date",
             type=str,
-            help="The delivery date in YYYY-MM-DD format (Ex: 2025-10-01), defaults to this day of next month if not provided",
+            help="The delivery date in YYYY-MM-DD format (Ex: 2025-10-01), defaults to this day of previous month if not provided",
         )
 
         parser.add_argument(
@@ -95,9 +95,10 @@ class Command(BaseCommand):
             )
 
     def get_valid_tier(self, tier: str) -> str:
-        tier = tier.lower()
-        if tier not in ServiceRateTiers._member_names_:
+        tier = tier.capitalize()
+        try:
+            return ServiceTiers[tier]
+        except KeyError:
             raise CommandError(
-                f'Invalid tier: "{tier}". Valid options are: {", ".join(ServiceRateTiers._value2member_map_.keys())}.'
+                f'Invalid tier: "{tier}". Valid options are: {", ".join(ServiceTiers._value2member_map_.keys())}.'
             )
-        return tier

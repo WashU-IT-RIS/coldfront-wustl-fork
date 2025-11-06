@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Union
 
 
-from coldfront.plugins.integratedbilling.constants import ServiceRateTiers  
+from coldfront.plugins.integratedbilling.constants import ServiceTiers
 from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.coldfront_usage_ingestor import (
     ColdfrontUsageIngestor,
@@ -19,7 +19,7 @@ class ReportGenerator:
         self,
         usage_date: datetime = None,
         delivery_date: datetime = None,
-        tier: ServiceRateTiers = ServiceRateTiers.active,
+        tier: ServiceTiers = ServiceTiers.Active,
     ) -> None:
         self.usage_date = (usage_date or _get_default_usage_date()).date()
         self.client = BillingItsmClient(usage_date, tier)
@@ -65,7 +65,7 @@ class ReportGenerator:
     def __get_allocation_usages(self):
         monthly_usages = AllocationUsage.objects.monthly_billable(
             self.usage_date,
-            self.tier.name.lower(),
+            self.tier.name,
         )
         return monthly_usages
 
