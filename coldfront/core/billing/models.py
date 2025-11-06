@@ -162,6 +162,11 @@ class MonthlyStorageBilling(AllocationUsage):
         managed = False  # This model does not create a database table
 
     HEADER_LINE_NO = 5
+    # ISP: Internal Service Provider
+    ISP_ACTIVE = "ISP0000030"
+    ISP_ARCHIVE = "ISP0000199"
+    # ISP_COMPUTE = "ISP0000370"
+
 
     @classmethod
     def _copy_template_headers_to_file(cls, template_filepath, target_filepath):
@@ -249,6 +254,12 @@ class MonthlyStorageBilling(AllocationUsage):
             print("Error: Could not read billing entry template.")
             return
 
+        a_tier = billing_objects[0].tier
+        if a_tier == "Active":
+            ISP_code = cls.ISP_ACTIVE
+        else:
+            ISP_code = cls.ISP_ARCHIVE
+
         spreadsheet_key = 1
         document_date = datetime.now().date().strftime("%m/%d/%Y")
         a_delivery_date = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d")
@@ -259,6 +270,7 @@ class MonthlyStorageBilling(AllocationUsage):
                 # Replace placeholders in the template with actual values
                 billing_entry = billing_entry_template.format(
                     spreadsheet_key=spreadsheet_key,
+                    internal_service_provider=ISP_code,
                     document_date=document_date,
                     fiscal_year=fiscal_year,
                     billing_month=billing_month,

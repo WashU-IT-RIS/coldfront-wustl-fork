@@ -332,7 +332,7 @@ class MonthlyStorageBillingTests(TestCase):
              tempfile.NamedTemporaryFile(mode="r+", delete=False) as output:
             headers = [f"header{i}\n" for i in range(1, 6)]
             entry_template = (
-                "{spreadsheet_key},{document_date},{fiscal_year},{billing_month},"
+                "{spreadsheet_key},{internal_service_provider},{document_date},{fiscal_year},{billing_month},"
                 "{sponsor_pi},{storage_cluster},{tier},{service_rate_category},"
                 "{billable_usage_tb},{unit_rate},{billing_unit},{billing_amount},"
                 "{delivery_date},{fileset_name},{funding_number}"
