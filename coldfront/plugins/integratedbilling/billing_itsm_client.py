@@ -1,6 +1,7 @@
 from datetime import date
 from typing import Any
 
+from coldfront.plugins.integratedbilling.constants import ServiceRateTiers
 from coldfront.plugins.qumulo.services.itsm.itsm_client_handler import ItsmClientHandler
 
 ITSM_ATTRIBUTES_FOR_BILLING = [
@@ -22,17 +23,14 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
     "service_id",
 ]
 
-
-ITSM_ACTIVE_ALLOCATION_SERVICE_ID = (
-    1  # This should match the service ID in ITSM for active allocations
-)
 ITSM_QUERY_KEY = "provision_usage_creation_date"  # Key for filtering billing data by creation date of usage records
 
 
 class BillingItsmClient:
-    def __init__(self, usage_date: date):
+    def __init__(self, usage_date: date, tier: ServiceRateTiers = ServiceRateTiers.active) -> None:
         self.handler = ItsmClientHandler()
         self.usage_date = usage_date
+        self.tier = tier
 
     def get_billing_usages(self) -> list[dict[str, Any]]:
         attributes = self.__get_attributes()
@@ -45,4 +43,5 @@ class BillingItsmClient:
 
     def __get_filters(self) -> str:
         usage_date = self.usage_date.strftime("%Y-%m-%d")
-        return f'{{"{ITSM_QUERY_KEY}":"{usage_date}","service_id":{ITSM_ACTIVE_ALLOCATION_SERVICE_ID}}}'
+        itsm_service_id = self.tier.value
+        return f'{{"{ITSM_QUERY_KEY}":"{usage_date}","service_id":{itsm_service_id}}}'

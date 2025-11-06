@@ -18,8 +18,8 @@ class TestBillingItsmClient(TestCase):
     def setUp(self, mock_billing_itsm_client: mock.MagicMock) -> None:
         # fixed current date for testing and simulating when report is generated
         current_date = datetime(2025, 10, 4).date()
-        self.default_billing_date = current_date.replace(day=1)
-        billing_itsm_client = BillingItsmClient()
+        self.usage_date = current_date.replace(day=1)
+        billing_itsm_client = BillingItsmClient(self.usage_date)
         with open(
             "coldfront/plugins/integratedbilling/static/mock_monthly_billing_data_current_month.json",
             "r",

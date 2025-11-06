@@ -1,6 +1,6 @@
+import json
 from datetime import datetime, timezone
 from freezegun import freeze_time
-import json
 from unittest import mock
 from django.test import TestCase
 from coldfront.plugins.integratedbilling.factories import ServiceRateCategoryFactory
@@ -39,7 +39,7 @@ class TestReportGenerator(TestCase):
         self.mock_report_generator.generate()
         # check that report file is created
         with open(
-            f"/tmp/RIS-{self.mock_report_generator.delivery_month}-storage-{self.mock_report_generator.tier}-billing.csv",
+            f"/tmp/RIS-{self.mock_report_generator.delivery_month}-storage-{self.mock_report_generator.tier.name.lower()}-billing.csv",
             "r",
         ) as file:
             report_data = file.readlines()

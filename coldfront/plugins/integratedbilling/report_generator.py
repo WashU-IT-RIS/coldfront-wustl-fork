@@ -1,4 +1,8 @@
 from datetime import date, datetime, timedelta, timezone
+from typing import Union
+
+
+from coldfront.plugins.integratedbilling.constants import ServiceRateTiers  
 from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.coldfront_usage_ingestor import (
     ColdfrontUsageIngestor,
@@ -15,10 +19,10 @@ class ReportGenerator:
         self,
         usage_date: datetime = None,
         delivery_date: datetime = None,
-        tier: str = "active",
+        tier: ServiceRateTiers = ServiceRateTiers.active,
     ) -> None:
         self.usage_date = (usage_date or _get_default_usage_date()).date()
-        self.client = BillingItsmClient(usage_date)
+        self.client = BillingItsmClient(usage_date, tier)
         self.itsm_usage_ingestion = ItsmUsageIngestor(self.client)
         self.coldfront_usage_ingestion = ColdfrontUsageIngestor(usage_date)
         self.tier = tier
@@ -61,7 +65,7 @@ class ReportGenerator:
     def __get_allocation_usages(self):
         monthly_usages = AllocationUsage.objects.monthly_billable(
             self.usage_date,
-            self.tier,
+            self.tier.name.lower(),
         )
         return monthly_usages
 
@@ -98,7 +102,7 @@ class ReportGenerator:
         return first_of_previous_month
 
     def __get_report_file_name(self) -> str:
-        return f"/tmp/RIS-{self.delivery_month}-storage-{self.tier}-billing.csv"
+        return f"/tmp/RIS-{self.delivery_month}-storage-{self.tier.name.lower()}-billing.csv"
 
 
 # helper function to get the default billing date (first day of the current month)

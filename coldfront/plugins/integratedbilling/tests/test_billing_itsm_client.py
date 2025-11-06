@@ -19,7 +19,7 @@ class TestBillingItsmClient(TestCase):
         # fixed current date for testing and simulating when report is generated
         report_date = datetime(2025, 10, 4).date()
         self.usage_date = report_date.replace(day=1)
-        billing_itsm_client = BillingItsmClient()
+        billing_itsm_client = BillingItsmClient(self.usage_date)
         with open(
             "coldfront/plugins/integratedbilling/static/mock_monthly_billing_data_current_month.json",
             "r",
