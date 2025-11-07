@@ -61,12 +61,10 @@ class ReportGenerator:
 
     # Private methods
     def __get_allocation_usages(self):
-        breakpoint()
         monthly_usages = AllocationUsage.objects.monthly_billable(
             usage_date=self.usage_date,
             tier=self.tier.name,
         )
-        print(monthly_usages.query)
         return monthly_usages
 
     def __calculate_usage_fee(
