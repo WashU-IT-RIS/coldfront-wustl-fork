@@ -61,10 +61,12 @@ class ReportGenerator:
 
     # Private methods
     def __get_allocation_usages(self):
+        breakpoint()
         monthly_usages = AllocationUsage.objects.monthly_billable(
-            self.usage_date,
-            self.tier.name,
+            usage_date=self.usage_date,
+            tier=self.tier.name,
         )
+        print(monthly_usages.query)
         return monthly_usages
 
     def __calculate_usage_fee(
@@ -75,9 +77,7 @@ class ReportGenerator:
 
     def __save_report(self, billing_objects: list, file_path: str = None) -> None:
         file_path = file_path or self.__get_report_file_name()
-        MonthlyStorageBilling.generate_report(
-            billing_objects, output_path=file_path
-        )
+        MonthlyStorageBilling.generate_report(billing_objects, output_path=file_path)
 
     def __log_report_generation(self, status: str, details: dict) -> None:
         print(f"Report Generation Status: {status}, Details: {details}")
