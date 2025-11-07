@@ -1,6 +1,4 @@
 from datetime import date, datetime, timedelta, timezone
-from typing import Union
-
 
 from coldfront.plugins.integratedbilling.constants import ServiceTiers
 from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling

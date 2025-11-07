@@ -24,14 +24,14 @@ class ServiceRateCategoryFactory(DjangoModelFactory):
             model_display_name="Archive Service",
             model_description="Archive Service Description",
             rate=3.15,
-            tier_name="archive",
+            tier_name="Archive",
         )
         active_service = factory.Trait(
             model_name="consumption",
             model_display_name="Active Service",
             model_description="Active Service Description",
             rate=6.50,
-            tier_name="active",
+            tier_name="Active",
         )
         current_service_rate = factory.Trait(
             start_date=factory.LazyFunction(lambda: date(2025, 9, 1)),

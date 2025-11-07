@@ -1,16 +1,19 @@
+from datetime import date
 from typing import Union
+from django.db.models.query import QuerySet
+from django.db.models.expressions import OuterRef, Subquery
 
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeUsage,
 )
-from django.db.models.query import QuerySet
-from django.db.models.expressions import OuterRef, Subquery
-from datetime import date
 
 from coldfront.core.billing.models import AllocationUsage
-from coldfront.plugins.integratedbilling.constants import BillingDataSources
+from coldfront.plugins.integratedbilling.constants import (
+    BillingDataSources,
+    ServiceTiers,
+)
 
 
 class ColdfrontUsageIngestor:
@@ -140,13 +143,8 @@ class ColdfrontUsageIngestor:
         return sub_queries
 
     def __get_tier(self, allocation_with_usage: Allocation) -> str:
-        # tier_attribute = AllocationAttribute.objects.filter(
-        #     allocation=allocation_with_usage,
-        #     allocation_attribute_type__name="tier",
-        # ).first()
-        # if tier_attribute:
-        #     return tier_attribute.value.lower()
-        return "active"
+        # all allocations ingested from Coldfront are Active tier
+        return ServiceTiers.Active.name
 
     # TODO: implement logic to set missing service rate category in allocation attributes
     def __get_service_rate_category(self, allocation_with_usage: Allocation) -> str:

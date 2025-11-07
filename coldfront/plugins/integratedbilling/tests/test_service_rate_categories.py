@@ -28,7 +28,7 @@ class TestServiceRateCategories(TestCase):
     def test_service_rate_category_retrieval(self):
         usage_date = date(2025, 10, 1)
         model_name = "consumption"
-        tier_name = "archive"
+        tier_name = "Archive"
         cycle = "monthly"
 
         categories = (
@@ -49,7 +49,7 @@ class TestServiceRateCategories(TestCase):
     def test_service_rate_category_no_match(self):
         usage_date = date(2025, 10, 1)
         model_name = "Nonexistent Model"
-        tier_name = "archive"
+        tier_name = "Archive"
         cycle = "monthly"
 
         categories = (
@@ -78,7 +78,7 @@ class TestServiceRateCategories(TestCase):
 
     def test_service_rate_category_edge_dates(self):
         model_name = "consumption"
-        tier_name = "active"
+        tier_name = "Active"
         cycle = "monthly"
 
         # Test start date

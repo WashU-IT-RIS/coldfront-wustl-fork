@@ -6,6 +6,7 @@ from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmC
 from coldfront.plugins.integratedbilling.constants import (
     BillingDataSources,
     StorageClusters,
+    ServiceTiers,
 )
 from coldfront.core.billing.models import AllocationUsage
 
@@ -109,7 +110,7 @@ class ItsmUsageIngestor:
     def __get_tier(self, usage: dict) -> str:
         if service_id := usage.get("service_id"):
             if int(service_id) == 2:
-                return "archive"
+                return ServiceTiers.Archive.name
             if int(service_id) == 1:
-                return "active"
-        return "active"
+                return ServiceTiers.Active.name
+        return ServiceTiers.Active.name

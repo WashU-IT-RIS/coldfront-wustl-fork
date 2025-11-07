@@ -1,6 +1,7 @@
 from datetime import date
 from django.core.management.base import BaseCommand
 
+from coldfront.plugins.integratedbilling.constants import ServiceTiers
 from coldfront.plugins.integratedbilling.models import ServiceRateCategory
 
 
@@ -17,7 +18,7 @@ class Command(BaseCommand):
                 "model_name": "consumption",
                 "cycle": "monthly",
                 "unit": "TB",
-                "tier_name": "active",
+                "tier_name": ServiceTiers.Active.name,
             },
         )
 
@@ -30,6 +31,6 @@ class Command(BaseCommand):
                 "model_name": "consumption",
                 "cycle": "monthly",
                 "unit": "TB",
-                "tier_name": "archive",
+                "tier_name": ServiceTiers.Archive.name,
             },
         )

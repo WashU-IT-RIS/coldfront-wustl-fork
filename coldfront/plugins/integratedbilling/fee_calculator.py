@@ -38,7 +38,6 @@ def get_billing_objects(
         # For now all are consumption TODO: remove service rate category from MonthlyStorageBilling model?
         model_name = "consumption"  # billing_object.service_rate_category
         billing_cycle = billing_object.billing_cycle
-
         rate_category = (
             ServiceRateCategory.rates.for_date(delivery_date)
             .for_tier(tier_name)
