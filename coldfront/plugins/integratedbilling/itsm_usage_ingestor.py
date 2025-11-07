@@ -116,8 +116,7 @@ class ItsmUsageIngestor:
         return ServiceTiers.Active.name
 
     def __get_subsidized(self, usage: dict) -> bool:
-        service_id = usage.get("service_id")
         # Treat Archive service as non-subsidized since ITSM (wrongly) sets all archive to subsidized
-        if int(service_id) == 2:
+        if usage.get("service_id") == str(ServiceTiers.Archive.value):
             return False
         return usage.get("subsidized", False)
