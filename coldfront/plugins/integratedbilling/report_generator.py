@@ -78,7 +78,7 @@ class ReportGenerator:
     def __save_report(self, billing_objects: list, file_path: str = None) -> None:
         file_path = file_path or self.__get_report_file_name()
         MonthlyStorageBilling.generate_report(
-            billing_objects, template_path=None, output_path=file_path
+            billing_objects, output_path=file_path
         )
 
     def __log_report_generation(self, status: str, details: dict) -> None:
