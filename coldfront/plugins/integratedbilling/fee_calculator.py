@@ -5,7 +5,7 @@ from coldfront.plugins.integratedbilling.models import ServiceRateCategory
 
 # TODO: Move to config?
 SUBSIDIZED_AMOUNT_TB = Decimal(
-    5.0  # (float): indicates the amount of TB subsidized per allocation usage
+    5.0  # (float): indicates the amount of TB subsidized per allocation usage per month
 )
 
 
@@ -32,6 +32,9 @@ def get_billing_objects(
             continue
 
         tier_name = billing_object.tier
+        print(
+            f"Calculating fee for AllocationUsage ID {billing_object.id} (fileset {billing_object.fileset_name}) - Tier: {tier_name}, Billable Usage: {billing_object.billable_usage_tb} TB"
+        )
         # For now all are consumption TODO: remove service rate category from MonthlyStorageBilling model?
         model_name = "consumption"  # billing_object.service_rate_category
         billing_cycle = billing_object.billing_cycle
