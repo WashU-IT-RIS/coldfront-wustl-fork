@@ -94,13 +94,9 @@ class ReportGenerator:
     def __get_report_file_name(self) -> str:
         return f"/tmp/RIS-{self.delivery_month}-storage-{self.tier.name.lower()}-billing.csv"
 
-    # TODO: Move to subsidy handler class or AllocationUsage since the report generator should not handle business logic
     def __handle_subsidies(
         self, filtered_allocation_usages: list[AllocationUsage]
     ) -> None:
-        if self.tier == ServiceTiers.Archive:
-            return
-
         filtered_allocation_usages.set_and_validate_all_subsidized()
 
 
