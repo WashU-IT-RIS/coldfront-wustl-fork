@@ -65,7 +65,11 @@ class AllocationUsageQuerySet(models.QuerySet):
     
     # From the queryset of monthly_billable consumption allocations
     def set_and_validate_all_subsidized(self) -> bool:
-        # breakpoint()
+        tier=self.first().tier
+        if tier != "Active":
+            self.all().update(subsidized=False)
+            return True  # Only Active tier allocations are considered for subsidized setting
+
         if not self._is_all_subsidized_valid():
             return False  # Found a PI with more than one subsidized allocation
 

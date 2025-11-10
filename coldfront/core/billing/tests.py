@@ -48,6 +48,7 @@ class AllocationUsageQuerySetTest(TestCase):
     def setUp(self):
         self.usage_date = date(2024, 6, 1)
         self.tier_active = "Active"
+        self.tier_archive = "Archive"
         self.storage_cluster1 = "Storage1"
         self.storage_cluster2 = "Storage2"
         self.storage_cluster3 = "Storage3"
@@ -126,6 +127,30 @@ class AllocationUsageQuerySetTest(TestCase):
             subsidized=False
         )
 
+        self.alloc7 = AllocationUsageFactory(
+            tier=self.tier_archive,
+            usage_date=self.usage_date,
+            exempt=False,
+            billing_cycle="monthly",
+            service_rate_category="consumption",
+            sponsor_pi=self.pi1,
+            storage_cluster=self.storage_cluster1,
+            fileset_name=self.fileset3,
+            subsidized=True
+        )
+
+        self.alloc8 = AllocationUsageFactory(
+            tier=self.tier_archive,
+            usage_date=self.usage_date,
+            exempt=False,
+            billing_cycle="monthly",
+            service_rate_category="consumption",
+            sponsor_pi=self.pi1,
+            storage_cluster=self.storage_cluster1,
+            fileset_name=self.fileset4,
+            subsidized=True
+        )
+
     def test_monthly_billable(self):
         qs = AllocationUsage.objects.monthly_billable(self.usage_date)
         self.assertIn(self.alloc1, qs)
@@ -136,7 +161,7 @@ class AllocationUsageQuerySetTest(TestCase):
 
     def test_with_usage_date(self):
         qs = AllocationUsage.objects.with_usage_date(self.usage_date)
-        self.assertEqual(qs.count(), 6)
+        self.assertEqual(qs.count(), 8)
 
     def test_not_exempt(self):
         qs = AllocationUsage.objects.not_exempt()
@@ -225,6 +250,13 @@ class AllocationUsageQuerySetTest(TestCase):
         qs_refresh = AllocationUsage.objects.monthly_billable(self.usage_date).consumption()
         self.assertEqual(qs_refresh._count_subsidized_by_pi(self.pi2), 1)
 
+    def test_set_and_validate_all_subsidized_to_false_for_archive_tier(self):
+        qs = AllocationUsage.objects.filter(tier="Archive", usage_date=self.usage_date)
+        # Set subsidized to False for all Archive tier allocations
+        result = qs.set_and_validate_all_subsidized()
+        self.assertTrue(result)
+        for alloc in qs:
+            self.assertFalse(alloc.subsidized)
 
 class MonthlyStorageBillingTests(TestCase):
     def setUp(self):
