@@ -35,19 +35,13 @@ class ReportGenerator:
 
             self.coldfront_usage_ingestion.process_usages()
 
-        # get usages for month and filter as needed
         filtered_allocation_usages = self.__get_allocation_usages()
 
-        # set the subsidies if applicable
-        filtered_allocation_usages.set_and_validate_all_subsidized()
+        self.__handle_subsidies(filtered_allocation_usages)
 
-        # calculate costs
         calculated_usage_costs = self.__calculate_usage_fee(filtered_allocation_usages)
 
-        self.__save_report(
-            calculated_usage_costs,
-        )
-
+        self.__save_report(calculated_usage_costs)
         summary = self.__generate_summary(filtered_allocation_usages)
         self.__log_report_generation(status="Success", details=summary)
 
@@ -99,6 +93,15 @@ class ReportGenerator:
 
     def __get_report_file_name(self) -> str:
         return f"/tmp/RIS-{self.delivery_month}-storage-{self.tier.name.lower()}-billing.csv"
+
+    # TODO: Move to subsidy handler class or AllocationUsage since the report generator should not handle business logic
+    def __handle_subsidies(
+        self, filtered_allocation_usages: list[AllocationUsage]
+    ) -> None:
+        if self.tier == ServiceTiers.Archive:
+            return
+
+        filtered_allocation_usages.set_and_validate_all_subsidized()
 
 
 # helper function to get the default billing date (first day of the current month)
