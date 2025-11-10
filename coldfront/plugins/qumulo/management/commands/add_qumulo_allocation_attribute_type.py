@@ -133,7 +133,7 @@ class Command(BaseCommand):
             },
         )
 
-        # these are the fields that will be migrated from
+        # these are the fields that will be migrated from Storage1
         AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Yes/No"),
             name="secure",
