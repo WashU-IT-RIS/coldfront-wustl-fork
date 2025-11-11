@@ -60,8 +60,8 @@ class TestAllocations(TestCase):
         self.assertQuerysetEqual(parents_allocations, filtered_allocations)
 
     def test_parents_not_exempt(self):
-        exempt_allocations = Allocation.objects.not_exempt()
-        filtered_allocations = Allocation.objects.exclude(
+        exempt_allocations = Allocation.objects.parents().not_exempt()
+        filtered_allocations = Allocation.objects.filter(parent_links=None).exclude(
             allocationattribute__allocation_attribute_type__name="billing_exempt",
             allocationattribute__value="yes",
         )
