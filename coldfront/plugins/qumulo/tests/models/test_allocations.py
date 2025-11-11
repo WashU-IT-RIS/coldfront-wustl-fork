@@ -22,7 +22,7 @@ class TestAllocations(TestCase):
     def test_active_storage_allocations_queryset(self):
         active_storage_allocations = Allocation.objects.active_storage()
         filtered_allocations = Allocation.objects.filter(
-            status__name="Active", resources__name__in=["Storage2", "Storage3"]
+            status__name="Active", resources__resource_type__name="Storage"
         )
         self.assertQuerysetEqual(active_storage_allocations, filtered_allocations)
 

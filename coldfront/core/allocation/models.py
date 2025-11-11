@@ -67,7 +67,7 @@ class AllocationStatusChoice(TimeStampedModel):
 class AllocationQuerySet(models.QuerySet):
     def active_storage(self):
         return self.filter(
-            status__name="Active", resources__name__in=["Storage2", "Storage3"]
+            status__name="Active", resources__resource_type__name="Storage"
         )
 
     def parents(self):
