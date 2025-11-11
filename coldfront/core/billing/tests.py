@@ -324,14 +324,16 @@ class MonthlyStorageBillingTests(TestCase):
         # Patch datetime to June and July to test fiscal year logic
         with mock.patch("coldfront.core.billing.models.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2024, 6, 1)
-            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 5, 1).date())
-            self.assertEqual(fy, "FY24")
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2023, 6, 1).date())
+            self.assertEqual(fy, "FY23")
             mock_dt.now.return_value = datetime(2024, 7, 1)
-            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 5, 1).date())
-            self.assertEqual(fy, "FY24")
             fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 6, 1).date())
+            self.assertEqual(fy, "FY24")
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 7, 1).date())
             self.assertEqual(fy, "FY25")
             fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 12, 1).date())
+            self.assertEqual(fy, "FY25")
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2025, 1, 1).date())
             self.assertEqual(fy, "FY25")
 
     def test_generate_report_default_file_paths(self):
@@ -357,6 +359,13 @@ class MonthlyStorageBillingTests(TestCase):
             test_output_path = "/tmp/test_billing_report.csv"
             if os.path.exists(test_output_path):
                 os.remove(test_output_path)
+
+    def test_generate_report_filename(self):
+        a_tier = "Active"
+        a_delivery_date = date(2024, 6, 1)
+        expected_filename = "RIS-June-storage-Active-billing.csv"
+        generated_filename = MonthlyStorageBilling._generate_report_filename(a_tier, a_delivery_date)
+        self.assertEqual(generated_filename, expected_filename)
 
     def test_generate_report(self):
         # Prepare template file with 6 lines, 6th is billing entry with placeholders

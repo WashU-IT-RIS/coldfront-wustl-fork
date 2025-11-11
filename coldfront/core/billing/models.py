@@ -223,20 +223,45 @@ class MonthlyStorageBilling(AllocationUsage):
             return None 
 
     @classmethod
-    def _get_fiscal_year_by_delivery_date(cls, delivery_date):
+    def _get_fiscal_year(cls, a_date):
         """
         Given a date, return the fiscal year as a combined string of
         'FY' and the last 2 digit of the year.
         Fiscal year starts on July 1st,
-        where the service delivery starts on June 1st.
         """
 
-        month = delivery_date.month
-        fiscal_year = delivery_date.year
-        if month >= 6:
-            fiscal_year = delivery_date.year + 1
+        month = a_date.month
+        fiscal_year = a_date.year
+        if month >= 7:
+            fiscal_year = a_date.year + 1
 
         return "FY" + str(fiscal_year)[-2:]
+
+    @classmethod
+    def _get_fiscal_year_by_delivery_date(cls, delivery_date):
+        """
+        This will be used in the memo filed in the billing report.
+        The delivery date is the first date of the month when the service is delivered.
+        """
+        return cls._get_fiscal_year(delivery_date)
+
+    @classmethod
+    def _get_fiscal_year_by_document_date(cls, document_date):
+        """
+        This will be used in the Box folder name for storing the billing report.
+        The document date is the date when the billing report is generated.
+        """
+        return cls._get_fiscal_year(document_date)
+
+    @classmethod
+    def _generate_report_filename(cls, a_tier, a_delivery_date):
+        """
+        Generate the billing report file name based on the tier and delivery date.
+        Example: RIS-January-storage-active-billing.csv
+        """
+        month_name = a_delivery_date.strftime("%B")
+        file_name = f"RIS-{month_name}-storage-{a_tier}-billing.csv"
+        return file_name
 
     @classmethod
     def generate_report(cls, billing_objects, template_path=None, output_path=None):
@@ -247,8 +272,12 @@ class MonthlyStorageBilling(AllocationUsage):
         if template_path is None:
             template_path = f"{PROJECT_ROOT()}/coldfront/core/billing/templates/RIS-monthly-storage-billing-template.csv"
 
+        a_tier = billing_objects[0].tier
+        a_delivery_date = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d")
+
         if output_path is None:
-            output_path = "/tmp/billing_report.csv"
+            output_filename = cls._generate_report_filename(a_tier, a_delivery_date)
+            output_path = f"/tmp/{output_filename}"
 
         cls._copy_template_headers_to_file(template_path, output_path)
 
@@ -258,7 +287,6 @@ class MonthlyStorageBilling(AllocationUsage):
             print("Error: Could not read billing entry template.")
             return
 
-        a_tier = billing_objects[0].tier
         if a_tier == "Active":
             ISP_code = cls.ISP_ACTIVE
         else:
@@ -266,7 +294,6 @@ class MonthlyStorageBilling(AllocationUsage):
 
         spreadsheet_key = 1
         document_date = datetime.now().date().strftime("%m/%d/%Y")
-        a_delivery_date = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d")
         fiscal_year = cls._get_fiscal_year_by_delivery_date(a_delivery_date)
         billing_month = a_delivery_date.strftime("%B")
         with open(output_path, "a") as output_file:
