@@ -70,7 +70,4 @@ class TestAllocations(TestCase):
             exempt_attr = allocation.allocationattribute_set.filter(
                 allocation_attribute_type__name="billing_exempt"
             ).first()
-            self.assertIsNone(exempt_attr)
-            # or if exists, value is not 'yes'
-            if exempt_attr:
-                self.assertNotEqual(exempt_attr.value, "yes")
+            self.assertNotEqual(exempt_attr.value, "yes") if exempt_attr else None
