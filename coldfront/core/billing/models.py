@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import models
+from django.db.models.functions import Lower
 
 from coldfront.config.env import PROJECT_ROOT
 from coldfront.core.allocation.models import *
@@ -14,14 +15,18 @@ from simple_history.models import HistoricalRecords
 class AllocationUsageQuerySet(models.QuerySet):
 
     def monthly_billable(self, usage_date, tier="Active"):
-        return self.filter(usage_date=usage_date,
-                           tier=tier,
-                           usage_tb__gt=0,
-                           exempt=False,
-                           billing_cycle="monthly",
-                           ).exclude(
-                               service_rate_category="condo",
-                           )
+        return self.annotate(
+                lower_status=Lower("status")
+            ).filter(
+                usage_date=usage_date,
+                tier=tier,
+                usage_tb__gt=0,
+                exempt=False,
+                billing_cycle="monthly",
+                lower_status__in=["active", "new", "pending", "jenkins error"]
+            ).exclude(
+                service_rate_category="condo",
+            )
 
     def with_usage_date(self, usage_date):
         return self.filter(usage_date=usage_date)
@@ -103,9 +108,11 @@ class AllocationUsage(TimeStampedModel):
         external_key (int): links to the primary key of the allocation to its source system
         source (str): indicates the source system of the usage (ex. ITSM, ColdFront)
         tier (str): indicates the service tier of the allocation (ex. Active, Archive)
+        filesystem_path (str): indicates the mount path of the allocation in the storage cluster
         sponsor_pi (str): indicates who is primarily responsible for the allocation. Usually a WUSTLkey.
         billing_contact (str): indicates who is the main contact for billing issues
         fileset_name (str): represents the commonly used name of the allocation
+        status (str): indicates the current status of the allocation in lowercases (ex. active, new, pending, jenkins error, inactive, etc.)
         service_rate_category (str): indicates the billing rate of the allocation (ex. consumption, subscription, condo)
         usage_tb (decimal): indicates the consumption of the allocation in TB at the point of time, usage_date
         funding_number (str): indicates the funding source aka cost center number
@@ -126,16 +133,19 @@ class AllocationUsage(TimeStampedModel):
             "sponsor_pi",
             "service_rate_category",
             "fileset_name",
+            "filesystem_path",
         ]
 
-        unique_together = (("tier", "storage_cluster", "fileset_name", "usage_date"),)
+        unique_together = (("tier", "storage_cluster", "filesystem_path", "usage_date"),)
 
     external_key=models.IntegerField()
     source=models.CharField(max_length=256)
     tier=models.CharField(max_length=256)
+    filesystem_path=models.CharField(max_length=512)
     sponsor_pi=models.CharField(max_length=512)
     billing_contact=models.CharField(max_length=512)
     fileset_name=models.CharField(max_length=256)
+    status=models.CharField(max_length=256)
     service_rate_category=models.CharField(max_length=256)
     usage_tb=models.DecimalField(max_digits=20, decimal_places=6)
     funding_number=models.CharField(max_length=256)
