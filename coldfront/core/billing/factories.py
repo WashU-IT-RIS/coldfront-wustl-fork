@@ -16,7 +16,7 @@ class AllocationUsageFactory(factory.django.DjangoModelFactory):
     sponsor_pi = factory.LazyAttribute(lambda _: fake.name())
     billing_contact = factory.LazyAttribute(lambda _: fake.email())
     fileset_name = factory.LazyAttribute(lambda _: fake.word())
-    status = factory.LazyAttribute(lambda _: fake.random_element(elements=['new', 'active', 'pending', 'jenkins error']))
+    status = factory.LazyAttribute(lambda _: fake.random_element(elements=['new', 'active', 'pending', 'jenkins error', 'inactive']))
     service_rate_category = factory.LazyAttribute(lambda _: fake.word())
     usage_tb = factory.LazyAttribute(lambda _: str(fake.pydecimal(left_digits=2, right_digits=6, positive=True)))
     funding_number = factory.LazyAttribute(lambda _: fake.bothify(text='??####'))
