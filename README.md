@@ -7,7 +7,7 @@
 ColdFront is an open source resource and allocation management system designed to provide a
 central portal for administration, reporting, and measuring scientific impact
 of cyberinfrastructure resources. ColdFront was created to help high performance computing (HPC) centers manage access to a diverse set of resources across large groups of users and provide a rich set of
-extensible meta data for comprehensive reporting. The flexiblity of ColdFront allows centers to manage and automate their policies and procedures within the framework provided or extend the functionality with [plugins](docs/pages/index.md#extensibility).  ColdFront is written in Python and released under the GPLv3 license.
+extensible meta data for comprehensive reporting. The flexiblity of ColdFront allows centers to manage and automate their policies and procedures within the framework provided or extend the functionality with [plugins](docs/pages/index.md#extensibility). ColdFront is written in Python and released under the GPLv3 license.
 
 ## Features
 
@@ -16,10 +16,10 @@ extensible meta data for comprehensive reporting. The flexiblity of ColdFront al
 - Collection of Project, Grant, and Publication data from users
 - Center director approval system and annual project review process
 - Email notifications for expiring/renewing access to resources
-- Ability to define custom attributes on resources and allocations 
+- Ability to define custom attributes on resources and allocations
 - Integration with 3rd party systems for automation, access control, and other system provisioning tasks
 
-[Read more](docs/pages/index.md)  
+[Read more](docs/pages/index.md)
 
 ## Community Supported Plugins
 
@@ -34,6 +34,7 @@ _Submit a PR to add your plugin to the list above._
 For more information on installing and using ColdFront see our [documentation here](https://coldfront.readthedocs.io)
 
 ## Contact Information
+
 If you would like a live demo followed by QA, please contact us at
 ccr-coldfront-admin-list@listserv.buffalo.edu. You can also contact us for
 general inquiries and installation troubleshooting.
@@ -44,7 +45,6 @@ following command in the body of the message:
 
 subscribe ccr-open-coldfront-list@listserv.buffalo.edu first_name last_name
 
-
 ## License
 
 ColdFront is released under the GPLv3 license. See the LICENSE file.
@@ -52,6 +52,7 @@ ColdFront is released under the GPLv3 license. See the LICENSE file.
 ## Testing
 
 ### Setup
+
 To run tests, the following variables should be included in a `.env` file in the root directory of the repo:
 
 ```
@@ -59,13 +60,14 @@ PLUGIN_QUMULO=True
 AD_SERVER_NAME=foo
 AD_USERNAME=bar
 AD_USER_PASS=bah
-STORAGE2_PATH=/foo/bar
+QUMULO_INFO={"Storage2": {"path": "/foo/bar", "host": "foo","port": "8000","user": "admin","pass": "bar" }}
 ```
 
 ### Running
-A complete test suite can be run with `manage.py test`.  You can target sub-groups of tests by including a specifying argument.  Ex: `manage.py.test coldfront.plugins.qumulo.tests` will run only unit tests for the qumulo plugin.
 
-Typically, you'll want to run non integration tests separately, which can be done with `python manage.py test --exclude-tag integration`.  Integrations can be run with `python manage.py test --tag integration`.
+A complete test suite can be run with `manage.py test`. You can target sub-groups of tests by including a specifying argument. Ex: `manage.py.test coldfront.plugins.qumulo.tests` will run only unit tests for the qumulo plugin.
+
+Typically, you'll want to run non integration tests separately, which can be done with `python manage.py test --exclude-tag integration`. Integrations can be run with `python manage.py test --tag integration`.
 
 ### Set up Local Environment and Run tests
 
@@ -73,13 +75,16 @@ Typically, you'll want to run non integration tests separately, which can be don
 2. Create a (Python) virtual environment: `python3 -mvenv coldfront-venv`
 3. Activate the virtual environment: `source coldfront-venv/bin/activate`
 4. Install the dependencies
+
 ```
 pip install --upgrade pip
 pip install -r requirements-dev.txt
 ```
+
 5. Run a test to verify the installation: `python manage.py test coldfront.plugins.qumulo.tests`
 
 **Steps for local development**
+
 ```
 python3 -mvenv coldfront-venv
 source coldfront-venv/bin/activate
@@ -89,7 +94,8 @@ python manage.py test coldfront.plugins.qumulo.tests
 ```
 
 ### Integration Test ENV
-Integration Tests need to be run while connected to a VPN.  The following variables need to be included for functioning integration tests.  Credentials should be stored in the `pass` store.
+
+Integration Tests need to be run while connected to a VPN. The following variables need to be included for functioning integration tests. Credentials should be stored in the `pass` store.
 
 ```
 PLUGIN_QUMULO=True

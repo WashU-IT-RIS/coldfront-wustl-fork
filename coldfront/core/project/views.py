@@ -513,7 +513,7 @@ class ProjectCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 class ProjectUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Project
     template_name_suffix = '_update_form'
-    fields = ['title', 'description', 'field_of_science', ]
+    form_class = ProjectCreateForm
     success_message = 'Project updated.'
 
     def test_func(self):
@@ -528,6 +528,21 @@ class ProjectUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestM
 
         if project_obj.projectuser_set.filter(user=self.request.user, role__name='Manager', status__name='Active').exists():
             return True
+       
+    def form_valid(self, form):
+        sponsor_department_attribute = self.get_object().projectattribute_set.filter(proj_attr_type__name="sponsor_department_number").first()
+        sponsor_department_attribute.value = form.cleaned_data.get('sponsor_department_number', '')
+        sponsor_department_attribute.save()
+            
+        return super().form_valid(form)   
+        
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        
+        sponsor_department_attribute = self.object.projectattribute_set.filter(proj_attr_type__name="sponsor_department_number").first()
+        kwargs['initial']['sponsor_department_number'] = sponsor_department_attribute.value if sponsor_department_attribute else ''
+        
+        return kwargs
 
     def dispatch(self, request, *args, **kwargs):
         project_obj = get_object_or_404(Project, pk=self.kwargs.get('pk'))

@@ -1,3 +1,4 @@
+from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
 
@@ -5,6 +6,7 @@ from django import forms
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["storage_type"].disabled = True
 
         self.fields["storage_name"].disabled = True
         self.fields["storage_filesystem_path"].disabled = True
@@ -18,3 +20,6 @@ class UpdateAllocationForm(AllocationForm):
             required=False,
         )
         self.fields["prepaid_expiration"].disabled = True
+        self.fields["rw_users"].required = (
+            self.allocation_status_name != "READY FOR DELETION"
+        )
