@@ -38,9 +38,6 @@ class TestIntegrationBillingItsmClient(TestCase):
         )
         data = billing_itsm_client_for_archive.get_billing_usages()
         service_provision_usage = data[0]
-        with open("archive.json", "w") as file:
-            json.dump(data, file)
-            file.close()
         self.assertIsInstance(service_provision_usage, dict)
         self.assertIsNot(service_provision_usage, {})
         self.assertIn("service_id", service_provision_usage.keys())
