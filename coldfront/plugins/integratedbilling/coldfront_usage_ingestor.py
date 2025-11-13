@@ -59,10 +59,8 @@ class ColdfrontUsageIngestor:
                 continue
 
             record = AllocationUsage.objects.update_or_create(
-                status=allocation_with_usage.status.name,
                 filesystem_path=allocation_with_usage.get("storage_filesystem_path"),
                 tier=self.__get_tier(allocation_with_usage),
-                fileset_name=allocation_with_usage.storage_name,
                 source=self.source,
                 usage_date=self.usage_date,
                 defaults={
@@ -93,6 +91,7 @@ class ColdfrontUsageIngestor:
                     )
                     .get()
                     .name,
+                    "status": allocation_with_usage.status.name,
                 },
             )
             saved_usages.append(record)
