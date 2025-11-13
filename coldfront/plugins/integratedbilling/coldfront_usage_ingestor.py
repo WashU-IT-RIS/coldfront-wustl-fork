@@ -59,7 +59,7 @@ class ColdfrontUsageIngestor:
                 continue
 
             record = AllocationUsage.objects.update_or_create(
-                filesystem_path=allocation_with_usage.get("storage_filesystem_path"),
+                filesystem_path=allocation_with_usage.storage_filesystem_path,
                 tier=self.__get_tier(allocation_with_usage),
                 source=self.source,
                 usage_date=self.usage_date,
