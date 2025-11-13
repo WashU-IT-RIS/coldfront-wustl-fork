@@ -9,30 +9,34 @@ from coldfront.core.billing.models import (AllocationUsage)
 @admin.register(AllocationUsage)
 class AllocationUsageAdmin(SimpleHistoryAdmin):
     list_display = (
+        'source',
         'external_key',
         'tier',
-        'source',
+        'filesystem_path',
         'sponsor_pi',
         'billing_contact',
         'fileset_name',
+        'storage_cluster',
+        'status',
         'service_rate_category',
+        'usage_date',
         'usage_tb',
-        'funding_number',
         'exempt',
         'subsidized',
         'is_condo_group',
         'parent_id_key',
         'quota',
+        'funding_number',
         'billing_cycle',
-        'usage_date',
-        'storage_cluster',
     )
     search_fields = (
         'external_key',
         'source',
         'sponsor_pi',
         'billing_contact',
+        'filesystem_path',
         'fileset_name',
+        'status',
         'service_rate_category',
         'funding_number',
         'quota',
@@ -41,11 +45,14 @@ class AllocationUsageAdmin(SimpleHistoryAdmin):
         'tier',
     )
     list_filter = (
+        'source',
+        'tier',
+        'storage_cluster',
+        'service_rate_category',
         'exempt',
         'subsidized',
         'is_condo_group',
-        'storage_cluster',
-        'tier',
+        'billing_cycle',
     )
     ordering = ('-usage_date', 'sponsor_pi', 'service_rate_category')
     date_hierarchy = 'usage_date'
@@ -54,11 +61,12 @@ class AllocationUsageAdmin(SimpleHistoryAdmin):
             'fields': (
                 ('external_key', 'source', 'tier'),
                 ('sponsor_pi', 'billing_contact'),
+                ('storage_cluster', 'filesystem_path'),
                 ('fileset_name', 'service_rate_category', 'usage_tb'),
                 ('funding_number', 'exempt', 'subsidized'),
                 ('is_condo_group', 'parent_id_key'),
                 ('quota', 'billing_cycle'),
-                ('usage_date', 'storage_cluster'),
+                ('usage_date', 'status'),
             ),
             'description': textwrap.dedent("""
                 <p class="help">
