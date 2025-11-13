@@ -1,8 +1,10 @@
 from datetime import datetime
 
 from django.db import models
+from django.db.models.functions import Lower
 
 from coldfront.config.env import PROJECT_ROOT
+from coldfront.core.constants import BILLABLE_STATUSES
 from coldfront.core.allocation.models import *
 from coldfront.core.project.models import *
 from coldfront.core.resource.models import *
@@ -14,14 +16,18 @@ from simple_history.models import HistoricalRecords
 class AllocationUsageQuerySet(models.QuerySet):
 
     def monthly_billable(self, usage_date, tier="Active"):
-        return self.filter(usage_date=usage_date,
-                           tier=tier,
-                           usage_tb__gt=0,
-                           exempt=False,
-                           billing_cycle="monthly",
-                           ).exclude(
-                               service_rate_category="condo",
-                           )
+        return self.annotate(
+                status_lower=Lower("status")
+            ).filter(
+                usage_date=usage_date,
+                tier=tier,
+                usage_tb__gt=0,
+                exempt=False,
+                billing_cycle="monthly",
+                status_lower__in=BILLABLE_STATUSES
+            ).exclude(
+                service_rate_category="condo",
+            )
 
     def with_usage_date(self, usage_date):
         return self.filter(usage_date=usage_date)
@@ -103,9 +109,11 @@ class AllocationUsage(TimeStampedModel):
         external_key (int): links to the primary key of the allocation to its source system
         source (str): indicates the source system of the usage (ex. ITSM, ColdFront)
         tier (str): indicates the service tier of the allocation (ex. Active, Archive)
+        filesystem_path (str): indicates the mount path of the allocation in the storage cluster
         sponsor_pi (str): indicates who is primarily responsible for the allocation. Usually a WUSTLkey.
         billing_contact (str): indicates who is the main contact for billing issues
         fileset_name (str): represents the commonly used name of the allocation
+        status (str): indicates the current status of the allocation in lowercases (ex. active, new, pending, jenkins error, inactive, etc.)
         service_rate_category (str): indicates the billing rate of the allocation (ex. consumption, subscription, condo)
         usage_tb (decimal): indicates the consumption of the allocation in TB at the point of time, usage_date
         funding_number (str): indicates the funding source aka cost center number
@@ -126,16 +134,19 @@ class AllocationUsage(TimeStampedModel):
             "sponsor_pi",
             "service_rate_category",
             "fileset_name",
+            "filesystem_path",
         ]
 
-        unique_together = (("tier", "storage_cluster", "fileset_name", "usage_date"),)
+        unique_together = (("tier", "storage_cluster", "filesystem_path", "usage_date"),)
 
     external_key=models.IntegerField()
     source=models.CharField(max_length=256)
     tier=models.CharField(max_length=256)
+    filesystem_path=models.CharField(max_length=512)
     sponsor_pi=models.CharField(max_length=512)
     billing_contact=models.CharField(max_length=512)
     fileset_name=models.CharField(max_length=256)
+    status=models.CharField(max_length=256)
     service_rate_category=models.CharField(max_length=256)
     usage_tb=models.DecimalField(max_digits=20, decimal_places=6)
     funding_number=models.CharField(max_length=256)
@@ -223,20 +234,45 @@ class MonthlyStorageBilling(AllocationUsage):
             return None 
 
     @classmethod
-    def _get_fiscal_year_by_delivery_date(cls, delivery_date):
+    def _get_fiscal_year(cls, a_date):
         """
         Given a date, return the fiscal year as a combined string of
         'FY' and the last 2 digit of the year.
         Fiscal year starts on July 1st,
-        where the service delivery starts on June 1st.
         """
 
-        month = delivery_date.month
-        fiscal_year = delivery_date.year
-        if month >= 6:
-            fiscal_year = delivery_date.year + 1
+        month = a_date.month
+        fiscal_year = a_date.year
+        if month >= 7:
+            fiscal_year = a_date.year + 1
 
         return "FY" + str(fiscal_year)[-2:]
+
+    @classmethod
+    def _get_fiscal_year_by_delivery_date(cls, delivery_date):
+        """
+        This will be used in the memo filed in the billing report.
+        The delivery date is the first date of the month when the service is delivered.
+        """
+        return cls._get_fiscal_year(delivery_date)
+
+    @classmethod
+    def _get_fiscal_year_by_document_date(cls, document_date):
+        """
+        This will be used in the Box folder name for storing the billing report.
+        The document date is the date when the billing report is generated.
+        """
+        return cls._get_fiscal_year(document_date)
+
+    @classmethod
+    def _generate_report_filename(cls, a_tier, a_delivery_date):
+        """
+        Generate the billing report file name based on the tier and delivery date.
+        Example: RIS-January-storage-active-billing.csv
+        """
+        month_name = a_delivery_date.strftime("%B")
+        file_name = f"RIS-{month_name}-storage-{a_tier}-billing.csv"
+        return file_name
 
     @classmethod
     def generate_report(cls, billing_objects, template_path=None, output_path=None):
@@ -247,8 +283,12 @@ class MonthlyStorageBilling(AllocationUsage):
         if template_path is None:
             template_path = f"{PROJECT_ROOT()}/coldfront/core/billing/templates/RIS-monthly-storage-billing-template.csv"
 
+        a_tier = billing_objects[0].tier
+        a_delivery_date = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d")
+
         if output_path is None:
-            output_path = "/tmp/billing_report.csv"
+            output_filename = cls._generate_report_filename(a_tier, a_delivery_date)
+            output_path = f"/tmp/{output_filename}"
 
         cls._copy_template_headers_to_file(template_path, output_path)
 
@@ -258,7 +298,6 @@ class MonthlyStorageBilling(AllocationUsage):
             print("Error: Could not read billing entry template.")
             return
 
-        a_tier = billing_objects[0].tier
         if a_tier == "Active":
             ISP_code = cls.ISP_ACTIVE
         else:
@@ -266,7 +305,6 @@ class MonthlyStorageBilling(AllocationUsage):
 
         spreadsheet_key = 1
         document_date = datetime.now().date().strftime("%m/%d/%Y")
-        a_delivery_date = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d")
         fiscal_year = cls._get_fiscal_year_by_delivery_date(a_delivery_date)
         billing_month = a_delivery_date.strftime("%B")
         with open(output_path, "a") as output_file:

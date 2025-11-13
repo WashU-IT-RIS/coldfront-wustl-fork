@@ -14,6 +14,7 @@ class AllocationUsageModelTest(TestCase):
         self.assertTrue(isinstance(usage.external_key, int))
         self.assertTrue(isinstance(usage.source, str))
         self.assertTrue(isinstance(usage.tier, str))
+        self.assertTrue(isinstance(usage.filesystem_path, str))
         self.assertTrue(isinstance(usage.sponsor_pi, str))
         self.assertTrue(isinstance(usage.billing_contact, str))
         self.assertTrue(isinstance(usage.fileset_name, str))
@@ -33,6 +34,7 @@ class AllocationUsageModelTest(TestCase):
         usage = AllocationUsageFactory()
         self.assertNotEqual(usage.source, "")
         self.assertNotEqual(usage.tier, "")
+        self.assertNotEqual(usage.filesystem_path, "")
         self.assertNotEqual(usage.sponsor_pi, "")
         self.assertNotEqual(usage.billing_contact, "")
         self.assertNotEqual(usage.fileset_name, "")
@@ -58,6 +60,12 @@ class AllocationUsageQuerySetTest(TestCase):
         self.fileset2 = "filesetB"
         self.fileset3 = "filesetC"
         self.fileset4 = "filesetD"
+        self.filesystem_path1 = "/filesystem/filesetA"
+        self.filesystem_path2 = "/filesystem/filesetB"
+        self.filesystem_path3 = "/filesystem/filesetC"
+        self.filesystem_path4 = "/filesystem/filesetD"
+        self.status_active = "active"
+        self.status_new = "new"
         # Create various AllocationUsage instances
         self.alloc1 = AllocationUsageFactory(
             tier=self.tier_active,
@@ -67,8 +75,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="consumption",
             sponsor_pi=self.pi1,
             storage_cluster=self.storage_cluster1,
+            filesystem_path=self.filesystem_path1,
             fileset_name=self.fileset1,
             subsidized=False,
+            status=self.status_active,
         )
         self.alloc2 = AllocationUsageFactory(
             tier=self.tier_active,
@@ -78,8 +88,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="consumption",
             sponsor_pi=self.pi1,
             storage_cluster=self.storage_cluster2,
+            filesystem_path=self.filesystem_path2,
             fileset_name=self.fileset2,
             subsidized=True,
+            status=self.status_active,
         )
         self.alloc3 = AllocationUsageFactory(
             tier=self.tier_active,
@@ -89,8 +101,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="consumption",
             sponsor_pi=self.pi2,
             storage_cluster=self.storage_cluster3,
+            filesystem_path=self.filesystem_path1,
             fileset_name=self.fileset1,
             subsidized=False,
+            status=self.status_active,
         )
         self.alloc4 = AllocationUsageFactory(
             tier=self.tier_active,
@@ -100,8 +114,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="subscription",
             sponsor_pi=self.pi2,
             storage_cluster=self.storage_cluster3,
+            filesystem_path=self.filesystem_path2,
             fileset_name=self.fileset2,
             subsidized=False,
+            status=self.status_active,
         )
         self.alloc5 = AllocationUsageFactory(
             tier=self.tier_active,
@@ -111,8 +127,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="consumption",
             sponsor_pi=self.pi2,
             storage_cluster=self.storage_cluster3,
+            filesystem_path=self.filesystem_path3,
             fileset_name=self.fileset3,
             subsidized=False,
+            status=self.status_active,
         )
 
         self.alloc6 = AllocationUsageFactory(
@@ -123,8 +141,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="condo",
             sponsor_pi=self.pi2,
             storage_cluster=self.storage_cluster3,
+            filesystem_path=self.filesystem_path4,
             fileset_name=self.fileset4,
-            subsidized=False
+            subsidized=False,
+            status=self.status_active,
         )
 
         self.alloc7 = AllocationUsageFactory(
@@ -135,8 +155,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="consumption",
             sponsor_pi=self.pi1,
             storage_cluster=self.storage_cluster1,
+            filesystem_path=self.filesystem_path3,
             fileset_name=self.fileset3,
-            subsidized=True
+            subsidized=True,
+            status=self.status_new,
         )
 
         self.alloc8 = AllocationUsageFactory(
@@ -147,8 +169,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="consumption",
             sponsor_pi=self.pi1,
             storage_cluster=self.storage_cluster1,
+            filesystem_path=self.filesystem_path4,
             fileset_name=self.fileset4,
-            subsidized=True
+            subsidized=True,
+            status=self.status_active,
         )
 
     def test_monthly_billable(self):
@@ -227,8 +251,10 @@ class AllocationUsageQuerySetTest(TestCase):
             service_rate_category="consumption",
             sponsor_pi=self.pi1,
             storage_cluster=self.storage_cluster1,
+            filesystem_path=self.filesystem_path4,
             fileset_name="filesetD",
             subsidized=True,
+            status=self.status_active,
         )
         qs2 = AllocationUsage.objects.monthly_billable(self.usage_date).consumption()
         self.assertFalse(qs2._is_all_subsidized_valid())
@@ -324,14 +350,16 @@ class MonthlyStorageBillingTests(TestCase):
         # Patch datetime to June and July to test fiscal year logic
         with mock.patch("coldfront.core.billing.models.datetime") as mock_dt:
             mock_dt.now.return_value = datetime(2024, 6, 1)
-            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 5, 1).date())
-            self.assertEqual(fy, "FY24")
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2023, 6, 1).date())
+            self.assertEqual(fy, "FY23")
             mock_dt.now.return_value = datetime(2024, 7, 1)
-            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 5, 1).date())
-            self.assertEqual(fy, "FY24")
             fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 6, 1).date())
+            self.assertEqual(fy, "FY24")
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 7, 1).date())
             self.assertEqual(fy, "FY25")
             fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2024, 12, 1).date())
+            self.assertEqual(fy, "FY25")
+            fy = MonthlyStorageBilling._get_fiscal_year_by_delivery_date(datetime(2025, 1, 1).date())
             self.assertEqual(fy, "FY25")
 
     def test_generate_report_default_file_paths(self):
@@ -357,6 +385,13 @@ class MonthlyStorageBillingTests(TestCase):
             test_output_path = "/tmp/test_billing_report.csv"
             if os.path.exists(test_output_path):
                 os.remove(test_output_path)
+
+    def test_generate_report_filename(self):
+        a_tier = "Active"
+        a_delivery_date = date(2024, 6, 1)
+        expected_filename = "RIS-June-storage-Active-billing.csv"
+        generated_filename = MonthlyStorageBilling._generate_report_filename(a_tier, a_delivery_date)
+        self.assertEqual(generated_filename, expected_filename)
 
     def test_generate_report(self):
         # Prepare template file with 6 lines, 6th is billing entry with placeholders
