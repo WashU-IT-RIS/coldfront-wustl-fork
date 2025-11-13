@@ -21,6 +21,8 @@ ITSM_ATTRIBUTES_FOR_BILLING = [
     "status",
     "provision_usage_creation_date",
     "service_id",
+    "status",
+    "name",
 ]
 
 ITSM_QUERY_KEY = "provision_usage_creation_date"  # Key for filtering billing data by creation date of usage records

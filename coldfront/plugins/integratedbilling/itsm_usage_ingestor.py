@@ -72,8 +72,8 @@ class ItsmUsageIngestor:
             amount_tb = self.__convert_to_amount_usage_to_tb(usage.get("amount"))
             billing_contact = self.__get_billing_contact(usage)
             record = AllocationUsage.objects.update_or_create(
+                filesystem_path=usage.get("name"),
                 tier=self.__get_tier(usage),
-                fileset_name=usage.get("fileset_name"),
                 source=self.source,
                 usage_date=datetime.strptime(
                     usage.get("provision_usage_creation_date"), "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -97,6 +97,7 @@ class ItsmUsageIngestor:
                     "quota": usage.get("quota"),
                     "billing_cycle": usage.get("billing_cycle"),
                     "storage_cluster": self.storage_cluster,
+                    "status": usage.get("status"),
                 },
             )
             saved_usages.append(record)
