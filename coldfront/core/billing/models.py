@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.functions import Lower
 
 from coldfront.config.env import PROJECT_ROOT
+from coldfront.core.constants import BILLABLE_STATUSES
 from coldfront.core.allocation.models import *
 from coldfront.core.project.models import *
 from coldfront.core.resource.models import *
@@ -16,14 +17,14 @@ class AllocationUsageQuerySet(models.QuerySet):
 
     def monthly_billable(self, usage_date, tier="Active"):
         return self.annotate(
-                lower_status=Lower("status")
+                status_lower=Lower("status")
             ).filter(
                 usage_date=usage_date,
                 tier=tier,
                 usage_tb__gt=0,
                 exempt=False,
                 billing_cycle="monthly",
-                lower_status__in=["active", "new", "pending", "jenkins error"]
+                status_lower__in=BILLABLE_STATUSES
             ).exclude(
                 service_rate_category="condo",
             )
