@@ -7,27 +7,6 @@ from coldfront.plugins.qumulo.tests.fixtures import (
 )
 
 
-ITSM_ATTRIBUTES_FOR_BILLING = [
-    "id",
-    "sponsor",
-    "fileset_name",
-    "service_rate_category",
-    "amount",
-    "funding_number",
-    "exempt",
-    "subsidized",
-    "is_condo_group",
-    "parent_id",
-    "quota",
-    "billing_cycle",
-    "billing_contact",
-    "status",
-    "provision_usage_creation_date",
-    "service_id",
-    "status",
-    "name",
-]
-
 COLDFRONT_PATH_FIXTURES = [
     "/storage2/fs1/daryls3",
     "/storage2/fs1/kdandurand",

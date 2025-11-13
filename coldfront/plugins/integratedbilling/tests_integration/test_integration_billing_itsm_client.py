@@ -4,7 +4,7 @@ from django.test import TestCase, tag
 
 from coldfront.plugins.integratedbilling.billing_itsm_client import BillingItsmClient
 from coldfront.plugins.integratedbilling.constants import ServiceTiers
-from coldfront.plugins.qumulo.tests.fixtures_usages import (
+from coldfront.plugins.integratedbilling.tests.fixtures import (
     ITSM_ATTRIBUTES_FOR_BILLING,
 )
 
