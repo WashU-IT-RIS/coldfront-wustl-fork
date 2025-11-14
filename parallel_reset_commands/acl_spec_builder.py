@@ -39,7 +39,7 @@ class ACL_SpecBuilder:
 
                     sub_alloc_spec_entry = sub_alloc_template.replace(
                         "<SUB_ALLOC>", sub_alloc_name
-                    ).replace("<STORAGE_SUFFIX>", storage_suffix)
+                    )
                     root_template = root_template + "\n" + sub_alloc_spec_entry
             self.root_spec = root_template.replace("<ALLOC>", alloc_name).replace(
                 "<STORAGE_SUFFIX>", storage_suffix
@@ -57,7 +57,7 @@ class ACL_SpecBuilder:
                     sub_alloc_template = sub_alloc_template_file.read()
                     sub_alloc_spec_entry = sub_alloc_template.replace(
                         "<SUB_ALLOC>", sub_alloc_name
-                    ).replace("<STORAGE_SUFFIX>", storage_suffix)
+                    )
                     active_template = active_template + "\n" + sub_alloc_spec_entry
             self.active_spec = active_template.replace("<ALLOC>", alloc_name).replace(
                 "<STORAGE_SUFFIX>", storage_suffix
