@@ -82,7 +82,8 @@ def process_acl(
     try:
         if perform_reset:
             reset_command = f'nfs4_setfacl -s "{spec}" {processed_path}'
-            subprocess.run(reset_command, check=True, shell=True)
+            print(reset_command)
+            # subprocess.run(reset_command, check=True, shell=True)
         return check_acl(path, processed_path, spec, path_type), path
     except subprocess.CalledProcessError as e:
         return False, path
