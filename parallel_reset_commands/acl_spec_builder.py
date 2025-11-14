@@ -41,7 +41,9 @@ class ACL_SpecBuilder:
                         "<SUB_ALLOC>", sub_alloc_name
                     ).replace("<STORAGE_SUFFIX>", storage_suffix)
                     root_template = root_template + "\n" + sub_alloc_spec_entry
-            self.root_spec = root_template.replace("<ALLOC>", alloc_name)
+            self.root_spec = root_template.replace("<ALLOC>", alloc_name).replace(
+                "<STORAGE_SUFFIX>", storage_suffix
+            )
 
         # need a spec for the Active folder
         with open("templates/active_spec_template.txt", "r") as active_template_file:
@@ -57,20 +59,26 @@ class ACL_SpecBuilder:
                         "<SUB_ALLOC>", sub_alloc_name
                     ).replace("<STORAGE_SUFFIX>", storage_suffix)
                     active_template = active_template + "\n" + sub_alloc_spec_entry
-            self.active_spec = active_template.replace("<ALLOC>", alloc_name)
+            self.active_spec = active_template.replace("<ALLOC>", alloc_name).replace(
+                "<STORAGE_SUFFIX>", storage_suffix
+            )
 
         # need a spec for folders/files *OUTSIDE* sub-allocations
         with open(
             "templates/base_folder_spec_template.txt", "r"
         ) as base_folder_template_file:
             base_folder_template = base_folder_template_file.read()
-            self.base_folder_spec = base_folder_template.replace("<ALLOC>", alloc_name)
+            self.base_folder_spec = base_folder_template.replace(
+                "<ALLOC>", alloc_name
+            ).replace("<STORAGE_SUFFIX>", storage_suffix)
 
         with open(
             "templates/base_file_spec_template.txt", "r"
         ) as base_file_template_file:
             base_file_template = base_file_template_file.read()
-            self.base_file_spec = base_file_template.replace("<ALLOC>", alloc_name)
+            self.base_file_spec = base_file_template.replace(
+                "<ALLOC>", alloc_name
+            ).replace("<STORAGE_SUFFIX>", storage_suffix)
 
         # need a spec for *each* of the sub-allocations at the sub-allocation's root,
         # for folders beneath root, and for files
