@@ -402,12 +402,21 @@ class ResetAcl:
                 )
                 if not self.is_allocation_root:
                     acl["aces"].extend(self.parent_file_aces)
+            elif item_type == "FS_FILE_TYPE_SYMLINK":
+                # by default, symlinks in Linux are always RWX for owner, group, others
+                # however, since Qumulo handles permissions separately, we want to be careful
+                # so we're just going to give Read/Execute
+                acl["aces"] = AcesManager.get_allocation_symlink_aces()
             elif item_type == "FS_FILE_TYPE_DIRECTORY":
                 acl["aces"] = AcesManager.get_allocation_existing_directory_aces(
                     self.rw_group, self.ro_group
                 )
                 if not self.is_allocation_root:
                     acl["aces"].extend(self.parent_directory_aces)
+            else:
+                raise UnknownItemType(
+                    f"Unknown item type: {item_type} found at: {item_path}"
+                )
 
             self.qumulo_api.rc.fs.set_acl_v2(path=item_path, acl=acl)
 
@@ -481,4 +490,7 @@ def reset_allocation_acls(
 
 
 class BadDirectoryEntry(Exception):
+    pass
+
+class UnknownItemType(Exception):
     pass
