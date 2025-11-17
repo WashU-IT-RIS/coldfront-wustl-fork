@@ -84,7 +84,6 @@ class UpdateAllocationView(AllocationView):
             "service_rate_category",
             "prepaid_time",
             "prepaid_billing_date",
-            "prepaid_billing_date",
             "prepaid_expiration",
         ]
         for key in allocation_attribute_keys:
