@@ -4,14 +4,14 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
 
-from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
+from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing
 
 
 class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
         self.migrate = MigrateToColdfront()
-        create_allocation_assets()
+        create_metadata_for_testing()
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name_found(self):

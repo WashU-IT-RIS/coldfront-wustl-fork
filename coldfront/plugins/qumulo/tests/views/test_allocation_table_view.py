@@ -37,7 +37,7 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "consumption",
         }
 
         self.allocation = create_allocation(self.project, self.user, self.form_data)
@@ -77,7 +77,7 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_allocation = create_allocation(other_project, other_user, other_form_data)
@@ -117,7 +117,7 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_allocation = create_allocation(other_project, other_user, other_form_data)
@@ -190,7 +190,7 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_form_data_b = {
@@ -206,7 +206,7 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         _ = create_allocation(
@@ -251,7 +251,7 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         other_allocations = []
@@ -337,7 +337,7 @@ class AllocationTableViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         child_allocation = create_allocation(

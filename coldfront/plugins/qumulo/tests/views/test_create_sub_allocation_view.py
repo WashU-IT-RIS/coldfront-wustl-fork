@@ -47,7 +47,7 @@ class AllocationViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
         self.sub_form_data = {
@@ -66,7 +66,7 @@ class AllocationViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
     def test_create_sub_allocation(

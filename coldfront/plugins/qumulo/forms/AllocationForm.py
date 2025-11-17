@@ -19,7 +19,7 @@ from coldfront.plugins.qumulo.validators import (
 )
 
 from coldfront.plugins.qumulo.constants import (
-    STORAGE_SERVICE_RATES,
+    SERVICE_RATE_CATEGORIES,
     PROTOCOL_OPTIONS,
 )
 
@@ -90,6 +90,12 @@ class AllocationForm(forms.Form):
         help_text="Choose one billing cycle option from the above list",
         required=True,
     )
+    service_rate_category = forms.ChoiceField(
+        help_text="Service rate category options for the storage allocation",
+        label="Service Rate Category",
+        choices=SERVICE_RATE_CATEGORIES,
+        initial="consumption",
+    )
     prepaid_time = forms.IntegerField(
         help_text="Prepaid Time in Months",
         label="Prepaid Time",
@@ -100,12 +106,6 @@ class AllocationForm(forms.Form):
         label="Prepaid Billing Start Date",
         validators=[validate_prepaid_start_date],
         required=False,
-    )
-    service_rate = forms.ChoiceField(
-        help_text="Service rate option for the Storage allocation",
-        label="Service Rate",
-        choices=STORAGE_SERVICE_RATES,
-        initial="consumption",
     )
     storage_quota = forms.IntegerField(
         min_value=0,

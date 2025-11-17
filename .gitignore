@@ -21,3 +21,4 @@ db.json
 .devcontainer/*
 .bin/*
 node_modules/
+poc/

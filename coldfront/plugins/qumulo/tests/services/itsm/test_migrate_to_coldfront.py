@@ -13,7 +13,7 @@ from coldfront.core.project.models import Project, ProjectAttribute
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
-from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
+from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing
 from coldfront.plugins.qumulo.tests.utils.mock_data import mock_qumulo_info
 
 QUMULO_INFO = mock_qumulo_info
@@ -25,7 +25,7 @@ class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
         self.migrate = MigrateToColdfront()
-        create_allocation_assets()
+        create_metadata_for_testing()
         self.expected_allocation_attributes = [
             ("storage_name", "mocker"),
             ("storage_quota", "200"),
@@ -34,7 +34,7 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate", "subscription"),
+            ("service_rate_category", "subscription"),
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "No"),
@@ -61,7 +61,7 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker_missing_contacts"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate", "subscription"),
+            ("service_rate_category", "subscription"),
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "No"),
@@ -86,7 +86,7 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate", "subscription"),
+            ("service_rate_category", "subscription"),
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "No"),
