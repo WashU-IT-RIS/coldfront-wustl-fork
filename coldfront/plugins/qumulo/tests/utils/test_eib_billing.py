@@ -398,7 +398,7 @@ class TestEIBBilling(TestCase):
             allocation.save()
 
         storage2_allocations = Allocation.objects.filter(
-            resources__name="Storage2", status__name__in=["Active"]
+            resources__name="Storage2", status__name="Active"
         )
         self.assertEqual(len(storage2_allocations), len(quota_service_rate_categories))
 

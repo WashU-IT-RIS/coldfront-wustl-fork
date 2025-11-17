@@ -17,9 +17,9 @@ class TestBillingItsmClient(TestCase):
     )
     def setUp(self, mock_billing_itsm_client: mock.MagicMock) -> None:
         # fixed current date for testing and simulating when report is generated
-        current_date = datetime(2025, 10, 4).date()
-        self.default_billing_date = current_date.replace(day=1)
-        billing_itsm_client = BillingItsmClient()
+        report_date = datetime(2025, 10, 4).date()
+        self.usage_date = report_date.replace(day=1)
+        billing_itsm_client = BillingItsmClient(self.usage_date)
         with open(
             "coldfront/plugins/integratedbilling/static/mock_monthly_billing_data_current_month.json",
             "r",
@@ -67,7 +67,7 @@ class TestBillingItsmClient(TestCase):
                 "Z", "+00:00"
             )
         ).date()
-        self.assertEqual(self.default_billing_date, provision_usage_creation_date)
+        self.assertEqual(self.usage_date, provision_usage_creation_date)
 
     @mock.patch(
         "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
@@ -76,7 +76,7 @@ class TestBillingItsmClient(TestCase):
         self, mock_billing_itsm_client: mock.MagicMock
     ):
         first_day_previous_month_date = (
-            self.default_billing_date.replace(day=1) - timedelta(days=1)
+            self.usage_date.replace(day=1) - timedelta(days=1)
         ).replace(day=1)
         billing_itsm_client = BillingItsmClient(first_day_previous_month_date)
 
@@ -94,5 +94,5 @@ class TestBillingItsmClient(TestCase):
                 "Z", "+00:00"
             )
         ).date()
-        self.assertNotEqual(self.default_billing_date, provision_usage_creation_date)
+        self.assertNotEqual(self.usage_date, provision_usage_creation_date)
         self.assertEqual(first_day_previous_month_date, provision_usage_creation_date)

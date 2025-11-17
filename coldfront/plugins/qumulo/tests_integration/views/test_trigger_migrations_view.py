@@ -3,14 +3,14 @@ from django.test import TestCase, tag, RequestFactory
 
 from coldfront.plugins.qumulo.forms.TriggerMigrationsForm import TriggerMigrationsForm
 from coldfront.plugins.qumulo.views.trigger_migrations_view import TriggerMigrationsView
-from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
+from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing
 
 from unittest.mock import MagicMock
 
 
 class TriggerMigrationsViewTests(TestCase):
     def set_up(self) -> None:
-        create_allocation_assets()
+        create_metadata_for_testing()
 
     @tag("integration")
     def test_migration_successful_with_valid_allocation(

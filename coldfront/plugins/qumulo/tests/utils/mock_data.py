@@ -1,3 +1,4 @@
+from coldfront.config.env import ENV
 from coldfront.core.user.models import User
 from coldfront.core.field_of_science.models import FieldOfScience
 from coldfront.core.project.models import Project, ProjectStatusChoice
@@ -17,6 +18,12 @@ from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.management.commands.qumulo_plugin_setup import (
     call_base_commands,
 )
+
+if ENV.bool(["PLUGIN_INTEGRATEDBILLING"], default=False):
+    from coldfront.plugins.integratedbilling.management.commands.integratedbilling_plugin_setup import (
+        call_base_commands as integrated_billing_call_base_commands,
+    )
+
 
 import json
 
@@ -75,6 +82,8 @@ def build_models_without_project() -> None:
     call_command("add_resource_defaults")
     call_command("add_allocation_defaults")
     call_base_commands()
+    if ENV.bool(["PLUGIN_INTEGRATEDBILLING"], default=False):
+        integrated_billing_call_base_commands()
 
 
 def build_user_plus_project(
