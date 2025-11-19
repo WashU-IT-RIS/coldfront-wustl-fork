@@ -316,7 +316,7 @@ itsm_to_coldfront_map:
     coldfront:
       - entity: allocation_form
         attributes:
-          - name: service_rate
+          - name: service_rate_category
             value:
               type: string
               transforms: null

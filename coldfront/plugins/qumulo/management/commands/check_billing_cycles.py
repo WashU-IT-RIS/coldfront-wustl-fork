@@ -45,7 +45,7 @@ def process_prepaid_billing_cycle_changes(
             update_billing_cycle(allocation, billing_cycle)
             AllocationAttribute.objects.filter(
                 allocation=allocation,
-                allocation_attribute_type__name="service_rate",
+                allocation_attribute_type__name="service_rate_category",
             ).update(value="subscription")
 
 

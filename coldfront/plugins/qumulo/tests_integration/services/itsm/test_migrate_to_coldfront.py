@@ -4,9 +4,7 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
 
-from coldfront.plugins.qumulo.tests.fixtures import (
-    create_metadata_for_testing,
-)
+from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing
 
 
 class TestMigrateToColdfront(TestCase):

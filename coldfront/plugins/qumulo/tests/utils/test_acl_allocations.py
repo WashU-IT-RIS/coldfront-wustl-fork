@@ -43,7 +43,7 @@ class TestAclAllocations(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "general",
+            "service_rate_category": "general",
         }
 
         self.client.force_login(self.user)

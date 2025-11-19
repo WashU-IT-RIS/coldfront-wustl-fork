@@ -38,7 +38,7 @@ class AllocationViewTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
 
     def test_create_new_allocation_create_allocation(

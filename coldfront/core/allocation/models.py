@@ -66,15 +66,23 @@ class AllocationStatusChoice(TimeStampedModel):
 
 class AllocationQuerySet(models.QuerySet):
     def active_storage(self):
-        return self.filter(status__name="Active", resources__name="Storage2")
+        return self.filter(
+            status__name="Active", resources__resource_type__name="Storage"
+        )
 
     def parents(self):
         return self.filter(parent_links=None)
 
     def consumption(self):
         return self.filter(
-            allocationattribute__allocation_attribute_type__name="service_rate",
+            allocationattribute__allocation_attribute_type__name="service_rate_category",
             allocationattribute__value="consumption",
+        )
+
+    def not_exempt(self):
+        return self.exclude(
+            allocationattribute__allocation_attribute_type__name="billing_exempt",
+            allocationattribute__value="yes",
         )
 
 

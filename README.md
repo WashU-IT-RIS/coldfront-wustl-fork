@@ -57,6 +57,7 @@ To run tests, the following variables should be included in a `.env` file in the
 
 ```
 PLUGIN_QUMULO=True
+PLUGIN_INTEGRATEDBILLING=True
 AD_SERVER_NAME=foo
 AD_USERNAME=bar
 AD_USER_PASS=bah
@@ -99,6 +100,7 @@ Integration Tests need to be run while connected to a VPN. The following variabl
 
 ```
 PLUGIN_QUMULO=True
+PLUGIN_INTEGRATEDBILLING=True
 QUMULO_HOST=
 QUMULO_PORT=
 QUMULO_USER=

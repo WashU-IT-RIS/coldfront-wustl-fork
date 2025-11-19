@@ -3,8 +3,6 @@ import factory
 from factory.django import DjangoModelFactory
 
 from coldfront.core.allocation.models import Allocation
-from coldfront.core.project.models import ProjectAttribute
-from coldfront.core.resource.models import ResourceType, Resource
 from coldfront.core.test_helpers.factories import (
     AllocationStatusChoiceFactory,
     FieldOfScienceFactory,
@@ -38,7 +36,7 @@ class RisAllocationFactory(DjangoModelFactory):
     is_changeable = True
 
     class Params:
-        storage2 = factory.Trait(
+        storage = factory.Trait(
             justification="",
             status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
         )
@@ -53,9 +51,14 @@ class RisAllocationFactory(DjangoModelFactory):
             status=factory.SubFactory(AllocationStatusChoiceFactory, name="Active"),
         )
 
+        pending = factory.Trait(
+            justification="",
+            status=factory.SubFactory(AllocationStatusChoiceFactory, name="Pending"),
+        )
+
 
 class Storage2Factory(RisAllocationFactory):
-    storage2 = True
+    storage = True
 
     @factory.post_generation
     def resources(self, create, extracted, **kwargs):
@@ -68,6 +71,38 @@ class Storage2Factory(RisAllocationFactory):
             ),
         )
         self.resources.add(*resources)
+
+
+class Storage3Factory(RisAllocationFactory):
+    storage = True
+
+    @factory.post_generation
+    def resources(self, create, extracted, **kwargs):
+        if not create:
+            return None
+
+        resources = extracted or (
+            ResourceFactory(
+                name="Storage3", resource_type=ResourceTypeFactory(name="Storage")
+            ),
+        )
+        self.resources.add(*resources)
+
+
+class Storage2PendingFactory(Storage2Factory):
+    pending = True
+
+
+class Storage3PendingFactory(Storage3Factory):
+    pending = True
+
+
+class Storage2ExemptFactory(Storage2Factory):
+    exempt = True
+
+
+class Storage3ExemptFactory(Storage3Factory):
+    exempt = True
 
 
 class ReadWriteGroupFactory(RisAllocationFactory):
@@ -93,6 +128,6 @@ class ReadOnlyGroupFactory(RisAllocationFactory):
             return None
 
         resources = extracted or (
-            ResourceFactory(name="rw", resource_type=ResourceTypeFactory(name="ACL")),
+            ResourceFactory(name="ro", resource_type=ResourceTypeFactory(name="ACL")),
         )
         self.resources.add(*resources)

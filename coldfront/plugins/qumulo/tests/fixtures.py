@@ -1,5 +1,8 @@
-from typing import Tuple
- 
+from datetime import datetime, timezone
+from typing import Any, Callable, Tuple, Union
+
+import factory
+
 from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import Project, ProjectAttributeType
 from coldfront.core.test_helpers.factories import (
@@ -19,6 +22,7 @@ from coldfront.core.test_helpers.factories import (
     ResourceFactory,
     ResourceTypeFactory,
     AllocationUserFactory,
+    UserFactory,
 )
 
 from coldfront.core.test_helpers.factories import field_of_science_provider
@@ -27,6 +31,7 @@ from coldfront.plugins.qumulo.tests.helper_classes.factories import (
     ReadOnlyGroupFactory,
     ReadWriteGroupFactory,
     Storage2Factory,
+    Storage3Factory,
 )
 
 
@@ -37,55 +42,23 @@ def create_metadata_for_testing() -> None:
     create_ris_resources()
 
 
-def create_ris_project_and_allocations(
-    path: str = None,
-) -> Tuple[Project, list[Allocation]]:
-    project = RisProjectFactory()
-
-    ProjectUserFactory(
-        project=project,
-        user=project.pi,
-        role=ProjectUserRoleChoiceFactory(name="Manager"),
-        status=ProjectUserStatusChoiceFactory(name="New"),
+def create_ris_project_and_allocations_storage2(
+    storage_filesystem_path: str,
+    pi_username: str = None,
+    **kwargs: dict[str, Any],
+) -> Tuple[Project, dict[str, Allocation]]:
+    return __create_ris_project_and_allocations(
+        Storage2Factory, storage_filesystem_path, pi_username=pi_username, **kwargs
     )
 
-    # django_get_or_create was not implemented in the core, so get the desired object
-    # TODO implement a RIS specific factory
-    sponsor_department_number = ProjectAttributeType.objects.get(name="sponsor_department_number")
-    ProjectAttributeFactory(
-        project=project,
-        proj_attr_type=sponsor_department_number,
-    )
 
-    storage2 = Storage2Factory(project=project)
-
-    AllocationAttributeFactory(
-        allocation=storage2,
-        allocation_attribute_type__name="storage_filesystem_path",
-        value=path,
-    )
-
-    AllocationUserFactory(
-        allocation=storage2,
-        user=project.pi,
-        status=AllocationUserStatusChoiceFactory(name="Active"),
-    )
-
-    rw_group = ReadWriteGroupFactory(project=project)
-    AllocationUserFactory.create_batch(
-        2,
-        allocation=rw_group,
-        status=AllocationUserStatusChoiceFactory(name="Active"),
-    )
-
-    ro_group = ReadOnlyGroupFactory(project=project)
-    AllocationUserFactory(
-        allocation=ro_group,
-        status=AllocationUserStatusChoiceFactory(name="Active"),
-    )
-    return (
-        project,
-        [storage2, rw_group, ro_group],
+def create_ris_project_and_allocations_storage3(
+    storage_filesystem_path: str,
+    pi_username: str = None,
+    **kwargs: dict[str, Any],
+) -> Tuple[Project, dict[str, Allocation]]:
+    return __create_ris_project_and_allocations(
+        Storage3Factory, storage_filesystem_path, pi_username=pi_username, **kwargs
     )
 
 
@@ -109,6 +82,11 @@ def create_ris_resources() -> None:
         description="Storage allocation via Qumulo",
     )
     ResourceFactory(
+        name="Storage3",
+        resource_type=ResourceTypeFactory(name="Storage"),
+        description="Storage allocation via Qumulo",
+    )
+    ResourceFactory(
         name="rw", resource_type=ResourceTypeFactory(name="ACL"), description="RW ACL"
     )
     ResourceFactory(
@@ -121,6 +99,70 @@ def create_attribute_types_for_ris_allocations() -> None:
     _create_acl_allocation_attribute_names()
     _create_storage_allocation_attribute_types()
     _create_project_attribute_types()
+
+
+def __create_ris_project_and_allocations(
+    storage_factory: Callable[[], Union[Storage2Factory, Storage3Factory]],
+    storage_filesystem_path: str,
+    pi_username: str = None,
+    **kwargs: dict[str, Any],
+) -> Tuple[Project, dict[str, Allocation]]:
+    pi = UserFactory(username=pi_username) if pi_username else UserFactory()
+    project = RisProjectFactory(pi=pi)
+    ProjectUserFactory(
+        project=project,
+        user=project.pi,
+        role=ProjectUserRoleChoiceFactory(name="Manager"),
+        status=ProjectUserStatusChoiceFactory(name="New"),
+    )
+
+    # django_get_or_create was not implemented in the core, so get the desired object
+    # TODO implement a RIS specific factory
+    sponsor_department_number = ProjectAttributeType.objects.get(
+        name="sponsor_department_number"
+    )
+    ProjectAttributeFactory(
+        project=project,
+        proj_attr_type=sponsor_department_number,
+    )
+
+    storage_allocation = storage_factory(project=project, **kwargs)
+
+    kwargs_allocation_attributes = {
+        "billing_contact": project.pi.email,
+        "storage_name": project.pi.username,
+        **kwargs,
+    }
+    _create_allocations_attribute_for_storage_allocation(
+        storage_allocation, storage_filesystem_path, **kwargs_allocation_attributes
+    )
+
+    AllocationUserFactory(
+        allocation=storage_allocation,
+        user=project.pi,
+        status=AllocationUserStatusChoiceFactory(name="Active"),
+    )
+
+    rw_group = ReadWriteGroupFactory(project=project)
+    AllocationUserFactory.create_batch(
+        2,
+        allocation=rw_group,
+        status=AllocationUserStatusChoiceFactory(name="Active"),
+    )
+
+    ro_group = ReadOnlyGroupFactory(project=project)
+    AllocationUserFactory(
+        allocation=ro_group,
+        status=AllocationUserStatusChoiceFactory(name="Active"),
+    )
+    return (
+        project,
+        {
+            "storage_allocation": storage_allocation,
+            "rw_allocation": rw_group,
+            "ro_allocation": ro_group,
+        },
+    )
 
 
 def _create_storage_allocation_attribute_types() -> None:
@@ -136,7 +178,7 @@ def _create_storage_allocation_attribute_types() -> None:
         ("department_number", "Text"),
         ("technical_contact", "Text"),
         ("billing_contact", "Text"),
-        ("service_rate", "Text"),
+        ("service_rate_category", "Text"),
         ("storage_acl_name", "Text"),
         ("storage_allocation_pk", "Int"),
         ("secure", "Yes/No"),
@@ -192,4 +234,54 @@ def _create_allocation_attribute_types(attribute_types: list[Tuple[str, str]]) -
         AllocationAttributeTypeFactory(
             name=allocation_attribute_name,
             attribute_type=AAttributeTypeFactory(name=allocation_attribute_type),
+        )
+
+
+def _create_allocations_attribute_for_storage_allocation(
+    storage_allocation: Allocation,
+    storage_filesystem_path: str,
+    **kwargs: dict[str, Any],
+) -> None:
+    # TODO refactor to use a dataclass or similar for options
+    billing_startdate = factory.fuzzy.FuzzyDateTime(start_dt=datetime.now(timezone.utc))
+    storage_allocation_attribute_names = [
+        ("storage_name", kwargs.get("storage_name")),
+        (
+            "storage_ticket",
+            kwargs.get("storage_ticket", factory.Sequence(lambda n: f"ITSD-{n}")),
+        ),
+        ("storage_quota", kwargs.get("storage_quota", 5)),
+        ("storage_protocols", kwargs.get("storage_protocols", "SMB")),
+        ("storage_filesystem_path", storage_filesystem_path),
+        ("storage_export_path", storage_filesystem_path),
+        (
+            "cost_center",
+            kwargs.get("cost_center", factory.Sequence(lambda n: f"COST-{n}")),
+        ),
+        (
+            "department_number",
+            kwargs.get("department_number", factory.Sequence(lambda n: f"Dept-{n}")),
+        ),
+        ("billing_contact", kwargs.get("billing_contact", "")),
+        ("service_rate_category", kwargs.get("service_rate_category", "consumption")),
+        ("secure", kwargs.get("secure", "Yes")),
+        ("audit", kwargs.get("audit", "Yes")),
+        ("billing_startdate", kwargs.get("billing_startdate", billing_startdate)),
+        (
+            "sponsor_department_number",
+            kwargs.get(
+                "sponsor_department_number", factory.Sequence(lambda n: f"Dept-{n}")
+            ),
+        ),
+        ("billing_exempt", kwargs.get("billing_exempt", "No")),
+        ("billing_cycle", kwargs.get("billing_cycle", "monthly")),
+        ("subsidized", kwargs.get("subsidized", "No")),
+    ]
+
+    for attribute_name, value in storage_allocation_attribute_names:
+        allocation_attribute_type = AllocationAttributeTypeFactory(name=attribute_name)
+        AllocationAttributeFactory(
+            allocation=storage_allocation,
+            allocation_attribute_type=allocation_attribute_type,
+            value=value,
         )
