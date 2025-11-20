@@ -1,3 +1,4 @@
+import json
 import os
 
 from datetime import datetime
@@ -9,36 +10,46 @@ from coldfront.core.allocation.models import (
 
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
 class FileQuotaService:
 
     @staticmethod
     def ingest_quotas_with_daily_usage(logger) -> None:
-        filtering_by = lambda quota_usage: AclAllocations.is_base_allocation(
-            quota_usage["path"]
-        )
-        base_allocation_quota_usages = FileQuotaService.get_allocation_file_quotas(
-            filtering_by
-        )
+        connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+        base_allocation_quota_usages = []
+        for storage_key in connection_info.keys():
+            qumulo_api_conn = StorageControllerFactory().create_connection(storage_key)
+            filtering_by = lambda quota_usage: AclAllocations.is_base_allocation(
+                quota_usage["path"], storage_key
+            )
+            base_allocation_quota_usages += FileQuotaService.get_allocation_file_quotas(
+                qumulo_api_conn=qumulo_api_conn, filtering_by=filtering_by
+            )
         _set_daily_quota_usages(base_allocation_quota_usages, logger)
         _validate_results(base_allocation_quota_usages, logger)
 
     @staticmethod
     def get_file_system_allocations_near_limit() -> list:
-        filtering_by = lambda quota_usage: AclAllocations.is_base_allocation(
-            quota_usage["path"]
-        ) and _is_near_limit(quota_usage["capacity_usage"], quota_usage["limit"])
-        allocations_over_threshold = FileQuotaService.get_allocation_file_quotas(
-            filtering_by
-        )
+        connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+        allocations_over_threshold = []
+        for storage_key in connection_info.keys():
+            qumulo_api_conn = StorageControllerFactory().create_connection(storage_key)
+            filtering_by = lambda quota_usage: AclAllocations.is_base_allocation(
+                quota_usage["path"], storage_key
+            ) and _is_near_limit(quota_usage["capacity_usage"], quota_usage["limit"])
+            allocations_over_threshold += FileQuotaService.get_allocation_file_quotas(
+                qumulo_api_conn=qumulo_api_conn, filtering_by=filtering_by
+            )
 
         return allocations_over_threshold
 
     @staticmethod
-    def get_allocation_file_quotas(filtering_by: callable) -> list:
-        qumulo_api = QumuloAPI()
-        quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
+    def get_allocation_file_quotas(
+        qumulo_api_conn: QumuloAPI, filtering_by: callable
+    ) -> list:
+        quota_usages = qumulo_api_conn.get_all_quotas_with_usage()["quotas"]
         print(f"{quota_usages=}")
         file_system_allocations = list(
             filter(
