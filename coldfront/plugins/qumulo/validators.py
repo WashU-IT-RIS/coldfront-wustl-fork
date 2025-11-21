@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy
 
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationAttribute,
     AllocationAttributeType,
     AllocationStatusChoice,
 )
@@ -148,25 +147,18 @@ def validate_single_ad_user_skip_admin(user: str):
     return validate_single_ad_user(user)
 
 
-def validate_storage_name(value: str):
+def validate_storage_name(value: str) -> bool:
     valid_character_match = re.match("^[0-9a-zA-Z\-_\.]*$", value)
 
-    if not valid_character_match:
-        raise ValidationError(
-            message=gettext_lazy(
-                "Storage name must contain only alphanumeric characters, hyphens, underscores, and periods."
-            ),
-            code="invalid",
-        )
+    if valid_character_match:
+        return True
 
-    existing_allocations = AllocationAttribute.objects.filter(
-        allocation_attribute_type__name="storage_name", value=value
+    raise ValidationError(
+        message=gettext_lazy(
+            "Storage name must contain only alphanumeric characters, hyphens, underscores, and periods."
+        ),
+        code="invalid",
     )
-
-    if existing_allocations.first():
-        raise ValidationError(message=f"{value} already exists", code="invalid")
-
-    return
 
 
 def validate_relative_path(value: str):

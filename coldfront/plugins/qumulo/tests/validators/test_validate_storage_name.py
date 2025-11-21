@@ -1,3 +1,4 @@
+from unittest import skip
 from django.test import TestCase
 
 from coldfront.plugins.qumulo.validators import validate_storage_name
@@ -8,8 +9,6 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 )
 
 from django.core.exceptions import ValidationError
-
-import os
 
 
 class TestValidateStorageName(TestCase):
@@ -22,6 +21,7 @@ class TestValidateStorageName(TestCase):
         except Exception:
             self.fail()
 
+    @skip("Temporarily skipped while duplicate name check is removed from validator")
     def test_fails_duplicate_name(self):
         test_name = "foo"
 

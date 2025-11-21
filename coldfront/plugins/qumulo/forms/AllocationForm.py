@@ -3,6 +3,7 @@ import re
 from typing import Any
 from django import forms
 
+from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import Project
 from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
@@ -223,6 +224,16 @@ class AllocationForm(forms.Form):
                 validate_parent_directory(storage_filesystem_path, storage_type)
             except forms.ValidationError as error:
                 self.add_error("storage_filesystem_path", error.message)
+
+        if Allocation.objects.filter(
+            allocationattribute__value=self.cleaned_data.get("storage_name", ""),
+            allocationattribute__allocation_attribute_type__name="storage_name",
+            resources__name=self.cleaned_data.get("storage_type", ""),
+        ).exists():
+            self.add_error(
+                "storage_name",
+                f"An allocation with the storage name {self.cleaned_data.get('storage_name', '')} already exists for the selected storage type.",
+            )
 
     def get_project_choices(self) -> list[str]:
         # jprew - NOTE: accesses to db collections should be consolidated to
