@@ -10,7 +10,7 @@ from coldfront.plugins.qumulo.services.notifications_service import (
 from coldfront.plugins.qumulo.tasks import notify_users_with_allocations_near_limit
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
-    create_ris_project_and_allocations,
+    create_ris_project_and_allocations_storage2,
 )
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import get_mock_quota_response
@@ -71,11 +71,13 @@ class TestFileQuotaService(TestCase):
         }
         return super().setUp()
 
-    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_get_file_system_allocations_near_limit(
-        self, qumulo_api_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
-        qumulo_api_mock.return_value = self.qumulo_api
+        create_connection_mock.return_value = self.qumulo_api
         allocations_near_limit = (
             FileQuotaService.get_file_system_allocations_near_limit()
         )
@@ -89,6 +91,7 @@ class TestFileQuotaService(TestCase):
         self.assertEqual(
             len(self.mock_quota_allocations), 5, "Expects QUMULO to have 5 allocations"
         )
+        breakpoint()
         self.assertEqual(
             len(allocations_near_limit),
             4,
@@ -99,31 +102,37 @@ class TestFileQuotaService(TestCase):
             "Expects the result to have all allocations near or over the limit",
         )
 
-    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_create_email_receiver_list(self, qumulo_api_mock: MagicMock) -> None:
         qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = (
             FileQuotaService.get_file_system_allocations_near_limit()
         )
         for quota in allocations_near_limit:
-            project, _ = create_ris_project_and_allocations(path=quota["path"])
+            project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
             recipients = allocation_user_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(email) for email in recipients))
 
-    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_send_email_for_allocations_near_limit(self, qumulo_api_mock: MagicMock):
         qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = (
             FileQuotaService.get_file_system_allocations_near_limit()
         )
         for quota in allocations_near_limit:
-            project, _ = create_ris_project_and_allocations(path=quota["path"])
+            project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
             recipients = allocation_user_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(recipient) for recipient in recipients))
 
-    @patch("coldfront.plugins.qumulo.services.file_quota_service.QumuloAPI")
+    @patch(
+        "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+    )
     def test_notify_users_with_allocations_near_limit_task(
         self, qumulo_api_mock: MagicMock
     ):
@@ -132,6 +141,6 @@ class TestFileQuotaService(TestCase):
             FileQuotaService.get_file_system_allocations_near_limit()
         )
         for quota in allocations_near_limit:
-            project, _ = create_ris_project_and_allocations(path=quota["path"])
+            project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
 
         notify_users_with_allocations_near_limit()
