@@ -198,7 +198,7 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         ):
             allocations = (
                 Allocation.objects.prefetch_related("resources")
-                .filter(project=self.object, resources__type="storage")
+                .filter(project=self.object, resources__resource_type__name="Storage")
                 .order_by("-end_date")
                 .annotate(filesystem_path=Subquery(fileset_path_sub_query))
             )
@@ -222,7 +222,7 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                                 "Active",
                             ]
                         )
-                        & Q(resources__type="storage")
+                        & Q(resources__resource_type__name="Storage")
                     )
                     .distinct()
                     .order_by("-end_date")
@@ -231,7 +231,9 @@ class ProjectDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             else:
                 allocations = (
                     Allocation.objects.prefetch_related("resources")
-                    .filter(project=self.object, resources__type="storage")
+                    .filter(
+                        project=self.object, resources__resource_type__name="Storage"
+                    )
                     .annotate(filesystem_path=Subquery(fileset_path_sub_query))
                 )
 
