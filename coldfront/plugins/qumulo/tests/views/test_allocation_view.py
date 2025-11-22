@@ -9,6 +9,7 @@ from coldfront.core.allocation.models import (
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
+from coldfront.plugins.qumulo.views.allocation_view import AllocationView
 
 
 @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
@@ -84,3 +85,17 @@ class AllocationViewTests(TestCase):
         AllocationService.create_new_allocation(self.form_data, self.user)
         allocation = Allocation.objects.first()
         self.assertEqual(allocation.status.name, "Pending")
+
+    def test_total_project_quotas(
+        self,
+        mock_ActiveDirectoryValidator: MagicMock,
+        mock_async_task: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
+    ):
+        AllocationService.create_new_allocation(self.form_data, self.user)
+        AllocationService.create_new_allocation(self.form_data, self.user)
+        AllocationService.create_new_allocation(self.form_data, self.user)
+
+        total_quotas = AllocationView.calculate_total_project_quotas(self.form_data)
+
+        self.assertEqual(total_quotas, 21)

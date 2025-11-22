@@ -1,14 +1,21 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.forms import ValidationError
 from django.views.generic.edit import FormView
 from django.urls import reverse
+from django.db.models import OuterRef, Subquery, Sum
 
 from typing import Optional
 
 import os
 import json
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationAttributeType,
+)
 
+from coldfront.core.resource.models import Resource
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from coldfront.plugins.qumulo.services.file_system_service import FileSystemService
 from coldfront.plugins.qumulo.validators import validate_filesystem_path_unique
@@ -18,6 +25,7 @@ from coldfront.plugins.qumulo.services.allocation_service import AllocationServi
 
 from pathlib import PurePath
 from datetime import date
+from django.utils.translation import gettext_lazy
 
 
 class AllocationView(LoginRequiredMixin, FormView):
@@ -47,6 +55,26 @@ class AllocationView(LoginRequiredMixin, FormView):
         if billing_cycle == "prepaid" and prepaid_billing_date > date.today():
             form_data["billing_cycle"] = "monthly"
 
+    def calculate_total_project_quotas(form_data):
+        storage_resources = Resource.objects.filter(resource_type__name="Storage")
+        allocation_project = form_data.get("project_pk")
+        project_allocations = Allocation.objects.filter(
+            project__id=allocation_project,
+            resources__in=storage_resources,
+        )
+        storage_quota_sub_query = AllocationAttribute.objects.filter(
+            allocation=OuterRef("pk"),
+            allocation_attribute_type__name="storage_quota",
+        ).values("value")[:1]
+        project_allocations = project_allocations.annotate(
+            storage_quota=Subquery(storage_quota_sub_query)
+        )
+        total_storage_quota = project_allocations.aggregate(total=Sum("storage_quota"))[
+            "total"
+        ]
+        total_storage_quota = total_storage_quota + form_data.get("storage_quota")
+        return total_storage_quota
+
     def form_valid(
         self, form: AllocationForm, parent_allocation: Optional[Allocation] = None
     ):
@@ -55,6 +83,13 @@ class AllocationView(LoginRequiredMixin, FormView):
         storage_type = form_data.get("storage_type")
         storage_filesystem_path = form_data.get("storage_filesystem_path")
         is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
+        if form_data.get("service_rate_category") == "condo":
+            quota_total = AllocationView.calculate_total_project_quotas(form_data)
+            if quota_total > 1000:
+                raise ValidationError(
+                    gettext_lazy("Project quota exceeds condo limit of 1000 GB.")
+                )
+
         if is_absolute_path:
             absolute_path = storage_filesystem_path
         else:
