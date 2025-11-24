@@ -147,7 +147,7 @@ def validate_single_ad_user_skip_admin(user: str):
     return validate_single_ad_user(user)
 
 
-def validate_storage_name(value: str) -> bool:
+def validate_storage_name(value: str) -> None:
     valid_character_match = re.match("^[0-9a-zA-Z\-_\.]*$", value)
 
     if valid_character_match:
