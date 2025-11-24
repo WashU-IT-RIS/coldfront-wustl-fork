@@ -149,16 +149,15 @@ def validate_single_ad_user_skip_admin(user: str):
 
 def validate_storage_name(value: str) -> None:
     valid_character_match = re.match("^[0-9a-zA-Z\-_\.]*$", value)
+    if not valid_character_match:
+        raise ValidationError(
+            message=gettext_lazy(
+                "Storage name must contain only alphanumeric characters, hyphens, underscores, and periods."
+            ),
+            code="invalid",
+        )
 
-    if valid_character_match:
-        return
-
-    raise ValidationError(
-        message=gettext_lazy(
-            "Storage name must contain only alphanumeric characters, hyphens, underscores, and periods."
-        ),
-        code="invalid",
-    )
+    return
 
 
 def validate_relative_path(value: str):
