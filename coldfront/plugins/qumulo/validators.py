@@ -151,7 +151,7 @@ def validate_storage_name(value: str) -> bool:
     valid_character_match = re.match("^[0-9a-zA-Z\-_\.]*$", value)
 
     if valid_character_match:
-        return True
+        return
 
     raise ValidationError(
         message=gettext_lazy(
