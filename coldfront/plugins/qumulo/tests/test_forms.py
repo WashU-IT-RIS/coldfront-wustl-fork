@@ -207,7 +207,7 @@ class AllocationFormTests(TestCase):
         self.mock_active_directory_api.return_value.get_members.return_value = [
             {"attributes": {"sAMAccountName": "duplicatename"}},
         ]
-        duplicate_name_data_in_an_rw_user= {
+        duplicate_name_data_in_an_rw_user = {
             "project_pk": self.project1.id,
             "storage_type": "Storage3",
             "storage_name": "just_a_name",  # Same name as existing allocation
