@@ -41,7 +41,7 @@ class AllocationFormTests(TestCase):
         )
         self.mock_active_directory_api = self.active_directory_patcher.start()
         self.mock_active_directory_api.return_value.get_members.return_value = [
-            {"attributes": {"sAMAccountName": "test"}},
+            {"attributes": {"sAMAccountName": "test"}}
         ]
 
         self.qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
