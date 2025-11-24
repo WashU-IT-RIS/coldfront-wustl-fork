@@ -171,9 +171,37 @@ class AllocationFormTests(TestCase):
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
-        form = AllocationForm(data=duplicate_name_data_different_storage_type, user_id=self.user.id)
+        form = AllocationForm(
+            data=duplicate_name_data_different_storage_type, user_id=self.user.id
+        )
         self.assertTrue(form.is_valid())
         self.assertNotIn("storage_name", form.errors)
+
+        # Now, attempt to create another allocation with an allocation attribute other than storage_name having the same name
+        duplicate_name_data_in_another_allocation_attribute = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage3",
+            "storage_name": "just_a_name",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "DuplicateName",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(
+            data=duplicate_name_data_in_another_allocation_attribute,
+            user_id=self.user.id,
+        )
+        self.assertTrue(form.is_valid())
+        self.assertNotIn("storage_name", form.errors)
+        self.assertNotIn("cost_center", form.errors)
 
     def test_empty_ro_users_form_valid(self):
         data = {
