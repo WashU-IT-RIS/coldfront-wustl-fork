@@ -115,7 +115,7 @@ class AllocationFormTests(TestCase):
         existing_allocation_data = {
             "project_pk": self.project1.id,
             "storage_type": "Storage2",
-            "storage_name": "DuplicateName",
+            "storage_name": "duplicatename",
             "storage_quota": 1000,
             "protocols": ["nfs"],
             "storage_filesystem_path": "path_to_filesystem",
@@ -135,7 +135,7 @@ class AllocationFormTests(TestCase):
         duplicate_name_data = {
             "project_pk": self.project1.id,
             "storage_type": "Storage2",
-            "storage_name": "DuplicateName",  # Same name as existing allocation
+            "storage_name": "duplicatename",  # Same name as existing allocation
             "storage_quota": 2000,
             "protocols": ["nfs"],
             "storage_filesystem_path": "another_path_to_filesystem",
@@ -157,7 +157,7 @@ class AllocationFormTests(TestCase):
         duplicate_name_data_different_storage_type = {
             "project_pk": self.project1.id,
             "storage_type": "Storage3",
-            "storage_name": "DuplicateName",  # Same name as existing allocation
+            "storage_name": "duplicatename",  # Same name as existing allocation
             "storage_quota": 2000,
             "protocols": ["nfs"],
             "storage_filesystem_path": "another_path_to_filesystem",
@@ -189,7 +189,7 @@ class AllocationFormTests(TestCase):
             "storage_export_path": "/another/path/to/export",
             "rw_users": ["test"],
             "ro_users": ["test"],
-            "cost_center": "DuplicateName",
+            "cost_center": "duplicatename",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
