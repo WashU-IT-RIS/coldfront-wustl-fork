@@ -210,7 +210,7 @@ class AllocationFormTests(TestCase):
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
-            "ro_users": [],
+            "ro_users": ["test"],
             "rw_users": ["test"],
             "storage_filesystem_path": "path_to_filesystem",
             "storage_ticket": "ITSD-98765",
