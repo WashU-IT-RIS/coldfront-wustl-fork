@@ -110,6 +110,71 @@ class AllocationFormTests(TestCase):
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.is_valid())
 
+    def test_duplicate_storage_name_for_storage_type(self):
+        # First, create an allocation with a specific name
+        existing_allocation_data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "DuplicateName",
+            "storage_quota": 1000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-12345",
+            "storage_export_path": "/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        create_allocation(self.project1, self.user, existing_allocation_data)
+
+        # Now, attempt to create another allocation with the same name
+        duplicate_name_data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "DuplicateName",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(data=duplicate_name_data, user_id=self.user.id)
+        self.assertFalse(form.is_valid())
+        self.assertIn("storage_name", form.errors)
+
+        # Now, attempt to create another allocation with the same name but different storage type
+        duplicate_name_data_different_storage_type = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage3",
+            "storage_name": "DuplicateName",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(data=duplicate_name_data_different_storage_type, user_id=self.user.id)
+        self.assertTrue(form.is_valid())
+        self.assertNotIn("storage_name", form.errors)
+
     def test_empty_ro_users_form_valid(self):
         data = {
             "project_pk": self.project1.id,
