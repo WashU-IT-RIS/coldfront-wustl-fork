@@ -10,6 +10,7 @@ from coldfront.core.allocation.models import (
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 from coldfront.plugins.qumulo.views.allocation_view import AllocationView
+from coldfront.plugins.qumulo.validators import calculate_total_project_quotas
 
 
 @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
@@ -96,6 +97,8 @@ class AllocationViewTests(TestCase):
         AllocationService.create_new_allocation(self.form_data, self.user)
         AllocationService.create_new_allocation(self.form_data, self.user)
 
-        total_quotas = AllocationView.calculate_total_project_quotas(self.form_data)
+        total_quotas = calculate_total_project_quotas(
+            self.form_data["project_pk"], self.form_data["storage_quota"]
+        )
 
-        self.assertEqual(total_quotas, 21)
+        self.assertEqual(total_quotas, 28)

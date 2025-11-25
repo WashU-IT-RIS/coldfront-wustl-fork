@@ -3,6 +3,7 @@ import re
 import json
 
 from django.core.exceptions import ValidationError
+from django.db.models import OuterRef, Subquery, Sum
 from django.utils.translation import gettext_lazy
 
 from coldfront.core.allocation.models import (
@@ -12,6 +13,7 @@ from coldfront.core.allocation.models import (
     AllocationStatusChoice,
 )
 
+from coldfront.core.resource.models import Resource
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
@@ -196,6 +198,37 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
             gettext_lazy("Prepaid billing can only start on the first of the month")
         )
     return
+
+
+def validate_condo_project_quota(project_pk, storage_quota):
+    condo_project_quota = 1000
+    quota_total = calculate_total_project_quotas(project_pk, storage_quota)
+    if quota_total > condo_project_quota:
+        raise ValidationError(
+            gettext_lazy(
+                f"Project quota exceeds condo limit of {condo_project_quota} TB."
+            )
+        )
+
+
+def calculate_total_project_quotas(project_pk, storage_quota):
+    storage_resources = Resource.objects.filter(resource_type__name="Storage")
+    project_allocations = Allocation.objects.filter(
+        project__id=project_pk,
+        resources__in=storage_resources,
+    )
+    storage_quota_sub_query = AllocationAttribute.objects.filter(
+        allocation=OuterRef("pk"),
+        allocation_attribute_type__name="storage_quota",
+    ).values("value")[:1]
+    project_allocations = project_allocations.annotate(
+        storage_quota=Subquery(storage_quota_sub_query)
+    )
+    total_storage_quota = (
+        project_allocations.aggregate(total=Sum("storage_quota"))["total"] or 0
+    )
+    total_storage_quota = total_storage_quota + storage_quota
+    return total_storage_quota
 
 
 def __ad_user_validation_helper(ad_user: str) -> bool:
