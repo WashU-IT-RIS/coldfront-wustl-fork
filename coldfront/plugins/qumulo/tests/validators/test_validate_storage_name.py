@@ -80,7 +80,7 @@ class TestValidateStorageName(TestCase):
         create_allocation_attribute(
             storage_2_name_to_validate_deleted,
             "storage_name",
-            name_to_validate,
+            another_unique_name,
         )
 
         # This should raise an error because an active allocation with this name and type exists
@@ -92,7 +92,7 @@ class TestValidateStorageName(TestCase):
 
         # This should not raise an error because the existing allocation with this name is deleted
         validate_uniqueness_storage_name_for_storage_type(
-            another_unique_name,
+            another_unique_name,git stta
             "Storage2",
         )
 
