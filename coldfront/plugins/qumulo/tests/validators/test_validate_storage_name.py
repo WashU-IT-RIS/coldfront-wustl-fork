@@ -4,10 +4,8 @@ from coldfront.plugins.qumulo.tests.fixtures import (
     create_allocation_attribute,
     create_attribute_types_for_ris_allocations,
 )
-from coldfront.plugins.qumulo.tests.helper_classes.factories import (
-    Storage2Factory,
-    Storage3Factory,
-)
+from coldfront.plugins.qumulo.tests.helper_classes.factories import Storage2Factory
+
 from coldfront.plugins.qumulo.validators import (
     validate_storage_name,
     validate_uniqueness_storage_name_for_storage_type,

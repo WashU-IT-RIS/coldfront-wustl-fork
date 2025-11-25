@@ -159,6 +159,7 @@ def __create_ris_project_and_allocations(
         allocation=ro_group,
         status=AllocationUserStatusChoiceFactory(name="Active"),
     )
+    # Comment from John change the return to return a dict of allocations and not a tuple.
     return (
         project,
         {
