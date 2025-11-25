@@ -11,6 +11,7 @@ from coldfront.plugins.qumulo.fields import ADUserField
 from coldfront.plugins.qumulo.validators import (
     validate_leading_forward_slash,
     validate_single_ad_user,
+    validate_uniqueness_storage_name_for_storage_type,
     validate_ticket,
     validate_storage_name,
     validate_prepaid_start_date,
@@ -198,6 +199,7 @@ class AllocationForm(forms.Form):
             )
 
     def clean(self) -> dict[str, Any]:
+        # Always call the parent's clean method to ensure basic validation is performed
         cleaned_data = super().clean()
         protocols = cleaned_data.get("protocols")
         storage_export_path = cleaned_data.get("storage_export_path")
@@ -216,24 +218,20 @@ class AllocationForm(forms.Form):
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
 
+        storage_name = cleaned_data.get("storage_name", "")
+        storage_type = cleaned_data.get("storage_type", "")
+        try:
+            validate_uniqueness_storage_name_for_storage_type(storage_name, storage_type)
+        except forms.ValidationError as error:
+            self.add_error("storage_name", error.message)
+
         if self.fields["storage_filesystem_path"].disabled is False:
-            storage_type = cleaned_data.get("storage_type")
             storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
             try:
                 validate_filesystem_path_unique(storage_filesystem_path, storage_type)
                 validate_parent_directory(storage_filesystem_path, storage_type)
             except forms.ValidationError as error:
                 self.add_error("storage_filesystem_path", error.message)
-
-        if Allocation.objects.filter(
-            allocationattribute__value=self.cleaned_data.get("storage_name", ""),
-            allocationattribute__allocation_attribute_type__name="storage_name",
-            resources__name=self.cleaned_data.get("storage_type", ""),
-        ).exists():
-            self.add_error(
-                "storage_name",
-                f"An allocation with the storage name {self.cleaned_data.get('storage_name', '')} already exists for the selected storage type.",
-            )
 
     def get_project_choices(self) -> list[str]:
         # jprew - NOTE: accesses to db collections should be consolidated to

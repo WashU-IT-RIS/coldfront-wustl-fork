@@ -82,6 +82,24 @@ def validate_filesystem_path_unique(value: str, resource_type: str):
         )
 
 
+def validate_uniqueness_storage_name_for_storage_type(value: str, storage_type: str):
+
+    allocations_with_storage_name_and_storage_type = (
+        Allocation.objects.reserved_statuses().filter(
+            allocationattribute__allocation_attribute_type__name="storage_name",
+            allocationattribute__value=value,
+            resources__name=storage_type,
+        )
+    )
+
+    if allocations_with_storage_name_and_storage_type.exists():
+        raise ValidationError(
+            message=f"The entered storage name (%(value)s) already exists for the selected storage type.",
+            code="invalid",
+            params={"value": value},
+        )
+
+
 def validate_ldap_usernames_and_groups(name: str):
     if name is None:
         return

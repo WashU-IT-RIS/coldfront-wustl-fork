@@ -70,9 +70,13 @@ def create_project_choices() -> None:
 
 def create_allocation_choices() -> None:
     FieldOfScienceFactory(description="Other")
+    AllocationUserStatusChoiceFactory(name="Active")
     AllocationStatusChoiceFactory(name="Pending")
     AllocationStatusChoiceFactory(name="Active")
-    AllocationUserStatusChoiceFactory(name="Active")
+    AllocationStatusChoiceFactory(name="New")
+    AllocationStatusChoiceFactory(name="Deleted")
+    AllocationStatusChoiceFactory(name="Ready for deletion")
+    AllocationStatusChoiceFactory(name="Invalid")
 
 
 def create_ris_resources() -> None:
@@ -279,9 +283,21 @@ def _create_allocations_attribute_for_storage_allocation(
     ]
 
     for attribute_name, value in storage_allocation_attribute_names:
-        allocation_attribute_type = AllocationAttributeTypeFactory(name=attribute_name)
-        AllocationAttributeFactory(
+        create_allocation_attribute(
             allocation=storage_allocation,
-            allocation_attribute_type=allocation_attribute_type,
+            attribute_name=attribute_name,
             value=value,
         )
+
+
+def create_allocation_attribute(
+    allocation: Allocation,
+    attribute_name: str,
+    value: Any,
+) -> None:
+    allocation_attribute_type = AllocationAttributeTypeFactory(name=attribute_name)
+    AllocationAttributeFactory(
+        allocation=allocation,
+        allocation_attribute_type=allocation_attribute_type,
+        value=value,
+    )
