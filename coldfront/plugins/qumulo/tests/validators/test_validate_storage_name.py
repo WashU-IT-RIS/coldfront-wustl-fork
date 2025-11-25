@@ -92,7 +92,7 @@ class TestValidateStorageName(TestCase):
 
         # This should not raise an error because the existing allocation with this name is deleted
         validate_uniqueness_storage_name_for_storage_type(
-            another_unique_name,git stta
+            another_unique_name,
             "Storage2",
         )
 
