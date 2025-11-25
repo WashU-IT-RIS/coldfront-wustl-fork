@@ -85,6 +85,11 @@ class AllocationQuerySet(models.QuerySet):
             allocationattribute__value="yes",
         )
 
+    def reserved_statuses(self):
+        return self.filter(
+            status__name__in=["Pending", "Active", "New"]
+        )
+
 
 class Allocation(TimeStampedModel):
     """An allocation provides users access to a resource.
