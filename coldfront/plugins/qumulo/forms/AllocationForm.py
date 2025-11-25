@@ -221,9 +221,11 @@ class AllocationForm(forms.Form):
         storage_name = cleaned_data.get("storage_name", "")
         storage_type = cleaned_data.get("storage_type", "")
         try:
-            validate_uniqueness_storage_name_for_storage_type(storage_name, storage_type)
+            validate_uniqueness_storage_name_for_storage_type(
+                storage_name, storage_type
+            )
         except forms.ValidationError as error:
-            self.add_error("storage_name", error.message)
+            self.add_error("storage_name", error)
 
         if self.fields["storage_filesystem_path"].disabled is False:
             storage_filesystem_path = cleaned_data.get("storage_filesystem_path")

@@ -94,7 +94,7 @@ def validate_uniqueness_storage_name_for_storage_type(value: str, storage_type: 
 
     if allocations_with_storage_name_and_storage_type.exists():
         raise ValidationError(
-            message=f"The entered storage name (%(value)s) already exists for the selected storage type.",
+            message=f"An allocation with the storage name (%(value)s) for the selected storage type already exists",
             code="invalid",
             params={"value": value},
         )
