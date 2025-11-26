@@ -1,5 +1,4 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.forms import ValidationError
 from django.views.generic.edit import FormView
 from django.urls import reverse
 
@@ -8,26 +7,16 @@ from typing import Optional
 import os
 import json
 
-from coldfront.core.allocation.models import (
-    Allocation,
-    AllocationAttribute,
-    AllocationAttributeType,
-)
-
-from coldfront.core.resource.models import Resource
+from coldfront.core.allocation.models import Allocation
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from coldfront.plugins.qumulo.services.file_system_service import FileSystemService
-from coldfront.plugins.qumulo.validators import (
-    validate_filesystem_path_unique,
-    validate_condo_project_quota,
-)
+from coldfront.plugins.qumulo.validators import validate_filesystem_path_unique
 
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 
 from pathlib import PurePath
 from datetime import date
-from django.utils.translation import gettext_lazy
 
 
 class AllocationView(LoginRequiredMixin, FormView):
@@ -65,7 +54,6 @@ class AllocationView(LoginRequiredMixin, FormView):
         storage_type = form_data.get("storage_type")
         storage_filesystem_path = form_data.get("storage_filesystem_path")
         is_absolute_path = PurePath(storage_filesystem_path).is_absolute()
-
         if is_absolute_path:
             absolute_path = storage_filesystem_path
         else:
