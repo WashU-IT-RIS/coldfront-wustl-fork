@@ -3,6 +3,7 @@ import re
 from typing import Any
 from django import forms
 
+from coldfront.core.allocation.models import Allocation
 from coldfront.core.project.models import Project
 from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
@@ -10,6 +11,7 @@ from coldfront.plugins.qumulo.fields import ADUserField
 from coldfront.plugins.qumulo.validators import (
     validate_leading_forward_slash,
     validate_single_ad_user,
+    validate_uniqueness_storage_name_for_storage_type,
     validate_ticket,
     validate_storage_name,
     validate_prepaid_start_date,
@@ -197,6 +199,7 @@ class AllocationForm(forms.Form):
             )
 
     def clean(self) -> dict[str, Any]:
+        # Always call the parent's clean method to ensure basic validation is performed
         cleaned_data = super().clean()
         protocols = cleaned_data.get("protocols")
         storage_export_path = cleaned_data.get("storage_export_path")
@@ -215,8 +218,16 @@ class AllocationForm(forms.Form):
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
 
+        storage_name = cleaned_data.get("storage_name", "")
+        storage_type = cleaned_data.get("storage_type", "")
+        try:
+            validate_uniqueness_storage_name_for_storage_type(
+                storage_name, storage_type
+            )
+        except forms.ValidationError as error:
+            self.add_error("storage_name", error)
+
         if self.fields["storage_filesystem_path"].disabled is False:
-            storage_type = cleaned_data.get("storage_type")
             storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
             try:
                 validate_filesystem_path_unique(storage_filesystem_path, storage_type)
