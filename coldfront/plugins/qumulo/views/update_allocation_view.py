@@ -159,8 +159,8 @@ class UpdateAllocationView(AllocationView):
             )
 
             comparand = (
-                int(attribute.value) 
-                if type(change[1]) is int 
+                int(attribute.value)
+                if type(change[1]) is int
                 else attribute.value
             )
             if comparand != change[1]:
@@ -244,7 +244,7 @@ class UpdateAllocationView(AllocationView):
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
         create_group_time = datetime.now()
-        
+
         async_task(
             addMembersToADGroup, users_to_add, access_allocation, create_group_time
         )
