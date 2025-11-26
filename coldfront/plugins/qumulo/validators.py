@@ -201,13 +201,13 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
 
 
 def validate_condo_project_quota(project_pk, storage_quota):
-    condo_project_quota = 1000
+    CONDO_PROJECT_QUOTA = 1000
     quota_total = calculate_total_project_quotas(project_pk, storage_quota)
     #I need a way to check if this form is creating or updating because the calculation is different depending on the scenario
-    if quota_total > condo_project_quota:
+    if quota_total > CONDO_PROJECT_QUOTA:
         raise ValidationError(
             gettext_lazy(
-                f"Project quota exceeds condo limit of {condo_project_quota} TB."
+                f"Project quota exceeds condo limit of {CONDO_PROJECT_QUOTA} TB."
             )
         )
 
