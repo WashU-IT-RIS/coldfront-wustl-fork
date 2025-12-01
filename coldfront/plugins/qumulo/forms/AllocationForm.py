@@ -258,7 +258,7 @@ class AllocationForm(forms.Form):
                 storage_name, storage_type
             )
         except forms.ValidationError as error:
-            self.add_error("storage_name", error.messages)
+            self.add_error("storage_name", error.message)
 
     def __is_unchanged(self, field_name: str) -> bool:
         return self.fields[field_name].disabled and field_name not in self.changed_data
