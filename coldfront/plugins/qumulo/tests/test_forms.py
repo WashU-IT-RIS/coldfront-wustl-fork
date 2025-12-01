@@ -630,9 +630,21 @@ class ProjectFormTests(TestCase):
         form = ProjectCreateForm(data=valid_data, user_id="admin")
         self.assertTrue(form.is_valid())
 
-
+@patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class UpdateAllocationFormTests(TestCase):
     def setUp(self):
+        self.qumulo_patcher = patch(
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        )
+        self.mock_qumulo_api = self.qumulo_patcher.start()
+        self.active_directory_patcher = patch(
+            "coldfront.plugins.qumulo.validators.ActiveDirectoryAPI"
+        )
+        self.mock_active_directory_api = self.active_directory_patcher.start()
+        self.mock_active_directory_api.return_value.get_members.return_value = [
+            {"attributes": {"sAMAccountName": "test"}}
+        ]
+
         build_data = build_models()
         self.user = build_data["user"]
         self.project1 = build_data["project"]
@@ -670,6 +682,7 @@ class UpdateAllocationFormTests(TestCase):
             user_id=self.user.id,
         )
         self.assertTrue(form.fields["rw_users"].required)
+        self.assertTrue(form.is_valid())
 
     def test_ready_for_deletion_rw_users_not_required(self):
         rfd_status = AllocationStatusChoice.objects.filter(
@@ -684,6 +697,7 @@ class UpdateAllocationFormTests(TestCase):
             user_id=self.user.id,
         )
         self.assertFalse(form.fields["rw_users"].required)
+        self.assertTrue(form.is_valid())
 
     def test_validations_on_changed_values(self):
         update_form = UpdateAllocationForm(
