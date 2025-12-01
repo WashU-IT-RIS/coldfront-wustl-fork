@@ -635,12 +635,15 @@ class UpdateAllocationFormTests(TestCase):
         build_data = build_models()
         self.user = build_data["user"]
         self.project1 = build_data["project"]
+        self.initial = {
+            "storage_name": "TestAllocation",
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_type": "Storage2",
+        }
         self.data = {
             "project_pk": self.project1.id,
-            "storage_name": "TestAllocation",
             "storage_quota": 1000,
             "protocols": ["nfs"],
-            "storage_filesystem_path": "path_to_filesystem",
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "/path/to/export",
             "rw_users": ["test"],
@@ -651,13 +654,15 @@ class UpdateAllocationFormTests(TestCase):
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
-        self.allocation = create_allocation(self.project1, self.user, self.data)
+        self.data_for_creation = {**self.data, **self.initial}
+        self.allocation = create_allocation(self.project1, self.user, self.data_for_creation)
 
     def tearDown(self):
         return super().tearDown()
 
     def test_default_rw_users_required(self):
         form = UpdateAllocationForm(
+            initial=self.initial,
             allocation_status_name=self.allocation.status.name,
             data=self.data,
             user_id=self.user.id,
@@ -671,8 +676,21 @@ class UpdateAllocationFormTests(TestCase):
         self.allocation.status = rfd_status
         self.allocation.save()
         form = UpdateAllocationForm(
+            initial=self.initial,
             allocation_status_name=self.allocation.status.name,
             data=self.data,
             user_id=self.user.id,
         )
+        form.is_valid()
         self.assertFalse(form.fields["rw_users"].required)
+
+    def test_validations_on_changed_values(self):
+        update_form = UpdateAllocationForm(
+            initial=self.initial, data=self.data, user_id=self.user.id
+        )
+        self.assertTrue(update_form.is_bound)
+        self.assertTrue(update_form.is_valid())
+        update_form.clean()
+        self.assertNotIn("storage_name", update_form.errors)
+        self.assertNotIn("storage_type", update_form.errors)
+        self.assertEqual(len(update_form.errors), 0)
