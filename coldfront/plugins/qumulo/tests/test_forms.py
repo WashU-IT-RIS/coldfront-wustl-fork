@@ -672,6 +672,8 @@ class UpdateAllocationFormTests(TestCase):
         self.allocation = create_allocation(self.project1, self.user, self.data_for_creation)
 
     def tearDown(self):
+        self.qumulo_patcher.stop()
+        patch.stopall()
         return super().tearDown()
 
     def test_default_rw_users_required(self):
