@@ -9,6 +9,7 @@ from django.contrib.auth.models import Permission
 
 from coldfront.core.allocation.models import AllocationStatusChoice
 from coldfront.core.project.models import Project, ProjectStatusChoice
+from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
 from coldfront.core.field_of_science.models import FieldOfScience
 
@@ -635,10 +636,11 @@ class UpdateAllocationFormTests(TestCase):
         build_data = build_models()
         self.user = build_data["user"]
         self.project1 = build_data["project"]
+        storage2 = Resource.objects.get(name="Storage2")
         self.initial = {
             "storage_name": "TestAllocation",
             "storage_filesystem_path": "path_to_filesystem",
-            "storage_type": "Storage2",
+            "storage_type": storage2.name,
         }
         self.data = {
             "project_pk": self.project1.id,
