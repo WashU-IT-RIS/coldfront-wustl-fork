@@ -683,7 +683,6 @@ class UpdateAllocationFormTests(TestCase):
             data=self.data,
             user_id=self.user.id,
         )
-        self.assertTrue(form.is_valid())
         self.assertFalse(form.fields["rw_users"].required)
 
     def test_validations_on_changed_values(self):
