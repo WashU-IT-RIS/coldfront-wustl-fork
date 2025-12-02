@@ -1,3 +1,4 @@
+from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
 
