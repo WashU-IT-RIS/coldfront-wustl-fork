@@ -218,18 +218,12 @@ class AllocationForm(forms.Form):
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
 
-        storage_name = cleaned_data.get("storage_name", "")
-        storage_type = cleaned_data.get("storage_type", "")
-        try:
-            validate_uniqueness_storage_name_for_storage_type(
-                storage_name, storage_type
-            )
-        except forms.ValidationError as error:
-            self.add_error("storage_name", error)
+        self.validate_unique_storage_name(cleaned_data=cleaned_data)
 
         if self.fields["storage_filesystem_path"].disabled is False:
             storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
             try:
+                storage_type = cleaned_data.get("storage_type", "")
                 validate_filesystem_path_unique(storage_filesystem_path, storage_type)
                 validate_parent_directory(storage_filesystem_path, storage_type)
             except forms.ValidationError as error:
@@ -250,3 +244,21 @@ class AllocationForm(forms.Form):
     def get_storage_type_choices(self) -> list[str]:
         storage_types = Resource.objects.filter(resource_type__name="Storage")
         return map(lambda storage: (storage.name, storage.description), storage_types)
+
+    def validate_unique_storage_name(self, cleaned_data: dict[str, Any]) -> None:
+        if self.__is_unchanged(field_name="storage_name") and self.__is_unchanged(
+            field_name="storage_type"
+        ):
+            return None
+
+        try:
+            storage_name = cleaned_data.get("storage_name", "")
+            storage_type = cleaned_data.get("storage_type", "")
+            validate_uniqueness_storage_name_for_storage_type(
+                storage_name, storage_type
+            )
+        except forms.ValidationError as error:
+            self.add_error("storage_name", error)
+
+    def __is_unchanged(self, field_name: str) -> bool:
+        return self.fields[field_name].disabled and field_name not in self.changed_data
