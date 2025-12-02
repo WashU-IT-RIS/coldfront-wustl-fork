@@ -249,7 +249,7 @@ class AllocationForm(forms.Form):
         if self.__is_unchanged(field_name="storage_name") and self.__is_unchanged(
             field_name="storage_type"
         ):
-            return
+            return None
 
         try:
             storage_name = cleaned_data.get("storage_name", "")
