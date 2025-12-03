@@ -33,4 +33,3 @@ def generate_integrated_billing_report() -> None:
     report_generator = ReportGenerator(usage_date)
     success = report_generator.generate()
     print("Integrated Monthly Billing Report generation success: ", success)
-    return None
