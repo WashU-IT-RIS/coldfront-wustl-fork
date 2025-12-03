@@ -8,7 +8,7 @@ from django_q.models import Schedule
 from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
 
 SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_3_00_AM = (
-    arrow.utcnow().replace(day=2, hour=3, minute=0).format(arrow.FORMAT_RFC3339)
+    arrow.now().replace(day=2, hour=3, minute=0).format(arrow.FORMAT_RFC3339)
 )
 
 
