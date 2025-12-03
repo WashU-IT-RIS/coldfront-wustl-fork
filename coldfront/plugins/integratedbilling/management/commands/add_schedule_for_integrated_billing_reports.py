@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
 def generate_integrated_billing_report() -> None:
     usage_date = datetime.now(tz=timezone.utc).replace(
-        day=1, hour=6, minute=0, second=0, microsecond=0
+        day=1, hour=18, minute=0, second=0, microsecond=0
     )
 
     report_generator = ReportGenerator(usage_date)
