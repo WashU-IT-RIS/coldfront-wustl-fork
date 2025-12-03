@@ -22,7 +22,6 @@ class Command(BaseCommand):
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_3_00_AM,
         )
-        return None
 
 
 def generate_integrated_billing_report() -> None:
