@@ -37,6 +37,7 @@ def process_path(result):
     result = result.replace(".", "\\.")
     result = result.replace("`", "\\`")
     result = result.replace("|", "\\|")
+    result = result.replace("+", "\\+")
     return result
 
 
