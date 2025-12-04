@@ -1,6 +1,6 @@
 import os
 
-from constants import STORAGE_2_PREFIX
+from constants import STORAGE_2_PREFIX, STORAGE_3_PREFIX
 import argparse
 
 
@@ -105,14 +105,16 @@ class ArgumentParser:
         self.perform_reset = args.perform_reset.lower() == "y"
 
         def validate_allocation_root(value):
-            if not value.startswith(STORAGE_2_PREFIX):
+            if not (
+                value.startswith(STORAGE_2_PREFIX) or value.startswith(STORAGE_3_PREFIX)
+            ):
                 raise ValueError(
-                    f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'."
+                    f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>' or '{STORAGE_3_PREFIX}<ROOT>'."
                 )
             allocation_root_name = value.replace(STORAGE_2_PREFIX, "").strip("/")
             if "/" in allocation_root_name:
                 raise ValueError(
-                    f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'."
+                    f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>' or '{STORAGE_3_PREFIX}<ROOT>'."
                 )
             if not (os.path.exists(value) and os.path.isdir(value)):
                 raise ValueError(f"Root path does not exist: {value}")
