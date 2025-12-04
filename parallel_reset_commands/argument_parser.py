@@ -61,7 +61,7 @@ class ArgumentParser:
             "--allocation_root",
             type=str,
             required=True,
-            help=f"Specify the allocation root path. Must start with '{STORAGE_2_PREFIX}'.",
+            help=f"Specify the allocation root path. Must start with '{STORAGE_2_PREFIX}' or '{STORAGE_3_PREFIX}'.",
         )
         parser.add_argument(
             "--target_dir",
@@ -125,8 +125,10 @@ class ArgumentParser:
             return value
 
         self.allocation_root = validate_allocation_root(args.allocation_root)
-        self.allocation_name = self.allocation_root.replace(STORAGE_2_PREFIX, "").strip(
-            "/"
+        self.allocation_name = (
+            self.allocation_root.replace(STORAGE_2_PREFIX, "").strip("/")
+            if self.allocation_root.startswith(STORAGE_2_PREFIX)
+            else self.allocation_root.replace(STORAGE_3_PREFIX, "").strip("/")
         )
 
         if not (
