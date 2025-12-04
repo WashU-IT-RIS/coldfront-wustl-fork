@@ -111,7 +111,11 @@ class ArgumentParser:
                 raise ValueError(
                     f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>' or '{STORAGE_3_PREFIX}<ROOT>'."
                 )
-            allocation_root_name = value.replace(STORAGE_2_PREFIX, "").strip("/")
+            allocation_root_name = (
+                value.replace(STORAGE_2_PREFIX, "").strip("/")
+                if value.startswith(STORAGE_2_PREFIX)
+                else value.replace(STORAGE_3_PREFIX, "").strip("/")
+            )
             if "/" in allocation_root_name:
                 raise ValueError(
                     f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>' or '{STORAGE_3_PREFIX}<ROOT>'."
