@@ -4,6 +4,7 @@ from coldfront.core.resource.models import Resource
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
 from django.db.models import OuterRef, Subquery, Sum
+from django.utils.translation import gettext_lazy
 
 from coldfront.plugins.qumulo.validators import calculate_total_project_quotas
 
@@ -35,6 +36,15 @@ class UpdateAllocationForm(AllocationForm):
             project__id=project_pk,
             resources__in=storage_resources,
         )
+        current_allocation = Allocation.objects.filter(name=UpdateAllocationForm.cleaned_data.get("storage_name")).first()
+        current_quota = current_allocation.allocationattribute_set.get(allocation_attribute_type__name="storage_quota").value
+        if storage_quota != current_quota:
+            if storage_quota > current_quota:
+                diff = storage_quota - current_quota
+            else:
+                diff = current_quota - storage_quota
+        else:
+            diff = 0
         storage_quota_sub_query = AllocationAttribute.objects.filter(
             allocation=OuterRef("pk"),
             allocation_attribute_type__name="storage_quota",
@@ -45,7 +55,7 @@ class UpdateAllocationForm(AllocationForm):
         total_storage_quota = (
             project_allocations.aggregate(total=Sum("storage_quota"))["total"] or 0
         )
-        total_storage_quota = total_storage_quota + storage_quota
+        total_storage_quota = total_storage_quota + diff
         return total_storage_quota
 
     def validate_condo_project_quota(project_pk, storage_quota):
