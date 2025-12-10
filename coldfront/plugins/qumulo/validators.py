@@ -203,6 +203,7 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
 def validate_condo_project_quota(project_pk, storage_quota):
     CONDO_PROJECT_QUOTA = 1000
     quota_total = calculate_total_project_quotas(project_pk, storage_quota)
+    print("this was called from the create form")
     #I need a way to check if this form is creating or updating because the calculation is different depending on the scenario
     if quota_total > CONDO_PROJECT_QUOTA:
         raise ValidationError(
@@ -213,6 +214,7 @@ def validate_condo_project_quota(project_pk, storage_quota):
 
 
 def calculate_total_project_quotas(project_pk, storage_quota):
+    print("this was called from the create form")
     storage_resources = Resource.objects.filter(resource_type__name="Storage")
     project_allocations = Allocation.objects.filter(
         project__id=project_pk,

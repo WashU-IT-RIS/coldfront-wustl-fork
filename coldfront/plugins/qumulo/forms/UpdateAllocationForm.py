@@ -31,6 +31,7 @@ class UpdateAllocationForm(AllocationForm):
         )
     
     def calculate_total_project_quotas(project_pk, storage_quota):
+        print("this was called from the update form")
         storage_resources = Resource.objects.filter(resource_type__name="Storage")
         project_allocations = Allocation.objects.filter(
             project__id=project_pk,
@@ -60,7 +61,8 @@ class UpdateAllocationForm(AllocationForm):
 
     def validate_condo_project_quota(project_pk, storage_quota):
         CONDO_PROJECT_QUOTA = 1000
-        quota_total = calculate_total_project_quotas(project_pk, storage_quota)
+        quota_total = UpdateAllocationForm.calculate_total_project_quotas(project_pk, storage_quota)
+        print("this was called from the update form")
         #I need a way to check if this form is creating or updating because the calculation is different depending on the scenario
         if quota_total > CONDO_PROJECT_QUOTA:
             raise forms.ValidationError(
@@ -79,7 +81,7 @@ class UpdateAllocationForm(AllocationForm):
         project_pk = cleaned_data.get("project_pk")
 
         if "condo" in service_rate_categories:
-            self.validate_condo_project_quota(project_pk, storage_quota)
+            UpdateAllocationForm.validate_condo_project_quota(project_pk, storage_quota)
 
         if "nfs" in protocols:
             if storage_export_path == "":
