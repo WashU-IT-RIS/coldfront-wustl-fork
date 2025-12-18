@@ -200,21 +200,21 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
     return
 
 
-def validate_condo_project_quota(project_pk, storage_quota):
+def validate_condo_project_quota(project_pk: str, storage_quota: int, current_quota=None):
     CONDO_PROJECT_QUOTA = 1000
-    quota_total = calculate_total_project_quotas(project_pk, storage_quota)
-    print("this was called from the create form")
-    #I need a way to check if this form is creating or updating because the calculation is different depending on the scenario
+    if current_quota==None:
+        quota_total = sum_project_quotas(project_pk, storage_quota)
+    else:
+        quota_total = update_calculate_total_project_quotas(project_pk, storage_quota, current_quota)
+    
     if quota_total > CONDO_PROJECT_QUOTA:
         raise ValidationError(
             gettext_lazy(
                 f"Project quota exceeds condo limit of {CONDO_PROJECT_QUOTA} TB."
             )
         )
-
-
-def calculate_total_project_quotas(project_pk, storage_quota):
-    print("this was called from the create form")
+        
+def sum_project_quotas(project_pk: str, storage_quota: int):
     storage_resources = Resource.objects.filter(resource_type__name="Storage")
     project_allocations = Allocation.objects.filter(
         project__id=project_pk,
@@ -233,6 +233,20 @@ def calculate_total_project_quotas(project_pk, storage_quota):
     total_storage_quota = total_storage_quota + storage_quota
     return total_storage_quota
 
+def update_calculate_total_project_quotas(project_pk: str, storage_quota: int, current_quota: int):
+    total_storage_quota = sum_project_quotas(project_pk, storage_quota)
+
+    if storage_quota != current_quota:
+        if storage_quota > current_quota:
+            diff = storage_quota - current_quota
+            total_storage_quota = total_storage_quota + diff 
+        else:
+            diff = current_quota - storage_quota
+            total_storage_quota = total_storage_quota - diff 
+                      
+    else:
+        diff = 0
+    return total_storage_quota
 
 def __ad_user_validation_helper(ad_user: str) -> bool:
     active_directory_api = ActiveDirectoryAPI()
