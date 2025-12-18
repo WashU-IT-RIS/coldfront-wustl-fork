@@ -1,24 +1,12 @@
 from typing import Any
-from coldfront.core.allocation.models import Allocation, AllocationAttribute, AllocationStatusChoice
-from coldfront.core.resource.models import Resource
+from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
-from django.db.models import OuterRef, Subquery, Sum
-from django.utils.translation import gettext_lazy
 from coldfront.plugins.qumulo.validators import (
     validate_condo_project_quota,
-    validate_leading_forward_slash,
-    validate_single_ad_user,
-    validate_ticket,
-    validate_storage_name,
-    validate_prepaid_start_date,
     validate_filesystem_path_unique,
-    validate_relative_path,
     validate_parent_directory,
 )
-
-from coldfront.plugins.qumulo.validators import calculate_total_project_quotas
-
 
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
@@ -42,11 +30,7 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["rw_users"].required = (
             self.allocation_status_name != "READY FOR DELETION"
         )
-    
-    
-
-    
-        
+       
     def clean(self) -> dict[str, Any]:
         cleaned_data = super(forms.Form, self).clean()
         protocols = cleaned_data.get("protocols")
