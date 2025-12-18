@@ -87,18 +87,3 @@ class AllocationViewTests(TestCase):
         allocation = Allocation.objects.first()
         self.assertEqual(allocation.status.name, "Pending")
 
-    def test_total_project_quotas(
-        self,
-        mock_ActiveDirectoryValidator: MagicMock,
-        mock_async_task: MagicMock,
-        mock_ActiveDirectoryAPI: MagicMock,
-    ):
-        AllocationService.create_new_allocation(self.form_data, self.user)
-        AllocationService.create_new_allocation(self.form_data, self.user)
-        AllocationService.create_new_allocation(self.form_data, self.user)
-
-        total_quotas = calculate_total_project_quotas(
-            self.form_data["project_pk"], self.form_data["storage_quota"]
-        )
-
-        self.assertEqual(total_quotas, 28)

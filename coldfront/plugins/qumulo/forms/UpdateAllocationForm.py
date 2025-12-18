@@ -2,17 +2,13 @@ from typing import Any
 from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
-from coldfront.plugins.qumulo.validators import (
-    validate_condo_project_quota,
-    validate_filesystem_path_unique,
-    validate_parent_directory,
-)
+
+from coldfront.plugins.qumulo.validators import validate_condo_project_quota, validate_filesystem_path_unique, validate_parent_directory
 
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         self.allocation_id = kwargs.pop("allocation_id")
         super().__init__(*args, **kwargs)
-
         self.fields["storage_type"].disabled = True
 
         self.fields["storage_name"].disabled = True
