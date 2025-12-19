@@ -15,7 +15,7 @@ from coldfront.plugins.qumulo.validators import existing_project_quota, update_c
 @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
 @patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
 @patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
-class AllocationViewTests(TestCase):
+class CondoQuotaValidationTest(TestCase):
     def setUp(self):
         build_data = build_models()
 
@@ -42,7 +42,10 @@ class AllocationViewTests(TestCase):
             "service_rate_category": "consumption",
         }
 
-
+    def existing_condo_quota_no_allocs(self, mock_ActiveDirectoryValidator: MagicMock,mock_async_task: MagicMock,mock_ActiveDirectoryAPI: MagicMock,):
+        total_quota = existing_project_quota(self.form_data["project_pk"])
+        self.assertEqual(total_quota, 0)
+    
     def test_sum_project_quotas(self, mock_ActiveDirectoryValidator: MagicMock,mock_async_task: MagicMock,mock_ActiveDirectoryAPI: MagicMock,):
         AllocationService.create_new_allocation(self.form_data, self.user)
         AllocationService.create_new_allocation(self.form_data, self.user)
