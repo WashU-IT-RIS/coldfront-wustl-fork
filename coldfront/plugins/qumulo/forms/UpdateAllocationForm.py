@@ -35,7 +35,9 @@ class UpdateAllocationForm(AllocationForm):
         storage_quota = cleaned_data.get("storage_quota", 0)
         service_rate_categories = cleaned_data.get("service_rate_category", "")
         project_pk = cleaned_data.get("project_pk")
-        current_quota = self.get_current_quota(self.allocation_id)
+
+        if self.allocation_id is not None:
+            current_quota = self.get_current_quota(self.allocation_id)
 
         if ("condo" in service_rate_categories) and (storage_quota != current_quota):
             validate_condo_project_quota(project_pk, storage_quota, current_quota)

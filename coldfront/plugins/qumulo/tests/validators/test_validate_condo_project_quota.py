@@ -42,7 +42,8 @@ class CondoQuotaValidationTest(TestCase):
             "service_rate_category": "consumption",
         }
 
-    def existing_condo_quota_no_allocs(self, mock_ActiveDirectoryValidator: MagicMock,mock_async_task: MagicMock,mock_ActiveDirectoryAPI: MagicMock,):
+    def test_existing_condo_quota_no_allocs(self, mock_ActiveDirectoryValidator: MagicMock,mock_async_task: MagicMock,mock_ActiveDirectoryAPI: MagicMock,):
+        breakpoint()
         total_quota = existing_project_quota(self.form_data["project_pk"])
         self.assertEqual(total_quota, 0)
     
