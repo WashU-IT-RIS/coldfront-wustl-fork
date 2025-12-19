@@ -219,9 +219,10 @@ def validate_condo_project_quota(project_pk: str, storage_quota: int, current_qu
         quota_total = update_calculate_total_project_quotas(project_pk, storage_quota, current_quota)
     
     if quota_total > CONDO_PROJECT_QUOTA:
+        remaining_quota = calculate_remaining_condo_quota(project_pk)
         raise ValidationError(
             gettext_lazy(
-                f"Project quota exceeds condo limit of {CONDO_PROJECT_QUOTA} TB."
+                f"Project quota exceeds condo limit of {CONDO_PROJECT_QUOTA} TB. There is {remaining_quota} TB available."
             )
         )
 
@@ -263,6 +264,12 @@ def update_calculate_total_project_quotas(project_pk: str, storage_quota: int, c
     else:
         diff = 0
     return total_storage_quota
+
+def calculate_remaining_condo_quota(project_pk: str):
+    CONDO_PROJECT_QUOTA = 1000
+    total_existing_quota = existing_project_quota(project_pk)
+    remaining_quota = CONDO_PROJECT_QUOTA - total_existing_quota
+    return remaining_quota
 
 def __ad_user_validation_helper(ad_user: str) -> bool:
     active_directory_api = ActiveDirectoryAPI()

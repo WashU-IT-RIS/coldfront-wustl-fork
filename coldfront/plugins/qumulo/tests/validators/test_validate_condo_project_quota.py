@@ -10,7 +10,7 @@ from coldfront.core.allocation.models import (
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 from coldfront.plugins.qumulo.views.allocation_view import AllocationView
-from coldfront.plugins.qumulo.validators import existing_project_quota, update_calculate_total_project_quotas, create_calculate_total_project_quotas
+from coldfront.plugins.qumulo.validators import existing_project_quota, update_calculate_total_project_quotas, create_calculate_total_project_quotas, calculate_remaining_condo_quota
 
 @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
 @patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
@@ -41,6 +41,20 @@ class CondoQuotaValidationTest(TestCase):
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
+    
+    def test_calculate_remaining_condo_quota(self, mock_ActiveDirectoryValidator: MagicMock,mock_async_task: MagicMock,mock_ActiveDirectoryAPI: MagicMock,):
+        AllocationService.create_new_allocation(self.form_data, self.user)
+        AllocationService.create_new_allocation(self.form_data, self.user)
+
+        remaining_quota = calculate_remaining_condo_quota(self.form_data["project_pk"])
+        self.assertEqual(remaining_quota, 986)
+    
+    def test_existing_condo_quota_with_allocs(self, mock_ActiveDirectoryValidator: MagicMock,mock_async_task: MagicMock,mock_ActiveDirectoryAPI: MagicMock,):
+        AllocationService.create_new_allocation(self.form_data, self.user)
+        AllocationService.create_new_allocation(self.form_data, self.user)
+
+        total_quota = existing_project_quota(self.form_data["project_pk"])
+        self.assertEqual(total_quota, 14)
 
     def test_existing_condo_quota_no_allocs(self, mock_ActiveDirectoryValidator: MagicMock,mock_async_task: MagicMock,mock_ActiveDirectoryAPI: MagicMock,):
         total_quota = existing_project_quota(self.form_data["project_pk"])
