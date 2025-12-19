@@ -9,8 +9,6 @@ from coldfront.core.allocation.models import (
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
-from coldfront.plugins.qumulo.views.allocation_view import AllocationView
-from coldfront.plugins.qumulo.validators import calculate_total_project_quotas
 
 
 @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
