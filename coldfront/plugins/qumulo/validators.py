@@ -3,7 +3,8 @@ import re
 import json
 
 from django.core.exceptions import ValidationError
-from django.db.models import OuterRef, Subquery, Sum
+from django.db.models import OuterRef, Subquery, IntegerField, Subquery, OuterRef, Sum
+from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy
 
 from coldfront.core.allocation.models import (
@@ -235,7 +236,9 @@ def existing_project_quota(project_pk: str):
         allocation_attribute_type__name="storage_quota",
     ).values("value")[:1]
     project_allocations = project_allocations.annotate(
-        storage_quota=Subquery(storage_quota_sub_query)
+        storage_quota_str=Subquery(storage_quota_sub_query)
+    ).annotate(
+        storage_quota=Cast('storage_quota_str', IntegerField())
     )
     total_storage_quota = (
         project_allocations.aggregate(total=Sum("storage_quota"))["total"] or 0
