@@ -682,6 +682,7 @@ class UpdateAllocationFormTests(TestCase):
             allocation_status_name=self.allocation.status.name,
             data=self.data,
             user_id=self.user.id,
+            allocation_id=self.allocation.pk,
         )
         self.assertTrue(form.fields["rw_users"].required)
         self.assertTrue(form.is_valid())
@@ -697,13 +698,14 @@ class UpdateAllocationFormTests(TestCase):
             allocation_status_name=self.allocation.status.name,
             data=self.data,
             user_id=self.user.id,
+            allocation_id=self.allocation.pk,
         )
         self.assertFalse(form.fields["rw_users"].required)
         self.assertTrue(form.is_valid())
 
     def test_validations_on_changed_values(self):
         update_form = UpdateAllocationForm(
-            initial=self.initial, data=self.data, user_id=self.user.id
+            initial=self.initial, data=self.data, user_id=self.user.id, allocation_id=self.allocation.pk,
         )
         self.assertTrue(update_form.is_bound)
         self.assertTrue(update_form.is_valid())
