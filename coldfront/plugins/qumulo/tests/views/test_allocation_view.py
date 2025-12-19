@@ -67,7 +67,7 @@ class AllocationViewTests(TestCase):
             "billing_exempt": "No",
             "subsidized": "Yes",
         }
-        for attr, value in allocation_defaults.items():
+        for attr in allocation_defaults.keys():
             attribute_type = AllocationAttributeType.objects.get(name=attr)
             num_attrs = len(
                 AllocationAttribute.objects.filter(

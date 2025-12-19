@@ -9,6 +9,7 @@ from django.contrib.auth.models import Permission
 
 from coldfront.core.allocation.models import AllocationStatusChoice
 from coldfront.core.project.models import Project, ProjectStatusChoice
+from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
 from coldfront.core.field_of_science.models import FieldOfScience
 
@@ -110,6 +111,100 @@ class AllocationFormTests(TestCase):
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.is_valid())
 
+    def test_duplicate_storage_name_for_storage_type(self):
+        # First, create an allocation with a specific name
+        existing_allocation_data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "duplicatename",
+            "storage_quota": 1000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-12345",
+            "storage_export_path": "/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        create_allocation(self.project1, self.user, existing_allocation_data)
+
+        # Now, attempt to create another allocation with the same name
+        duplicate_name_data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "duplicatename",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(data=duplicate_name_data, user_id=self.user.id)
+        self.assertFalse(form.is_valid())
+        self.assertIn("storage_name", form.errors)
+
+        # Now, attempt to create another allocation with the same name but different storage type
+        duplicate_name_data_different_storage_type = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage3",
+            "storage_name": "duplicatename",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(
+            data=duplicate_name_data_different_storage_type, user_id=self.user.id
+        )
+        self.assertTrue(form.is_valid())
+        self.assertNotIn("storage_name", form.errors)
+
+        # Now, attempt to create another allocation with an allocation attribute other than storage_name having the same name
+        duplicate_name_data_in_another_allocation_attribute = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage3",
+            "storage_name": "just_a_name",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "duplicatename",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(
+            data=duplicate_name_data_in_another_allocation_attribute,
+            user_id=self.user.id,
+        )
+        self.assertTrue(form.is_valid())
+        self.assertNotIn("storage_name", form.errors)
+        self.assertNotIn("cost_center", form.errors)
+
+
     def test_empty_ro_users_form_valid(self):
         data = {
             "project_pk": self.project1.id,
@@ -117,7 +212,7 @@ class AllocationFormTests(TestCase):
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
-            "ro_users": [],
+            "ro_users": ["test"],
             "rw_users": ["test"],
             "storage_filesystem_path": "path_to_filesystem",
             "storage_ticket": "ITSD-98765",
@@ -535,18 +630,34 @@ class ProjectFormTests(TestCase):
         form = ProjectCreateForm(data=valid_data, user_id="admin")
         self.assertTrue(form.is_valid())
 
-
+@patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class UpdateAllocationFormTests(TestCase):
     def setUp(self):
+        self.qumulo_patcher = patch(
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        )
+        self.mock_qumulo_api = self.qumulo_patcher.start()
+        self.active_directory_patcher = patch(
+            "coldfront.plugins.qumulo.validators.ActiveDirectoryAPI"
+        )
+        self.mock_active_directory_api = self.active_directory_patcher.start()
+        self.mock_active_directory_api.return_value.get_members.return_value = [
+            {"attributes": {"sAMAccountName": "test"}}
+        ]
+
         build_data = build_models()
         self.user = build_data["user"]
         self.project1 = build_data["project"]
+        storage2 = Resource.objects.get(name="Storage2")
+        self.initial = {
+            "storage_name": "TestAllocation",
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_type": storage2.name,
+        }
         self.data = {
             "project_pk": self.project1.id,
-            "storage_name": "TestAllocation",
             "storage_quota": 1000,
             "protocols": ["nfs"],
-            "storage_filesystem_path": "path_to_filesystem",
             "storage_ticket": "ITSD-98765",
             "storage_export_path": "/path/to/export",
             "rw_users": ["test"],
@@ -557,18 +668,23 @@ class UpdateAllocationFormTests(TestCase):
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
         }
-        self.allocation = create_allocation(self.project1, self.user, self.data)
+        self.data_for_creation = {**self.data, **self.initial}
+        self.allocation = create_allocation(self.project1, self.user, self.data_for_creation)
 
     def tearDown(self):
+        self.qumulo_patcher.stop()
+        patch.stopall()
         return super().tearDown()
 
     def test_default_rw_users_required(self):
         form = UpdateAllocationForm(
+            initial=self.initial,
             allocation_status_name=self.allocation.status.name,
             data=self.data,
             user_id=self.user.id,
         )
         self.assertTrue(form.fields["rw_users"].required)
+        self.assertTrue(form.is_valid())
 
     def test_ready_for_deletion_rw_users_not_required(self):
         rfd_status = AllocationStatusChoice.objects.filter(
@@ -577,8 +693,21 @@ class UpdateAllocationFormTests(TestCase):
         self.allocation.status = rfd_status
         self.allocation.save()
         form = UpdateAllocationForm(
+            initial=self.initial,
             allocation_status_name=self.allocation.status.name,
             data=self.data,
             user_id=self.user.id,
         )
         self.assertFalse(form.fields["rw_users"].required)
+        self.assertTrue(form.is_valid())
+
+    def test_validations_on_changed_values(self):
+        update_form = UpdateAllocationForm(
+            initial=self.initial, data=self.data, user_id=self.user.id
+        )
+        self.assertTrue(update_form.is_bound)
+        self.assertTrue(update_form.is_valid())
+        update_form.clean()
+        self.assertNotIn("storage_name", update_form.errors)
+        self.assertNotIn("storage_type", update_form.errors)
+        self.assertEqual(len(update_form.errors), 0)

@@ -7,6 +7,12 @@ from coldfront.plugins.qumulo.tests.fixtures import (
     create_ris_project_and_allocations_storage2,
     create_ris_project_and_allocations_storage3,
 )
+from coldfront.plugins.qumulo.tests.helper_classes.factories import (
+    Storage2Factory,
+    Storage2PendingFactory,
+    Storage3Factory,
+    Storage3PendingFactory,
+)
 
 
 class TestAllocations(TestCase):
@@ -71,3 +77,26 @@ class TestAllocations(TestCase):
                 allocation_attribute_type__name="billing_exempt"
             ).first()
             self.assertNotEqual(exempt_attr.value, "yes") if exempt_attr else None
+
+    def test_reserved_statuses_queryset(self):
+        Storage2PendingFactory()
+        Storage3PendingFactory()
+        Storage2Factory()  # Active by default
+        Storage3Factory()  # Active by default
+        Storage2Factory(status__name="New")
+        Storage3Factory(status__name="New")
+        storage2_deleted = Storage2Factory(status__name="Deleted")
+        storage3_deleted = Storage3Factory(status__name="Deleted")
+
+        reserved_allocations = Allocation.objects.reserved_statuses()
+        filtered_allocations = Allocation.objects.filter(
+            status__name__in=["Pending", "Active", "New"]
+        )
+        self.assertQuerysetEqual(reserved_allocations, filtered_allocations)
+        for allocation in reserved_allocations:
+            self.assertIn(
+                allocation.status.name,
+                ["Pending", "Active", "New"],
+            )
+        self.assertNotIn(storage2_deleted, reserved_allocations)
+        self.assertNotIn(storage3_deleted, reserved_allocations)

@@ -8,12 +8,12 @@ from django.utils.translation import gettext_lazy
 
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationAttribute,
     AllocationAttributeType,
     AllocationStatusChoice,
 )
 
 from coldfront.core.resource.models import Resource
+from coldfront.core.allocation.models import AllocationAttribute
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
@@ -85,6 +85,24 @@ def validate_filesystem_path_unique(value: str, resource_type: str):
         )
 
 
+def validate_uniqueness_storage_name_for_storage_type(value: str, storage_type: str):
+
+    allocations_with_storage_name_and_storage_type = (
+        Allocation.objects.reserved_statuses().filter(
+            allocationattribute__allocation_attribute_type__name="storage_name",
+            allocationattribute__value=value,
+            resources__name=storage_type,
+        )
+    )
+
+    if allocations_with_storage_name_and_storage_type.exists():
+        raise ValidationError(
+            message=f"An allocation with the storage name (%(value)s) for the selected storage type already exists",
+            code="invalid",
+            params={"value": value},
+        )
+
+
 def validate_ldap_usernames_and_groups(name: str):
     if name is None:
         return
@@ -150,9 +168,8 @@ def validate_single_ad_user_skip_admin(user: str):
     return validate_single_ad_user(user)
 
 
-def validate_storage_name(value: str):
+def validate_storage_name(value: str) -> None:
     valid_character_match = re.match("^[0-9a-zA-Z\-_\.]*$", value)
-
     if not valid_character_match:
         raise ValidationError(
             message=gettext_lazy(
@@ -160,13 +177,6 @@ def validate_storage_name(value: str):
             ),
             code="invalid",
         )
-
-    existing_allocations = AllocationAttribute.objects.filter(
-        allocation_attribute_type__name="storage_name", value=value
-    )
-
-    if existing_allocations.first():
-        raise ValidationError(message=f"{value} already exists", code="invalid")
 
     return
 
