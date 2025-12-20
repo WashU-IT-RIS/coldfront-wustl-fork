@@ -36,7 +36,7 @@ class UpdateAllocationForm(AllocationForm):
 
     def clean(self) -> dict[str, Any]:
         # Always call the parent's clean method to ensure basic validation is performed
-        cleaned_data = super().clean()
+        cleaned_data = super(forms.Form).clean()
         protocols = cleaned_data.get("protocols")
         storage_export_path = cleaned_data.get("storage_export_path")
         storage_ticket = self._upper(cleaned_data.get("storage_ticket", None))
