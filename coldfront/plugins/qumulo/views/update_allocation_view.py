@@ -96,6 +96,7 @@ class UpdateAllocationView(AllocationView):
             form_data[key + "_users"] = self.get_access_users(key, allocation)
 
         kwargs["initial"] = form_data
+        kwargs["allocation_id"] = allocation_id
         return kwargs
 
     def form_valid(
