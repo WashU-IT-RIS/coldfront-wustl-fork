@@ -5,6 +5,7 @@ from django import forms
 from coldfront.core.project.models import Project
 from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
+from coldfront.core.allocation.models import AllocationAttribute, Allocation
 from coldfront.plugins.qumulo.validators import (
     validate_uniqueness_storage_name_for_storage_type,
     validate_filesystem_path_unique,
@@ -15,6 +16,10 @@ from coldfront.core.allocation.forms import AllocationForm
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         self.allocation_id = kwargs.pop("allocation_id")
+        self.user_id = kwargs.pop("user_id")
+        self.allocation_status_name = self._upper(
+            kwargs.pop("allocation_status_name", None)
+        )
         super().__init__(*args, **kwargs)
         self.fields["storage_type"].disabled = True
 
@@ -41,7 +46,6 @@ class UpdateAllocationForm(AllocationForm):
         storage_export_path = cleaned_data.get("storage_export_path")
         storage_ticket = self._upper(cleaned_data.get("storage_ticket", None))
         requested_quota = cleaned_data.get("storage_quota", 0)
-        project_pk = cleaned_data.get("project_pk")
 
         if self.allocation_id is not None:
             current_quota = self.get_current_quota(self.allocation_id)
@@ -78,4 +82,14 @@ class UpdateAllocationForm(AllocationForm):
                 validate_parent_directory(storage_filesystem_path, storage_type)
             except forms.ValidationError as error:
                 self.add_error("storage_filesystem_path", error.message)
+    
+    def get_current_quota(self, current_allocation: int) -> int:
+        allocation_obj = Allocation.objects.get(pk=current_allocation)
+        current_quota = AllocationAttribute.objects.filter(
+        allocation=allocation_obj,
+        allocation_attribute_type__name="storage_quota",
+        ).values("value")[:1]
+        current_quota = int(current_quota[0]['value'])
+
+        return current_quota
 
