@@ -18,6 +18,7 @@ from coldfront.plugins.qumulo.validators import (
     validate_filesystem_path_unique,
     validate_relative_path,
     validate_parent_directory,
+    validate_condo_project_quota,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -204,6 +205,12 @@ class AllocationForm(forms.Form):
         protocols = cleaned_data.get("protocols")
         storage_export_path = cleaned_data.get("storage_export_path")
         storage_ticket = self._upper(cleaned_data.get("storage_ticket", None))
+        storage_quota = cleaned_data.get("storage_quota", 0)
+        service_rate_categories = cleaned_data.get("service_rate_category", "")
+        project_pk = cleaned_data.get("project_pk")
+
+        if "condo" in service_rate_categories:
+            validate_condo_project_quota(project_pk, storage_quota)
 
         if "nfs" in protocols:
             if storage_export_path == "":

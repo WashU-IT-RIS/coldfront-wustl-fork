@@ -3,6 +3,8 @@ import re
 import json
 
 from django.core.exceptions import ValidationError
+from django.db.models import OuterRef, Subquery, IntegerField, Subquery, OuterRef, Sum
+from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy
 
 from coldfront.core.allocation.models import (
@@ -11,6 +13,8 @@ from coldfront.core.allocation.models import (
     AllocationStatusChoice,
 )
 
+from coldfront.core.resource.models import Resource
+from coldfront.core.allocation.models import AllocationAttribute
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
@@ -206,6 +210,66 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
         )
     return
 
+
+def validate_condo_project_quota(project_pk: str, storage_quota: int, current_quota=None):
+    CONDO_PROJECT_QUOTA = 1000
+    if current_quota==None:
+        quota_total = create_calculate_total_project_quotas(project_pk, storage_quota)
+    else:
+        quota_total = update_calculate_total_project_quotas(project_pk, storage_quota, current_quota)
+    
+    if quota_total > CONDO_PROJECT_QUOTA:
+        remaining_quota = calculate_remaining_condo_quota(project_pk)
+        raise ValidationError(
+            gettext_lazy(
+                f"Project quota exceeds condo limit of {CONDO_PROJECT_QUOTA} TB. There is {remaining_quota} TB available."
+            )
+        )
+
+def existing_project_quota(project_pk: str):
+    storage_resources = Resource.objects.filter(resource_type__name="Storage")
+    project_allocations = Allocation.objects.filter(
+        project__id=project_pk,
+        resources__in=storage_resources,
+    )
+    storage_quota_sub_query = AllocationAttribute.objects.filter(
+        allocation=OuterRef("pk"),
+        allocation_attribute_type__name="storage_quota",
+    ).values("value")[:1]
+    project_allocations = project_allocations.annotate(
+        storage_quota_str=Subquery(storage_quota_sub_query)
+    ).annotate(
+        storage_quota=Cast('storage_quota_str', IntegerField())
+    )
+    total_storage_quota = (
+        project_allocations.aggregate(total=Sum("storage_quota"))["total"] or 0
+    )
+    return total_storage_quota
+        
+def create_calculate_total_project_quotas(project_pk: str, storage_quota: int):
+    total_existing_quota = existing_project_quota(project_pk)
+    total_storage_quota = total_existing_quota + storage_quota
+    return total_storage_quota
+
+def update_calculate_total_project_quotas(project_pk: str, storage_quota: int, current_quota: int):
+    total_existing_quota = existing_project_quota(project_pk)
+
+    if storage_quota != current_quota:
+        if storage_quota > current_quota:
+            diff = storage_quota - current_quota
+            total_storage_quota = total_existing_quota + diff 
+        else:
+            diff = current_quota - storage_quota
+            total_storage_quota = total_existing_quota - diff                      
+    else:
+        diff = 0
+    return total_storage_quota
+
+def calculate_remaining_condo_quota(project_pk: str):
+    CONDO_PROJECT_QUOTA = 1000
+    total_existing_quota = existing_project_quota(project_pk)
+    remaining_quota = CONDO_PROJECT_QUOTA - total_existing_quota
+    return remaining_quota
 
 def __ad_user_validation_helper(ad_user: str) -> bool:
     active_directory_api = ActiveDirectoryAPI()

@@ -1,8 +1,9 @@
-import re
-
 from typing import Any
+from coldfront.core.allocation.models import Allocation, AllocationAttribute
+from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
 
+from coldfront.plugins.qumulo.validators import validate_condo_project_quota, validate_filesystem_path_unique, validate_parent_directory
 
 from coldfront.core.project.models import Project
 from coldfront.core.resource.models import Resource
@@ -36,14 +37,16 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["rw_users"].required = (
             self.allocation_status_name != "READY FOR DELETION"
         )
-
+       
     def clean(self) -> dict[str, Any]:
-        # Always call the parent's clean method to ensure basic validation is performed
         cleaned_data = super(forms.Form, self).clean()
         protocols = cleaned_data.get("protocols")
         storage_export_path = cleaned_data.get("storage_export_path")
         storage_ticket = self._upper(cleaned_data.get("storage_ticket", None))
         requested_quota = cleaned_data.get("storage_quota", 0)
+        storage_quota = cleaned_data.get("storage_quota", 0)
+        service_rate_categories = cleaned_data.get("service_rate_category", "")
+        project_pk = cleaned_data.get("project_pk")
 
         if self.allocation_id is not None:
             current_quota = self.get_current_quota(self.allocation_id)
@@ -55,7 +58,9 @@ class UpdateAllocationForm(AllocationForm):
                     "storage_quota",
                     "Increases of 10TB or more for Storage2 allocations require approval. Please contact support.",
                 )
-        
+
+        if ("condo" in service_rate_categories) and (storage_quota != current_quota):
+            validate_condo_project_quota(project_pk, storage_quota, current_quota)
 
         if "nfs" in protocols:
             if storage_export_path == "":
@@ -73,13 +78,15 @@ class UpdateAllocationForm(AllocationForm):
         self.validate_unique_storage_name(cleaned_data=cleaned_data)
 
         if self.fields["storage_filesystem_path"].disabled is False:
+            storage_type = cleaned_data.get("storage_type")
             storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
             try:
-                storage_type = cleaned_data.get("storage_type", "")
                 validate_filesystem_path_unique(storage_filesystem_path, storage_type)
                 validate_parent_directory(storage_filesystem_path, storage_type)
             except forms.ValidationError as error:
                 self.add_error("storage_filesystem_path", error.message)
+        
+        return cleaned_data
     
     def get_current_quota(self, current_allocation: int) -> int:
         allocation_obj = Allocation.objects.get(pk=current_allocation)
