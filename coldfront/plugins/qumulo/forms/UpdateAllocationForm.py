@@ -16,10 +16,6 @@ from coldfront.core.allocation.forms import AllocationForm
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         self.allocation_id = kwargs.pop("allocation_id")
-        self.user_id = kwargs.pop("user_id")
-        self.allocation_status_name = self._upper(
-            kwargs.pop("allocation_status_name", None)
-        )
         super().__init__(*args, **kwargs)
         self.fields["storage_type"].disabled = True
 
