@@ -3,7 +3,7 @@ from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
 
-from coldfront.plugins.qumulo.validators import validate_condo_project_quota, validate_filesystem_path_unique, validate_parent_directory
+from coldfront.plugins.qumulo.validators import validate_condo_project_quota, validate_filesystem_path_unique, validate_parent_directory, validate_storage2_quota_increase
 
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
@@ -38,6 +38,9 @@ class UpdateAllocationForm(AllocationForm):
 
         if self.allocation_id is not None:
             current_quota = self.get_current_quota(self.allocation_id)
+        
+        if cleaned_data.get("storage_type") == "Storage2" and storage_quota > current_quota:
+            validate_storage2_quota_increase(storage_quota, current_quota)
 
         if ("condo" in service_rate_categories) and (storage_quota != current_quota):
             validate_condo_project_quota(project_pk, storage_quota, current_quota)

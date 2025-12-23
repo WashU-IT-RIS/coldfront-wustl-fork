@@ -271,6 +271,14 @@ def calculate_remaining_condo_quota(project_pk: str):
     remaining_quota = CONDO_PROJECT_QUOTA - total_existing_quota
     return remaining_quota
 
+def validate_storage2_quota_increase(storage_quota: int, current_quota: int):
+    diff = storage_quota - current_quota
+    if diff >= 10:
+        raise ValidationError(
+            "Increases of 10TB or more for Storage2 allocations require approval. Please contact support.",
+        )
+    return
+
 def __ad_user_validation_helper(ad_user: str) -> bool:
     active_directory_api = ActiveDirectoryAPI()
 
