@@ -8,6 +8,7 @@ from coldfront.plugins.qumulo.validators import validate_condo_project_quota, va
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         self.allocation_id = kwargs.pop("allocation_id")
+        self.sub_allocation = kwargs.pop("sub_allocation", False)
         super().__init__(*args, **kwargs)
         self.fields["storage_type"].disabled = True
 

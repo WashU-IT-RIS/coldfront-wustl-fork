@@ -35,6 +35,7 @@ class AllocationForm(forms.Form):
         self.allocation_status_name = self._upper(
             kwargs.pop("allocation_status_name", None)
         )
+        self.sub_allocation = kwargs.pop("sub_allocation", False)
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
         self.fields["storage_type"].choices = self.get_storage_type_choices()
@@ -209,7 +210,7 @@ class AllocationForm(forms.Form):
         service_rate_categories = cleaned_data.get("service_rate_category", "")
         project_pk = cleaned_data.get("project_pk")
 
-        if "condo" in service_rate_categories:
+        if "condo" in service_rate_categories and not self.sub_allocation:
             validate_condo_project_quota(project_pk, storage_quota)
 
         if "nfs" in protocols:

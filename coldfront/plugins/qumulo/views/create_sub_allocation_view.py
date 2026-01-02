@@ -19,6 +19,7 @@ class CreateSubAllocationView(UpdateAllocationView):
     def get_form_kwargs(self):
         kwargs = super(CreateSubAllocationView, self).get_form_kwargs()
         kwargs["user_id"] = self.request.user.id
+        kwargs["sub_allocation"] = True
 
         allocation_id = self.kwargs.get("allocation_id")
         parent_allocation = Allocation.objects.get(pk=allocation_id)
