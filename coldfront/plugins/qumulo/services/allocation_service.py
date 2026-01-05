@@ -216,6 +216,8 @@ class AllocationService:
 
             if allocation_attribute_name == "storage_protocols":
                 protocols = form_data.get("protocols")
+                if not protocols:
+                    continue
 
                 AllocationAttribute.objects.create(
                     allocation_attribute_type=allocation_attribute_type,
