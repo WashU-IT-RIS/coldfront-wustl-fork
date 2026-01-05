@@ -220,7 +220,6 @@ class MigrateToColdfront:
             allocation_data.update(field.entity_item)
         allocation_data["storage_filesystem_path"] = f"{base_path}/{seed_path}"
         allocation_data["storage_export_path"] = f"{base_path}/{seed_path}"
-
         service_result = AllocationService.create_new_allocation(
             allocation_data, pi_user
         )

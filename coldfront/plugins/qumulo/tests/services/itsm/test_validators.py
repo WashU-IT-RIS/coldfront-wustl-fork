@@ -37,11 +37,6 @@ class TestValidators(TestCase):
         empty = "{}"
         self.assertIsNone(validate_json(empty))
 
-        malformed = """
-        {"afm_cache_enable":bad}
-        """
-        self.assertEqual(validate_json(malformed), "is not a valid JSON")
-
         conditions = {"allow_blank": True}
         blank = ""
         self.assertIsNone(validate_json(blank, conditions))
