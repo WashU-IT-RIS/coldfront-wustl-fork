@@ -1,2 +1,4 @@
 STORAGE_2_PREFIX = "/storage2/fs1"
+STORAGE_3_PREFIX = "/storage3/fs1"
+
 BATCH_SIZE=10000
