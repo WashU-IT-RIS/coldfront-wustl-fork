@@ -1,11 +1,12 @@
 import re, json
+from typing import Any, Union
 
 import coldfront.core.allocation.models as coldfront_models
 
 
 # This is copy from coldfront/plugins/qumulo/validators.py
 # loading the validator from Django causes an exception due to app requirements.
-def validate_ticket(ticket: str, validate: bool = True):
+def validate_ticket(ticket: str, validate: bool = True) -> Union[str, None]:
     if not validate:
         return None
 
@@ -21,7 +22,7 @@ def validate_ticket(ticket: str, validate: bool = True):
     return f"{ticket} is not in the format ITSD-12345 or 12345"
 
 
-def numericallity(value: int, conditions: dict):
+def numericallity(value: int, conditions: dict) -> Union[str, None]:
     if value is None:
         return f"{value} is not a number"
 
@@ -45,7 +46,7 @@ def numericallity(value: int, conditions: dict):
     return None
 
 
-def presence(value, presence: bool = True):
+def presence(value: Any, presence: bool = True) -> Union[str, None]:
     if presence:
         if value is None:
             return "must be specified"
@@ -56,7 +57,7 @@ def presence(value, presence: bool = True):
     return
 
 
-def length(value, conditions):
+def length(value: str, conditions: dict) -> Union[str, None]:
     allow_blank = conditions.get("allow_blank")
     if allow_blank:
         if not bool(value):
@@ -72,7 +73,7 @@ def length(value, conditions):
     return f"exceeds the limit of {maximum_length}: {value}"
 
 
-def inclusion(value, accepted_values):
+def inclusion(value: Union[list, str], accepted_values: list) -> Union[str, None]:
     if isinstance(value, list):
         value_list = value
         if all(element in accepted_values for element in value_list):
@@ -84,7 +85,7 @@ def inclusion(value, accepted_values):
     return f"{value} is not amongst {accepted_values}"
 
 
-def exclusion(value, exclusions):
+def exclusion(value: str, exclusions: dict) -> Union[str, None]:
     if value is None:
         return None
 
@@ -97,13 +98,13 @@ def exclusion(value, exclusions):
     return f"constains an email and should only contain valid WUSTL keys: value {value}"
 
 
-def validate_json(value, conditions={}):
+def validate_json(value: Any, conditions: dict = {}) -> Union[str, None]:
     if conditions.get("allow_blank"):
         if value in [None, ""]:
             return None
 
     try:
-        bool(json.loads(value))
+        bool(json.dumps(value))
     except:
         return "is not a valid JSON"
 
@@ -111,7 +112,7 @@ def validate_json(value, conditions={}):
 
 
 # TODO check if the user exists
-def ad_record_exist(value, validate: bool = True):
+def ad_record_exist(value, validate: bool = True) -> Union[str, None]:
     if not validate:
         return None
 
@@ -123,7 +124,7 @@ def ad_record_exist(value, validate: bool = True):
 # Note that the field is hardcoded to allocation_attribute_type__name since I need to
 # figure out how to pass the entity_attribute from the conditions['entity_attribute'] to the filter.
 # This seemed promissing to no avail: exec(f"{conditions['entity_attribute']}")
-def uniqueness(value, conditions):
+def uniqueness(value: Any, conditions: dict) -> Union[str, None]:
 
     # SELECT "allocation_allocationattribute"."id", "allocation_allocationattribute"."created", "allocation_allocationattribute"."modified", "allocation_allocationattribute"."allocation_attribute_type_id", "allocation_allocationattribute"."allocation_id", "allocation_allocationattribute"."value" FROM "allocation_allocationattribute" INNER JOIN "allocation_allocationattributetype" ON ("allocation_allocationattribute"."allocation_attribute_type_id" = "allocation_allocationattributetype"."id") WHERE ("allocation_allocationattributetype"."name" = storage_name AND "allocation_allocationattribute"."value" = /storage2-dev/fs1/jin810)
     exists = (
