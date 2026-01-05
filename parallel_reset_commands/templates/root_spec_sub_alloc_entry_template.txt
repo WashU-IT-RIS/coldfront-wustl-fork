@@ -1,2 +1,2 @@
-A:g:storage-<ALLOC>-<SUB_ALLOC>-rw@accounts.ad.wustl.edu:rxtncy
-A:g:storage-<ALLOC>-<SUB_ALLOC>-ro@accounts.ad.wustl.edu:rxtncy
+A:g:storage<STORAGE_SUFFIX>-<ALLOC>-<SUB_ALLOC>-rw@accounts.ad.wustl.edu:rxtncy
+A:g:storage<STORAGE_SUFFIX>-<ALLOC>-<SUB_ALLOC>-ro@accounts.ad.wustl.edu:rxtncy
