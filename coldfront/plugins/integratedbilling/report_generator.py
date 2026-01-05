@@ -27,7 +27,7 @@ class ReportGenerator:
         self.delivery_date = delivery_date or self.__get_delivery_date()
         self.delivery_month = self.delivery_date.strftime("%B")
 
-    def generate(self, ingest_usages=True, dry_run=False) -> None:
+    def generate(self, ingest_usages=True, dry_run=False) -> bool:
         if ingest_usages:
             success = self.itsm_usage_ingestion.process_usages()
             if not success:
@@ -54,7 +54,7 @@ class ReportGenerator:
         return True
 
     # Private methods
-    def __get_allocation_usages(self):
+    def __get_allocation_usages(self) -> list[AllocationUsage]:
         monthly_usages = AllocationUsage.objects.monthly_billable(
             usage_date=self.usage_date,
             tier=self.tier.name,
@@ -102,7 +102,5 @@ class ReportGenerator:
 
 # helper function to get the default billing date (first day of the current month)
 def _get_default_usage_date() -> datetime:
-    today = datetime.now()
-    return today.replace(
-        day=1, hour=18, minute=0, second=0, microsecond=0, tzinfo=timezone.utc
-    )
+    today = datetime.now(tz=timezone.utc)
+    return today.replace(day=1, hour=18, minute=0, second=0, microsecond=0)
