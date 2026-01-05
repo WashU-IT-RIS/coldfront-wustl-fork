@@ -8,7 +8,6 @@ from coldfront.plugins.qumulo.validators import validate_condo_project_quota, va
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         self.allocation_id = kwargs.pop("allocation_id")
-        self.sub_allocation = kwargs.pop("sub_allocation", False)
         super().__init__(*args, **kwargs)
         self.fields["storage_type"].disabled = True
 
@@ -36,6 +35,7 @@ class UpdateAllocationForm(AllocationForm):
         storage_quota = cleaned_data.get("storage_quota", 0)
         service_rate_categories = cleaned_data.get("service_rate_category", "")
         project_pk = cleaned_data.get("project_pk")
+        parent_allocation = cleaned_data.get("parent_allocation", None)
 
         if self.allocation_id is not None:
             current_quota = self.get_current_quota(self.allocation_id)
@@ -43,7 +43,7 @@ class UpdateAllocationForm(AllocationForm):
         if cleaned_data.get("storage_type") == "Storage2" and storage_quota > current_quota:
             validate_storage2_quota_increase(storage_quota, current_quota)
 
-        if ("condo" in service_rate_categories) and (storage_quota != current_quota):
+        if ("condo" in service_rate_categories) and (storage_quota != current_quota) and (not parent_allocation):
             validate_condo_project_quota(project_pk, storage_quota, current_quota)
 
         if "nfs" in protocols:
