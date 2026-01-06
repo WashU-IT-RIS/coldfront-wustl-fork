@@ -233,27 +233,22 @@ def existing_project_quota(project_pk: str):
         project__id=project_pk,
         resources__in=storage_resources,
     )
-    
-    project_parent_allocations = Allocation.objects.filter(
-        pk__in=AllocationLinkage.objects.filter(parent__in=project_allocations).values_list("parent", flat=True)
+    project_child_allocations = Allocation.objects.filter(
+        pk__in=AllocationLinkage.objects.filter(children__in=project_allocations).values_list("children", flat=True)
     )
-    
+    project_top_level_allocations = project_allocations.exclude(pk__in=project_child_allocations.values_list("pk", flat=True))
     storage_quota_sub_query = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"),
         allocation_attribute_type__name="storage_quota",
     ).values("value")[:1]
-    project_parent_allocations = project_parent_allocations.annotate(
+    project_top_level_allocations = project_top_level_allocations.annotate(
         storage_quota_str=Subquery(storage_quota_sub_query)
     ).annotate(
         storage_quota=Cast('storage_quota_str', IntegerField())
     )
-    for allocation in project_parent_allocations:
-        print(f"Allocation ID: {allocation.pk}, storage_quota: {allocation.storage_quota}")
-    
     total_storage_quota = (
-        project_parent_allocations.aggregate(total=Sum("storage_quota"))["total"] or 0
+        project_top_level_allocations.aggregate(total=Sum("storage_quota"))["total"] or 0
     )
-    print("Total storage quota for project {}: {}".format(project_pk, total_storage_quota))
     return total_storage_quota
         
 def create_calculate_total_project_quotas(project_pk: str, storage_quota: int):
