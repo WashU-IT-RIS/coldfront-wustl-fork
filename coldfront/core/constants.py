@@ -12,3 +12,5 @@ ALL_ATTRIBUTE_TYPES = [
     "Attribute Expanded Text",
     "JSON",
 ]
+
+CONDO_PROJECT_QUOTA = 1000

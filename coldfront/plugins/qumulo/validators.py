@@ -16,6 +16,7 @@ from coldfront.core.allocation.models import (
 
 from coldfront.core.resource.models import Resource
 from coldfront.core.allocation.models import AllocationAttribute
+from coldfront.core.constants import CONDO_PROJECT_QUOTA
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
@@ -213,7 +214,6 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
 
 
 def validate_condo_project_quota(project_pk: str, storage_quota: int, current_quota=None):
-    CONDO_PROJECT_QUOTA = 1000
     if current_quota==None:
         quota_total = create_calculate_total_project_quotas(project_pk, storage_quota)
     else:
@@ -271,7 +271,6 @@ def update_calculate_total_project_quotas(project_pk: str, storage_quota: int, c
     return total_storage_quota
 
 def calculate_remaining_condo_quota(project_pk: str):
-    CONDO_PROJECT_QUOTA = 1000
     total_existing_quota = existing_project_quota(project_pk)
     remaining_quota = CONDO_PROJECT_QUOTA - total_existing_quota
     return remaining_quota
