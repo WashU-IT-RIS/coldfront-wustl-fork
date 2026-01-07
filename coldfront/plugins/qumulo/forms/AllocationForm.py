@@ -36,7 +36,8 @@ class AllocationForm(forms.Form):
         self.allocation_status_name = self._upper(
             kwargs.pop("allocation_status_name", None)
         )
-        self.allocation_id = kwargs.pop("allocation_id", None)
+        if not hasattr(self, "allocation_id"):
+            self.allocation_id = kwargs.pop("allocation_id", None)
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
         self.fields["storage_type"].choices = self.get_storage_type_choices()
@@ -212,7 +213,6 @@ class AllocationForm(forms.Form):
         project_pk = cleaned_data.get("project_pk")
         parent_allocation = cleaned_data.get("parent_allocation", None)
         current_quota = None
-
         if self.allocation_id is not None:
             current_quota = self.get_current_quota(self.allocation_id)
         

@@ -261,7 +261,7 @@ def update_calculate_total_project_quotas(project_pk: str, storage_quota: int, c
     diff = 0
     if storage_quota != current_quota:
         diff = storage_quota - current_quota
-        total_storage_quota = total_existing_quota + diff                    
+        total_storage_quota = total_existing_quota + diff                   
     return total_storage_quota
 
 def calculate_remaining_condo_quota(project_pk: str):
