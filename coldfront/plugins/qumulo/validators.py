@@ -260,12 +260,8 @@ def update_calculate_total_project_quotas(project_pk: str, storage_quota: int, c
     total_existing_quota = existing_project_quota(project_pk)
 
     if storage_quota != current_quota:
-        if storage_quota > current_quota:
-            diff = storage_quota - current_quota
-            total_storage_quota = total_existing_quota + diff 
-        else:
-            diff = current_quota - storage_quota
-            total_storage_quota = total_existing_quota - diff                      
+        diff = storage_quota - current_quota
+        total_storage_quota = total_existing_quota + diff                    
     else:
         diff = 0
     return total_storage_quota
