@@ -9,11 +9,16 @@ rpt_resource = os.environ.get('USER_LIST_RESOURCE', None)
 if rpt_resource not in ['Storage2', 'Storage3']:
     print("USER_LIST_RESOURCE value should be one of: Storage2, Storage3")
     sys.exit(1)
-r = Resource.objects.filter(name=rpt_resource)[0]
 no_emails = []
-for allocation in Allocation.objects.all():
-    if allocation.get_parent_resource != r:
-        continue
+for allocation in Allocation \
+                    .objects \
+                    .filter(
+                        resources=Resource \
+                            .objects
+                            .filter(
+                                name=rpt_resource
+                            )[0]
+                    ):
     for attribute in AllocationAttribute.objects.filter(value=allocation.pk):
         acl_allocation_id = attribute.allocation_id
         for allocation_user in \
