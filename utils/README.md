@@ -13,8 +13,8 @@ Coldfront container/pod and piping its contents to the `coldfront shell`
 command.  The following `kubectl` example uploads the script to the `/tmp`
 directory in the job scheduler container:
 
-  `kubectl cp ./user_list.py \
-    coldfront-qcluster-deployment-86d445f9df-lgzv8:/tmp/user_list.py \
+  `kubectl cp ./user_list.py
+    coldfront-qcluster-deployment-86d445f9df-lgzv8:/tmp/user_list.py
     -n coldfront`
 
 More details on and usage examples of the `kubectl` command can be found here:
@@ -32,13 +32,13 @@ The reports can be run by piping the script to the standard input of a
 desired resource and prints the report to its standard output.  Here is an
 example that generates a report for `Storage3` and saves it to a CSV file:
 
-  `USER_LIST_RESOURCE=Storage3 coldfront shell < ./user_list.py \
+  `USER_LIST_RESOURCE=Storage3 coldfront shell < ./user_list.py
     > ./Storage3-UserList-20260107.csv`
 
 The CSV file can then be downloaded with the following command:
 
-  `kubectl cp \
-    coldfront-qcluster-deployment-86d445f9df-lgzv8:/tmp/Storage3-UserList-20260107.csv ~/tmp/Storage3-UserList-20260107.csv \
+  `kubectl cp 
+    coldfront-qcluster-deployment-86d445f9df-lgzv8:/tmp/Storage3-UserList-20260107.csv ~/tmp/Storage3-UserList-20260107.csv 
    -n coldfront`
 
 At the time the script was created, a number of IDs did not have associated
