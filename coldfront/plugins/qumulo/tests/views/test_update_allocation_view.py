@@ -345,7 +345,7 @@ class UpdateAllocationViewTests(TestCase):
     ):
         # allocation and allocation attributes already created
 
-        form = UpdateAllocationForm(data=self.form_data, user_id=self.user.id)
+        form = UpdateAllocationForm(data=self.form_data, user_id=self.user.id, allocation_id=self.storage_allocation.pk)
         form.cleaned_data = self.form_data
         form.clean()
         # No changes in the form data, so no AllocationAttributeChangeRequest should be created
@@ -375,7 +375,7 @@ class UpdateAllocationViewTests(TestCase):
             "billing_contact": "finance.guru MUTATE",
         }
 
-        form = UpdateAllocationForm(data=updated_form_data, user_id=self.user.id)
+        form = UpdateAllocationForm(data=updated_form_data, user_id=self.user.id, allocation_id=self.storage_allocation.pk)
         form.cleaned_data = updated_form_data
         form.clean()
         view = UpdateAllocationView(form=form, user_id=self.user.id)
@@ -427,7 +427,7 @@ class UpdateAllocationViewTests(TestCase):
         )
 
         form = UpdateAllocationForm(
-            data=form_data_missing_contacts, user_id=self.user.id
+            data=form_data_missing_contacts, user_id=self.user.id, allocation_id=storage_allocation_missing_contacts.pk
         )
         form_data_missing_contacts["billing_contact"] = "new_billing_contact"
         form_data_missing_contacts["technical_contact"] = "new_tech_contact"
@@ -454,7 +454,7 @@ class UpdateAllocationViewTests(TestCase):
 
         request = RequestFactory().post("/irrelevant")
         form = UpdateAllocationForm(
-            data=form_data_missing_contacts, user_id=self.user.id
+            data=form_data_missing_contacts, user_id=self.user.id, allocation_id=storage_allocation_missing_contacts.pk
         )
         form_data_missing_contacts["billing_contact"] = "new_billing_contact"
         form_data_missing_contacts["technical_contact"] = "new_tech_contact"
@@ -484,7 +484,7 @@ class UpdateAllocationViewTests(TestCase):
         mock_file_system_service: MagicMock,
     ):
         view = UpdateAllocationView(
-            form=UpdateAllocationForm(data=self.form_data, user_id=self.user.id)
+            form=UpdateAllocationForm(data=self.form_data, user_id=self.user.id, allocation_id=self.storage_allocation.pk)
         )
         view.setup(self.request, allocation_id=1)
         self.assertFalse(
@@ -518,7 +518,7 @@ class UpdateAllocationViewTests(TestCase):
             self.project, self.user, sub_form_data, self.storage_allocation
         )
         view = UpdateAllocationView(
-            form=UpdateAllocationForm(data=self.form_data, user_id=self.user.id)
+            form=UpdateAllocationForm(data=self.form_data, user_id=self.user.id, allocation_id=self.storage_allocation.pk)
         )
         view.setup(self.request, allocation_id=1)
         self.assertTrue(
@@ -533,7 +533,7 @@ class UpdateAllocationViewTests(TestCase):
     ):
         request = RequestFactory().post("/irrelevant", {"reset_acls": "set"})
         request.user = self.user
-        form = UpdateAllocationForm(data=self.form_data, user_id=self.user.id)
+        form = UpdateAllocationForm(data=self.form_data, user_id=self.user.id, allocation_id=self.storage_allocation.pk)
         form.cleaned_data = {
             "protocols": ["smb"],
             "storage_export_path": "bar",
@@ -563,7 +563,7 @@ class UpdateAllocationViewTests(TestCase):
                 {"reset_acls": "set", "reset_sub_acls": "on" if onOff == "on" else ""},
             )
             request.user = self.user
-            form = UpdateAllocationForm(data=self.form_data, user_id=self.user.id)
+            form = UpdateAllocationForm(data=self.form_data, user_id=self.user.id, allocation_id=self.storage_allocation.pk)
             form.cleaned_data = {
                 "project_pk": self.project.id,
                 "protocols": ["smb"],

@@ -84,3 +84,4 @@ class AllocationViewTests(TestCase):
         AllocationService.create_new_allocation(self.form_data, self.user)
         allocation = Allocation.objects.first()
         self.assertEqual(allocation.status.name, "Pending")
+

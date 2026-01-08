@@ -1,9 +1,9 @@
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from django import forms
 
-
 class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
+        self.allocation_id = kwargs.pop("allocation_id")
         super().__init__(*args, **kwargs)
         self.fields["storage_type"].disabled = True
 
@@ -22,3 +22,4 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["rw_users"].required = (
             self.allocation_status_name != "READY FOR DELETION"
         )
+        

@@ -12,3 +12,7 @@ ALL_ATTRIBUTE_TYPES = [
     "Attribute Expanded Text",
     "JSON",
 ]
+
+CONDO_PROJECT_QUOTA = 1000
+
+MAX_STORAGE2_QUOTA_INCREASE = 10
