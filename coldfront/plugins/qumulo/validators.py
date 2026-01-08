@@ -229,9 +229,11 @@ def validate_condo_project_quota(project_pk: str, storage_quota: int, current_qu
 
 def existing_project_quota(project_pk: str):
     storage_resources = Resource.objects.filter(resource_type__name="Storage")
+    status_choices = AllocationStatusChoice.objects.filter(name__in=["Pending", "Active", "New"])
     project_allocations = Allocation.objects.filter(
         project__id=project_pk,
         resources__in=storage_resources,
+        status__in=status_choices,
     )
     project_child_allocations = Allocation.objects.filter(
         pk__in=AllocationLinkage.objects.filter(children__in=project_allocations).values_list("children", flat=True)
