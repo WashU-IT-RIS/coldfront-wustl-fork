@@ -16,7 +16,7 @@ from coldfront.core.allocation.models import (
 
 from coldfront.core.resource.models import Resource
 from coldfront.core.allocation.models import AllocationAttribute
-from coldfront.core.constants import CONDO_PROJECT_QUOTA
+from coldfront.core.constants import CONDO_PROJECT_QUOTA, MAX_STORAGE2_QUOTA_INCREASE
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
@@ -273,9 +273,9 @@ def calculate_remaining_condo_quota(project_pk: str):
 
 def validate_storage2_quota_increase(storage_quota: int, current_quota: int):
     diff = storage_quota - current_quota
-    if diff >= 10:
+    if diff >= MAX_STORAGE2_QUOTA_INCREASE:
         raise ValidationError(
-            "Increases of 10TB or more for Storage2 allocations require approval. Please contact support.",
+            f"Increases of {MAX_STORAGE2_QUOTA_INCREASE}TB or more for Storage2 allocations require approval. Please contact support.",
         )
     return
 
