@@ -256,6 +256,9 @@ def set_allocation_attributes(
         if allocation_attribute_name == "storage_protocols":
             protocols = form_data.get("protocols")
 
+            if protocols is None:
+                continue
+
             AllocationAttribute.objects.create(
                 allocation_attribute_type=allocation_attribute_type,
                 allocation=allocation,
