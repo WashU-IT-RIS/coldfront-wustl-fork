@@ -5,6 +5,7 @@ from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 
 class CreateSubAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
+        self.allocation_id = kwargs.pop("allocation_id")
         super().__init__(*args, **kwargs)
         # hide the project field and show the parent allocation instead
         self.fields["project_pk"].widget = forms.HiddenInput()

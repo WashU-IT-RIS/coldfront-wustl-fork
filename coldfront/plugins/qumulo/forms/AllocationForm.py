@@ -3,7 +3,7 @@ import re
 from typing import Any
 from django import forms
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.core.project.models import Project
 from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
@@ -11,6 +11,7 @@ from coldfront.plugins.qumulo.fields import ADUserField
 from coldfront.plugins.qumulo.validators import (
     validate_leading_forward_slash,
     validate_single_ad_user,
+    validate_storage2_quota_increase,
     validate_uniqueness_storage_name_for_storage_type,
     validate_ticket,
     validate_storage_name,
@@ -18,6 +19,7 @@ from coldfront.plugins.qumulo.validators import (
     validate_filesystem_path_unique,
     validate_relative_path,
     validate_parent_directory,
+    validate_condo_project_quota,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -34,6 +36,8 @@ class AllocationForm(forms.Form):
         self.allocation_status_name = self._upper(
             kwargs.pop("allocation_status_name", None)
         )
+        if not hasattr(self, "allocation_id"):
+            self.allocation_id = kwargs.pop("allocation_id", None)
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
         self.fields["storage_type"].choices = self.get_storage_type_choices()
@@ -204,6 +208,19 @@ class AllocationForm(forms.Form):
         protocols = cleaned_data.get("protocols")
         storage_export_path = cleaned_data.get("storage_export_path")
         storage_ticket = self._upper(cleaned_data.get("storage_ticket", None))
+        storage_quota = cleaned_data.get("storage_quota", 0)
+        service_rate_categories = cleaned_data.get("service_rate_category", "")
+        project_pk = cleaned_data.get("project_pk")
+        parent_allocation = cleaned_data.get("parent_allocation", None)
+        current_quota = None
+        if self.allocation_id is not None:
+            current_quota = self.get_current_quota(self.allocation_id)
+        
+        if (cleaned_data.get("storage_type") == "Storage2") and (current_quota is not None) and (storage_quota > current_quota):
+            validate_storage2_quota_increase(storage_quota, current_quota)
+
+        if ("condo" in service_rate_categories) and (storage_quota != current_quota) and not parent_allocation:
+            validate_condo_project_quota(project_pk, storage_quota, current_quota)
 
         if "nfs" in protocols:
             if storage_export_path == "":
@@ -262,3 +279,13 @@ class AllocationForm(forms.Form):
 
     def __is_unchanged(self, field_name: str) -> bool:
         return self.fields[field_name].disabled and field_name not in self.changed_data
+    
+    def get_current_quota(self, current_allocation: int) -> int:
+        allocation_obj = Allocation.objects.get(pk=current_allocation)
+        current_quota = AllocationAttribute.objects.filter(
+        allocation=allocation_obj,
+        allocation_attribute_type__name="storage_quota",
+        ).values("value")[:1]
+        current_quota = int(current_quota[0]['value'])
+        
+        return current_quota

@@ -96,6 +96,7 @@ class UpdateAllocationView(AllocationView):
             form_data[key + "_users"] = self.get_access_users(key, allocation)
 
         kwargs["initial"] = form_data
+        kwargs["allocation_id"] = allocation_id
         return kwargs
 
     def form_valid(
@@ -244,7 +245,7 @@ class UpdateAllocationView(AllocationView):
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
         create_group_time = datetime.now()
-        
+
         async_task(
             addMembersToADGroup, users_to_add, access_allocation, create_group_time
         )
