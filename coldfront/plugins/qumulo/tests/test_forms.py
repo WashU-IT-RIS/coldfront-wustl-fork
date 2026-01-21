@@ -204,6 +204,12 @@ class AllocationFormTests(TestCase):
         self.assertNotIn("storage_name", form.errors)
         self.assertNotIn("cost_center", form.errors)
 
+    def test_storage_type_default_value(self):
+        form = AllocationForm(user_id=self.user.id)
+        self.assertEqual(
+            form.fields["storage_type"].initial,
+            Resource.objects.get(name="Storage3").name,
+        )
 
     def test_empty_ro_users_form_valid(self):
         data = {
@@ -630,6 +636,7 @@ class ProjectFormTests(TestCase):
         form = ProjectCreateForm(data=valid_data, user_id="admin")
         self.assertTrue(form.is_valid())
 
+
 @patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class UpdateAllocationFormTests(TestCase):
     def setUp(self):
@@ -669,7 +676,9 @@ class UpdateAllocationFormTests(TestCase):
             "service_rate_category": "consumption",
         }
         self.data_for_creation = {**self.data, **self.initial}
-        self.allocation = create_allocation(self.project1, self.user, self.data_for_creation)
+        self.allocation = create_allocation(
+            self.project1, self.user, self.data_for_creation
+        )
 
     def tearDown(self):
         self.qumulo_patcher.stop()
@@ -705,7 +714,10 @@ class UpdateAllocationFormTests(TestCase):
 
     def test_validations_on_changed_values(self):
         update_form = UpdateAllocationForm(
-            initial=self.initial, data=self.data, user_id=self.user.id, allocation_id=self.allocation.pk,
+            initial=self.initial,
+            data=self.data,
+            user_id=self.user.id,
+            allocation_id=self.allocation.pk,
         )
         self.assertTrue(update_form.is_bound)
         self.assertTrue(update_form.is_valid())

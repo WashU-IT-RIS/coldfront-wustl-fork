@@ -23,6 +23,7 @@ from coldfront.plugins.qumulo.validators import (
 )
 
 from coldfront.plugins.qumulo.constants import (
+    DEFAULT_STORAGE_TYPE,
     SERVICE_RATE_CATEGORIES,
     PROTOCOL_OPTIONS,
 )
@@ -47,7 +48,9 @@ class AllocationForm(forms.Form):
 
     storage_type = forms.ChoiceField(
         label="Storage Type",
+        initial=Resource.objects.get(name=DEFAULT_STORAGE_TYPE).name,
     )
+
     project_pk = forms.ChoiceField(
         label="Project",
         widget=forms.Select(
@@ -215,7 +218,7 @@ class AllocationForm(forms.Form):
         current_quota = None
         if self.allocation_id is not None:
             current_quota = self.get_current_quota(self.allocation_id)
-        
+
         if (cleaned_data.get("storage_type") == "Storage2") and (current_quota is not None) and (storage_quota > current_quota):
             validate_storage2_quota_increase(storage_quota, current_quota)
 
@@ -279,7 +282,7 @@ class AllocationForm(forms.Form):
 
     def __is_unchanged(self, field_name: str) -> bool:
         return self.fields[field_name].disabled and field_name not in self.changed_data
-    
+
     def get_current_quota(self, current_allocation: int) -> int:
         allocation_obj = Allocation.objects.get(pk=current_allocation)
         current_quota = AllocationAttribute.objects.filter(
@@ -287,5 +290,5 @@ class AllocationForm(forms.Form):
         allocation_attribute_type__name="storage_quota",
         ).values("value")[:1]
         current_quota = int(current_quota[0]['value'])
-        
+
         return current_quota
