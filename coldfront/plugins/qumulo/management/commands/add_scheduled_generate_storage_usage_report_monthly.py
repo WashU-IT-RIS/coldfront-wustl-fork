@@ -19,8 +19,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print("Scheduling generating storage2&3 usage report for school of Engineering...")
         schedule(
-            func="coldfront.plugins.qumulo.management.commands.add_scheduled_generate_storage_usage_report_monthly.generate_storage2_monthly_billing_report",
-            name="Generate Storage2 Monthly Billing Report",
+            func="coldfront.plugins.qumulo.management.commands.add_scheduled_generate_storage_usage_report_monthly.generate_storage2_3_monthly_usage_report",
+            name="Generate Storage2&3 Monthly Usage Report for ENG",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
         )
