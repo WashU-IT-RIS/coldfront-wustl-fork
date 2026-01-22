@@ -325,3 +325,4 @@ def is_float(val) -> bool:
         return True
     except (ValueError, TypeError):
         return False
+

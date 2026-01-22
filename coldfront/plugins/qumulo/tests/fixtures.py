@@ -311,3 +311,4 @@ def create_allocation_linkage(
 ) -> AllocationLinkageFactory:
     linkage = AllocationLinkageFactory(parent=parent, children=children)
     return linkage
+
