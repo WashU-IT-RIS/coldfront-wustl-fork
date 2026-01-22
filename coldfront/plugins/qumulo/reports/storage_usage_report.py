@@ -49,7 +49,7 @@ class StorageUsageReport:
         return report
 
     def get_departments_by_school(self, unit='ALL') -> list:
-        itsm_client = ItsmClientHandler('department')
+        itsm_client = ItsmClientHandler('/v2/rest/attr/info/department')
         uri_filters = self._format_filter_for_dept_by_unit(unit)
         departments = itsm_client.get_data('number', uri_filters)
         dept_numbers = [dept['number'] for dept in departments]
