@@ -49,13 +49,10 @@ class StorageUsageReport:
         return report
 
     def get_departments_by_school(self, unit='ALL') -> list:
-        itsm_client = ItsmClientHandler()
-        itsm_service_provision_endpoint = itsm_client.url
-        itsm_client.url = itsm_client.url.replace('service_provision', 'department')
+        itsm_client = ItsmClientHandler('department')
         uri_filters = self._format_filter_for_dept_by_unit(unit)
         departments = itsm_client.get_data('number', uri_filters)
         dept_numbers = [dept['number'] for dept in departments]
-        itsm_client.url = itsm_service_provision_endpoint
         return dept_numbers
 
     def _format_filter_for_dept_by_unit(self, unit: str) -> str:
@@ -67,10 +64,10 @@ class StorageUsageReport:
     def _filter_for_valid_dept_number(self) -> str:
         return '"number":{"operator":"~*","value":["CH|AU"]}'
 
-    def get_allocations_by_school(self, school: str) -> list:
+    def get_allocations_by_school(self, unit='ALL') -> list:
         allocations = Allocation.objects.filter(
             allocationattribute__allocation_attribute_type__name = 'department_number',
-            allocationattribute__value__in = self.get_departments_by_school(school),
+            allocationattribute__value__in = self.get_departments_by_school(unit),
             status__name = 'Active'
         ).exclude(
             id__in = self._get_suballocation_ids()
@@ -84,9 +81,9 @@ class StorageUsageReport:
                 suballoc_ids.append(child.pk)
         return suballoc_ids
 
-    def get_usages_by_pi_for_school(self, school: str) -> list:
+    def get_usages_by_pi_for_school(self, unit='ALL') -> list:
         pi_usages = list()
-        allocations = self.get_allocations_by_school(school)
+        allocations = self.get_allocations_by_school(unit)
         for allocation in allocations:
             pi = allocation.project.pi.username
             usage = allocation.get_usage_kb_by_date(self.usage_date)
@@ -108,14 +105,14 @@ class StorageUsageReport:
     def _find_max_length_of_key(self, usage_list: list, key: str) -> int:
         return max(len(entry[key]) for entry in usage_list) if usage_list else 0
 
-    def generate_storage_usage_report_for_school(self, school: str) -> str:
-        usages = self.get_usages_by_pi_for_school(school)
+    def generate_report_for_school(self, unit='ALL') -> str:
+        usages = self.get_usages_by_pi_for_school(unit)
         return self._format_usage_report(usages)
 
 if __name__ == "__main__":
     report_generator = StorageUsageReport()
     school = "Engineering"
     unit = "ENG"
-    report = report_generator.generate_storage_usage_report_for_school(unit)
+    report = report_generator.generate_report_for_school(unit)
     print(f"Storage Usage Report for {school} on {report_generator.usage_date}:\n")
     print(report)

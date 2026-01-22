@@ -4,7 +4,6 @@ from datetime import date
 from coldfront.core.test_helpers.factories import (
     AllocationFactory, AllocationAttributeFactory, AllocationAttributeTypeFactory, AllocationAttributeUsageFactory, ResourceFactory
 )
-from coldfront.plugins.qumulo.tests.helper_classes.factories import RisProjectFactory, RisAllocationFactory
 from coldfront.plugins.qumulo.tests import fixtures
 from coldfront.plugins.qumulo.reports.storage_usage_report import StorageUsageReport
 
@@ -119,7 +118,7 @@ class StorageUsageReportFactoryTests(TestCase):
         self.assertTrue(any(u['pi'] == allocation.project.pi.username for u in usages))
         self.assertTrue(any(u['filesystem_path'] == '/fs1' for u in usages))
 
-    def test_generate_storage_usage_report_for_school(self):
+    def test_generate_report_for_school(self):
         # Setup allocation and usage
         allocation = AllocationFactory()
         allocation.status.name = 'Active'
@@ -143,6 +142,6 @@ class StorageUsageReportFactoryTests(TestCase):
             value=2048
         )
         self.report.get_departments_by_school = lambda school: ['CH123']
-        report = self.report.generate_storage_usage_report_for_school('ENG')
+        report = self.report.generate_report_for_school('ENG')
         self.assertIn('PI', report)
         self.assertIn('/fs1', report)
