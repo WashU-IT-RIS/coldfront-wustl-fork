@@ -19,10 +19,12 @@ SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM = (
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
+        parser.add_argument('--usage_date', type=str, default=datetime.now(timezone.utc).strftime("%Y-%m-01"), help='Usage date in YYYY-MM-01 format (default: first day of current month)')
         parser.add_argument('--school', type=str, default='ENG', help='School unit (default: ENG)')
-        parser.add_argument('--email', type=str, required=True, help='Recipient email address')
+        parser.add_argument('--email', type=str, help='Recipient email address(es) with comma separation')
 
     def handle(self, *args, **options):
+        usage_date = options['usage_date']
         school = options['school']
         email = options['email']
         print(f"Scheduling generating storage2&3 usage report for school {school}...")
@@ -31,7 +33,7 @@ class Command(BaseCommand):
             name=f"Generate Storage2&3 Monthly Usage Report for {school}",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
-            args=[school, email],
+            kwargs={'usage_date': usage_date, 'school': school, 'email': email},
         )
 
 
@@ -47,8 +49,8 @@ def generate_storage2_3_monthly_usage_report(
     report_generator = StorageUsageReport(usage_date=usage_date)
     usage_report = report_generator.generate_report_for_school(school)
 
-    subject = f"Storage2&3 Monthly Usage Report for {school}"
-    message = f"Here is your monthly storage usage report for {school}:\n\n{usage_report}"
+    subject = f"Storage2&3 Monthly Usage Report with consumptions on {usage_date} for {school}"
+    message = f"Here is your monthly storage usage report with consumptions on {usage_date} for {school}:\n\n{usage_report}"
     from_email = 'noreply@gowustl.onmicrosoft.com'
     recipient_list = [email] if email else []
 
