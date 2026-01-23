@@ -212,13 +212,13 @@ class AllocationFormTests(TestCase):
         self.assertEqual(
             form.fields["storage_type"].initial,
             Resource.objects.get(name=DEFAULT_STORAGE_TYPE).name,
-            msg="Default storage type should be 'Storage3'",
+            msg=f"Default storage type should be '{DEFAULT_STORAGE_TYPE}'",
         )
 
         self.assertNotEqual(
             form.fields["storage_type"].initial,
             Resource.objects.get(name=OTHER_STORAGE_TYPE).name,
-            msg="Default storage type should not be 'Storage2'",
+            msg=f"Default storage type should not be '{OTHER_STORAGE_TYPE}'",
         )
 
 
