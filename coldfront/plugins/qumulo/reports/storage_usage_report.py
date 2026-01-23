@@ -62,7 +62,9 @@ class StorageUsageReport:
             return f'{{"unit":"{unit}",{self._filter_for_valid_dept_number()}}}'
 
     def _filter_for_valid_dept_number(self) -> str:
-        return '"number":{"operator":"~*","value":["CH|AU"]}'
+        # Only include department numbers starting with CH or AU
+        # ~* is case-insensitive regex match
+        return '"number":{"operator":"~*","value":["^CH|^AU"]}'
 
     def get_allocations_by_school(self, unit='ALL') -> list:
         allocations = Allocation.objects.filter(
