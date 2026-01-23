@@ -1,6 +1,8 @@
 from icecream import ic
 
 from django.core.management.base import BaseCommand
+from coldfront.core.resource.models import Resource
+from coldfront.plugins.qumulo.constants import DEFAULT_RESOURCE_NAME
 
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
@@ -15,7 +17,10 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "resource_name", type=str, help="The resource_name (Ex: Storage2)"
+            "resource_name",
+            type=str,
+            help="The resource_name (Default to Storage3)",
+            default=Resource.objects.get(name=DEFAULT_RESOURCE_NAME).name,
         )
 
         parser.add_argument(
