@@ -38,11 +38,7 @@ class Command(BaseCommand):
 
 
 
-def generate_storage2_3_monthly_usage_report(
-        usage_date=datetime.now(timezone.utc).strftime("%Y-%m-01"),
-        school='ENG',
-        email='tz-kai.lin@wustl.edu'
-    ):
+def generate_storage2_3_monthly_usage_report(usage_date: str, school: str, email: str):
     """
     Generate the Storage2&3 Monthly Usage Report for the given school and email it.
     """
