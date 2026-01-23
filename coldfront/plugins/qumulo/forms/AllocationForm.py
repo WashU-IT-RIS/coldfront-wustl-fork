@@ -42,13 +42,15 @@ class AllocationForm(forms.Form):
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
         self.fields["storage_type"].choices = self.get_storage_type_choices()
+        self.fields["storage_type"].initial = Resource.objects.get(
+            name=DEFAULT_STORAGE_TYPE
+        ).name
 
     class Media:
         js = ("allocation.js",)
 
     storage_type = forms.ChoiceField(
         label="Storage Type",
-        initial=Resource.objects.get(name=DEFAULT_STORAGE_TYPE).name,
     )
 
     project_pk = forms.ChoiceField(
