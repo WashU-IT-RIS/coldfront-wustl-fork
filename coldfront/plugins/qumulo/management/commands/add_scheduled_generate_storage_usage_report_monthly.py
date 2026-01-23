@@ -36,7 +36,7 @@ class Command(BaseCommand):
 
 
 
-def generate_storage2_3_monthly_usage_report(school='ENG', email=['tz-kai.lin@wustl.edu']) -> None:
+def generate_storage2_3_monthly_usage_report(school='ENG', email='tz-kai.lin@wustl.edu') -> None:
     """
     Generate the Storage2&3 Monthly Usage Report for the given school and email it.
     """
