@@ -1,8 +1,9 @@
 from coldfront.plugins.qumulo.services.itsm.itsm_client_handler import ItsmClientHandler
 from coldfront.plugins.qumulo.validators import is_float
-from coldfront.core.allocation.models import Allocation, AllocationLinkage, AllocationAttributeUsage
+from coldfront.core.allocation.models import Allocation, AllocationLinkage
 from datetime import datetime, date, time
 import re
+
 
 class StorageUsageReport:
     def __init__(self, usage_date=datetime.combine(date.today(), time.min)):
@@ -110,11 +111,3 @@ class StorageUsageReport:
     def generate_report_for_school(self, unit='ALL') -> str:
         usages = self.get_usages_by_pi_for_school(unit)
         return self._format_usage_report(usages)
-
-if __name__ == "__main__":
-    report_generator = StorageUsageReport()
-    school = "Engineering"
-    unit = "ENG"
-    report = report_generator.generate_report_for_school(unit)
-    print(f"Storage Usage Report for {school} on {report_generator.usage_date}:\n")
-    print(report)

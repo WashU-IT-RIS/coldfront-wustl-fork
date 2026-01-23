@@ -9,6 +9,8 @@ from datetime import datetime, timezone
 
 from coldfront.plugins.qumulo.reports.storage_usage_report import StorageUsageReport 
 
+from django.core.mail import send_mail
+
 SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM = (
     arrow.utcnow().replace(day=2, hour=6, minute=00).format(arrow.FORMAT_RFC3339)
 )
@@ -27,5 +29,25 @@ class Command(BaseCommand):
 
 
 def generate_storage2_3_monthly_usage_report() -> None:
-    storage_report = StorageUsageReport(datetime.now(timezone.utc).strftime("%Y-%m-01"))
-    storage_report.generate_report_for_school('ENG')
+    """
+    Generate the Storage2&3 Monthly Usage Report for ENG and email it.
+    """
+    # Generate the report
+    report_generator = StorageUsageReport(datetime.now(timezone.utc).strftime("%Y-%m-01"))
+    usage_report = report_generator.generate_report_for_school('ENG')
+
+    subject = "Storage2&3 Monthly Usage Report for ENG"
+    message = f"Here is your monthly storage usage report for ENG:\n\n{usage_report}"
+    from_email = 'noreply@gowustl.onmicrosoft.com'
+    recipient_list = ['tz-kai.lin@wustl.edu']
+
+    # Set your email address here
+    send_mail(
+        subject,
+        message,
+        from_email,
+        recipient_list,
+        fail_silently=False,
+    )
+    print("Storage2&3 Monthly Usage Report for ENG has been sent via email.")
+    return
