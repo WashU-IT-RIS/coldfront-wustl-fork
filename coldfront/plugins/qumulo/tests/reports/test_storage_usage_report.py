@@ -45,7 +45,7 @@ class StorageUsageReportFactoryTests(TestCase):
     def test_filter_for_valid_dept_number(self):
         result = self.report._filter_for_valid_dept_number()
         self.assertIn('operator', result)
-        self.assertIn('CH|AU', result)
+        self.assertIn('^CH|^AU', result)
 
     def test_get_allocations_by_school_with_factory(self):
         # Create a department attribute type and allocation
