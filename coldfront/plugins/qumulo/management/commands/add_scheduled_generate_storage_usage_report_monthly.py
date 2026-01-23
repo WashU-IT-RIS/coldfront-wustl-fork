@@ -18,36 +18,45 @@ SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM = (
 
 class Command(BaseCommand):
 
+    def add_arguments(self, parser):
+        parser.add_argument('--school', type=str, default='ENG', help='School unit (default: ENG)')
+        parser.add_argument('--email', type=str, required=True, help='Recipient email address')
+
     def handle(self, *args, **options):
-        print("Scheduling generating storage2&3 usage report for school of Engineering...")
+        school = options['school']
+        email = options['email']
+        print(f"Scheduling generating storage2&3 usage report for school {school}...")
         schedule(
             func="coldfront.plugins.qumulo.management.commands.add_scheduled_generate_storage_usage_report_monthly.generate_storage2_3_monthly_usage_report",
-            name="Generate Storage2&3 Monthly Usage Report for ENG",
+            name=f"Generate Storage2&3 Monthly Usage Report for {school}",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
+            args=[school, email],
         )
 
 
-def generate_storage2_3_monthly_usage_report() -> None:
+
+def generate_storage2_3_monthly_usage_report(school='ENG', email=['tz-kai.lin@wustl.edu']) -> None:
     """
-    Generate the Storage2&3 Monthly Usage Report for ENG and email it.
+    Generate the Storage2&3 Monthly Usage Report for the given school and email it.
     """
-    # Generate the report
     report_generator = StorageUsageReport(datetime.now(timezone.utc).strftime("%Y-%m-01"))
-    usage_report = report_generator.generate_report_for_school('ENG')
+    usage_report = report_generator.generate_report_for_school(school)
 
-    subject = "Storage2&3 Monthly Usage Report for ENG"
-    message = f"Here is your monthly storage usage report for ENG:\n\n{usage_report}"
+    subject = f"Storage2&3 Monthly Usage Report for {school}"
+    message = f"Here is your monthly storage usage report for {school}:\n\n{usage_report}"
     from_email = 'noreply@gowustl.onmicrosoft.com'
-    recipient_list = ['tz-kai.lin@wustl.edu']
+    recipient_list = [email] if email else []
 
-    # Set your email address here
-    send_mail(
-        subject,
-        message,
-        from_email,
-        recipient_list,
-        fail_silently=False,
-    )
-    print("Storage2&3 Monthly Usage Report for ENG has been sent via email.")
-    return
+    if recipient_list:
+        send_mail(
+            subject,
+            message,
+            from_email,
+            recipient_list,
+            fail_silently=False,
+        )
+        print(f"Storage2&3 Monthly Usage Report for {school} has been sent via email to {email}.")
+    else:
+        print("No recipient email provided. Report not sent.")
+
