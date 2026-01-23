@@ -6,6 +6,7 @@ from coldfront.core.test_helpers.factories import (
 )
 from coldfront.plugins.qumulo.tests import fixtures
 from coldfront.plugins.qumulo.reports.storage_usage_report import StorageUsageReport
+import re
 
 class StorageUsageReportFactoryTests(TestCase):
     def setUp(self):
@@ -46,6 +47,9 @@ class StorageUsageReportFactoryTests(TestCase):
         result = self.report._filter_for_valid_dept_number()
         self.assertIn('operator', result)
         self.assertIn('^CH|^AU', result)
+        regex = r'^CH|^AU'
+        self.assertIsNone(re.match(regex, 'abc123'))
+        self.assertIsNone(re.match(regex, 'ABCH000'))
 
     def test_get_allocations_by_school_with_factory(self):
         # Create a department attribute type and allocation
