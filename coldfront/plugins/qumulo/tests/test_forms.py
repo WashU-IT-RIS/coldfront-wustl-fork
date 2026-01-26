@@ -204,7 +204,7 @@ class AllocationFormTests(TestCase):
         self.assertNotIn("storage_name", form.errors)
         self.assertNotIn("cost_center", form.errors)
 
-    def test_storage_type_default_value(self):
+    def test_storage_type_initial_value(self):
         DEFAULT_STORAGE_TYPE = "Storage3"
         OTHER_STORAGE_TYPE = "Storage2"
         form = AllocationForm(user_id=self.user.id)
@@ -212,13 +212,13 @@ class AllocationFormTests(TestCase):
         self.assertEqual(
             form.fields["storage_type"].initial,
             Resource.objects.get(name=DEFAULT_STORAGE_TYPE).name,
-            msg=f"Default storage type should be '{DEFAULT_STORAGE_TYPE}'",
+            msg=f"Initial storage type should be '{DEFAULT_STORAGE_TYPE}'",
         )
 
         self.assertNotEqual(
             form.fields["storage_type"].initial,
             Resource.objects.get(name=OTHER_STORAGE_TYPE).name,
-            msg=f"Default storage type should not be '{OTHER_STORAGE_TYPE}'",
+            msg=f"Initial storage type should not be '{OTHER_STORAGE_TYPE}'",
         )
 
 

@@ -22,7 +22,8 @@ class TriggerMigrationsViewTests(TestCase):
         )
         valid_data = {"allocation_name_search": "/vol/rdcw-fs1/kchoi"}
         form = TriggerMigrationsForm(data=valid_data)
-        form.is_valid()
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.fields["allocation_resource_name"].initial, "Storage3")
         view = TriggerMigrationsView()
         view.request = request
         try:
@@ -38,7 +39,8 @@ class TriggerMigrationsViewTests(TestCase):
         )
         invalid_data = {"allocation_name_search": "allocation"}
         form = TriggerMigrationsForm(data=invalid_data)
-        form.is_valid()
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.fields["allocation_resource_name"].initial, "Storage3")
         view = TriggerMigrationsView()
         view.request = request
         try:
