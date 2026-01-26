@@ -27,26 +27,30 @@ class Command(BaseCommand):
         usage_date = options['usage_date']
         school = options['school']
         email = options['email']
-        print(f"Scheduling generating storage2&3 usage report for school {school}...")
+        print(f"Scheduling generating storage2&3 usage report to {email} for school {school} with consumption on {usage_date}...")
         schedule(
             func="coldfront.plugins.qumulo.management.commands.add_scheduled_generate_storage_usage_report_monthly.generate_storage2_3_monthly_usage_report",
             name=f"Generate Storage2&3 Monthly Usage Report for {school}",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
+            usage_date=usage_date,
+            school=school,
+            email=email,
             kwargs={'usage_date': usage_date, 'school': school, 'email': email},
         )
 
 
 
-def generate_storage2_3_monthly_usage_report(**kwargs):
+def generate_storage2_3_monthly_usage_report(usage_date: str, school: str, email: str = None, **kwargs):
     """
     Generate the Storage2&3 Monthly Usage Report for the given school and email it.
     """
-    usage_date = kwargs.get('usage_date')
-    school = kwargs.get('school')
-    email = kwargs.get('email')
+    print(f"Storage2&3 Monthly Usage Report for {school} has been scheduled to be sent via email to {email}.")
+    print(f"kwargs: Storage2&3 Monthly Usage Report for {kwargs['school']} has been scheduled to be sent via email to {kwargs['email']}.")
+
     report_generator = StorageUsageReport(usage_date=usage_date)
     usage_report = report_generator.generate_report_for_school(school)
+    print(usage_report)
 
     subject = f"Storage2&3 Monthly Usage Report with consumptions on {usage_date} for {school}"
     message = f"Here is your monthly storage usage report with consumptions on {usage_date} for {school}:\n\n{usage_report}"
