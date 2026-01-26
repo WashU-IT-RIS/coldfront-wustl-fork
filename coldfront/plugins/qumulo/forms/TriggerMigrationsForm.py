@@ -22,7 +22,7 @@ class TriggerMigrationsForm(forms.Form):
         label="Allocation Name",
         max_length=100,
         required=True,
-        help_text="the ITSM allocation name to migrate",
+        help_text="the ITSM allocation name to migrate, for example, /vol/rdcw2/allocation_name",
     )
 
     allocation_resource_name = forms.ChoiceField(
