@@ -18,6 +18,7 @@ class Command(BaseCommand):
 
         parser.add_argument(
             "resource_name",
+            nargs='?',
             type=str,
             help=f"The storage resource_name (Defaults to {DEFAULT_STORAGE_TYPE})",
             default=Resource.objects.get(name=DEFAULT_STORAGE_TYPE).name,
