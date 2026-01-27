@@ -26,7 +26,7 @@ class TriggerMigrationsForm(forms.Form):
     )
 
     allocation_resource_name = forms.ChoiceField(
-        label="Resource Name",
+        label="Storage Type",
         required=True,
-        help_text="the Coldfront storage resource name to migrate allocations into",
+        help_text="the Coldfront storage cluster type to migrate allocations into.",
     )

@@ -3,8 +3,6 @@ import os
 from unittest.mock import patch
 from django.test import TestCase
 
-from coldfront.core.resource.models import Resource
-from coldfront.plugins.qumulo.constants import DEFAULT_STORAGE_TYPE
 from coldfront.plugins.qumulo.tests.fixtures import create_ris_resources
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     mock_qumulo_info,
