@@ -40,13 +40,12 @@ class Command(BaseCommand):
         )
 
 
-
 def generate_storage2_3_monthly_usage_report(usage_date: str, school: str, email: str = None, **kwargs):
     """
     Generate the Storage2&3 Monthly Usage Report for the given school and email it.
     """
     print(f"Storage2&3 Monthly Usage Report for {school} has been scheduled to be sent via email to {email}.")
-    print(f"kwargs: Storage2&3 Monthly Usage Report for {kwargs['school']} has been scheduled to be sent via email to {kwargs['email']}.")
+    print(f"kwargs: Storage2&3 Monthly Usage Report for {school} {kwargs['kwargs']['school']} has been scheduled to be sent via email to {kwargs['kwargs']['email']}.")
 
     report_generator = StorageUsageReport(usage_date=usage_date)
     usage_report = report_generator.generate_report_for_school(school)
