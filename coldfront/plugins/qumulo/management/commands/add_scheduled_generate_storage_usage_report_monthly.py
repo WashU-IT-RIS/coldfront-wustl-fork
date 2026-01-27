@@ -34,7 +34,8 @@ class Command(BaseCommand):
 def generate_storage2_3_monthly_usage_report(
         usage_date = datetime.now(timezone.utc).strftime("%Y-%m-01"),
         school: str = 'ENG',
-        email: str = None, **kwargs
+        email: str = None,
+        **kwargs
     ):
     """
     Generate the Storage2&3 Monthly Usage Report for the given school and email it.
@@ -45,8 +46,8 @@ def generate_storage2_3_monthly_usage_report(
     usage_report = report_generator.generate_report_for_school(school)
     print(usage_report)
 
-    subject = f"Storage2&3 Monthly Usage Report with consumptions on {usage_date} for {school}"
-    message = f"Here is your monthly storage usage report with consumptions on {usage_date} for {school}:\n\n{usage_report}"
+    subject = f"Storage2&3 Monthly Usage Report with consumptions on {usage_date} for the school of {school}"
+    message = f"Here is the Storage2&3 usage report with consumptions on {usage_date} for the school of {school} by PIs:\n\n{usage_report}"
     from_email = 'noreply@gowustl.onmicrosoft.com'
     recipient_list = [email] if email else []
 
