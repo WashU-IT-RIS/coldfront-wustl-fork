@@ -5,3 +5,5 @@ SERVICE_RATE_CATEGORIES = [
 ]
 
 PROTOCOL_OPTIONS = [("nfs", "NFS"), ("smb", "SMB")]
+
+DEFAULT_STORAGE_TYPE = "Storage3"
