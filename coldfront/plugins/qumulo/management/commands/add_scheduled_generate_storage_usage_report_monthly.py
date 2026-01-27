@@ -14,8 +14,8 @@ SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM = (
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument('--school', type=str, default='ENG', help='School unit (default: ENG)')
-        parser.add_argument('--email', type=str, help='Recipient email address(es) with comma separation')
+        parser.add_argument('--school', type=str, default='ENG', help='School unit (default: ENG, options: ENG, MEDICAL, ARTSCI, CFU)')
+        parser.add_argument('--email', type=str, help='Recipient email address')
 
     def handle(self, *args, **options):
         school = options['school']
