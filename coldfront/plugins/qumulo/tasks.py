@@ -10,16 +10,18 @@ from datetime import datetime
 from coldfront.config.env import ENV
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationStatusChoice,
     AllocationAttribute,
-    AllocationAttributeType,
-    AllocationAttributeUsage,
+    AllocationStatusChoice,
     AllocationLinkage,
 )
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
 
+from coldfront.plugins.qumulo.services.file_quota_service import FileQuotaService
+from coldfront.plugins.qumulo.services.notifications_service import (
+    send_email_for_near_limit_allocation,
+)
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -106,10 +108,25 @@ def conditionally_update_storage_allocation_statuses() -> None:
         conditionally_update_storage_allocation_status(allocation)
 
 
-# TODO: refactor the following methods to a service class
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
+    FileQuotaService.ingest_quotas_with_daily_usage(logger)
 
+
+def notify_users_with_allocations_near_limit() -> None:
+    qumulo_allocations = FileQuotaService.get_file_system_allocations_near_limit()
+    as_it_paths = list(map(lambda quota: quota["path"], qumulo_allocations))
+    paths_without_trailing_slash = list(map(lambda path: path.rstrip("/"), as_it_paths))
+    allocation_attributes = AllocationAttribute.objects.select_related(
+        "allocation"
+    ).filter(
+        value__in=as_it_paths + paths_without_trailing_slash,
+        allocation_attribute_type__name="storage_filesystem_path",
+        allocation__status__name="Active",
+    )
+    allocations = list(
+        map(lambda attribute: attribute.allocation, allocation_attributes)
+    )
     connection_info = json.loads(os.environ.get("QUMULO_INFO", "{}"))
 
     base_allocation_quota_usages = []
@@ -125,8 +142,8 @@ def ingest_quotas_with_daily_usage() -> None:
             )
         )
 
-    __set_daily_quota_usages(base_allocation_quota_usages, logger)
-    __validate_results(base_allocation_quota_usages, logger)
+    for allocation in allocations:
+        send_email_for_near_limit_allocation(allocation)
 
 
 def addMembersToADGroup(
@@ -253,73 +270,6 @@ def __send_invalid_users_email(acl_allocation: Allocation, bad_keys: list[str]) 
         sender=import_from_settings("DEFAULT_FROM_EMAIL"),
         receiver_list=user_support_emails,
     )
-
-
-def __set_daily_quota_usages(quotas, logger) -> None:
-    # Iterate and populate allocation_attribute_usage records
-    storage_filesystem_path_attribute_type = AllocationAttributeType.objects.get(
-        name="storage_filesystem_path"
-    )
-    active_status = AllocationStatusChoice.objects.get(name="Active")
-
-    for quota in quotas:
-        path = quota.get("path")
-
-        allocation = __get_allocation_by_attribute(
-            storage_filesystem_path_attribute_type, path, active_status
-        )
-        if allocation is None:
-            if path[-1] != "/":
-                continue
-
-            value = path[:-1]
-            logger.warn(f"Attempting to find allocation without the trailing slash...")
-            allocation = __get_allocation_by_attribute(
-                storage_filesystem_path_attribute_type, value, active_status
-            )
-            if allocation is None:
-                continue
-
-        allocation.set_usage("storage_quota", quota.get("capacity_usage"))
-
-
-def __get_allocation_by_attribute(attribute_type, value, for_status):
-    try:
-        attribute = AllocationAttribute.objects.select_related("allocation").get(
-            value=value,
-            allocation_attribute_type=attribute_type,
-            allocation__status=for_status,
-        )
-    except AllocationAttribute.DoesNotExist:
-        logger.warn(f"Allocation record for {value} path was not found")
-        return None
-
-    logger.warn(f"Allocation record for {value} path was found")
-    return attribute.allocation
-
-
-def __validate_results(quota_usages, logger) -> bool:
-    today = datetime.today()
-    year = today.year
-    month = today.month
-    day = today.day
-
-    daily_usage_ingested = AllocationAttributeUsage.objects.filter(
-        modified__year=year, modified__month=month, modified__day=day
-    ).count()
-    usage_pulled_from_qumulo = len(quota_usages)
-
-    success = usage_pulled_from_qumulo == daily_usage_ingested
-    if success:
-        logger.warn("Successful ingestion of quota daily usage.")
-    else:
-        logger.warn(
-            "Unsuccessful ingestion of quota daily usage. Not all the QUMULO usage data was stored in Coldfront."
-        )
-        logger.warn(f"Usages pulled from QUMULO: {usage_pulled_from_qumulo}")
-        logger.warn(f"Usages ingested for today: {daily_usage_ingested}")
-
-    return success
 
 
 class ResetAcl:
