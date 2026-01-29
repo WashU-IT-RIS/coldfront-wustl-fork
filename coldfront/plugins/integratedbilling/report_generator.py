@@ -97,7 +97,18 @@ class ReportGenerator:
     def __handle_subsidies(
         self, filtered_allocation_usages: list[AllocationUsage]
     ) -> None:
-        filtered_allocation_usages.set_and_validate_all_subsidized()
+        result = filtered_allocation_usages.set_and_validate_all_subsidized()
+        if not result:
+            self.__log_failed_subsidized_entries(filtered_allocation_usages)
+
+    def __log_failed_subsidized_entries(self, billable_alloc_usages):
+        # Find PIs and allocations when the PI has more than one subsidized allocation
+        pis = billable_alloc_usages.values_list('sponsor_pi', flat=True).distinct()
+        for pi in pis:
+            if not billable_alloc_usages._is_subsidized_valid_by_pi(pi):
+                print(f"[Subsidized Validation Failure] PI {pi} has multiple subsidized allocations.")
+                for usage in billable_alloc_usages.filter(sponsor_pi=pi):
+                    print(f"    Allocation: source={usage.source}, external_key={usage.external_key}, filesystem_path={usage.filesystem_path}, exempt={usage.exempt}, subsidized={usage.subsidized}")
 
 
 # helper function to get the default billing date (first day of the current month)
