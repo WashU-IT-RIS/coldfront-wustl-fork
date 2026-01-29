@@ -43,6 +43,7 @@ class TestReportGenerator(TestCase):
         output = captured_output.getvalue()
         self.assertIn(f"PI {pi_name} has multiple subsidized allocations", output)
         self.assertIn("Allocation:", output)
+        self.assertNotIn("Other PI", output)
 
     @mock.patch(
         "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
