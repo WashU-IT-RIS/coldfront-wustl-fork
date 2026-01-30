@@ -37,7 +37,8 @@ class ReportGenerator:
 
         filtered_allocation_usages = self.__get_allocation_usages()
 
-        self.__handle_subsidies(filtered_allocation_usages)
+        if not self.__handle_subsidies(filtered_allocation_usages):
+            return False
 
         calculated_usage_costs = self.__calculate_usage_fee(filtered_allocation_usages)
 
@@ -100,6 +101,9 @@ class ReportGenerator:
         result = filtered_allocation_usages.set_and_validate_all_subsidized()
         if not result:
             self.__log_failed_subsidized_entries(filtered_allocation_usages)
+            return False
+        else:
+            return True
 
     def __log_failed_subsidized_entries(self, billable_alloc_usages):
         # Find PIs and allocations when the PI has more than one subsidized allocation
