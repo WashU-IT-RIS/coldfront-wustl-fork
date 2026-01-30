@@ -16,21 +16,9 @@ import datetime
 import logging
 # logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def process_path(result):
-    result = result.replace("\\", "\\\\")
-    result = result.replace("@", "\\@")
-    result = result.replace("=", "\\=")
-    result = result.replace(";", "\\;")
-    result = result.replace("~", "\\~")
-    result = result.replace("$", "\\$")
-    result = result.replace("(", "\\(")
-    result = result.replace(")", "\\)")
-    result = result.replace("'", "\\'")
-    result = result.replace(" ", "\\ ")
-    result = result.replace("&", "\\&")
-    result = result.replace(".", "\\.")
-    result = result.replace("`", "\\`")
-    result = result.replace("|", "\\|")
+def process_path(result):  
+    result = result.replace("'", "'\"'\"'")
+    result = f"'{result}'"
     return result
 
 def _piece_out_acl(acl_info: str) -> Set[str]:
