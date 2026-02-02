@@ -1792,7 +1792,7 @@
         "amount": "161579174336KB",
         "funding_number": "CC0004259",
         "exempt": false,
-        "subsidized": false,
+        "subsidized": true,
         "is_condo_group": false,
         "parent_id": null,
         "quota": "500T",
