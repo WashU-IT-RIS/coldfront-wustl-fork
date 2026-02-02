@@ -350,6 +350,20 @@ itsm_to_coldfront_map:
               transforms: comment_to_protocols
               validates:
                 inclusion: [smb, nfs]
+      - entity: sub_allocation_form
+        attributes:
+          - name: protocols
+            value:
+              type: string
+              transforms: comment_to_read_write_users
+              validates: false
+      - entity: sub_allocation_form
+        attributes:
+          - name: protocols
+            value:
+              type: string
+              transforms: comment_to_read_only_users
+              validates: false                     
     itsm_value:
       entity: service_provision
       attribute: comment
