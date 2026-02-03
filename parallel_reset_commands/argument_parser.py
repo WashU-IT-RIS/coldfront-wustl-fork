@@ -182,8 +182,10 @@ class ArgumentParser:
             candidate_dir = os.path.join(os.getcwd(), args.log_dir)
         if not os.path.exists(candidate_dir):
             os.makedirs(candidate_dir)
+
         self.log_dir = candidate_dir
         self.storage_suffix = args.storage_suffix
+        self.access_mode = args.access_mode
 
         if os.listdir(self.log_dir):
             raise ValueError(f"Log directory is not empty: {self.log_dir}")
