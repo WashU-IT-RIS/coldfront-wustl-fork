@@ -318,3 +318,11 @@ def __ldap_usernames_and_groups_validator(name: str) -> bool:
         return False
 
     return True
+
+def is_float(val) -> bool:
+    try:
+        float(val)
+        return True
+    except (ValueError, TypeError):
+        return False
+
