@@ -2,7 +2,7 @@ from typing import List
 
 import os
 
-from constants import STORAGE_2_PREFIX
+from constants import STORAGE_2_PREFIX, STORAGE_3_PREFIX
 
 
 class ACL_SpecBuilder:
@@ -17,6 +17,7 @@ class ACL_SpecBuilder:
         self.sub_alloc_folder_specs = dict()
         self.sub_alloc_root_specs = dict()
 
+        self.storage_suffix = ""
         self.allocation_name = ""
         self.sub_alloc_names = []
         # jprew - TODO - need to update the get_spec_by_path method to use
@@ -30,6 +31,8 @@ class ACL_SpecBuilder:
         access_mode: str,
     ):
         file_base = f"templates/{access_mode}"
+
+        self.storage_suffix = storage_suffix
         self.allocation_name = alloc_name
         self.sub_alloc_names = sub_alloc_names
         # need a spec for the root of the allocation
@@ -141,7 +144,9 @@ class ACL_SpecBuilder:
 
     def get_spec_by_path(self, target: str, item_type: str):
         # jprew - TODO - this is a stub
-        allocation_root = f"{STORAGE_2_PREFIX}/{self.allocation_name}"
+        prefix = STORAGE_2_PREFIX if self.storage_suffix == "2" else STORAGE_3_PREFIX
+
+        allocation_root = f"{prefix}/{self.allocation_name}"
         allocation_root_active = f"{allocation_root}/Active"
         if os.path.samefile(allocation_root, target):
             return self.get_root_spec()
