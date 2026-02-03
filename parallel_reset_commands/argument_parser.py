@@ -97,9 +97,9 @@ class ArgumentParser:
             "--access_mode",
             type=str,
             required=False,
-            default="standard",
-            choices=["standard", "admin-only"],
-            help="Specify the access mode ('standard' or 'admin-only'). Default is 'standard'.",
+            default="standard-access",
+            choices=["standard-access", "admin-access"],
+            help="Specify the access mode ('standard-access' or 'admin-access'). Default is 'standard-access'.",
         )
 
         args = parser.parse_args()
