@@ -1,7 +1,7 @@
-A:dg:storage-<ALLOC>-rw@accounts.ad.wustl.edu:rxtncy
-A:fg:storage-<ALLOC>-rw@accounts.ad.wustl.edu:rtncy
-A:dg:storage-<ALLOC>-ro@accounts.ad.wustl.edu:rxtncy
-A:fg:storage-<ALLOC>-ro@accounts.ad.wustl.edu:rtncy
+A:dg:storage2-<ALLOC>-rw@accounts.ad.wustl.edu:rxtncy
+A:fg:storage2-<ALLOC>-rw@accounts.ad.wustl.edu:rtncy
+A:dg:storage2-<ALLOC>-ro@accounts.ad.wustl.edu:rxtncy
+A:fg:storage2-<ALLOC>-ro@accounts.ad.wustl.edu:rtncy
 A:d:OWNER@:rwaDxtTnNcCoy
 A:f:OWNER@:rwaxtTnNcCoy
 A:dg:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaDxtTnNcy
