@@ -16,9 +16,13 @@ class ArgumentParser:
         self.sub_allocations = []
         self.log_dir = ""
         self.storage_suffix = ""
+        self.access_mode = ""
 
     def get_perform_reset(self):
         return self.perform_reset
+
+    def get_access_mode(self):
+        return self.access_mode
 
     def get_allocation_name(self):
         return self.allocation_name
@@ -98,6 +102,14 @@ class ArgumentParser:
             type=str,
             default="",
             help="Suffix for storage in groupname. Ex: groupname = 'storage2_foo_rw' => --storage_suffix=2",
+        )
+        parser.add_argument(
+            "--access_mode",
+            type=str,
+            required=False,
+            default="standard-access",
+            choices=["standard-access", "admin-access"],
+            help="Specify the access mode ('standard-access' or 'admin-access'). Default is 'standard-access'.",
         )
 
         args = parser.parse_args()

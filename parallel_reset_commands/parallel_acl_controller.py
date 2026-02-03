@@ -85,10 +85,11 @@ def process_acls_recursive(
     storage_suffix: str,
     error_file: str,
     walker_method: Callable,
+    access_mode: str,
 ):
     with ProcessPoolExecutor(max_workers=num_workers) as executor:
         builder = ACL_SpecBuilder()
-        builder.build_specs(alloc_name, sub_alloc_names, storage_suffix)
+        builder.build_specs(alloc_name, sub_alloc_names, storage_suffix, access_mode)
         count = 0
         batch_count = 0
         result_futures = []
@@ -152,6 +153,7 @@ def main():
             parser.get_storage_suffix(),
             _create_error_file_name(parser.get_target_dir(), parser.get_log_dir()),
             walk_recursive_from_target,
+            parser.get_access_mode(),
         )
     else:
         dir_depth, dir_count, dirs_at_depth = result
@@ -169,6 +171,7 @@ def main():
                     parser.get_storage_suffix(),
                     _create_error_file_name(subdir, parser.get_log_dir()),
                     walk_recursive_from_target,
+                    parser.get_access_mode(),
                 )
                 # do I need to inspect the results of these parallel processors?
                 # or just rely on the log files they produce
@@ -182,6 +185,7 @@ def main():
             parser.get_storage_suffix(),
             _create_error_file_name(parser.get_target_dir(), parser.get_log_dir()),
             lambda x: walk_to_max_depth(x, dir_depth),
+            parser.get_access_mode(),
         )
 
     # after the processing is 100% done, we can consolidate the error logs

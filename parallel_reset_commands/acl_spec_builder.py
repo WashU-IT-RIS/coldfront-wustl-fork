@@ -23,20 +23,24 @@ class ACL_SpecBuilder:
         # these
 
     def build_specs(
-        self, alloc_name: str, sub_alloc_names: List[str], storage_suffix: str
+        self,
+        alloc_name: str,
+        sub_alloc_names: List[str],
+        storage_suffix: str,
+        access_mode: str,
     ):
+        file_base = f"templates/{access_mode}"
         self.allocation_name = alloc_name
         self.sub_alloc_names = sub_alloc_names
         # need a spec for the root of the allocation
-        with open("templates/root_spec_template.txt", "r") as root_template_file:
+        with open(f"{file_base}/root_spec_template.txt", "r") as root_template_file:
             root_template = root_template_file.read()
             for sub_alloc_name in sub_alloc_names:
                 # need a spec for the sub-allocation
                 with open(
-                    "templates/root_spec_sub_alloc_entry_template.txt", "r"
+                    f"{file_base}/root_spec_sub_alloc_entry_template.txt", "r"
                 ) as sub_alloc_template_file:
                     sub_alloc_template = sub_alloc_template_file.read()
-
                     sub_alloc_spec_entry = sub_alloc_template.replace(
                         "<SUB_ALLOC>", sub_alloc_name
                     )
@@ -46,13 +50,13 @@ class ACL_SpecBuilder:
             )
 
         # need a spec for the Active folder
-        with open("templates/active_spec_template.txt", "r") as active_template_file:
+        with open(f"{file_base}/active_spec_template.txt", "r") as active_template_file:
             active_template = active_template_file.read()
 
             for sub_alloc_name in sub_alloc_names:
                 # need a spec for the sub-allocation
                 with open(
-                    "templates/active_spec_sub_alloc_entry_template.txt", "r"
+                    f"{file_base}/active_spec_sub_alloc_entry_template.txt", "r"
                 ) as sub_alloc_template_file:
                     sub_alloc_template = sub_alloc_template_file.read()
                     sub_alloc_spec_entry = sub_alloc_template.replace(
@@ -65,7 +69,7 @@ class ACL_SpecBuilder:
 
         # need a spec for folders/files *OUTSIDE* sub-allocations
         with open(
-            "templates/base_folder_spec_template.txt", "r"
+            f"{file_base}/base_folder_spec_template.txt", "r"
         ) as base_folder_template_file:
             base_folder_template = base_folder_template_file.read()
             self.base_folder_spec = base_folder_template.replace(
@@ -73,7 +77,7 @@ class ACL_SpecBuilder:
             ).replace("<STORAGE_SUFFIX>", storage_suffix)
 
         with open(
-            "templates/base_file_spec_template.txt", "r"
+            f"{file_base}/base_file_spec_template.txt", "r"
         ) as base_file_template_file:
             base_file_template = base_file_template_file.read()
             self.base_file_spec = base_file_template.replace(
@@ -84,7 +88,7 @@ class ACL_SpecBuilder:
         # for folders beneath root, and for files
         # store it with the sub-allocation name as the key
         with open(
-            "templates/sub_alloc_root_spec_template.txt", "r"
+            f"{file_base}/sub_alloc_root_spec_template.txt", "r"
         ) as sub_alloc_root_template_file:
             sub_alloc_root_template = sub_alloc_root_template_file.read()
             for sub_alloc_name in sub_alloc_names:
@@ -94,7 +98,7 @@ class ACL_SpecBuilder:
                     .replace("<STORAGE_SUFFIX>", storage_suffix)
                 )
         with open(
-            "templates/sub_alloc_folder_spec_template.txt", "r"
+            f"{file_base}/sub_alloc_folder_spec_template.txt", "r"
         ) as sub_alloc_folder_template_file:
             sub_alloc_folder_template = sub_alloc_folder_template_file.read()
             for sub_alloc_name in sub_alloc_names:
@@ -104,7 +108,7 @@ class ACL_SpecBuilder:
                     .replace("<STORAGE_SUFFIX>", storage_suffix)
                 )
         with open(
-            "templates/sub_alloc_file_spec_template.txt", "r"
+            f"{file_base}/sub_alloc_file_spec_template.txt", "r"
         ) as sub_alloc_file_template_file:
             sub_alloc_file_template = sub_alloc_file_template_file.read()
             for sub_alloc_name in sub_alloc_names:
