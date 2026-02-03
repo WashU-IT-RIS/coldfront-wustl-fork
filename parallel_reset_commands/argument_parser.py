@@ -1,6 +1,6 @@
 import os
 
-from constants import STORAGE_2_PREFIX
+from constants import STORAGE_2_PREFIX, STORAGE_3_PREFIX
 import argparse
 
 
@@ -61,7 +61,7 @@ class ArgumentParser:
             "--allocation_root",
             type=str,
             required=True,
-            help=f"Specify the allocation root path. Must start with '{STORAGE_2_PREFIX}'.",
+            help=f"Specify the allocation root path. Must start with '{STORAGE_2_PREFIX}' or '{STORAGE_3_PREFIX}'.",
         )
         parser.add_argument(
             "--target_dir",
@@ -105,22 +105,30 @@ class ArgumentParser:
         self.perform_reset = args.perform_reset.lower() == "y"
 
         def validate_allocation_root(value):
-            if not value.startswith(STORAGE_2_PREFIX):
+            if not (
+                value.startswith(STORAGE_2_PREFIX) or value.startswith(STORAGE_3_PREFIX)
+            ):
                 raise ValueError(
-                    f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'."
+                    f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>' or '{STORAGE_3_PREFIX}<ROOT>'."
                 )
-            allocation_root_name = value.replace(STORAGE_2_PREFIX, "").strip("/")
+            allocation_root_name = (
+                value.replace(STORAGE_2_PREFIX, "").strip("/")
+                if value.startswith(STORAGE_2_PREFIX)
+                else value.replace(STORAGE_3_PREFIX, "").strip("/")
+            )
             if "/" in allocation_root_name:
                 raise ValueError(
-                    f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>'."
+                    f"Root path must look like '{STORAGE_2_PREFIX}<ROOT>' or '{STORAGE_3_PREFIX}<ROOT>'."
                 )
             if not (os.path.exists(value) and os.path.isdir(value)):
                 raise ValueError(f"Root path does not exist: {value}")
             return value
 
         self.allocation_root = validate_allocation_root(args.allocation_root)
-        self.allocation_name = self.allocation_root.replace(STORAGE_2_PREFIX, "").strip(
-            "/"
+        self.allocation_name = (
+            self.allocation_root.replace(STORAGE_2_PREFIX, "").strip("/")
+            if self.allocation_root.startswith(STORAGE_2_PREFIX)
+            else self.allocation_root.replace(STORAGE_3_PREFIX, "").strip("/")
         )
 
         if not (
