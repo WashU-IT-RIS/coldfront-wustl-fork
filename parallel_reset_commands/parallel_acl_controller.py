@@ -23,20 +23,8 @@ import logging
 
 
 def process_path(result):
-    result = result.replace("\\", "\\\\")
-    result = result.replace("@", "\\@")
-    result = result.replace("=", "\\=")
-    result = result.replace(";", "\\;")
-    result = result.replace("~", "\\~")
-    result = result.replace("$", "\\$")
-    result = result.replace("(", "\\(")
-    result = result.replace(")", "\\)")
-    result = result.replace("'", "\\'")
-    result = result.replace(" ", "\\ ")
-    result = result.replace("&", "\\&")
-    result = result.replace(".", "\\.")
-    result = result.replace("`", "\\`")
-    result = result.replace("|", "\\|")
+    result = result.replace("'", "'\"'\"'")
+    result = f"'{result}'"
     return result
 
 
