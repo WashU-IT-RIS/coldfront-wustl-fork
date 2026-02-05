@@ -4,13 +4,13 @@ import requests
 
 
 class ItsmClientHandler:
-    def __init__(self):
+    def __init__(self, endpoint=os.environ.get("ITSM_SERVICE_PROVISION_ENDPOINT")):
         self.user = os.environ.get("ITSM_SERVICE_USER")
         self.password = os.environ.get("ITSM_SERVICE_PASSWORD")
         self.host = os.environ.get("ITSM_HOST")
         protocol = os.environ.get("ITSM_PROTOCOL")
         port = os.environ.get("ITSM_REST_API_PORT")
-        endpoint_path = os.environ.get("ITSM_SERVICE_PROVISION_ENDPOINT")
+        endpoint_path = endpoint
         self.url = f"{protocol}://{self.host}:{port}{endpoint_path}"
 
     def get_data(self, attributes: str, filters: str) -> list[dict[str, Any]]:

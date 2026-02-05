@@ -1,3 +1,7 @@
+from coldfront.core.billing.factories import AllocationUsageFactory
+from coldfront.core.billing.models import AllocationUsage
+from io import StringIO
+import sys
 import json
 from datetime import datetime, timezone
 from freezegun import freeze_time
@@ -12,6 +16,34 @@ from coldfront.plugins.qumulo.tests.fixtures_usages import (
 
 
 class TestReportGenerator(TestCase):
+
+    def test_log_failed_subsidized_entries(self):
+        # Create two allocations for the same PI, both subsidized, which should trigger the log
+        pi_name = "Test PI"
+        alloc1 = AllocationUsageFactory(sponsor_pi=pi_name, subsidized=True, tier="Active")
+        alloc2 = AllocationUsageFactory(sponsor_pi=pi_name, subsidized=True, tier="Active")
+        # Add a non-failing allocation for another PI
+        AllocationUsageFactory(sponsor_pi="Other PI", subsidized=True, tier="Active")
+
+        # Get all usages for the test PI
+        usages = AllocationUsage.objects.filter(sponsor_pi=pi_name)
+
+        # Patch stdout to capture print output
+        captured_output = StringIO()
+        sys_stdout = sys.stdout
+        sys.stdout = captured_output
+        try:
+            # Create a ReportGenerator instance (date doesn't matter for this test)
+            rg = ReportGenerator()
+            # Call the private method directly
+            rg._ReportGenerator__log_failed_subsidized_entries(usages)
+        finally:
+            sys.stdout = sys_stdout
+
+        output = captured_output.getvalue()
+        self.assertIn(f"PI {pi_name} has multiple subsidized allocations", output)
+        self.assertIn("Allocation:", output)
+        self.assertNotIn("Other PI", output)
 
     @mock.patch(
         "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
