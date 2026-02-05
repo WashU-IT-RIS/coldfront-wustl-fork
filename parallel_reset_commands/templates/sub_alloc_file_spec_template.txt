@@ -1,6 +1,0 @@
-A::OWNER@:rwaxtTnNcCoy
-A:g:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaxtTnNcy
-A:g:storage2-<ALLOC>-<SUB_ALLOC>-rw@accounts.ad.wustl.edu:rwaxtTnNcy
-A:g:storage2-<ALLOC>-<SUB_ALLOC>-ro@accounts.ad.wustl.edu:rtncy
-A:g:storage2-<ALLOC>-rw@accounts.ad.wustl.edu:rwaxtTnNcy
-A:g:storage2-<ALLOC>-ro@accounts.ad.wustl.edu:rtncy

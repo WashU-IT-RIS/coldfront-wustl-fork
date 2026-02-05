@@ -1,2 +1,0 @@
-A:g:storage2-<ALLOC>-<SUB_ALLOC>-rw@accounts.ad.wustl.edu:rxtncy
-A:g:storage2-<ALLOC>-<SUB_ALLOC>-ro@accounts.ad.wustl.edu:rxtncy
