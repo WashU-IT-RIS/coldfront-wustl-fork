@@ -1,6 +1,10 @@
 from django.core.management.base import BaseCommand
 
-from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationStatusChoice,
+    AllocationLinkage,
+)
 from coldfront.core.allocation.signals import allocation_activate
 
 
@@ -19,14 +23,29 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         failed_allocations = []
 
-        allocations = options["allocations"]
-        for allocation_id in allocations:
-            try:
-                self._activate_allocation(allocation_id)
-            except ValueError as e:
-                failed_allocations.append(
-                    {"allocation_id": allocation_id, "error": str(e)}
-                )
+        allocations_ids = options["allocations"]
+
+        parent_allocations = []
+        sub_allocations = []
+
+        for allocation_id in allocations_ids:
+            allocation_linkage = AllocationLinkage.objects.filter(
+                children__pk=allocation_id
+            )
+
+            if allocation_linkage.len() > 0:
+                sub_allocations.append(allocation_id)
+            else:
+                parent_allocations.append(allocation_id)
+
+        for allocations in [parent_allocations, sub_allocations]:
+            for allocation_id in allocations:
+                try:
+                    self._activate_allocation(allocation_id)
+                except ValueError as e:
+                    failed_allocations.append(
+                        {"allocation_id": allocation_id, "error": str(e)}
+                    )
 
         if failed_allocations:
             print("Some allocations failed to activate:")
