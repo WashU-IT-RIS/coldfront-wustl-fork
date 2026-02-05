@@ -33,7 +33,7 @@ class Command(BaseCommand):
                 children__pk=allocation_id
             )
 
-            if allocation_linkage.len() > 0:
+            if allocation_linkage.count() > 0:
                 sub_allocations.append(allocation_id)
             else:
                 parent_allocations.append(allocation_id)
