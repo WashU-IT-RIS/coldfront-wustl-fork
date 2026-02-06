@@ -38,7 +38,7 @@ class Command(BaseCommand):
             else:
                 parent_allocations.append(allocation_id)
 
-        for allocations, index in [parent_allocations, sub_allocations]:
+        for index, allocations in enumerate([parent_allocations, sub_allocations]):
             for allocation_id in allocations:
                 try:
                     self._activate_allocation(allocation_id, is_child=index)
