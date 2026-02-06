@@ -15,13 +15,11 @@ module load python3
 # formatted as: wustlkey,storage2_allocation,{storage2_suballocation2,storage2_suballocation2,...}
 input_file="./slurm/inputs.csv"
 input_line=$(sed -n "$((SLURM_ARRAY_TASK_ID + 1))p" $input_file)
-wustlkey=$(echo $input_line | cut -d',' -f1)
 allocation_root=$(echo $input_line | cut -d',' -f2)
 sub_allocations=$(echo $input_line | cut -d',' -f3 | tr -d '{}')
 storage_suffix=$(echo "$allocation_root" | grep -Po '(?<=storage)\d+')
 
 # Print the parameters for logging
-echo "WUSTL Key: $wustlkey"
 echo "Allocation Root: $allocation_root"
 echo "Sub Allocations: $sub_allocations"
 echo "SLURM_ARRAY_TASK_ID: $SLURM_ARRAY_TASK_ID"
@@ -39,11 +37,11 @@ perform_reset="n"
 # Execute the parallel reset command with the parameters read from the input file
 if [ ! -z "$sub_allocations" ]; then
     srun python3 ./parallel_acl_controller.py --perform_reset $perform_reset --allocation_root $allocation_root --target_dir ${allocation_root}/Active --sub_allocations $sub_allocations --storage_suffix $storage_suffix --num_walkers $num_walkers --num_workers_per_walk $num_workers_per_walk --log_dir $log_dir
-    echo "Parallel reset process complete for SLURM_ARRAY_TASK_ID: $SLURM_ARRAY_TASK_ID, WUSTL Key: $wustlkey"
+    echo "Parallel reset process complete for SLURM_ARRAY_TASK_ID: $SLURM_ARRAY_TASK_ID, Allocation Root: $allocation_root"
     exit 0
 else
     srun python3 ./parallel_acl_controller.py --perform_reset $perform_reset --allocation_root $allocation_root --target_dir ${allocation_root}/Active --storage_suffix $storage_suffix --num_walkers $num_walkers --num_workers_per_walk $num_workers_per_walk --log_dir $log_dir
-    echo "Parallel reset process complete for SLURM_ARRAY_TASK_ID: $SLURM_ARRAY_TASK_ID, WUSTL Key: $wustlkey"
+    echo "Parallel reset process complete for SLURM_ARRAY_TASK_ID: $SLURM_ARRAY_TASK_ID, Allocation Root: $allocation_root"
     exit 0
 fi
 
