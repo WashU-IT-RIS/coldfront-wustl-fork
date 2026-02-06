@@ -6,7 +6,7 @@ itsm_to_coldfront_map:
           - name: username
             value:
               type: string
-              transforms: null
+              transforms: convert_email_to_username
               validates:
                 presence: true
                 length:
@@ -17,7 +17,7 @@ itsm_to_coldfront_map:
           - name: pi
             value:
               type: int
-              transforms: null
+              transforms: convert_email_to_username
               foreign_key: User.objects.get(username=sponsor)
               validates:
                 presence: true
@@ -97,7 +97,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: string
-              transforms: null
+              transforms: convert_email_to_username
               validates:
                 exclusion: emails
                 length:
@@ -117,7 +117,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: string
-              transforms: null
+              transforms: convert_email_to_username
               validates:
                 exclusion: emails
                 length:
