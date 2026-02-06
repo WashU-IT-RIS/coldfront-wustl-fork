@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --time=1-12:00:00
 #SBATCH --partition=general-cpu
-#SBATCH --array=0-4     # Adjust the range based on the number of input lines
+#SBATCH --array=0-6     # Adjust the range based on the number of lines in inputs.csv
 
 module load python3
 
