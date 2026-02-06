@@ -1,0 +1,95 @@
+{
+    "comment": {
+        "dir_projects": {
+            "KHADER": {
+                "ro": null,
+                "rw": null
+            },
+            "KHADER_ADMIN": {
+                "ro": null,
+                "rw": [
+                    "mushtaqahmed",
+                    "pamelacamp"
+                ]
+            },
+            "KHADERLAB_PROTOCOLS": {
+                "ro": [
+                    "akter",
+                    "bobba.suhas",
+                    "chauhank",
+                    "darya.urusova",
+                    "lmellett",
+                    "lulan",
+                    "ncaleb",
+                    "rswanson",
+                    "s.thirunavukkarasu",
+                    "sbmehta",
+                    "yangyan"
+                ],
+                "rw": [
+                    "g.ananya",
+                    "mushtaqahmed",
+                    "shibalidas"
+                ]
+            },
+            "KHADERLAB_TBPROGRAM": {
+                "ro": null,
+                "rw": [
+                    "akter",
+                    "bobba.suhas",
+                    "chauhank",
+                    "darya.urusova",
+                    "g.ananya",
+                    "lmellett",
+                    "lulan",
+                    "mushtaqahmed",
+                    "ncaleb",
+                    "pamelacamp",
+                    "rswanson",
+                    "s.thirunavukkarasu",
+                    "sbmehta",
+                    "shibalidas",
+                    "yangyan"
+                ]
+            },
+            "PAPER_2018": {
+                "ro": null,
+                "rw": [
+                    "shibalidas"
+                ]
+            },
+            "Khader_lab": {
+                "ro": null,
+                "rw": [
+                    "jmartin"
+                ]
+            },
+            "Khadercompute": {
+                "ro": null,
+                "rw": [
+                    "akter",
+                    "bobba.suhas",
+                    "jmartin",
+                    "mushtaqahmed",
+                    "sakhader"
+                ]
+            },
+            "Shared_With_Max": {
+                "ro": null,
+                "rw": [
+                    "akter",
+                    "mushtaqahmed",
+                    "shibalidas",
+                    "storage-martyomov"
+                ]
+            },
+            "MGI_Data": {
+                "rw": [
+                    "barosa",
+                    "jmartin",
+                    "storage-sakhader-khaderlab_tbprogram-rw"
+                ],
+                "ro": []
+            }
+        }
+    }

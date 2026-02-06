@@ -85,15 +85,25 @@ class MigrateToColdfront:
         if created:
             self.__create_project_user(project, pi_user)
             self.__create_project_attributes(fields, project)
+
         allocation = self.__create_allocation(
             key, fields, project, pi_user, resource_type
         )
         self.__create_allocation_attributes(fields, allocation)
-        return {
+
+        result = {
             "allocation_id": allocation.id,
             "project_id": project.id,
             "pi_user_id": pi_user.id,
         }
+
+        sub_allocations = self.__create_sub_allocations(
+            fields=fields, parent_allocation=allocation
+        )
+        if sub_allocations:
+            result["sub_allocations"] = [sub_alloc.id for sub_alloc in sub_allocations]
+
+        return result
 
     def __get_itsm_allocation_by_fileset_name(self, fileset_name: str) -> str:
         itsm_client = ItsmClient()
@@ -136,6 +146,11 @@ class MigrateToColdfront:
 
     def __get_or_create_user(self, fields: list) -> User:
         username = self.__get_username(fields)
+        # TODO get email by washu key
+        # user_email = self.__get_meail_from_ad_lookup(username)
+        # if email is None:
+        #    raise Exception(f"No email found for user {username} in AD Lookup")
+
         user, _ = User.objects.get_or_create(
             username=username,
             email=f"{username}@wustl.edu",
@@ -207,21 +222,12 @@ class MigrateToColdfront:
         attributes_for_allocation = filter(
             lambda field: field.entity == "allocation_form", fields
         )
-        # "example_lab/foo/bar_active" -> "bar"
-        seed_path = key.split("_active")[0].rsplit("/", 1)[-1]
-        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
-        base_path = qumulo_info[resource.name]["path"]
 
-        allocation_data = {}
-        allocation_data["project_pk"] = project.id
-        allocation_data["ro_users"] = []
-        allocation_data["storage_type"] = resource.name
-        for field in list(attributes_for_allocation):
-            allocation_data.update(field.entity_item)
-        allocation_data["storage_filesystem_path"] = f"{base_path}/{seed_path}"
-        allocation_data["storage_export_path"] = f"{base_path}/{seed_path}"
+        allocation_data = self.__get_allocation_data_from_fields(
+            attributes_for_allocation, key, resource, project
+        )
         service_result = AllocationService.create_new_allocation(
-            allocation_data, pi_user
+            form_data=allocation_data, pi_user=pi_user
         )
         return service_result["allocation"]
 
@@ -253,3 +259,100 @@ class MigrateToColdfront:
                 return username
 
         return None
+
+    def __create_sub_allocations(
+        self, fields: list, parent_allocation: Allocation
+    ) -> None:
+        project_dir_field = next(
+            (field for field in fields if field.itsm_attribute_name == "comment"), None
+        )
+        if project_dir_field is None or project_dir_field.value is None:
+            return
+
+        project_dir = project_dir_field.value.get("project_dir")
+        if project_dir is None:
+            return
+
+        # Logic to create sub-allocations based on project_dir
+        # This is a placeholder for the actual implementation
+        # sub_allocation_names = fields[0].value.get("dir_projects", []) or []
+
+        sub_allocation_names = 
+        for sub_alloc_name in sub_allocation_names:
+            sub_allocation_form_data = self.__get_sub_allocation_form_data(
+                sub_allocation_name=sub_alloc_name,
+                fields=fields,
+                resource=parent_allocation.resource,
+                project=parent_allocation.project,
+            )
+
+            AllocationService.create_sub_allocation(
+                sub_allocation_form_data,
+                sub_allocation_name=sub_alloc_name.strip(),
+                parent_allocation=parent_allocation,
+            )
+
+    def __get_allocation_path(self, key, resource: Resource) -> str:
+        # "example_lab/foo/bar_active" -> "bar"
+        seed_path = key.split("_active")[0].rsplit("/", 1)[-1]
+        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+        base_path = qumulo_info[resource.name]["path"]
+        return f"{base_path}/{seed_path}"
+
+    def __get_allocation_data_from_fields(
+        self, attributes_for_allocation, key, resource: Resource, project: Project
+    ) -> dict:
+        allocation_data = {}
+        allocation_data["project_pk"] = project.id
+        allocation_data["ro_users"] = []
+        allocation_data["storage_type"] = resource.name
+        for field in list(attributes_for_allocation):
+            allocation_data.update(field.entity_item)
+
+        allocation_data["storage_filesystem_path"] = self.__get_allocation_path(
+            key, resource
+        )
+        allocation_data["storage_export_path"] = self.__get_allocation_path(
+            key, resource
+        )
+        return allocation_data
+
+    def __get_sub_allocation_form_data(
+        self,
+        sub_allocation_name: str,
+        fields: list,
+        resource: Resource,
+        project: Project,
+    ) -> dict:
+        sub_allocation_form_data = {}
+        sub_allocation_form_data["project_pk"] = project.id
+        sub_allocation_form_data["storage_type"] = resource.name
+        sub_allocation_form_data["storage_filesystem_path"] = sub_allocation_name
+        sub_allocation_form_data["storage_export_path"] = sub_allocation_name
+        for field in [
+            sub_allocation_field
+            for sub_allocation_field in fields
+            if sub_allocation_field.entity == "sub_allocation_form"
+        ]:
+            sub_allocation_form_data.update(field.entity_item)
+
+        dir_projects = sub_allocation_form_data.get("dir_projects")
+        sub_allocation_form_data["rw_users"] = self.__get_sub_allocation_rw_users(dir_projects, sub_allocation_name)
+        sub_allocation_form_data["ro_users"] = self.__get_sub_allocation_ro_users(dir_projects, sub_allocation_name)
+
+        return sub_allocation_form_data
+
+
+    def __get_sub_allocation_rw_users(self, dir_projects: dict, sub_allocation_name:str) -> None:
+        users = dir_projects.get(sub_allocation_name)
+        rw_users = users.get("rw_users")
+        if rw_users is None or rw_users == []:
+            rw_users = ["test_user"] # get users from the parent allocation if rw_users is empty for the sub-allocation
+        return rw_users
+
+    def __get_sub_allocation_ro_users(self, dir_projects: dict, sub_allocation_name:str) -> None:
+        users = dir_projects.get(sub_allocation_name)
+        ro_users = users.get("ro_users")
+        if ro_users is None:
+            ro_users = []
+        return ro_users
