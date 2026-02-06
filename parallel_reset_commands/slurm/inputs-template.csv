@@ -1,10 +1,10 @@
 wustlkey1,/storage2/fs1/allocation_root1,{suballoc1,suballoc2,suballoc3}
 wustlkey2,/storage2/fs1/allocation_root2,{suballocA,suballocB}
 wustlkey3,/storage2/fs1/allocation_root3,{suballocX,suballocY,suballocZ}
-wustlkey4,/storage2/fs1/allocation_root4,{suballocM}
-wustlkey5,/storage2/fs1/allocation_root5,{suballocN,suballocO}
-wustlkey6,/storage2/fs1/allocation_root6,{suballocP,suballocQ,suballocR}
-wustlkey7,/storage2/fs1/allocation_root7,{suballocS}
-wustlkey8,/storage2/fs1/allocation_root8,{suballocT,suballocU}
-wustlkey9,/storage2/fs1/allocation_root9,{suballocV,suballocW}
-wustlkey10,/storage2/fs1/allocation_root10,{suballocAA,suballocBB,suballocCC}
+wustlkey4,/storage3/fs1/allocation_root4,{suballocM}
+wustlkey5,/storage3/fs1/allocation_root5,{suballocN,suballocO}
+wustlkey6,/storage3/fs1/allocation_root6,{suballocP,suballocQ,suballocR}
+wustlkey7,/storage4/fs1/allocation_root7,{suballocS}
+wustlkey8,/storage4/fs1/allocation_root8,{suballocT,suballocU}
+wustlkey9,/storage4/fs1/allocation_root9,{suballocV,suballocW}
+wustlkey10,/storage5/fs1/allocation_root10,{suballocAA,suballocBB,suballocCC}
