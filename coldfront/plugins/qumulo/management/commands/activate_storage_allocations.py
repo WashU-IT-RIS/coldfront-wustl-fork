@@ -38,10 +38,10 @@ class Command(BaseCommand):
             else:
                 parent_allocations.append(allocation_id)
 
-        for allocations in [parent_allocations, sub_allocations]:
+        for allocations, index in [parent_allocations, sub_allocations]:
             for allocation_id in allocations:
                 try:
-                    self._activate_allocation(allocation_id)
+                    self._activate_allocation(allocation_id, is_child=index)
                 except ValueError as e:
                     failed_allocations.append(
                         {"allocation_id": allocation_id, "error": str(e)}
@@ -54,7 +54,7 @@ class Command(BaseCommand):
                     f" - Allocation ID {failure['allocation_id']}: {failure['error']}"
                 )
 
-    def _activate_allocation(self, allocation_id):
+    def _activate_allocation(self, allocation_id: int, is_child: bool):
         print(f"Activating storage allocation with ID: {allocation_id}")
 
         try:
@@ -67,6 +67,17 @@ class Command(BaseCommand):
             raise ValueError(
                 f"Allocation with ID {allocation_id} is not in 'New' status."
             )
+
+        if is_child:
+            allocation_linkage = AllocationLinkage.objects.get(
+                children__pk=allocation_id
+            )
+            parent_allocation = allocation_linkage.parent
+
+            if parent_allocation.status.name != "Active":
+                raise ValueError(
+                    f"Parent allocation with ID {parent_allocation.pk} is not in 'Active' status."
+                )
 
         allocation.status = AllocationStatusChoice.objects.get(name="Active")
         allocation.save()
