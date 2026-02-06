@@ -1,5 +1,5 @@
 import math, os, json
-from typing import Optional
+from typing import Optional, Union
 
 
 def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
@@ -93,42 +93,25 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
     # throws ValueError: invalid literal for int() with base 10: value
     return bool(int(value))
 
-def comment_to_read_write_users(comment: Optional[str]) -> Optional[str]:
-    if comment is None:
-        return None
-    
-    # default to the parents rw groups
 
-def comment_to_read_only_users(comment: Optional[str]) -> Optional[str]:
+def anything_to_comsumption() -> str:
+    return "consumption"
+
+
+def anything_to_empty_list() -> list[None]:
+    return []
+
+
+def comment_to_dir_projects(
+    comment: Optional[str],
+) -> Optional[dict[str, Optional[dict[str, Optional[list[str]]]]]]:
     if comment is None:
         return None
-    
-    comment_json = __to_json(comment)
+
+    comment_json = json.loads(comment)
     if comment_json is None:
         return None
-    
-    users = comment_json.get("ro_users")
-    if users is None:
-        return None
-    
-    return comment.split(",")
 
-def __to_json(value: str) -> dict:
-    if value is None:
-        return None
-
-    return json.loads(value)
-
-def comment_to_sub_allocations(comment: Optional[str]) -> Optional[str]:
-    if comment is None:
-        return None
-    
-    comment_json = __to_json(comment)
-    if comment_json is None:
-        return None
-    
     sub_allocations = comment_json.get("dir_projects")
-    if sub_allocations is None:
-        return None
-    
-    return comment.split(",")
+
+    return sub_allocations

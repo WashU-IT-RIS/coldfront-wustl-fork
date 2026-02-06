@@ -119,3 +119,14 @@ class TestValidators(TestCase):
         defaults_to = False
         self.assertIsNotNone(truthy_or_falsy_to_boolean(None, defaults_to))
         self.assertRaises(ValueError, truthy_or_falsy_to_boolean, "Bogus Data")
+
+    
+    def test_washu_key_not_found_by_email(self):
+        
+
+        
+    
+# sponsor has an email
+# if found, should convert email to whashu_key
+# if not found, should reject migration
+# if multiple found, reject migration with an exception 
