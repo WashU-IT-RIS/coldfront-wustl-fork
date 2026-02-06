@@ -24,7 +24,7 @@
     ```
     ```bash
     ❯ wc -l ./slurm/inputs.csv 
-           7 ./slurm/inputs.csv
+           7 ./slurm/inputs.csv # results in array of 0-6
     ```
 1. Use the line count value to set the array size used by `./slurm/sbatch.sh`
     ```bash
