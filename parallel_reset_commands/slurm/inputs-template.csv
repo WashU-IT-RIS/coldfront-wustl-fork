@@ -1,0 +1,11 @@
+/storage2/fs1/allocation_root1,{suballoc1,suballoc2,suballoc3}
+/storage2/fs1/allocation_root2,{suballocA,suballocB}
+/storage2/fs1/allocation_root3,{suballocX,suballocY,suballocZ}
+/storage3/fs1/allocation_root4,{suballocM}
+/storage3/fs1/allocation_root5,{suballocN,suballocO}
+/storage3/fs1/allocation_root6,{suballocP,suballocQ,suballocR}
+/storage4/fs1/allocation_root7,{suballocS}
+/storage4/fs1/allocation_root8,{suballocT,suballocU}
+/storage4/fs1/allocation_root9,{suballocV,suballocW}
+/storage5/fs1/allocation_root10,{suballocAA,suballocBB,suballocCC}
+
