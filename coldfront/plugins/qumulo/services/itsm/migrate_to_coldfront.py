@@ -86,7 +86,7 @@ class MigrateToColdfront:
             self.__create_project_user(project, pi_user)
             self.__create_project_attributes(fields, project)
 
-        allocation = self.__create_allocation(
+        allocation, dir_projects = self.__create_allocation(
             key, fields, project, pi_user, resource_type
         )
         self.__create_allocation_attributes(fields, allocation)
@@ -97,11 +97,13 @@ class MigrateToColdfront:
             "pi_user_id": pi_user.id,
         }
 
+        if dir_projects is None or dir_projects == {}:
+            return result
+
         sub_allocations = self.__create_sub_allocations(
-            fields=fields, parent_allocation=allocation
+            dir_projects, parent_allocation=allocation, fields=fields
         )
-        if sub_allocations:
-            result["sub_allocations"] = [sub_alloc.id for sub_alloc in sub_allocations]
+        result["sub_allocations"] = [sub_alloc.id for sub_alloc in sub_allocations]
 
         return result
 
@@ -261,34 +263,21 @@ class MigrateToColdfront:
         return None
 
     def __create_sub_allocations(
-        self, fields: list, parent_allocation: Allocation
+        self, dir_projects: dict, parent_allocation: Allocation, fields: list
     ) -> None:
-        project_dir_field = next(
-            (field for field in fields if field.itsm_attribute_name == "comment"), None
-        )
-        if project_dir_field is None or project_dir_field.value is None:
-            return
 
-        project_dir = project_dir_field.value.get("project_dir")
-        if project_dir is None:
-            return
-
-        # Logic to create sub-allocations based on project_dir
-        # This is a placeholder for the actual implementation
-        # sub_allocation_names = fields[0].value.get("dir_projects", []) or []
-
-        sub_allocation_names = 
-        for sub_alloc_name in sub_allocation_names:
+        for sub_allocation_name, users in dir_projects.items():
+            purified_sub_allocation_name = sub_allocation_name.strip()
             sub_allocation_form_data = self.__get_sub_allocation_form_data(
-                sub_allocation_name=sub_alloc_name,
+                sub_allocation_name=purified_sub_allocation_name,
+                users=users,
+                parent_allocation=parent_allocation,
                 fields=fields,
-                resource=parent_allocation.resource,
-                project=parent_allocation.project,
             )
 
             AllocationService.create_sub_allocation(
                 sub_allocation_form_data,
-                sub_allocation_name=sub_alloc_name.strip(),
+                sub_allocation_name=purified_sub_allocation_name,
                 parent_allocation=parent_allocation,
             )
 
@@ -320,13 +309,13 @@ class MigrateToColdfront:
     def __get_sub_allocation_form_data(
         self,
         sub_allocation_name: str,
+        users: dict,
+        parent_allocation: Allocation,
         fields: list,
-        resource: Resource,
-        project: Project,
     ) -> dict:
         sub_allocation_form_data = {}
-        sub_allocation_form_data["project_pk"] = project.id
-        sub_allocation_form_data["storage_type"] = resource.name
+        sub_allocation_form_data["project_pk"] = parent_allocation.id
+        sub_allocation_form_data["storage_type"] = parent_allocation.resource.name
         sub_allocation_form_data["storage_filesystem_path"] = sub_allocation_name
         sub_allocation_form_data["storage_export_path"] = sub_allocation_name
         for field in [
@@ -336,22 +325,27 @@ class MigrateToColdfront:
         ]:
             sub_allocation_form_data.update(field.entity_item)
 
-        dir_projects = sub_allocation_form_data.get("dir_projects")
-        sub_allocation_form_data["rw_users"] = self.__get_sub_allocation_rw_users(dir_projects, sub_allocation_name)
-        sub_allocation_form_data["ro_users"] = self.__get_sub_allocation_ro_users(dir_projects, sub_allocation_name)
+        sub_allocation_form_data["rw_users"] = self.__get_sub_allocation_rw_users(users)
+        sub_allocation_form_data["ro_users"] = self.__get_sub_allocation_ro_users(users)
 
         return sub_allocation_form_data
 
-
-    def __get_sub_allocation_rw_users(self, dir_projects: dict, sub_allocation_name:str) -> None:
-        users = dir_projects.get(sub_allocation_name)
+    def __get_sub_allocation_rw_users(
+        self, users: dict, parent_allocation: Allocation
+    ) -> None:
         rw_users = users.get("rw_users")
         if rw_users is None or rw_users == []:
-            rw_users = ["test_user"] # get users from the parent allocation if rw_users is empty for the sub-allocation
+            rw_allocation = Allocation.objects.get(
+                allocationattribute__allocation_attribute_type__name="storage_allocation_pk",
+                allocationattribute__value=parent_allocation.id,
+                resources__name="rw",
+            )
+            rw_users = rw_allocation.allocationuser_set.filter(
+                status__name="Active"
+            ).values_list("user__username", flat=True)
         return rw_users
 
-    def __get_sub_allocation_ro_users(self, dir_projects: dict, sub_allocation_name:str) -> None:
-        users = dir_projects.get(sub_allocation_name)
+    def __get_sub_allocation_ro_users(self, users: dict) -> None:
         ro_users = users.get("ro_users")
         if ro_users is None:
             ro_users = []
