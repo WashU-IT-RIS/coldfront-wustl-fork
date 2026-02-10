@@ -1,5 +1,5 @@
-import math, os, json
-from typing import Optional, Union
+import math, json
+from typing import Optional
 
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
