@@ -37,7 +37,7 @@ class Field:
 
     @property
     def entity_item(self) -> str:
-        if self.entity == "allocation_form":
+        if self.entity == "allocation_form" or self.entity == "sub_allocation_form":
             return {self.attributes[0].get("name"): self.value}
 
         return None

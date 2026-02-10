@@ -66,6 +66,16 @@ itsm_to_coldfront_map:
                 presence: true
                 length:
                   maximum: 128
+      - entity: sub_allocation_form
+        attributes:
+          - name: department_number
+            value:
+              type: string
+              transforms: null
+              validates:
+                presence: true
+                length:
+                  maximum: 128
     itsm_value:
       entity: service_provision
       attribute: department_number
@@ -74,6 +84,16 @@ itsm_to_coldfront_map:
   funding_number:
     coldfront:
       - entity: allocation_form
+        attributes:
+          - name: cost_center
+            value:
+              type: string
+              transforms: null
+              validates:
+                presence: true
+                length:
+                  maximum: 128
+      - entity: sub_allocation_form
         attributes:
           - name: cost_center
             value:
@@ -167,6 +187,16 @@ itsm_to_coldfront_map:
               validates:
                 presence: true
                 validate_ticket: true
+      - entity: sub_allocation_form
+        attributes:
+          - name: cost_center
+            value:
+              type: string
+              transforms: null
+              validates:
+                presence: true
+                length:
+                  maximum: 128
     itsm_value:
       entity: service_provision
       attribute: service_desk_ticket_number
@@ -219,9 +249,9 @@ itsm_to_coldfront_map:
               type: string
               transforms: null
               validates:
-                presence: true # is this conditionally necessary?
                 length:
                   maximum: 128
+                  allow_blank: true
     itsm_value:
       entity: service_provision
       attribute: sponsor_department_number
@@ -306,6 +336,14 @@ itsm_to_coldfront_map:
               transforms: truthy_or_falsy_to_boolean
               validates:
                 inclusion: ["Yes", "No"]
+      - entity: sub_allocation_form
+        attributes:
+          - name: billing_exempt
+            value:
+              type: Yes/No
+              transforms: truthy_or_falsy_to_boolean
+              validates:
+                inclusion: ["Yes", "No"]
     itsm_value:
       entity: service_provision
       attribute: exempt
@@ -319,9 +357,17 @@ itsm_to_coldfront_map:
           - name: service_rate_category
             value:
               type: string
-              transforms: null
+              transforms: anything_to_comsumption
               validates:
-                inclusion: ["condo", "consumption", "subscription"]
+                inclusion: ["consumption"]
+      - entity: sub_allocation_form
+        attributes:
+          - name: service_rate_category
+            value:
+              type: string
+              transforms: anything_to_comsumption
+              validates:
+                inclusion: ["consumption"]
     itsm_value:
       entity: service_provision
       attribute: service_rate_category
@@ -350,6 +396,20 @@ itsm_to_coldfront_map:
               transforms: comment_to_protocols
               validates:
                 inclusion: [smb, nfs]
+      - entity: sub_allocation_form
+        attributes:
+          - name: protocols
+            value:
+              type: string
+              transforms: anything_to_empty_list
+              validates: false
+      - entity: allocation_form
+        attributes:
+          - name: dir_projects
+            value:
+              type: string
+              transforms: comment_to_dir_projects
+              validates: false
     itsm_value:
       entity: service_provision
       attribute: comment
@@ -398,6 +458,18 @@ itsm_to_coldfront_map:
   quota:
     coldfront:
       - entity: allocation_form
+        attributes:
+          - name: storage_quota
+            value:
+              type: Int
+              transforms: string_parsing_quota_and_unit_to_integer
+              validates:
+                presence: true
+                numericallity:
+                  only_integer: true
+                  greater_than: 0
+                  less_than_or_equal_to: 2000
+      - entity: sub_allocation_form
         attributes:
           - name: storage_quota
             value:

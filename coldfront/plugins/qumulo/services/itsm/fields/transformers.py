@@ -1,5 +1,5 @@
 import math, os, json
-from typing import Optional
+from typing import Optional, Union
 
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
@@ -114,3 +114,24 @@ def convert_email_to_username(value:str) -> str:
     return None
     
     
+def anything_to_comsumption() -> str:
+    return "consumption"
+
+
+def anything_to_empty_list() -> list[None]:
+    return []
+
+
+def comment_to_dir_projects(
+    comment: Optional[str],
+) -> Optional[dict[str, Optional[dict[str, Optional[list[str]]]]]]:
+    if comment is None:
+        return None
+
+    comment_json = json.loads(comment)
+    if comment_json is None:
+        return None
+
+    sub_allocations = comment_json.get("dir_projects")
+
+    return sub_allocations
