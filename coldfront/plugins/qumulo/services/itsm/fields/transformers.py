@@ -1,6 +1,8 @@
 import math, os, json
 from typing import Optional, Union
 
+from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+
 
 def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
     # In ITSM, fileset_names are mapped into name
@@ -94,6 +96,24 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
     return bool(int(value))
 
 
+def convert_email_to_username(value:str) -> str:
+    if value is None:
+        return None
+
+    allowed_domains = ["@wustl.edu", "@email.wustl.edu", "@go.wustl.edu"]
+    for domain in allowed_domains:
+        if value.endswith(domain):
+            try:
+                ad_api = ActiveDirectoryAPI()
+                user_info = ad_api.get_user_by_email(value)
+                # if the user is not found, then keep the email as the value
+                attrs = user_info.get("attributes", {})
+                return attrs.get("sAMAccountName", value)
+            except Exception:
+                return None
+    return None
+    
+    
 def anything_to_comsumption() -> str:
     return "consumption"
 
