@@ -8,12 +8,12 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
 )
-from coldfront.plugins.qumulo.management.commands.migrate_allocation_attributes import (
-    Command,
-)
+from coldfront.plugins.qumulo.management.commands.migrate_allocation_attributes import Command
 
 from datetime import date
 from dateutil.relativedelta import relativedelta
+
+
 
 
 class TestMigrateAllocationAttributes(TestCase):
@@ -21,7 +21,7 @@ class TestMigrateAllocationAttributes(TestCase):
         current = date.today()
         past = current - relativedelta(months=3)
         return past
-
+    
     def setUp(self):
         self.client = Client()
 
@@ -86,21 +86,20 @@ class TestMigrateAllocationAttributes(TestCase):
         )
         monthly_allocation.status = AllocationStatusChoice.objects.get(name="Active")
         monthly_allocation.save()
-
+        
         Command._migrate_allocation_attribute(self, "billing_cycle", "monthly")
 
         billing_cycle_query = AllocationAttribute.objects.filter(
-            allocation=monthly_allocation,
-            allocation_attribute_type__name="billing_cycle",
+            allocation=monthly_allocation,allocation_attribute_type__name="billing_cycle"
         )
         billing_cycle_value = AllocationAttribute.objects.get(
             allocation=monthly_allocation,
             allocation_attribute_type__name="billing_cycle",
         ).value
-
+        
         self.assertEqual(billing_cycle_query.count(), 1)
         self.assertEqual(billing_cycle_value, "monthly")
-
+    
     def test_billing_cycle_is_not_default_value(self):
         prepaid_allocation = create_allocation(
             self.project, self.user, self.prepaid_form_data
@@ -111,17 +110,16 @@ class TestMigrateAllocationAttributes(TestCase):
         Command._migrate_allocation_attribute(self, "billing_cycle", "monthly")
 
         billing_cycle_query = AllocationAttribute.objects.filter(
-            allocation=prepaid_allocation,
-            allocation_attribute_type__name="billing_cycle",
+            allocation=prepaid_allocation,allocation_attribute_type__name="billing_cycle"
         )
         billing_cycle_value = AllocationAttribute.objects.get(
             allocation=prepaid_allocation,
             allocation_attribute_type__name="billing_cycle",
         ).value
-
+        
         self.assertEqual(billing_cycle_query.count(), 1)
         self.assertEqual(billing_cycle_value, "prepaid")
-
+    
     def test_no_billing_cycle(self):
         allocation = create_allocation(
             self.project, self.user, self.no_billing_form_data
@@ -131,12 +129,16 @@ class TestMigrateAllocationAttributes(TestCase):
         Command._migrate_allocation_attribute(self, "billing_cycle", "monthly")
 
         billing_cycle_query = AllocationAttribute.objects.filter(
-            allocation=allocation, allocation_attribute_type__name="billing_cycle"
+            allocation=allocation,allocation_attribute_type__name="billing_cycle"
         )
-        billing_cycle_value = AllocationAttribute.objects.get(
-            allocation=allocation,
-            allocation_attribute_type__name="billing_cycle",
-        ).value
-
+        billing_cycle_value = AllocationAttribute.objects.get(allocation=allocation,allocation_attribute_type__name="billing_cycle",).value
+        
         self.assertEqual(billing_cycle_query.count(), 1)
         self.assertEqual(billing_cycle_value, "monthly")
+        
+        
+
+
+
+
+
