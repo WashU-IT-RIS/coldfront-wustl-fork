@@ -10,10 +10,11 @@ from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
 
 requested_storage_resource = os.environ.get("USER_LIST_RESOURCE", None)
-storage_resource_names = Resource.objects.filter(
-    resource_type__name="Storage"
-).values_list("name", flat=True)
-if requested_storage_resource not in storage_resource_names:
+storage_resources_qs = Resource.objects.filter(resource_type__name="Storage")
+if not requested_storage_resource or not storage_resources_qs.filter(
+    name=requested_storage_resource
+).exists():
+    storage_resource_names = storage_resources_qs.values_list("name", flat=True)
     print(
         "Invalid USER_LIST_RESOURCE configuration: "
         f"got USER_LIST_RESOURCE={requested_storage_resource!r}; "
