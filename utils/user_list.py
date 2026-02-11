@@ -23,9 +23,14 @@ emails = []
 no_emails = []
 for allocation in Allocation.objects.filter(resources__name=requested_storage_resource):
     # TODO: optimize this query to avoid N+1 queries, maybe by using select_related or prefetch_related
+    #
+    # allocation_ids = Allocation.objects.filter(
+    #                       resources__name=requested_storage_resource, 
+    #                       status__name="Active")
+    #                       .values_list("id", flat=True)
     # user_group_allocations = Allocation.objects.filter(
     #    allocationattribute__allocation_attribute_type__name="storage_allocation_pk",
-    #    allocationattribute__value__in=allocation.id,
+    #    allocationattribute__value__in=allocation_ids,
     # ).prefetch_related("allocationattribute_set__allocationuser_set__user")
     # for user_group_allocation in user_group_allocations:
     #     for attribute in user_group_allocation.allocationattribute_set.all():
@@ -39,9 +44,8 @@ for allocation in Allocation.objects.filter(resources__name=requested_storage_re
     # I don't have time now to test the above code.
     #
     # The query AllocationAttribute.objects.filter(value=allocation.pk) relies on a value that is
-    # the primary key of the allocation, which is an integer. This is a bit brittle and relies on 
-    # the assumption that there are no other allocation attributes with integer values that could match this. 
-
+    # the primary key of the allocation, which is an integer. This is a bit brittle and relies on
+    # the assumption that there are no other allocation attributes with integer values that could match this.
 
     for attribute in AllocationAttribute.objects.filter(value=allocation.pk):
         acl_allocation_id = attribute.allocation_id
