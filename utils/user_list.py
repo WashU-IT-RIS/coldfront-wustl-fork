@@ -15,7 +15,10 @@ storage_resource_names = Resource.objects.filter(
 ).values_list("name", flat=True)
 if requested_storage_resource not in storage_resource_names:
     print(
-        f"USER_LIST_RESOURCE value should be one of: {', '.join(storage_resource_names)}"
+        "Invalid USER_LIST_RESOURCE configuration: "
+        f"got USER_LIST_RESOURCE={requested_storage_resource!r}; "
+        f"expected one of: {', '.join(storage_resource_names)}. "
+        "Please set the USER_LIST_RESOURCE environment variable to a valid storage resource name."
     )
     sys.exit(1)
 
