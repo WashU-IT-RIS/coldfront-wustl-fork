@@ -122,11 +122,11 @@ class TestValidators(TestCase):
 
     
     def test_washu_key_not_found_by_email(self):
-        
+        ...
 
         
     
 # sponsor has an email
 # if found, should convert email to whashu_key
 # if not found, should reject migration
-# if multiple found, reject migration with an exception 
+# if multiple found, reject migration with an exception
