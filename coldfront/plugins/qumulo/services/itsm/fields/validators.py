@@ -1,12 +1,13 @@
 import re, json
-from typing import Any, Union
+from typing import Any, Optional, Union
 
 import coldfront.core.allocation.models as coldfront_models
+from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 
 # This is copy from coldfront/plugins/qumulo/validators.py
 # loading the validator from Django causes an exception due to app requirements.
-def validate_ticket(ticket: str, validate: bool = True) -> Union[str, None]:
+def validate_ticket(ticket: str, validate: bool = True) -> Optional[str]:
     if not validate:
         return None
 
@@ -22,7 +23,7 @@ def validate_ticket(ticket: str, validate: bool = True) -> Union[str, None]:
     return f"{ticket} is not in the format ITSD-12345 or 12345"
 
 
-def numericallity(value: int, conditions: dict) -> Union[str, None]:
+def numericallity(value: int, conditions: dict) -> Optional[str]:
     if value is None:
         return f"{value} is not a number"
 
@@ -46,7 +47,7 @@ def numericallity(value: int, conditions: dict) -> Union[str, None]:
     return None
 
 
-def presence(value: Any, presence: bool = True) -> Union[str, None]:
+def presence(value: Any, presence: bool = True) -> Optional[str]:
     if presence:
         if value is None:
             return "must be specified"
@@ -54,10 +55,10 @@ def presence(value: Any, presence: bool = True) -> Union[str, None]:
         if isinstance(value, str):
             if not bool(value):
                 return "must not be blank"
-    return
+    return None
 
 
-def length(value: str, conditions: dict) -> Union[str, None]:
+def length(value: str, conditions: dict) -> Optional[str]:
     allow_blank = conditions.get("allow_blank")
     if allow_blank:
         if not bool(value):
@@ -73,7 +74,7 @@ def length(value: str, conditions: dict) -> Union[str, None]:
     return f"exceeds the limit of {maximum_length}: {value}"
 
 
-def inclusion(value: Union[list, str], accepted_values: list) -> Union[str, None]:
+def inclusion(value: Union[list, str], accepted_values: list) -> Optional[str]:
     if isinstance(value, list):
         value_list = value
         if all(element in accepted_values for element in value_list):
@@ -85,7 +86,7 @@ def inclusion(value: Union[list, str], accepted_values: list) -> Union[str, None
     return f"{value} is not amongst {accepted_values}"
 
 
-def exclusion(value: str, exclusions: dict) -> Union[str, None]:
+def exclusion(value: str, exclusions: dict) -> Optional[str]:
     if value is None:
         return None
 
@@ -98,7 +99,7 @@ def exclusion(value: str, exclusions: dict) -> Union[str, None]:
     return f"constains an email and should only contain valid WUSTL keys: value {value}"
 
 
-def validate_json(value: Any, conditions: dict = {}) -> Union[str, None]:
+def validate_json(value: Any, conditions: dict = {}) -> Optional[str]:
     if conditions.get("allow_blank"):
         if value in [None, ""]:
             return None
@@ -111,10 +112,22 @@ def validate_json(value: Any, conditions: dict = {}) -> Union[str, None]:
     return None
 
 
-# TODO check if the user exists
-def ad_record_exist(value, validate: bool = True) -> Union[str, None]:
+def ad_record_exist(value: Union[str, list], validate: bool = True) -> Optional[str]:
     if not validate:
         return None
+
+    if type(value) is list:
+        for element in value:
+            try:
+                ActiveDirectoryAPI().get_user(element)
+            except ValueError:
+                return f"{element} does not exist in Active Directory"
+        return None
+
+    try:
+        ActiveDirectoryAPI().get_user(value)
+    except ValueError:
+        return f"{value} does not exist in Active Directory"
 
     return None
 
@@ -124,7 +137,7 @@ def ad_record_exist(value, validate: bool = True) -> Union[str, None]:
 # Note that the field is hardcoded to allocation_attribute_type__name since I need to
 # figure out how to pass the entity_attribute from the conditions['entity_attribute'] to the filter.
 # This seemed promissing to no avail: exec(f"{conditions['entity_attribute']}")
-def uniqueness(value: Any, conditions: dict) -> Union[str, None]:
+def uniqueness(value: Any, conditions: dict) -> Optional[str]:
 
     # SELECT "allocation_allocationattribute"."id", "allocation_allocationattribute"."created", "allocation_allocationattribute"."modified", "allocation_allocationattribute"."allocation_attribute_type_id", "allocation_allocationattribute"."allocation_id", "allocation_allocationattribute"."value" FROM "allocation_allocationattribute" INNER JOIN "allocation_allocationattributetype" ON ("allocation_allocationattribute"."allocation_attribute_type_id" = "allocation_allocationattributetype"."id") WHERE ("allocation_allocationattributetype"."name" = storage_name AND "allocation_allocationattribute"."value" = /storage2-dev/fs1/jin810)
     exists = (

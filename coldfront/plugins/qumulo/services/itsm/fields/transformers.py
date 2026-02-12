@@ -51,9 +51,9 @@ def acl_group_members_to_aggregate_create_users(value) -> Optional[str]:
     return value.split(",")
 
 
-def string_parsing_quota_and_unit_to_integer(value: str) -> int:
+def string_parsing_quota_and_unit_to_integer(value: str) -> Optional[int]:
     if value is None:
-        return
+        return None
 
     # all values in ITSM are kept in TB (T) and some in GB (G).
     if value[-1] == "T":
@@ -62,17 +62,17 @@ def string_parsing_quota_and_unit_to_integer(value: str) -> int:
     if value[-1] == "G":
         return int(math.ceil(int(value[:-1]) / 1000))
 
-    return
+    return None
 
 
-def truthy_or_falsy_to_boolean(value, default_value=None) -> str:
+def truthy_or_falsy_to_boolean(value, default_value=None) -> Optional[str]:
     transfromed_value = __truthy_or_falsy_to_boolean(value, default_value)
     return __boolean_to_coldfront_yes_no(transfromed_value)
 
 
-def __boolean_to_coldfront_yes_no(value: bool) -> str:
+def __boolean_to_coldfront_yes_no(value: bool) -> Optional[str]:
     if value is None:
-        return
+        return None
 
     if value:
         return "Yes"
@@ -96,7 +96,7 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
     return bool(int(value))
 
 
-def convert_email_to_username(value:str) -> str:
+def convert_email_to_username(value: str) -> Optional[str]:
     if value is None:
         return None
 
@@ -112,8 +112,8 @@ def convert_email_to_username(value:str) -> str:
             except Exception:
                 return None
     return None
-    
-    
+
+
 def anything_to_comsumption() -> str:
     return "consumption"
 
@@ -124,13 +124,18 @@ def anything_to_empty_list() -> list[None]:
 
 def comment_to_dir_projects(
     comment: Optional[str],
+    default_value: Optional[dict[str, Optional[dict[str, Optional[list[str]]]]]] = {},
 ) -> Optional[dict[str, Optional[dict[str, Optional[list[str]]]]]]:
     if comment is None:
-        return None
+        return default_value
 
-    comment_json = json.loads(comment)
+    try:
+        comment_json = json.loads(comment)
+    except json.JSONDecodeError:
+        return default_value
+
     if comment_json is None:
-        return None
+        return default_value
 
     sub_allocations = comment_json.get("dir_projects")
 
