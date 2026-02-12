@@ -117,11 +117,16 @@ def ad_record_exist(value: Union[str, list], validate: bool = True) -> Optional[
         return None
 
     if type(value) is list:
+        error_messages = []
         for element in value:
             try:
                 ActiveDirectoryAPI().get_user(element)
             except ValueError:
-                return f"{element} does not exist in Active Directory"
+                error_messages.append(f"{element} does not exist in Active Directory")
+
+        if error_messages:
+            return error_messages
+
         return None
 
     try:
