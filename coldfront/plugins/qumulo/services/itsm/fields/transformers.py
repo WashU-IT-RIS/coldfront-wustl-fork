@@ -97,8 +97,8 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
 
 
 def convert_email_to_username(value: str) -> Optional[str]:
-    if value is None:
-        return None
+    if value is None or "@" not in value:
+        return value
 
     allowed_domains = ["@wustl.edu", "@email.wustl.edu", "@go.wustl.edu"]
     for domain in allowed_domains:
@@ -114,11 +114,11 @@ def convert_email_to_username(value: str) -> Optional[str]:
     return None
 
 
-def anything_to_comsumption() -> str:
+def anything_to_comsumption(value: Optional[str]) -> str:
     return "consumption"
 
 
-def anything_to_empty_list() -> list[None]:
+def anything_to_empty_list(value: Optional[str]) -> list[None]:
     return []
 
 
@@ -137,6 +137,6 @@ def comment_to_dir_projects(
     if comment_json is None:
         return default_value
 
-    sub_allocations = comment_json.get("dir_projects")
+    sub_allocations = comment_json.get("dir_projects", default_value)
 
     return sub_allocations

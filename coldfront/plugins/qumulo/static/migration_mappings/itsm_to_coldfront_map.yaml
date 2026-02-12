@@ -400,20 +400,22 @@ itsm_to_coldfront_map:
             value:
               type: string
               transforms: anything_to_empty_list
-              validates: false
+              validates:
+                presence: true
       - entity: allocation_form
         attributes:
           - name: dir_projects
             value:
               type: string
               transforms: comment_to_dir_projects
-              validates: false
+              validates:
+                presence: true
     itsm_value:
       entity: service_provision
       attribute: comment
       type: text
       nulls: true
-      defaults_to: {}
+      defaults_to: "{}"
   billing_cycle:
     coldfront:
       - entity: allocation_attribute

@@ -229,9 +229,9 @@ class MigrateToColdfront:
             attributes_for_allocation, key, resource, project
         )
         service_result = AllocationService.create_new_allocation(
-            form_data=allocation_data, pi_user=pi_user
+            form_data=allocation_data, user=pi_user
         )
-        return service_result["allocation"]
+        return service_result["allocation"], allocation_data.get("dir_projects")
 
     def __create_allocation_attributes(
         self, fields: list, allocation: Allocation

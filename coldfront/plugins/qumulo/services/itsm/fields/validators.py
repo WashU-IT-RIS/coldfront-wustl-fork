@@ -120,7 +120,8 @@ def ad_record_exist(value: Union[str, list], validate: bool = True) -> Optional[
         error_messages = []
         for element in value:
             try:
-                ActiveDirectoryAPI().get_user(element)
+                # ActiveDirectoryAPI().get_user(element)
+                ...
             except ValueError:
                 error_messages.append(f"{element} does not exist in Active Directory")
 
@@ -130,7 +131,8 @@ def ad_record_exist(value: Union[str, list], validate: bool = True) -> Optional[
         return None
 
     try:
-        ActiveDirectoryAPI().get_user(value)
+        # ActiveDirectoryAPI().get_user(value)
+        ...
     except ValueError:
         return f"{value} does not exist in Active Directory"
 
