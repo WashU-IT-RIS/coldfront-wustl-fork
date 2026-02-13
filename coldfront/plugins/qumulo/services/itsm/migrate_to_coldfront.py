@@ -103,6 +103,7 @@ class MigrateToColdfront:
         sub_allocations = self.__create_sub_allocations(
             dir_projects, parent_allocation=allocation, fields=fields
         )
+
         result["sub_allocations"] = [sub_alloc.id for sub_alloc in sub_allocations]
 
         return result
@@ -264,8 +265,7 @@ class MigrateToColdfront:
 
     def __create_sub_allocations(
         self, dir_projects: dict, parent_allocation: Allocation, fields: list
-    ) -> None:
-
+    ) -> None:        
         for sub_allocation_name, users in dir_projects.items():
             purified_sub_allocation_name = sub_allocation_name.strip()
             sub_allocation_form_data = self.__get_sub_allocation_form_data(
@@ -276,8 +276,8 @@ class MigrateToColdfront:
             )
 
             AllocationService.create_sub_allocation(
-                sub_allocation_form_data,
-                sub_allocation_name=purified_sub_allocation_name,
+                sub_allocation_form_data=sub_allocation_form_data,
+                pi_user=parent_allocation.project.pi,
                 parent_allocation=parent_allocation,
             )
 
@@ -315,7 +315,8 @@ class MigrateToColdfront:
     ) -> dict:
         sub_allocation_form_data = {}
         sub_allocation_form_data["project_pk"] = parent_allocation.id
-        sub_allocation_form_data["storage_type"] = parent_allocation.resource.name
+        sub_allocation_form_data["storage_name"] = sub_allocation_name
+        sub_allocation_form_data["storage_type"] = parent_allocation.resources.get(resource_type__name="Storage").name
         sub_allocation_form_data["storage_filesystem_path"] = sub_allocation_name
         sub_allocation_form_data["storage_export_path"] = sub_allocation_name
         for field in [
@@ -325,7 +326,7 @@ class MigrateToColdfront:
         ]:
             sub_allocation_form_data.update(field.entity_item)
 
-        sub_allocation_form_data["rw_users"] = self.__get_sub_allocation_rw_users(users)
+        sub_allocation_form_data["rw_users"] = self.__get_sub_allocation_rw_users(users, parent_allocation)
         sub_allocation_form_data["ro_users"] = self.__get_sub_allocation_ro_users(users)
 
         return sub_allocation_form_data
@@ -343,6 +344,7 @@ class MigrateToColdfront:
             rw_users = rw_allocation.allocationuser_set.filter(
                 status__name="Active"
             ).values_list("user__username", flat=True)
+
         return rw_users
 
     def __get_sub_allocation_ro_users(self, users: dict) -> None:

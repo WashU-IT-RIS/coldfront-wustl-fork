@@ -112,7 +112,28 @@ def validate_json(value: Any, conditions: dict = {}) -> Optional[str]:
     return None
 
 
-def ad_record_exist(value: Union[str, list], validate: bool = True) -> Optional[str]:
+def validate_keys_in_dict(value: dict, conditions: dict = {}) -> Optional[list[str]]:
+    if conditions.get("allow_blank"):
+        if value in [None, ""]:
+            return None
+
+    dir_projects = value.get("dir_projects", {})
+    error_messages = []
+    for candicate_sub_allocation_name in dir_projects.keys():
+        if any(c.isspace() for c in candicate_sub_allocation_name):
+            error_messages.append(
+                f"sub-allocation name {candicate_sub_allocation_name} is invalid"
+            )
+
+    if error_messages:
+        return error_messages
+
+    return None
+
+
+def ad_record_exist(
+    value: Union[str, list], validate: bool = True
+) -> Optional[Union[str, list[str]]]:
     if not validate:
         return None
 

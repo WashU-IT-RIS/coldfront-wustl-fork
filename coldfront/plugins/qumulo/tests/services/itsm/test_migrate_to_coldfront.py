@@ -34,7 +34,7 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate_category", "subscription"),
+            ("service_rate_category", "consumption"),
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "No"),
@@ -61,7 +61,7 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker_missing_contacts"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate_category", "subscription"),
+            ("service_rate_category", "consumption"),
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "No"),
@@ -86,7 +86,7 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate_category", "subscription"),
+            ("service_rate_category", "consumption"),
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "No"),
@@ -112,7 +112,7 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate_category", "subscription"),
+            ("service_rate_category", "consumption"),
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "No"),
@@ -124,6 +124,32 @@ class TestMigrateToColdfront(TestCase):
             ("fileset_alias", "mocker_active"),
             ("billing_cycle", "monthly"),
             ("sla_name", ""),
+        ]
+
+        self.expected_allocation_attributes_itsm_comment_dir_projects = [
+            ("storage_name", "mocker"),
+            ("storage_quota", "200"),
+            ("storage_protocols", '["smb"]'),
+            ("storage_filesystem_path", f"{storage2_path}/mocker"),
+            ("storage_export_path", f"{storage2_path}/mocker"),
+            ("cost_center", "CC0004259"),
+            ("department_number", "CH00409"),
+            ("service_rate_category", "consumption"),
+            ("secure", "No"),
+            ("audit", "No"),
+            ("billing_exempt", "No"),
+            ("subsidized", "Yes"),
+            ("billing_contact", "jin810"),
+            ("technical_contact", "jin810"),
+            ("storage_ticket", "ITSD-2222"),
+            ("fileset_name", "mocker_active"),
+            ("fileset_alias", "mocker_active"),
+            ("billing_cycle", "monthly"),
+            ("sla_name", ""),
+            (
+                "itsm_comment",
+                '{"KHADER": {"ro": null,"rw": null},"KHADER_ADMIN": {"ro": null,"rw": ["mushtaqahmed","pamelacamp"]},"KHADERLAB_PROTOCOLS": {"ro": ["akter","bobba.suhas","chauhank","darya.urusova","lmellett","lulan","ncaleb","rswanson","s.thirunavukkarasu","sbmehta","yangyan"],"rw": ["g.ananya","mushtaqahmed","shibalidas"]}"},]',
+            ),
         ]
 
     @mock.patch(
@@ -413,3 +439,43 @@ class TestMigrateToColdfront(TestCase):
         # allocation_attributes on create allocation
         for value in [("itsm_comment", None)]:
             self.assertNotIn(value, allocation_attribute_values)
+
+    @mock.patch(
+        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
+    )
+    @mock.patch(
+        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
+    )
+    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
+    def test_migrate_to_coldfront_with_itsm_comment_dir_projects(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_itsm_comment_dir_projects.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
+            mock_itsm_client.return_value = itsm_client
+
+        name = "mocker"
+        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
+        allocation = Allocation.objects.get(id=result["allocation_id"])
+        self.assertEqual(allocation.id, result["allocation_id"])
+
+        allocation_attributes = AllocationAttribute.objects.filter(
+            allocation=result["allocation_id"]
+        )
+        allocation_attribute_values = allocation_attributes.values_list(
+            "allocation_attribute_type__name", "value"
+        )
+
+        for attribute_value in self.expected_allocation_attributes_itsm_comment_dir_projects:
+            print(attribute_value)
+            self.assertIn(attribute_value, allocation_attribute_values)
+
+        self.assertEqual(allocation_attributes.count(), 21)
