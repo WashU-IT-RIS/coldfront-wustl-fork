@@ -148,7 +148,7 @@ class TestMigrateToColdfront(TestCase):
             ("sla_name", ""),
             (
                 "itsm_comment",
-                '{"KHADER_ADMIN": {"ro": null,"rw": ["mushtaqahmed","pamelacamp"]},"KHADERLAB_PROTOCOLS": {"ro": ["akter","bobba.suhas","chauhank","darya.urusova","lmellett","lulan","ncaleb","rswanson","s.thirunavukkarasu","sbmehta","yangyan"],"rw": ["g.ananya","mushtaqahmed","shibalidas"]}"},]',
+                '{"dir_projects":{"KHADER":{"ro":null,"rw":null},"KHADER_ADMIN":{"ro":null,"rw":["mushtaqahmed","pamelacamp"]},"KHADERLAB_PROTOCOLS":{"ro":["akter","bobba.suhas","chauhank","darya.urusova","lmellett","lulan","ncaleb","rswanson","s.thirunavukkarasu","sbmehta","yangyan"],"rw":["g.ananya","mushtaqahmed","shibalidas"]},"KHADERLAB_TBPROGRAM":{"ro":null,"rw":["akter","bobba.suhas","chauhank","darya.urusova","g.ananya","lmellett","lulan","mushtaqahmed","ncaleb","pamelacamp","rswanson","s.thirunavukkarasu","sbmehta","shibalidas","yangyan"]},"PAPER_2018":{"ro":null,"rw":["shibalidas"]},"Khader_lab":{"ro":null,"rw":["jmartin"]},"Khadercompute":{"ro":null,"rw":["akter","bobba.suhas","jmartin","mushtaqahmed","sakhader"]},"Shared_With_Max":{"ro":null,"rw":["akter","mushtaqahmed","shibalidas","storage-martyomov"]},"MGI_Data":{"rw":["barosa","jmartin","storage-sakhader-khaderlab_tbprogram-rw"],"ro":[]}}}',
             ),
         ]
 
@@ -478,6 +478,10 @@ class TestMigrateToColdfront(TestCase):
             # TODO supressing the assertion for itsm_comment with dir_projects since the value is 
             # a stringified dict and should be tested differently.
             if attribute_value[0] == "itsm_comment":
+                self.assertDictEqual(
+                    json.loads(allocation_attribute_values.get(allocation_attribute_type__name="itsm_comment")[1]),
+                    json.loads(attribute_value[1]),
+                )
                 continue
             self.assertIn(attribute_value, allocation_attribute_values)
 
