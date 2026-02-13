@@ -114,9 +114,8 @@ def validate_json(value: Any, conditions: dict = {}) -> Optional[str]:
 
 def validate_keys_in_dict(value: dict, presence: bool = True) -> Optional[list[str]]:
     if presence:
-        dir_projects = value.get("dir_projects", {})
         error_messages = []
-        for candicate_sub_allocation_name in dir_projects.keys():
+        for candicate_sub_allocation_name in value.keys():
             if any(c.isspace() for c in candicate_sub_allocation_name):
                 error_messages.append(
                     f"sub-allocation name {candicate_sub_allocation_name} is invalid"
