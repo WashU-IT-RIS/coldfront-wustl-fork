@@ -61,9 +61,16 @@ class MigrateToColdfront:
         fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
 
         field_error_messages = {}
+        field_warning_messages = {}
         for field in fields:
             validation_messages = field.validate()
             if validation_messages:
+                if field.should_warn_not_error():
+                    if not field.itsm_attribute_name in field_warning_messages:
+                        field_warning_messages[field.itsm_attribute_name] = []
+                    field_warning_messages[field.itsm_attribute_name] = validation_messages
+
+
                 if not field.itsm_attribute_name in field_error_messages:
                     field_error_messages[field.itsm_attribute_name] = []
 
@@ -77,6 +84,7 @@ class MigrateToColdfront:
             return {
                 f"validation checks for {key}": "successful",
                 "itsm_allocation": itsm_allocation,
+                "warning_messages": field_warning_messages,
             }
 
         resource_type = self.__get_resource(resource_name)
@@ -95,6 +103,7 @@ class MigrateToColdfront:
             "allocation_id": allocation.id,
             "project_id": project.id,
             "pi_user_id": pi_user.id,
+            "warning_messages": field_warning_messages,
         }
 
         if dir_projects is None or dir_projects == {}:

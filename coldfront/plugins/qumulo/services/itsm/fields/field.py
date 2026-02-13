@@ -71,6 +71,16 @@ class Field:
                         error_messages.append(validation_message)
 
         return error_messages
+    
+    def should_warn_not_error(self) -> bool:
+        for attribute in self._coldfront_attributes:
+            value = attribute["value"]
+            if isinstance(value, dict):
+                validates = value.get("validates", {})
+                if "warn_not_error" in validates:
+                    return True
+
+        return False
 
     def __get_default_value(self) -> Any:
         return self._itsm_value_field.get("defaults_to")
