@@ -331,7 +331,7 @@ class MigrateToColdfront:
         fields: list,
     ) -> dict:
         sub_allocation_form_data = {}
-        sub_allocation_form_data["project_pk"] = parent_allocation.id
+        sub_allocation_form_data["project_pk"] = parent_allocation.project.id
         sub_allocation_form_data["storage_name"] = sub_allocation_name
         sub_allocation_form_data["storage_type"] = parent_allocation.resources.get(
             resource_type__name="Storage"
