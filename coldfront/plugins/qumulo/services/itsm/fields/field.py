@@ -9,6 +9,7 @@ class Field:
         self._itsm_value_field = itsm_value_field
         self._coldfront_entity = coldfront_definitions["entity"]
         self._coldfront_attributes = coldfront_definitions["attributes"]
+        self._warn_not_error = coldfront_definitions.get("warn_not_error", False)
         self._value = value
         self._itsm_to_value = self.__get_value_definition()
 
@@ -37,7 +38,7 @@ class Field:
 
     @property
     def entity_item(self) -> str:
-        if self.entity == "allocation_form":
+        if self.entity == "allocation_form" or self.entity == "sub_allocation_form":
             return {self.attributes[0].get("name"): self.value}
 
         return None
@@ -62,6 +63,7 @@ class Field:
                     to_be_validated = transforms_function(to_be_validated)
 
                 for validator, conditions in value["validates"].items():
+                    # print(f"Validating {to_be_validated} with {validator} and conditions {conditions}")
                     validator_function = getattr(
                         value_validators,
                         validator,
@@ -71,6 +73,9 @@ class Field:
                         error_messages.append(validation_message)
 
         return error_messages
+    
+    def should_warn_not_error(self) -> bool:
+        return bool(self._warn_not_error)
 
     def __get_default_value(self) -> Any:
         return self._itsm_value_field.get("defaults_to")

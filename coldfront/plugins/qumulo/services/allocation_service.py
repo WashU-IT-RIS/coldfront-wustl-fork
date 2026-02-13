@@ -11,12 +11,13 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
-    Project,
     AllocationLinkage,
     AllocationStatusChoice,
-    Resource,
     AllocationUserStatusChoice,
     AllocationUser,
+    Project,
+    Resource,
+    User,
 )
 
 from coldfront.plugins.qumulo.tasks import addMembersToADGroup
@@ -31,8 +32,10 @@ class AllocationService:
     # This is the entry point and the only public method for this service
     @staticmethod
     def create_new_allocation(
-        form_data: Dict[str, Any], user, parent_allocation: Optional[Allocation] = None
-    ):
+        form_data: Dict[str, Any],
+        user: User,
+        parent_allocation: Optional[Allocation] = None,
+    ) -> Dict[str, Any]:
         if parent_allocation:
             form_data["storage_name"] = (
                 AllocationService.__handle_sub_allocation_scoping(
@@ -87,6 +90,36 @@ class AllocationService:
             )
 
         return {"allocation": allocation, "access_allocations": access_allocations}
+
+    @staticmethod
+    def create_sub_allocation(
+        sub_allocation_form_data: Dict[str, Any],
+        pi_user: User,
+        parent_allocation: Allocation,
+    ) -> Dict[str, Any]:
+        if not parent_allocation:
+            raise ValueError("Parent allocation must be provided for sub-allocation.")
+        
+        if pi_user:
+            parent_allocation_pi_user = parent_allocation.allocationuser_set.filter(
+                status=AllocationUserStatusChoice.objects.get(name="Active")
+            ).first()
+
+        else:
+            raise ValueError("PI user does not exist.")
+        
+        if sub_allocation_form_data.get("project_pk") != parent_allocation.project.pk:
+            raise ValueError("Sub-allocation project must match parent allocation project.")
+        
+        if sub_allocation_form_data.get("storage_type") != parent_allocation.resources.first().name:
+            raise ValueError("Sub-allocation storage type must match parent allocation storage type.")
+    
+
+        return AllocationService.create_new_allocation(
+            form_data=sub_allocation_form_data,
+            user=pi_user,
+            parent_allocation=parent_allocation,
+        )
 
     @staticmethod
     def __handle_sub_allocation_scoping(
