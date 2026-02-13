@@ -31,9 +31,8 @@ class TestMetadataMigrations(TestCase):
     @patch('coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.get_user_by_email')
     def test_migrate_metadata(self, mock_get_user_by_email):
         # Mock user lookup responses
-        mock_get_user_by_email.side_effect = lambda email: {
-            '
-            
+        ...
+
 # sponsor has an email
 # if found, should convert email to whashu_key
 # if not found, should reject migration
