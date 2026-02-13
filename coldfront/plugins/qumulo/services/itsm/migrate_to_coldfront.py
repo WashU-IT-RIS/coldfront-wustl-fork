@@ -68,8 +68,10 @@ class MigrateToColdfront:
                 if field.should_warn_not_error():
                     if not field.itsm_attribute_name in field_warning_messages:
                         field_warning_messages[field.itsm_attribute_name] = []
-                    field_warning_messages[field.itsm_attribute_name] = validation_messages
-
+                    field_warning_messages[field.itsm_attribute_name] = (
+                        validation_messages
+                    )
+                    continue
 
                 if not field.itsm_attribute_name in field_error_messages:
                     field_error_messages[field.itsm_attribute_name] = []
@@ -77,8 +79,11 @@ class MigrateToColdfront:
                 field_error_messages[field.itsm_attribute_name] += validation_messages
 
         if field_error_messages:
-            errors = {"errors": field_error_messages}
-            raise Exception("Validation messages: ", errors)
+            messages = {
+                "errors": field_error_messages,
+                "warnings": field_warning_messages,
+            }
+            raise Exception(messages)
 
         if self.dry_run:
             return {
@@ -158,7 +163,7 @@ class MigrateToColdfront:
     def __get_or_create_user(self, fields: list) -> User:
         username = self.__get_username(fields)
         # TODO get email by washu key
-        # user_email = self.__get_meail_from_ad_lookup(username)
+        # user_email = self.__get_email_from_ad_lookup(username)
         # if email is None:
         #    raise Exception(f"No email found for user {username} in AD Lookup")
 

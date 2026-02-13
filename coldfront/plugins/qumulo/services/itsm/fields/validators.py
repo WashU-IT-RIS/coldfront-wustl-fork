@@ -112,21 +112,18 @@ def validate_json(value: Any, conditions: dict = {}) -> Optional[str]:
     return None
 
 
-def validate_keys_in_dict(value: dict, conditions: dict = {}) -> Optional[list[str]]:
-    if conditions.get("allow_blank"):
-        if value in [None, ""]:
-            return None
+def validate_keys_in_dict(value: dict, presence: bool = True) -> Optional[list[str]]:
+    if presence:
+        dir_projects = value.get("dir_projects", {})
+        error_messages = []
+        for candicate_sub_allocation_name in dir_projects.keys():
+            if any(c.isspace() for c in candicate_sub_allocation_name):
+                error_messages.append(
+                    f"sub-allocation name {candicate_sub_allocation_name} is invalid"
+                )
 
-    dir_projects = value.get("dir_projects", {})
-    error_messages = []
-    for candicate_sub_allocation_name in dir_projects.keys():
-        if any(c.isspace() for c in candicate_sub_allocation_name):
-            error_messages.append(
-                f"sub-allocation name {candicate_sub_allocation_name} is invalid"
-            )
-
-    if error_messages:
-        return error_messages
+        if error_messages:
+            return error_messages
 
     return None
 
@@ -136,13 +133,12 @@ def ad_record_exist(
 ) -> Optional[Union[str, list[str]]]:
     if not validate:
         return None
-
+    print(f"Validating AD record existence for value: {value}")
     if type(value) is list:
         error_messages = []
         for element in value:
             try:
-                # ActiveDirectoryAPI().get_user(element)
-                ...
+                ActiveDirectoryAPI().get_user(element)
             except ValueError:
                 error_messages.append(f"{element} does not exist in Active Directory")
 
@@ -152,8 +148,7 @@ def ad_record_exist(
         return None
 
     try:
-        # ActiveDirectoryAPI().get_user(value)
-        ...
+        ActiveDirectoryAPI().get_user(value)
     except ValueError:
         return f"{value} does not exist in Active Directory"
 

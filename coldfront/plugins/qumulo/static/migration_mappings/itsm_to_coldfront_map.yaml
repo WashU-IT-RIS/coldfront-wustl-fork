@@ -38,6 +38,7 @@ itsm_to_coldfront_map:
                 length:
                   maximum: 128
                 ad_record_exist: true
+        warn_not_error: true
     itsm_value:
       entity: service_provision
       attribute: acl_group_members
@@ -122,6 +123,7 @@ itsm_to_coldfront_map:
                 length:
                   maximum: 128
                   allow_blank: true
+        warn_not_error: true
     itsm_value:
       entity: service_provision
       attribute: billing_contact
@@ -141,6 +143,7 @@ itsm_to_coldfront_map:
                 length:
                   maximum: 128
                   allow_blank: true
+        warn_not_error: true
     itsm_value:
       entity: service_provision
       attribute: technical_contact
@@ -410,8 +413,7 @@ itsm_to_coldfront_map:
               transforms: comment_to_dir_projects
               validates:
                 presence: true
-                validate_keys_in_dict:
-                  allow_blank: true
+                validate_keys_in_dict: true
     itsm_value:
       entity: service_provision
       attribute: comment

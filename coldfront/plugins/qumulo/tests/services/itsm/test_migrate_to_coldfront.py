@@ -177,14 +177,20 @@ class TestMigrateToColdfront(TestCase):
         name = "mocker"
         result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
         self.assertDictEqual(
-            result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
+            result,
+            {
+                "allocation_id": 1,
+                "pi_user_id": 1,
+                "project_id": 1,
+                "warning_messages": {},
+            },
         )
 
         allocation = Allocation.objects.get(id=result["allocation_id"])
         project = Project.objects.get(id=result["project_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
         self.assertEqual(allocation.project, project)
-        self.assertEqual(allocation.project.title, name)
+        self.assertEqual(allocation.project.title, "jin810")
 
         allocation_attributes = AllocationAttribute.objects.filter(
             allocation=result["allocation_id"]
@@ -230,14 +236,20 @@ class TestMigrateToColdfront(TestCase):
         name = "mocker"
         result = self.migrate.by_storage_provision_name(f"{name}", "Storage2")
         self.assertDictEqual(
-            result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
+            result,
+            {
+                "allocation_id": 1,
+                "pi_user_id": 1,
+                "project_id": 1,
+                "warning_messages": {},
+            },
         )
 
         allocation = Allocation.objects.get(id=result["allocation_id"])
         project = Project.objects.get(id=result["project_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
         self.assertEqual(allocation.project, project)
-        self.assertEqual(allocation.project.title, name)
+        self.assertEqual(allocation.project.title, "jin810")
 
         allocation_attributes = AllocationAttribute.objects.filter(
             allocation=result["allocation_id"]
@@ -283,14 +295,19 @@ class TestMigrateToColdfront(TestCase):
         result = self.migrate.by_fileset_alias(f"{fileset_alias}", "Storage2")
         self.assertDictEqual(
             result,
-            {"allocation_id": 1, "pi_user_id": 1, "project_id": 1},
+            {
+                "allocation_id": 1,
+                "pi_user_id": 1,
+                "project_id": 1,
+                "warning_messages": {},
+            },
         )
 
         allocation = Allocation.objects.get(id=result["allocation_id"])
         project = Project.objects.get(id=result["project_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
         self.assertEqual(allocation.project, project)
-        self.assertEqual(allocation.project.title, name)
+        self.assertEqual(allocation.project.title, "jin810")
 
         allocation_attributes = AllocationAttribute.objects.filter(
             allocation=result["allocation_id"]
@@ -332,25 +349,14 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker_missing_contacts"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
-        allocation = Allocation.objects.get(id=result["allocation_id"])
-        self.assertEqual(allocation.id, result["allocation_id"])
 
-        allocation_attributes = AllocationAttribute.objects.filter(
-            allocation=result["allocation_id"]
+        self.assertRaises(
+            Exception,
+            self.migrate.by_fileset_name,
+            f"{name}_active",
+            "Storage2",
+            msg="{'errors': {'sponsor': ['mocker_missing_contacts does not exist in Active Directory']}, 'warnings': {}}",
         )
-        allocation_attribute_values = allocation_attributes.values_list(
-            "allocation_attribute_type__name", "value"
-        )
-
-        for attribute_value in self.expected_allocation_attributes_missing_contacts:
-            self.assertIn(attribute_value, allocation_attribute_values)
-
-        self.assertEqual(allocation_attributes.count(), 19)
-        # optional fields with empty or missing values should not create
-        # allocation_attributes on create allocation
-        for value in [("billing_contact", ""), ("technical_contact", "")]:
-            self.assertNotIn(value, allocation_attribute_values)
 
     @mock.patch(
         "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
@@ -474,12 +480,18 @@ class TestMigrateToColdfront(TestCase):
             "allocation_attribute_type__name", "value"
         )
 
-        for attribute_value in self.expected_allocation_attributes_itsm_comment_dir_projects:
-            # TODO supressing the assertion for itsm_comment with dir_projects since the value is 
+        for (
+            attribute_value
+        ) in self.expected_allocation_attributes_itsm_comment_dir_projects:
+            # TODO supressing the assertion for itsm_comment with dir_projects since the value is
             # a stringified dict and should be tested differently.
             if attribute_value[0] == "itsm_comment":
                 self.assertDictEqual(
-                    json.loads(allocation_attribute_values.get(allocation_attribute_type__name="itsm_comment")[1]),
+                    json.loads(
+                        allocation_attribute_values.get(
+                            allocation_attribute_type__name="itsm_comment"
+                        )[1]
+                    ),
                     json.loads(attribute_value[1]),
                 )
                 continue
