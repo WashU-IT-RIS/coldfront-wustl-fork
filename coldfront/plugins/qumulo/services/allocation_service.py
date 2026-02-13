@@ -36,7 +36,6 @@ class AllocationService:
         user: User,
         parent_allocation: Optional[Allocation] = None,
     ) -> Dict[str, Any]:
-        print(form_data)
         if parent_allocation:
             form_data["storage_name"] = (
                 AllocationService.__handle_sub_allocation_scoping(
