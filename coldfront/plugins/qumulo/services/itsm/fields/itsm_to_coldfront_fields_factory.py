@@ -21,13 +21,21 @@ with open(ITSM_TO_COLDFRONT_MAP_PATH, "r") as file:
 class ItsmToColdfrontFieldsFactory:
 
     @staticmethod
-    def get_fields(itsm_allocation) -> list:
+    def get_fields(itsm_allocation, overrides: dict = {}) -> list:
         fields = []
         for item in field_items.values():
             itsm_value_field = item["itsm_value"]
             for coldfront_definitions in item["coldfront"]:
                 value_attribute = itsm_allocation.get(itsm_value_field["attribute"])
+                override_value = (
+                    overrides.get(itsm_value_field["attribute"]) if overrides else None
+                )
                 fields.append(
-                    Field(coldfront_definitions, itsm_value_field, value_attribute)
+                    Field(
+                        coldfront_definitions,
+                        itsm_value_field,
+                        value_attribute,
+                        override_value,
+                    )
                 )
         return fields

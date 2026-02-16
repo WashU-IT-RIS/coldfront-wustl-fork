@@ -4,13 +4,20 @@ import coldfront.plugins.qumulo.services.itsm.fields.validators as value_validat
 
 
 class Field:
-    def __init__(self, coldfront_definitions, itsm_value_field, value):
+    def __init__(
+        self,
+        coldfront_definitions: dict,
+        itsm_value_field: dict,
+        value: Any,
+        override_value: Any = None,
+    ):
         self.coldfront_definitions = coldfront_definitions
         self._itsm_value_field = itsm_value_field
         self._coldfront_entity = coldfront_definitions["entity"]
         self._coldfront_attributes = coldfront_definitions["attributes"]
         self._warn_not_error = coldfront_definitions.get("warn_not_error", False)
         self._value = value
+        self._override_value = override_value
         self._itsm_to_value = self.__get_value_definition()
 
     def __get_value_definition(self):
@@ -54,7 +61,9 @@ class Field:
             if isinstance(value, dict):
                 transforms = value["transforms"]
 
-                to_be_validated = self._value or self.__get_default_value()
+                to_be_validated = (
+                    self._override_value or self._value or self.__get_default_value()
+                )
                 if transforms is not None:
                     transforms_function = getattr(
                         value_transformers,
@@ -73,7 +82,7 @@ class Field:
                         error_messages.append(validation_message)
 
         return error_messages
-    
+
     def should_warn_not_error(self) -> bool:
         return bool(self._warn_not_error)
 
@@ -86,7 +95,7 @@ class Field:
     def __transform_value(self) -> Any:
         attribute_value = self._itsm_to_value
         transforms = attribute_value["transforms"]
-        value = self._value or self.__get_default_value()
+        value = self._override_value or self._value or self.__get_default_value()
         if transforms is not None:
             transform_function = getattr(
                 value_transformers,

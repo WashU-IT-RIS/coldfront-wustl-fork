@@ -1,3 +1,4 @@
+from typing import Any
 from coldfront.core.field_of_science.models import FieldOfScience
 
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
@@ -29,8 +30,14 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
 
 import json, os
 
+OVERRIDABLE_FIELD_NAMES = [
+    "service_desk_ticket_number",
+]
+
 
 class MigrateToColdfront:
+
+    __overrides: dict[str, Any] = {}
 
     def __init__(self, dry_run: bool = False) -> None:
         self.dry_run = dry_run
@@ -54,11 +61,17 @@ class MigrateToColdfront:
         result = self.__create_by(storage_provision_name, itsm_result, resource_name)
         return result
 
+    def set_override(self, field_name: str, value: any) -> None:
+        if field_name not in OVERRIDABLE_FIELD_NAMES:
+            raise Exception(f"{field_name} is not an overridable field")
+
+        self.__overrides.update({field_name: value})
+
     # Private Methods
     def __create_by(self, key: str, itsm_result: str, resource_name: str) -> str:
         self.__validate_itsm_result_set(key, itsm_result)
         itsm_allocation = itsm_result[0]
-        fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation)
+        fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation, self.__overrides)
 
         field_error_messages = {}
         field_warning_messages = {}
@@ -68,9 +81,10 @@ class MigrateToColdfront:
                 if field.should_warn_not_error():
                     if not field.itsm_attribute_name in field_warning_messages:
                         field_warning_messages[field.itsm_attribute_name] = []
-                    field_warning_messages[field.itsm_attribute_name] = (
-                        validation_messages
-                    )
+
+                    field_warning_messages[
+                        field.itsm_attribute_name
+                    ] += validation_messages
                     continue
 
                 if not field.itsm_attribute_name in field_error_messages:
