@@ -202,6 +202,7 @@ itsm_to_coldfront_map:
       entity: service_provision
       attribute: service_desk_ticket_number
       type: string
+      overridable: true
   audit:
     coldfront:
       - entity: allocation_attribute
