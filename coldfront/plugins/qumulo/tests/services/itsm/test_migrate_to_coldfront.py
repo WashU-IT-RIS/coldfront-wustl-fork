@@ -24,7 +24,6 @@ storage2_path = QUMULO_INFO["Storage2"]["path"]
 class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
-        self.migrate = MigrateToColdfront()
         create_metadata_for_testing()
         self.expected_allocation_attributes = [
             ("storage_name", "mocker"),
@@ -175,7 +174,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         self.assertDictEqual(
             result,
             {
@@ -234,7 +233,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker"
-        result = self.migrate.by_storage_provision_name(f"{name}", "Storage2")
+        result = MigrateToColdfront().by_storage_provision_name(f"{name}", "Storage2")
         self.assertDictEqual(
             result,
             {
@@ -292,7 +291,7 @@ class TestMigrateToColdfront(TestCase):
 
         fileset_alias = "mocker_active"
         name = "mocker"
-        result = self.migrate.by_fileset_alias(f"{fileset_alias}", "Storage2")
+        result = MigrateToColdfront().by_fileset_alias(f"{fileset_alias}", "Storage2")
         self.assertDictEqual(
             result,
             {
@@ -352,7 +351,7 @@ class TestMigrateToColdfront(TestCase):
 
         self.assertRaises(
             Exception,
-            self.migrate.by_fileset_name,
+            MigrateToColdfront().by_fileset_name,
             f"{name}_active",
             "Storage2",
             msg="{'errors': {'sponsor': ['mocker_missing_contacts does not exist in Active Directory']}, 'warnings': {}}",
@@ -381,7 +380,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
 
@@ -426,7 +425,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "mocker"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
 
@@ -469,7 +468,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "jin810"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
 
@@ -522,10 +521,10 @@ class TestMigrateToColdfront(TestCase):
         name = "jin810"
         self.assertRaises(
             Exception,
-            self.migrate.by_fileset_name,
+            MigrateToColdfront().by_fileset_name,
             f"{name}_active",
             "Storage2",
-            msg="{'errors': {'comment': [['sub-allocation name KHADER_ADMIN is invalid']]}, 'warnings': {'acl_group_members': [['no-exist does not exist in Active Directory']]}}",
+            msg="{'errors': {'comment': [['sub-allocation name KHADER ADMIN is invalid']]}, 'warnings': {'acl_group_members': [['no-exist does not exist in Active Directory']]}}",
         )
 
     @mock.patch(
@@ -551,7 +550,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         name = "jin810"
-        ticket_number_override = "ITSD-12345"
+        ticket_number_override = "ITSD-54321"
         migrate = MigrateToColdfront()
         migrate.set_override("service_desk_ticket_number", ticket_number_override)
         result = migrate.by_fileset_name(f"{name}_active", "Storage2")

@@ -181,7 +181,7 @@ itsm_to_coldfront_map:
                 validate_ticket: true
       - entity: allocation_form
         attributes:
-          - name: service_desk_ticket_number
+          - name: storage_ticket
             value:
               type: string
               transforms: null
@@ -190,7 +190,7 @@ itsm_to_coldfront_map:
                 validate_ticket: true
       - entity: sub_allocation_form
         attributes:
-          - name: cost_center
+          - name: storage_ticket
             value:
               type: string
               transforms: null

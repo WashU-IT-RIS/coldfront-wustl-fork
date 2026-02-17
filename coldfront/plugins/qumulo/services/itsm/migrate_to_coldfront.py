@@ -33,10 +33,9 @@ import json, os
 
 class MigrateToColdfront:
 
-    __overrides: dict[str, Any] = {}
-
     def __init__(self, dry_run: bool = False) -> None:
-        self.dry_run = dry_run
+        self.dry_run: bool = dry_run
+        self.__overrides: dict[str, Any] = {}
 
     def by_fileset_alias(self, fileset_alias: str, resource_name: str) -> str:
         itsm_result = self.__get_itsm_allocation_by_fileset_alias(fileset_alias)
@@ -57,14 +56,14 @@ class MigrateToColdfront:
         result = self.__create_by(storage_provision_name, itsm_result, resource_name)
         return result
 
-    def set_override(self, field_name: str, value: any) -> None:
+    def set_override(self, itsm_field_name: str, value: any) -> None:
         overridable_fields = ItsmToColdfrontFieldsFactory.get_overridable_attributes()
-        if field_name not in overridable_fields:
+        if itsm_field_name not in overridable_fields:
             raise Exception(
-                f"{field_name} is not an overridable field. Overridable fields are: {overridable_fields}"
+                f"{itsm_field_name} is not an overridable field. Overridable fields are: {overridable_fields}"
             )
 
-        self.__overrides.update({field_name: value})
+        self.__overrides.update({itsm_field_name: value})
 
     # Private Methods
     def __create_by(self, key: str, itsm_result: str, resource_name: str) -> str:
@@ -125,7 +124,7 @@ class MigrateToColdfront:
             "pi_user_id": pi_user.id,
             "warning_messages": field_warning_messages,
         }
-
+        print(f"{self.__overrides=}")
         if dir_projects is None or dir_projects == {}:
             return result
 
