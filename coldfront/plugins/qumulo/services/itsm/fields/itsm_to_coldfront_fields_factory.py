@@ -16,6 +16,11 @@ with open(ITSM_TO_COLDFRONT_MAP_PATH, "r") as file:
     field_map = itsm_to_coldfront_map["itsm_to_coldfront_map"]
     field_items = {key: value for key, value in field_map.items() if value is not None}
     itsm_attributes = field_items.keys()
+    overridable_field_names = [
+        field["itsm_value"]["attribute"]
+        for field in field_items.values()
+        if field["itsm_value"].get("overridable")
+    ]
 
 
 class ItsmToColdfrontFieldsFactory:
@@ -39,3 +44,7 @@ class ItsmToColdfrontFieldsFactory:
                     )
                 )
         return fields
+
+    @staticmethod
+    def get_overridable_attributes() -> list:
+        return overridable_field_names

@@ -30,10 +30,6 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
 
 import json, os
 
-OVERRIDABLE_FIELD_NAMES = [
-    "service_desk_ticket_number",
-]
-
 
 class MigrateToColdfront:
 
@@ -62,8 +58,11 @@ class MigrateToColdfront:
         return result
 
     def set_override(self, field_name: str, value: any) -> None:
-        if field_name not in OVERRIDABLE_FIELD_NAMES:
-            raise Exception(f"{field_name} is not an overridable field")
+        overridable_fields = ItsmToColdfrontFieldsFactory.get_overridable_attributes()
+        if field_name not in overridable_fields:
+            raise Exception(
+                f"{field_name} is not an overridable field. Overridable fields are: {overridable_fields}"
+            )
 
         self.__overrides.update({field_name: value})
 
@@ -71,7 +70,9 @@ class MigrateToColdfront:
     def __create_by(self, key: str, itsm_result: str, resource_name: str) -> str:
         self.__validate_itsm_result_set(key, itsm_result)
         itsm_allocation = itsm_result[0]
-        fields = ItsmToColdfrontFieldsFactory.get_fields(itsm_allocation, self.__overrides)
+        fields = ItsmToColdfrontFieldsFactory.get_fields(
+            itsm_allocation, self.__overrides
+        )
 
         field_error_messages = {}
         field_warning_messages = {}
