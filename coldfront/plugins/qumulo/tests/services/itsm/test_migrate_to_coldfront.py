@@ -31,10 +31,6 @@ def ad_lookup_get_user_side_effect(value: str):
 @mock.patch(
     "coldfront.plugins.qumulo.services.itsm.fields.validators.ActiveDirectoryAPI"
 )
-@mock.patch(
-    "coldfront.plugins.qumulo.services.itsm.fields.validators.ActiveDirectoryAPI.get_user",
-    side_effect=ad_lookup_get_user_side_effect,
-)
 @mock.patch("coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient")
 @mock.patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
 @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
@@ -173,7 +169,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -184,6 +179,8 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
 
         name = "mocker"
         result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
@@ -225,7 +222,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -239,6 +235,7 @@ class TestMigrateToColdfront(TestCase):
             )
             mock_itsm_client.return_value = itsm_client
 
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
         name = "mocker"
         result = MigrateToColdfront().by_storage_provision_name(f"{name}", "Storage2")
         self.assertDictEqual(
@@ -279,7 +276,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -290,6 +286,8 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_alias.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
 
         fileset_alias = "mocker_active"
         name = "mocker"
@@ -332,7 +330,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -343,6 +340,8 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
 
         name = "mocker_missing_contacts"
 
@@ -359,7 +358,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -370,6 +368,7 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
 
         name = "mocker"
         result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
@@ -399,7 +398,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -410,6 +408,7 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
 
         name = "mocker"
         result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
@@ -437,7 +436,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -449,6 +447,7 @@ class TestMigrateToColdfront(TestCase):
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
 
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
         name = "jin810"
         result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
@@ -483,7 +482,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -494,6 +492,7 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
 
         name = "jin810"
         self.assertRaises(
@@ -509,7 +508,6 @@ class TestMigrateToColdfront(TestCase):
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
-        mock_ad_api_get_user: mock.MagicMock,
         mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
@@ -520,6 +518,7 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
 
         name = "jin810"
         ticket_number_override = "ITSD-54321"
