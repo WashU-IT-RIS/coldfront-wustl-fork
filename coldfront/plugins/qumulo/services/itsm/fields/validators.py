@@ -132,7 +132,7 @@ def ad_record_exist(
 ) -> Optional[Union[str, list[str]]]:
     if not validate:
         return None
-    print(f"Validating AD record existence for value: {value}")
+
     if type(value) is list:
         error_messages = []
         for element in value:

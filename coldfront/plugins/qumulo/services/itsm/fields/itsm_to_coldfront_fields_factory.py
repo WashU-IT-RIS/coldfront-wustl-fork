@@ -46,5 +46,5 @@ class ItsmToColdfrontFieldsFactory:
         return fields
 
     @staticmethod
-    def get_overridable_attributes() -> list:
+    def get_overridable_attributes() -> list[str]:
         return overridable_field_names
