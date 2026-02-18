@@ -124,7 +124,7 @@ class MigrateToColdfront:
             "pi_user_id": pi_user.id,
             "warning_messages": field_warning_messages,
         }
-        print(f"{self.__overrides=}")
+
         if dir_projects is None or dir_projects == {}:
             return result
 

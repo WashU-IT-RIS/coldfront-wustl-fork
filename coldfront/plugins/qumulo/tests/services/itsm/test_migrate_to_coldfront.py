@@ -20,7 +20,24 @@ QUMULO_INFO = mock_qumulo_info
 storage2_path = QUMULO_INFO["Storage2"]["path"]
 
 
+def ad_lookup_get_user_side_effect(value: str):
+    if value != "no-exist":
+        return {"dn": "user_dn", "attributes": {"other_attr": "value"}}
+    else:
+        raise ValueError("User not found")
+
+
 @patch.dict("os.environ", {"QUMULO_INFO": json.dumps(QUMULO_INFO)})
+@mock.patch(
+    "coldfront.plugins.qumulo.services.itsm.fields.validators.ActiveDirectoryAPI"
+)
+@mock.patch(
+    "coldfront.plugins.qumulo.services.itsm.fields.validators.ActiveDirectoryAPI.get_user",
+    side_effect=ad_lookup_get_user_side_effect,
+)
+@mock.patch("coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient")
+@mock.patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
+@mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
 class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
@@ -151,18 +168,13 @@ class TestMigrateToColdfront(TestCase):
             ),
         ]
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_by_fileset_name(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
@@ -208,18 +220,13 @@ class TestMigrateToColdfront(TestCase):
         )
         self.assertEqual(len(project_attributes), 3)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_by_service_provision_name(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
@@ -267,18 +274,13 @@ class TestMigrateToColdfront(TestCase):
         )
         self.assertEqual(len(project_attributes), 3)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_by_fileset_alias(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
@@ -325,18 +327,13 @@ class TestMigrateToColdfront(TestCase):
         )
         self.assertEqual(len(project_attributes), 3)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_contacts_missing(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_missing_contacts.json",
@@ -357,18 +354,13 @@ class TestMigrateToColdfront(TestCase):
             msg="{'errors': {'sponsor': ['mocker_missing_contacts does not exist in Active Directory']}, 'warnings': {}}",
         )
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_billing_startdate_missing(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_billing_startdate_not_found.json",
@@ -402,18 +394,13 @@ class TestMigrateToColdfront(TestCase):
         for value in [("billing_startdate", "")]:
             self.assertNotIn(value, allocation_attribute_values)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_itsm_comment_missing(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_itsm_comment_empty.json",
@@ -445,18 +432,13 @@ class TestMigrateToColdfront(TestCase):
         for value in [("itsm_comment", None)]:
             self.assertNotIn(value, allocation_attribute_values)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_itsm_comment_dir_projects(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_itsm_comment_dir_projects.json",
@@ -496,18 +478,13 @@ class TestMigrateToColdfront(TestCase):
 
         self.assertEqual(allocation_attributes.count(), 21)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_itsm_comment_dir_projects_with_errors_and_warnings(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_itsm_comment_dir_projects_with_errors_and_warnings.json",
@@ -527,18 +504,13 @@ class TestMigrateToColdfront(TestCase):
             msg="{'errors': {'comment': [['sub-allocation name KHADER ADMIN is invalid']]}, 'warnings': {'acl_group_members': [['no-exist does not exist in Active Directory']]}}",
         )
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_by_fileset_name_override_ticket_number(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_get_user: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
