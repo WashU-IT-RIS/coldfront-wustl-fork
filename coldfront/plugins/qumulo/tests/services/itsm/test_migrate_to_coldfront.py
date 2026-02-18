@@ -20,11 +20,11 @@ QUMULO_INFO = mock_qumulo_info
 storage2_path = QUMULO_INFO["Storage2"]["path"]
 
 
-def ad_lookup_get_user_side_effect(value: str):
-    if value != "no-exist":
-        return {"dn": "user_dn", "attributes": {"other_attr": "value"}}
-    else:
+def ad_lookup_get_user_side_effect(washu_key: str):
+    if washu_key == "no-exist":
         raise ValueError("User not found")
+    
+    return {"dn": "user_dn", "attributes": {"other_attr": "value"}}
 
 
 @patch.dict("os.environ", {"QUMULO_INFO": json.dumps(QUMULO_INFO)})
