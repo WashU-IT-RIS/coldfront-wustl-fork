@@ -30,6 +30,8 @@ from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_fact
 
 import json, os
 
+from coldfront.plugins.qumulo.validators import validate_filesystem_path_unique
+
 
 class MigrateToColdfront:
 
@@ -67,6 +69,10 @@ class MigrateToColdfront:
 
     # Private Methods
     def __create_by(self, key: str, itsm_result: str, resource_name: str) -> str:
+        storage_resource: Resource = Resource.objects.get(name=resource_name)
+        storage_filesystem_path = key
+        validate_filesystem_path_unique(storage_filesystem_path, storage_resource.name)
+
         self.__validate_itsm_result_set(key, itsm_result)
         itsm_allocation = itsm_result[0]
         fields = ItsmToColdfrontFieldsFactory.get_fields(
@@ -106,7 +112,6 @@ class MigrateToColdfront:
                 "warning_messages": field_warning_messages,
             }
 
-        resource_type = self.__get_resource(resource_name)
         pi_user = self.__get_or_create_user(fields)
         project, created = self.__get_or_create_project(pi_user)
         if created:
@@ -114,7 +119,7 @@ class MigrateToColdfront:
             self.__create_project_attributes(fields, project)
 
         allocation, dir_projects = self.__create_allocation(
-            key, fields, project, pi_user, resource_type
+            key, fields, project, pi_user, resource=storage_resource
         )
         self.__create_allocation_attributes(fields, allocation)
 
@@ -167,12 +172,6 @@ class MigrateToColdfront:
             )
 
         return True
-
-    def __get_resource(self, resource_name: str) -> Resource:
-        resource = Resource.objects.get(name=resource_name)
-        if not resource:
-            raise Exception("Qumulo resource not found")
-        return resource
 
     def __get_or_create_user(self, fields: list) -> User:
         username = self.__get_username(fields)
