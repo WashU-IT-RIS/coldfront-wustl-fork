@@ -176,6 +176,10 @@ class TestMigrateToColdfront(TestCase):
             ),
         ]
 
+    def tearDown(self):
+        patch.stopall()
+        return super().tearDown()
+
     def test_migrate_to_coldfront_by_fileset_name(
         self,
         mock_async_task: mock.MagicMock,
