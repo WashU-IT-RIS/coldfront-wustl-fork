@@ -22,6 +22,9 @@ from coldfront.core.project.models import (
     ProjectUserStatusChoice,
 )
 
+from coldfront.plugins.qumulo.services.itsm.fields.transformers import (
+    fileset_name_to_storage_filesystem_seed,
+)
 from coldfront.plugins.qumulo.services.itsm.itsm_client import ItsmClient
 
 from coldfront.plugins.qumulo.services.itsm.fields.itsm_to_coldfront_fields_factory import (
@@ -70,8 +73,8 @@ class MigrateToColdfront:
     # Private Methods
     def __create_by(self, key: str, itsm_result: str, resource_name: str) -> str:
         storage_resource: Resource = Resource.objects.get(name=resource_name)
-        storage_filesystem_path = key
-        validate_filesystem_path_unique(storage_filesystem_path, storage_resource.name)
+        storage_filesystem_seed = fileset_name_to_storage_filesystem_seed(key)
+        validate_filesystem_path_unique(storage_filesystem_seed, storage_resource.name)
 
         self.__validate_itsm_result_set(key, itsm_result)
         itsm_allocation = itsm_result[0]

@@ -279,7 +279,7 @@ itsm_to_coldfront_map:
           - name: storage_filesystem_path
             value:
               type: string
-              transforms: fileset_name_to_storage_filesystem_path
+              transforms: fileset_name_to_storage_filesystem_seed
               validates:
                 presence: true
                 length:
