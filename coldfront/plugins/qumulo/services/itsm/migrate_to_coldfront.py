@@ -369,7 +369,7 @@ class MigrateToColdfront:
     def __get_sub_allocation_rw_users(
         self, users: dict, parent_allocation: Allocation
     ) -> None:
-        rw_users = users.get("rw_users")
+        rw_users = users.get("rw")
         if rw_users is None or rw_users == []:
             rw_allocation = Allocation.objects.get(
                 allocationattribute__allocation_attribute_type__name="storage_allocation_pk",
@@ -383,7 +383,7 @@ class MigrateToColdfront:
         return rw_users
 
     def __get_sub_allocation_ro_users(self, users: dict) -> None:
-        ro_users = users.get("ro_users")
+        ro_users = users.get("ro")
         if ro_users is None:
             ro_users = []
         return ro_users
