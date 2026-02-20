@@ -4,11 +4,11 @@ from typing import Optional
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 
-def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
+def fileset_name_to_storage_filesystem_seed(fileset_name_or_alias) -> str:
     # In ITSM, fileset_names are mapped into name
     # Examples
-    # bisiademuyiwa_active --> /storage2/fs1/bisiademuyiwa
-    # gc6159 --> /storage2/fs1/gc6159
+    # bisiademuyiwa_active --> bisiademuyiwa
+    # gc6159 --> gc6159
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
     return fileset_name_seed
 
