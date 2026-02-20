@@ -94,26 +94,33 @@ class AllocationService:
     @staticmethod
     def create_sub_allocation(
         sub_allocation_form_data: Dict[str, Any],
-        pi_user: User,
         parent_allocation: Allocation,
     ) -> Dict[str, Any]:
+
         if not parent_allocation:
             raise ValueError("Parent allocation must be provided for sub-allocation.")
-        
-        if pi_user:
-            parent_allocation_pi_user = parent_allocation.allocationuser_set.filter(
-                status=AllocationUserStatusChoice.objects.get(name="Active")
-            ).first()
 
-        else:
-            raise ValueError("PI user does not exist.")
-        
-        if sub_allocation_form_data.get("project_pk") != parent_allocation.project.pk:
-            raise ValueError("Sub-allocation project must match parent allocation project.")
-        
-        if sub_allocation_form_data.get("storage_type") != parent_allocation.resources.first().name:
-            raise ValueError("Sub-allocation storage type must match parent allocation storage type.")
-    
+        sub_allocation_project = Project.objects.get(
+            pk=sub_allocation_form_data.get("project_pk")
+        )
+        if sub_allocation_project != parent_allocation.project:
+            raise ValueError(
+                "Sub-allocation project must match parent allocation project. Got {:d} but expected {:d}".format(
+                    sub_allocation_project.pk, parent_allocation.project.pk
+                )
+            )
+
+        sub_allocation_storage_resource = Resource.objects.get(
+            name=sub_allocation_form_data.get("storage_type")
+        )
+        if sub_allocation_storage_resource != parent_allocation.resources.get(
+            resource_type__name="Storage"
+        ):
+            raise ValueError(
+                "Sub-allocation storage type must match parent allocation storage type."
+            )
+
+        pi_user = parent_allocation.project.pi
 
         return AllocationService.create_new_allocation(
             form_data=sub_allocation_form_data,

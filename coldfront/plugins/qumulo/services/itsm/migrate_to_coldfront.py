@@ -308,7 +308,6 @@ class MigrateToColdfront:
             sub_allocations.append(
                 AllocationService.create_sub_allocation(
                     sub_allocation_form_data=sub_allocation_form_data,
-                    pi_user=parent_allocation.project.pi,
                     parent_allocation=parent_allocation,
                 )
             )
