@@ -9,7 +9,7 @@ from coldfront.plugins.qumulo.services.itsm.fields.transformers import (
     comment_to_protocols,
     fileset_name_to_storage_name,
     fileset_name_to_storage_export_path,
-    fileset_name_to_storage_filesystem_path,
+    fileset_name_to_storage_filesystem_seed,
     string_parsing_quota_and_unit_to_integer,
     truthy_or_falsy_to_boolean,
 )
@@ -76,13 +76,13 @@ class TestValidators(TestCase):
     def test_fileset_name_to_storage_filesystem_path(self):
         itsm_fileset_name = "jiaoy_active"
         self.assertEqual(
-            fileset_name_to_storage_filesystem_path(itsm_fileset_name),
+            fileset_name_to_storage_filesystem_seed(itsm_fileset_name),
             "jiaoy",
         )
 
         itsm_fileset_alias = "gc6159"
         self.assertEqual(
-            fileset_name_to_storage_filesystem_path(itsm_fileset_alias),
+            fileset_name_to_storage_filesystem_seed(itsm_fileset_alias),
             "gc6159",
         )
 

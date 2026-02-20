@@ -2,7 +2,7 @@ import json
 from django.test import TestCase
 
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -14,6 +14,9 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
 from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing
+from coldfront.plugins.qumulo.tests.helper_classes.filesystem_path import (
+    ValidFormPathMock,
+)
 from coldfront.plugins.qumulo.tests.utils.mock_data import mock_qumulo_info
 
 QUMULO_INFO = mock_qumulo_info
@@ -38,6 +41,15 @@ class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
         create_metadata_for_testing()
+        self.mock_factory = patch(
+            "coldfront.plugins.qumulo.validators.StorageControllerFactory"
+        ).start()
+
+        self.mock_qumulo_api = MagicMock()
+        self.mock_factory.return_value.create_connection.return_value = (
+            self.mock_qumulo_api
+        )
+
         self.expected_allocation_attributes = [
             ("storage_name", "mocker"),
             ("storage_quota", "200"),
@@ -164,6 +176,10 @@ class TestMigrateToColdfront(TestCase):
             ),
         ]
 
+    def tearDown(self):
+        patch.stopall()
+        return super().tearDown()
+
     def test_migrate_to_coldfront_by_fileset_name(
         self,
         mock_async_task: mock.MagicMock,
@@ -181,6 +197,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
 
         name = "mocker"
         result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
@@ -236,6 +253,8 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
         name = "mocker"
         result = MigrateToColdfront().by_storage_provision_name(f"{name}", "Storage2")
         self.assertDictEqual(
@@ -288,6 +307,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
 
         fileset_alias = "mocker_active"
         name = "mocker"
@@ -342,6 +362,7 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
 
         name = "mocker_missing_contacts"
 
@@ -368,7 +389,9 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+
         mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
 
         name = "mocker"
         result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
@@ -408,7 +431,9 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+
         mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
 
         name = "mocker"
         result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
@@ -448,6 +473,8 @@ class TestMigrateToColdfront(TestCase):
             mock_itsm_client.return_value = itsm_client
 
         mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
         name = "jin810"
         result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
@@ -518,7 +545,9 @@ class TestMigrateToColdfront(TestCase):
             itsm_client = mock.MagicMock()
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
+
         mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
 
         name = "jin810"
         ticket_number_override = "ITSD-54321"
