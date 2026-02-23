@@ -12,6 +12,7 @@ from coldfront.plugins.qumulo.services.itsm.fields.transformers import (
     fileset_name_to_storage_filesystem_seed,
     string_parsing_quota_and_unit_to_integer,
     truthy_or_falsy_to_boolean,
+    truthy_or_falsy_to_yes,
 )
 
 """
@@ -119,3 +120,16 @@ class TestValidators(TestCase):
         defaults_to = False
         self.assertIsNotNone(truthy_or_falsy_to_boolean(None, defaults_to))
         self.assertRaises(ValueError, truthy_or_falsy_to_boolean, "Bogus Data")
+
+
+def test_truthy_or_falsy_to_yes(self):
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("True"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("False"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(None))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("Bogus Data"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("1"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("0"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(1))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(0))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(True))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(False))
