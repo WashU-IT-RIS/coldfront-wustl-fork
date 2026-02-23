@@ -29,7 +29,7 @@ class TestValidators(TestCase):
         acl_group_members_from_itsm = (
             "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing"
         )
-        result = acl_group_members_from_itsm.split(",")
+        result = ["ris-svc-admin"]
         self.assertListEqual(
             acl_group_members_to_aggregate_create_users(acl_group_members_from_itsm),
             result,

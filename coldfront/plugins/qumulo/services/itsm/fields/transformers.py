@@ -41,14 +41,8 @@ def fileset_name_to_storage_name(value) -> str:
     return value.split("_active")[0]
 
 
-# Example: "akronzer,derek.harford,d.ken,ehogue,jiaoy,perezm,xuebing".split(",")
-# return ['akronzer', 'derek.harford', 'd.ken', 'ehogue', 'jiaoy', 'perezm', 'xuebing']
-# from this array, create a user from every element in the array
-def acl_group_members_to_aggregate_create_users(value) -> Optional[str]:
-    if value is None:
-        return None
-
-    return value.split(",")
+def acl_group_members_to_aggregate_create_users(value:str) -> list[str]:
+    return ["ris-svc-admin"]
 
 
 def string_parsing_quota_and_unit_to_integer(value: str) -> Optional[int]:
