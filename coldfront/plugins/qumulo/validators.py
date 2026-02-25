@@ -1,18 +1,25 @@
 import os
 import re
+import json
 
 from django.core.exceptions import ValidationError
+from django.db.models import OuterRef, Subquery, IntegerField, Subquery, OuterRef, Sum
+from django.db.models.functions import Cast
 from django.utils.translation import gettext_lazy
 
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationAttribute,
     AllocationAttributeType,
+    AllocationLinkage,
     AllocationStatusChoice,
 )
 
+from coldfront.core.resource.models import Resource
+from coldfront.core.allocation.models import AllocationAttribute
+from coldfront.core.constants import CONDO_PROJECT_QUOTA, MAX_STORAGE2_QUOTA_INCREASE
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 from pathlib import PurePath
 from qumulo.lib import request
@@ -20,11 +27,15 @@ from datetime import date
 
 
 def validate_ad_users(ad_users: list[str]):
+    active_directory_api = ActiveDirectoryAPI()
+
     bad_users = []
 
-    for user in ad_users:
+    gotten_users = active_directory_api.get_members(ad_users)
+    gotten_user_names = [user["attributes"]["sAMAccountName"] for user in gotten_users]
 
-        if not _ad_user_validation_helper(user):
+    for user in ad_users:
+        if user not in gotten_user_names:
             bad_users.append(user)
 
     if len(bad_users) > 0:
@@ -38,11 +49,11 @@ def validate_ad_users(ad_users: list[str]):
         )
 
 
-def validate_filesystem_path_unique(value: str):
-
-    storage_root = os.environ.get("STORAGE2_PATH").strip("/")
-    full_path = f"/{storage_root}/{value}"
-    qumulo_api = QumuloAPI()
+def validate_filesystem_path_unique(value: str, resource_type: str):
+    connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+    storage_dir = connection_info[resource_type]["path"].strip("/")
+    full_path = f"/{storage_dir}/{value}"
+    qumulo_api = StorageControllerFactory().create_connection(resource_type)
 
     reserved_statuses = AllocationStatusChoice.objects.filter(
         name__in=["Pending", "Active", "New"]
@@ -77,6 +88,24 @@ def validate_filesystem_path_unique(value: str):
         )
 
 
+def validate_uniqueness_storage_name_for_storage_type(value: str, storage_type: str):
+
+    allocations_with_storage_name_and_storage_type = (
+        Allocation.objects.reserved_statuses().filter(
+            allocationattribute__allocation_attribute_type__name="storage_name",
+            allocationattribute__value=value,
+            resources__name=storage_type,
+        )
+    )
+
+    if allocations_with_storage_name_and_storage_type.exists():
+        raise ValidationError(
+            message=f"An allocation with the storage name (%(value)s) for the selected storage type already exists",
+            code="invalid",
+            params={"value": value},
+        )
+
+
 def validate_ldap_usernames_and_groups(name: str):
     if name is None:
         return
@@ -104,11 +133,11 @@ def validate_leading_forward_slash(value: str):
         )
 
 
-def validate_parent_directory(value: str):
-
-    storage_root = os.environ.get("STORAGE2_PATH").strip("/")
+def validate_parent_directory(value: str, resource_type: str):
+    connection_info = json.loads(os.environ.get("QUMULO_INFO"))
+    storage_root = connection_info[resource_type]["path"].strip("/")
     full_path = f"/{storage_root}/{value}"
-    qumulo_api = QumuloAPI()
+    qumulo_api = StorageControllerFactory().create_connection(resource_type)
     sub_directories = full_path.strip("/").split("/")
 
     for depth in range(1, len(sub_directories), 1):
@@ -124,7 +153,7 @@ def validate_parent_directory(value: str):
 
 
 def validate_single_ad_user(ad_user: str):
-    if not _ad_user_validation_helper(ad_user):
+    if not __ad_user_validation_helper(ad_user):
         raise ValidationError(
             message="This WUSTL Key could not be validated", code="invalid"
         )
@@ -142,9 +171,8 @@ def validate_single_ad_user_skip_admin(user: str):
     return validate_single_ad_user(user)
 
 
-def validate_storage_name(value: str):
+def validate_storage_name(value: str) -> None:
     valid_character_match = re.match("^[0-9a-zA-Z\-_\.]*$", value)
-
     if not valid_character_match:
         raise ValidationError(
             message=gettext_lazy(
@@ -152,13 +180,6 @@ def validate_storage_name(value: str):
             ),
             code="invalid",
         )
-
-    existing_allocations = AllocationAttribute.objects.filter(
-        allocation_attribute_type__name="storage_name", value=value
-    )
-
-    if existing_allocations.first():
-        raise ValidationError(message=f"{value} already exists", code="invalid")
 
     return
 
@@ -192,7 +213,73 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
     return
 
 
-def _ad_user_validation_helper(ad_user: str) -> bool:
+def validate_condo_project_quota(project_pk: str, storage_quota: int, current_quota=None):
+    if current_quota==None:
+        quota_total = create_calculate_total_project_quotas(project_pk, storage_quota)
+    else:
+        quota_total = update_calculate_total_project_quotas(project_pk, storage_quota, current_quota)
+    
+    if quota_total > CONDO_PROJECT_QUOTA:
+        remaining_quota = calculate_remaining_condo_quota(project_pk)
+        raise ValidationError(
+            gettext_lazy(
+                f"Project quota exceeds condo limit of {CONDO_PROJECT_QUOTA} TB. There is {remaining_quota} TB available."
+            )
+        )
+
+def existing_project_quota(project_pk: str):
+    storage_resources = Resource.objects.filter(resource_type__name="Storage")
+    status_choices = AllocationStatusChoice.objects.filter(name__in=["Pending", "Active", "New"])
+    project_allocations = Allocation.objects.filter(
+        project__id=project_pk,
+        resources__in=storage_resources,
+        status__in=status_choices,
+    )
+    project_child_allocations = Allocation.objects.filter(
+        pk__in=AllocationLinkage.objects.filter(children__in=project_allocations).values_list("children", flat=True)
+    )
+    project_top_level_allocations = project_allocations.exclude(pk__in=project_child_allocations.values_list("pk", flat=True))
+    storage_quota_sub_query = AllocationAttribute.objects.filter(
+        allocation=OuterRef("pk"),
+        allocation_attribute_type__name="storage_quota",
+    ).values("value")[:1]
+    project_top_level_allocations = project_top_level_allocations.annotate(
+        storage_quota_str=Subquery(storage_quota_sub_query)
+    ).annotate(
+        storage_quota=Cast('storage_quota_str', IntegerField())
+    )
+    total_storage_quota = (
+        project_top_level_allocations.aggregate(total=Sum("storage_quota"))["total"] or 0
+    )
+    return total_storage_quota
+        
+def create_calculate_total_project_quotas(project_pk: str, storage_quota: int):
+    total_existing_quota = existing_project_quota(project_pk)
+    total_storage_quota = total_existing_quota + storage_quota
+    return total_storage_quota
+
+def update_calculate_total_project_quotas(project_pk: str, storage_quota: int, current_quota: int):
+    total_existing_quota = existing_project_quota(project_pk)
+    diff = 0
+    if storage_quota != current_quota:
+        diff = storage_quota - current_quota
+        total_storage_quota = total_existing_quota + diff                   
+    return total_storage_quota
+
+def calculate_remaining_condo_quota(project_pk: str):
+    total_existing_quota = existing_project_quota(project_pk)
+    remaining_quota = CONDO_PROJECT_QUOTA - total_existing_quota
+    return remaining_quota
+
+def validate_storage2_quota_increase(storage_quota: int, current_quota: int):
+    diff = storage_quota - current_quota
+    if diff >= MAX_STORAGE2_QUOTA_INCREASE:
+        raise ValidationError(
+            f"Increases of {MAX_STORAGE2_QUOTA_INCREASE}TB or more for Storage2 allocations require approval. Please contact support.",
+        )
+    return
+
+def __ad_user_validation_helper(ad_user: str) -> bool:
     active_directory_api = ActiveDirectoryAPI()
 
     try:
@@ -231,3 +318,11 @@ def __ldap_usernames_and_groups_validator(name: str) -> bool:
         return False
 
     return True
+
+def is_float(val) -> bool:
+    try:
+        float(val)
+        return True
+    except (ValueError, TypeError):
+        return False
+

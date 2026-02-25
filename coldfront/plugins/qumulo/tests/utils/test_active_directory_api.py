@@ -4,17 +4,29 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 from ldap3 import MODIFY_DELETE
 
 import os
-from dotenv import load_dotenv
 
-load_dotenv(override=True)
+
+os_environ = {
+    "AD_SERVER_NAME": "test_server",
+    "AD_USERNAME": "test_user",
+    "AD_USER_PASS": "test_pass",
+    "AD_GROUPS_OU": "OU=Groups",
+}
 
 
 class TestActiveDirectoryAPI(TestCase):
     @patch("coldfront.plugins.qumulo.utils.active_directory_api.Connection")
     def setUp(self, mock_connection):
+        patch.dict("os.environ", os_environ).start()
+
         self.mock_connection = mock_connection.return_value
         self.ad_api = ActiveDirectoryAPI()
         self.mock_connection.response = []
+
+    def tearDown(self):
+        patch.stopall()
+
+        return super().tearDown()
 
     def test_get_user_returns_user(self):
         self.mock_connection.response = [
@@ -67,7 +79,7 @@ class TestActiveDirectoryAPI(TestCase):
 
     def test_create_ad_group_creates_group(self):
         group_name = "test_group_name"
-        expected_groups_ou = os.environ.get("AD_GROUPS_OU")
+        expected_groups_ou = os_environ["AD_GROUPS_OU"]
         expected_new_group_dn = f"cn={group_name},{expected_groups_ou}"
 
         self.ad_api.create_ad_group(group_name)
@@ -105,7 +117,7 @@ class TestActiveDirectoryAPI(TestCase):
         )
 
     def test_get_group_dn_searches_for_group_dn(self):
-        groups_OU = os.environ.get("AD_GROUPS_OU")
+        groups_OU = os_environ["AD_GROUPS_OU"]
 
         group_name = "some_group_name"
 
@@ -143,7 +155,7 @@ class TestActiveDirectoryAPI(TestCase):
         self.assertEqual(return_group_dn, group_dn)
 
     def test_delete_ad_group_gets_group_dn(self):
-        groups_OU = os.environ.get("AD_GROUPS_OU")
+        groups_OU = os_environ["AD_GROUPS_OU"]
         group_name = "some_group_name"
 
         self.mock_connection.response = [
@@ -191,7 +203,7 @@ class TestActiveDirectoryAPI(TestCase):
         )
 
     def test_remove_member_from_group_gets_group_dn(self):
-        groups_OU = os.environ.get("AD_GROUPS_OU")
+        groups_OU = os_environ["AD_GROUPS_OU"]
         group_name = "some_group_name"
 
         self.mock_connection.response = [

@@ -3,44 +3,64 @@ import re
 from typing import Any
 from django import forms
 
+from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.core.project.models import Project
+from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
-from coldfront.core.field_of_science.models import FieldOfScience
-from coldfront.plugins.qumulo.fields import ADUserField, StorageFileSystemPathField
+from coldfront.plugins.qumulo.fields import ADUserField
 from coldfront.plugins.qumulo.validators import (
     validate_leading_forward_slash,
-    validate_single_ad_user_skip_admin,
     validate_single_ad_user,
+    validate_storage2_quota_increase,
+    validate_uniqueness_storage_name_for_storage_type,
     validate_ticket,
     validate_storage_name,
     validate_prepaid_start_date,
+    validate_filesystem_path_unique,
+    validate_relative_path,
+    validate_parent_directory,
+    validate_condo_project_quota,
 )
 
 from coldfront.plugins.qumulo.constants import (
-    STORAGE_SERVICE_RATES,
+    DEFAULT_STORAGE_TYPE,
+    SERVICE_RATE_CATEGORIES,
     PROTOCOL_OPTIONS,
 )
 
 from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 
 
-from coldfront.core.allocation.models import (
-    AllocationStatusChoice,
-)
-
-from django.db.models.functions import Lower
-
-
 class AllocationForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user_id = kwargs.pop("user_id")
+        self.allocation_status_name = self._upper(
+            kwargs.pop("allocation_status_name", None)
+        )
+        if not hasattr(self, "allocation_id"):
+            self.allocation_id = kwargs.pop("allocation_id", None)
         super(forms.Form, self).__init__(*args, **kwargs)
         self.fields["project_pk"].choices = self.get_project_choices()
+        self.fields["storage_type"].choices = self.get_storage_type_choices()
+        self.fields["storage_type"].initial = Resource.objects.get(
+            name=DEFAULT_STORAGE_TYPE
+        ).name
 
     class Media:
         js = ("allocation.js",)
 
-    project_pk = forms.ChoiceField(label="Project")
+    storage_type = forms.ChoiceField(
+        label="Storage Type",
+    )
+
+    project_pk = forms.ChoiceField(
+        label="Project",
+        widget=forms.Select(
+            attrs={
+                "class": "select2",
+            }
+        ),
+    )
     storage_name = forms.CharField(
         help_text="Name of the Allocation",
         label="Name",
@@ -81,6 +101,12 @@ class AllocationForm(forms.Form):
         help_text="Choose one billing cycle option from the above list",
         required=True,
     )
+    service_rate_category = forms.ChoiceField(
+        help_text="Service rate category options for the storage allocation",
+        label="Service Rate Category",
+        choices=SERVICE_RATE_CATEGORIES,
+        initial="consumption",
+    )
     prepaid_time = forms.IntegerField(
         help_text="Prepaid Time in Months",
         label="Prepaid Time",
@@ -91,11 +117,6 @@ class AllocationForm(forms.Form):
         label="Prepaid Billing Start Date",
         validators=[validate_prepaid_start_date],
         required=False,
-    )
-    service_rate = forms.ChoiceField(
-        help_text="Service rate option for the Storage2 allocation",
-        label="Service Rate",
-        choices=STORAGE_SERVICE_RATES,
     )
     storage_quota = forms.IntegerField(
         min_value=0,
@@ -111,9 +132,10 @@ class AllocationForm(forms.Form):
         initial=["smb"],
         required=False,
     )
-    storage_filesystem_path = StorageFileSystemPathField(
+    storage_filesystem_path = forms.CharField(
         help_text="Path of the allocation resource",
         label="Filesystem Path",
+        validators=[validate_relative_path],
     )
     storage_export_path = forms.CharField(
         help_text="Path of the allocation resource",
@@ -127,10 +149,7 @@ class AllocationForm(forms.Form):
         label="ITSD Ticket",
         validators=[validate_ticket],
     )
-    rw_users = ADUserField(
-        label="Read/Write Users",
-        initial="",
-    )
+    rw_users = ADUserField(label="Read/Write Users", initial="")
     ro_users = ADUserField(label="Read Only Users", initial="", required=False)
 
     def _upper(self, val: Any) -> Any:
@@ -189,10 +208,24 @@ class AllocationForm(forms.Form):
             )
 
     def clean(self) -> dict[str, Any]:
+        # Always call the parent's clean method to ensure basic validation is performed
         cleaned_data = super().clean()
         protocols = cleaned_data.get("protocols")
         storage_export_path = cleaned_data.get("storage_export_path")
         storage_ticket = self._upper(cleaned_data.get("storage_ticket", None))
+        storage_quota = cleaned_data.get("storage_quota", 0)
+        service_rate_categories = cleaned_data.get("service_rate_category", "")
+        project_pk = cleaned_data.get("project_pk")
+        parent_allocation = cleaned_data.get("parent_allocation", None)
+        current_quota = None
+        if self.allocation_id is not None:
+            current_quota = self.get_current_quota(self.allocation_id)
+
+        if (cleaned_data.get("storage_type") == "Storage2") and (current_quota is not None) and (storage_quota > current_quota):
+            validate_storage2_quota_increase(storage_quota, current_quota)
+
+        if ("condo" in service_rate_categories) and (storage_quota != current_quota) and not parent_allocation:
+            validate_condo_project_quota(project_pk, storage_quota, current_quota)
 
         if "nfs" in protocols:
             if storage_export_path == "":
@@ -207,6 +240,17 @@ class AllocationForm(forms.Form):
             else:
                 self.cleaned_data["storage_ticket"] = storage_ticket
 
+        self.validate_unique_storage_name(cleaned_data=cleaned_data)
+
+        if self.fields["storage_filesystem_path"].disabled is False:
+            storage_filesystem_path = cleaned_data.get("storage_filesystem_path")
+            try:
+                storage_type = cleaned_data.get("storage_type", "")
+                validate_filesystem_path_unique(storage_filesystem_path, storage_type)
+                validate_parent_directory(storage_filesystem_path, storage_type)
+            except forms.ValidationError as error:
+                self.add_error("storage_filesystem_path", error.message)
+
     def get_project_choices(self) -> list[str]:
         # jprew - NOTE: accesses to db collections should be consolidated to
         # single classes
@@ -219,97 +263,34 @@ class AllocationForm(forms.Form):
 
         return map(lambda project: (project.id, project.title), projects)
 
+    def get_storage_type_choices(self) -> list[str]:
+        storage_types = Resource.objects.filter(resource_type__name="Storage")
+        return map(lambda storage: (storage.name, storage.description), storage_types)
 
-class UpdateAllocationForm(AllocationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def validate_unique_storage_name(self, cleaned_data: dict[str, Any]) -> None:
+        if self.__is_unchanged(field_name="storage_name") and self.__is_unchanged(
+            field_name="storage_type"
+        ):
+            return None
 
-        self.fields["storage_name"].disabled = True
-        self.fields["storage_filesystem_path"].disabled = True
+        try:
+            storage_name = cleaned_data.get("storage_name", "")
+            storage_type = cleaned_data.get("storage_type", "")
+            validate_uniqueness_storage_name_for_storage_type(
+                storage_name, storage_type
+            )
+        except forms.ValidationError as error:
+            self.add_error("storage_name", error)
 
-        self.fields["storage_filesystem_path"].validators = []
-        self.fields["storage_name"].validators = []
+    def __is_unchanged(self, field_name: str) -> bool:
+        return self.fields[field_name].disabled and field_name not in self.changed_data
 
-        self.fields["prepaid_expiration"] = forms.DateField(
-            help_text="Allocation is paid until this date",
-            label="Prepaid Expiration Date",
-            required=False,
-        )
-        self.fields["prepaid_expiration"].disabled = True
+    def get_current_quota(self, current_allocation: int) -> int:
+        allocation_obj = Allocation.objects.get(pk=current_allocation)
+        current_quota = AllocationAttribute.objects.filter(
+        allocation=allocation_obj,
+        allocation_attribute_type__name="storage_quota",
+        ).values("value")[:1]
+        current_quota = int(current_quota[0]['value'])
 
-
-class CreateSubAllocationForm(AllocationForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # hide the project field and show the parent allocation instead
-        self.fields["project_pk"].widget = forms.HiddenInput()
-        self.fields["parent_allocation"] = forms.CharField(
-            help_text="The parent of this sub-allocation",
-            label="Parent Allocation",
-            required=True,
-        )
-
-        # display the parent allocation name
-        self.fields["parent_allocation"].initial = kwargs["initial"].pop(
-            "parent_allocation_name"
-        )
-        self.fields["parent_allocation"].disabled = True
-
-        # re-order fields so parent allocation field appears at the top
-        self.fields = {
-            "parent_allocation": self.fields.pop("parent_allocation"),
-            **self.fields,
-        }
-
-
-class ProjectCreateForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.user_id = kwargs.pop("user_id")
-        super().__init__(*args, **kwargs)
-        self.fields["pi"].initial = self.user_id
-        self.fields["field_of_science"].choices = self.get_fos_choices()
-        self.fields["field_of_science"].initial = FieldOfScience.DEFAULT_PK
-
-    title = forms.CharField(
-        label="Title",
-        max_length=255,
-    )
-    pi = forms.CharField(
-        label="Principal Investigator",
-        max_length=128,
-        validators=[validate_single_ad_user_skip_admin],
-    )
-    description = forms.CharField(
-        required=False,
-        widget=forms.Textarea,
-    )
-    field_of_science = forms.ChoiceField(label="Field of Science")
-
-    def get_fos_choices(self):
-        return map(lambda fos: (fos.id, fos.description), FieldOfScience.objects.all())
-
-
-class AllocationTableSearchForm(forms.Form):
-    pi_last_name = forms.CharField(label="PI Surname", max_length=100, required=False)
-
-    pi_first_name = forms.CharField(
-        label="PI Given Name", max_length=100, required=False
-    )
-
-    status = forms.ModelMultipleChoiceField(
-        widget=forms.CheckboxSelectMultiple,
-        queryset=AllocationStatusChoice.objects.all().order_by(Lower("name")),
-        required=False,
-    )
-
-    department_number = forms.CharField(
-        label="Department Number", max_length=100, required=False
-    )
-
-    itsd_ticket = forms.CharField(label="ITSD Ticket", max_length=100, required=False)
-
-    no_grouping = forms.BooleanField(
-        label="No Grouping",
-        initial=False,
-        required=False,
-    )
+        return current_quota

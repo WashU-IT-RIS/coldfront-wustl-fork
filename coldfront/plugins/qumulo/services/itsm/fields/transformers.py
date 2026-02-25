@@ -1,24 +1,22 @@
-import math, os
+import math, json
 from typing import Optional
 
+from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
-def fileset_name_to_storage_filesystem_path(fileset_name_or_alias) -> str:
+
+def fileset_name_to_storage_filesystem_seed(fileset_name_or_alias) -> str:
     # In ITSM, fileset_names are mapped into name
     # Examples
-    # bisiademuyiwa_active --> /storage2/fs1/bisiademuyiwa
-    # gc6159 --> /storage2/fs1/gc6159
+    # bisiademuyiwa_active --> bisiademuyiwa
+    # gc6159 --> gc6159
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    storage_filesystem_path = f"{__get_storage2_base_path()}/{fileset_name_seed}"
-
-    return storage_filesystem_path
+    return fileset_name_seed
 
 
 def fileset_name_to_storage_export_path(fileset_name_or_alias) -> str:
     # TODO I cannot figure out from the code how to populate this.
     fileset_name_seed = fileset_name_or_alias.split("_active")[0]
-    export_path = f"{__get_storage2_base_path()}/{fileset_name_seed}"
-
-    return export_path
+    return fileset_name_seed
 
 
 # TODO what are the protocols for the allocations created from ITSM?
@@ -53,9 +51,9 @@ def acl_group_members_to_aggregate_create_users(value) -> Optional[str]:
     return value.split(",")
 
 
-def string_parsing_quota_and_unit_to_integer(value: str) -> int:
+def string_parsing_quota_and_unit_to_integer(value: str) -> Optional[int]:
     if value is None:
-        return
+        return None
 
     # all values in ITSM are kept in TB (T) and some in GB (G).
     if value[-1] == "T":
@@ -64,17 +62,17 @@ def string_parsing_quota_and_unit_to_integer(value: str) -> int:
     if value[-1] == "G":
         return int(math.ceil(int(value[:-1]) / 1000))
 
-    return
+    return None
 
 
-def truthy_or_falsy_to_boolean(value, default_value=None) -> str:
+def truthy_or_falsy_to_boolean(value, default_value=None) -> Optional[str]:
     transfromed_value = __truthy_or_falsy_to_boolean(value, default_value)
     return __boolean_to_coldfront_yes_no(transfromed_value)
 
 
-def __boolean_to_coldfront_yes_no(value: bool) -> str:
+def __boolean_to_coldfront_yes_no(value: bool) -> Optional[str]:
     if value is None:
-        return
+        return None
 
     if value:
         return "Yes"
@@ -98,5 +96,49 @@ def __truthy_or_falsy_to_boolean(value, default_value) -> bool:
     return bool(int(value))
 
 
-def __get_storage2_base_path():
-    return os.environ.get("STORAGE2_PATH")
+def convert_email_to_username(value: str) -> Optional[str]:
+    if value is None or "@" not in value:
+        return value
+
+    allowed_domains = ["@wustl.edu", "@email.wustl.edu", "@go.wustl.edu"]
+    for domain in allowed_domains:
+        if value.endswith(domain):
+            try:
+                ad_api = ActiveDirectoryAPI()
+                user_info = ad_api.get_user_by_email(value)
+                # if the user is not found, then keep the email as the value
+                attrs = user_info.get("attributes", {})
+                return attrs.get("sAMAccountName", value)
+            except Exception:
+                return None
+    return None
+
+
+def anything_to_comsumption(value: Optional[str]) -> str:
+    return "consumption"
+
+
+def anything_to_empty_list(value: Optional[str]) -> list[None]:
+    return []
+
+def truthy_or_falsy_to_yes(value) -> str:
+    return "Yes"
+
+def comment_to_dir_projects(
+    comment: Optional[str],
+    default_value: Optional[dict[str, Optional[dict[str, Optional[list[str]]]]]] = {},
+) -> Optional[dict[str, Optional[dict[str, Optional[list[str]]]]]]:
+    if comment is None:
+        return default_value
+
+    try:
+        comment_json = json.loads(comment)
+    except json.JSONDecodeError:
+        return default_value
+
+    if comment_json is None:
+        return default_value
+
+    sub_allocations = comment_json.get("dir_projects", default_value)
+
+    return sub_allocations

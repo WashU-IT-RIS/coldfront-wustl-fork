@@ -9,9 +9,10 @@ from coldfront.plugins.qumulo.services.itsm.fields.transformers import (
     comment_to_protocols,
     fileset_name_to_storage_name,
     fileset_name_to_storage_export_path,
-    fileset_name_to_storage_filesystem_path,
+    fileset_name_to_storage_filesystem_seed,
     string_parsing_quota_and_unit_to_integer,
     truthy_or_falsy_to_boolean,
+    truthy_or_falsy_to_yes,
 )
 
 """
@@ -54,32 +55,36 @@ class TestValidators(TestCase):
             fileset_name_to_storage_name(itsm_fileset_name_bad), "jiaoy"
         )
 
-    @mock.patch.dict(os.environ, {"STORAGE2_PATH": "/storage2-test"})
+    @mock.patch.dict(
+        os.environ, {"QUMULO_INFO": '{"Storage2": {"path": "/storage2-test"}}'}
+    )
     def test_fileset_name_to_storage_export_path(self):
         itsm_fileset_name = "jiaoy_active"
         self.assertEqual(
             fileset_name_to_storage_export_path(itsm_fileset_name),
-            "/storage2-test/jiaoy",
+            "jiaoy",
         )
 
         itsm_fileset_alias = "gc6159"
         self.assertEqual(
             fileset_name_to_storage_export_path(itsm_fileset_alias),
-            "/storage2-test/gc6159",
+            "gc6159",
         )
 
-    @mock.patch.dict(os.environ, {"STORAGE2_PATH": "/storage2-test"})
+    @mock.patch.dict(
+        os.environ, {"QUMULO_INFO": '{"Storage2": {"path": "/storage2-test"}}'}
+    )
     def test_fileset_name_to_storage_filesystem_path(self):
         itsm_fileset_name = "jiaoy_active"
         self.assertEqual(
-            fileset_name_to_storage_filesystem_path(itsm_fileset_name),
-            "/storage2-test/jiaoy",
+            fileset_name_to_storage_filesystem_seed(itsm_fileset_name),
+            "jiaoy",
         )
 
         itsm_fileset_alias = "gc6159"
         self.assertEqual(
-            fileset_name_to_storage_filesystem_path(itsm_fileset_alias),
-            "/storage2-test/gc6159",
+            fileset_name_to_storage_filesystem_seed(itsm_fileset_alias),
+            "gc6159",
         )
 
     def test_string_parsing_quota_and_unit_to_integer(self):
@@ -115,3 +120,16 @@ class TestValidators(TestCase):
         defaults_to = False
         self.assertIsNotNone(truthy_or_falsy_to_boolean(None, defaults_to))
         self.assertRaises(ValueError, truthy_or_falsy_to_boolean, "Bogus Data")
+
+
+def test_truthy_or_falsy_to_yes(self):
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("True"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("False"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(None))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("Bogus Data"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("1"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes("0"))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(1))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(0))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(True))
+        self.assertEqual("Yes", truthy_or_falsy_to_yes(False))

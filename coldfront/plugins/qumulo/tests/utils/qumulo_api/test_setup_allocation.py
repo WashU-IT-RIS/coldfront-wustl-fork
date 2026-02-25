@@ -2,6 +2,7 @@ from django.test import TestCase
 from unittest.mock import patch, MagicMock
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 
 from deepdiff import DeepDiff
@@ -15,7 +16,7 @@ class SetupAllocation(TestCase):
 
         fs_path = "/storage2/fs1/foo"
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch("coldfront.plugins.qumulo.utils.qumulo_api.open") as mock_open:
             qumulo_instance.setup_allocation(fs_path)
@@ -30,7 +31,7 @@ class SetupAllocation(TestCase):
 
         fs_path = "/storage2/fs1/foo/bar"
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         qumulo_instance.setup_allocation(fs_path)
 
@@ -44,7 +45,7 @@ class SetupAllocation(TestCase):
         expected_acl = AcesManager().get_base_acl()
         expected_acl["aces"] = AcesManager.default_aces
 
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch("coldfront.plugins.qumulo.utils.qumulo_api.open") as mock_open:
             qumulo_instance.setup_allocation(fs_path)

@@ -1,6 +1,7 @@
 from django.test import TestCase
 from unittest.mock import call, patch, MagicMock
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
 @patch.object(QumuloAPI, "get_id", MagicMock())
@@ -8,7 +9,7 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 class DeleteAllocation(TestCase):
     def test_gets_nfs_export_id(self, mock_RestClient: MagicMock):
         with patch.object(QumuloAPI, "get_id", MagicMock()) as mock_get_id:
-            qumulo_instance = QumuloAPI()
+            qumulo_instance = StorageControllerFactory().create_connection("Storage2")
             qumulo_instance._delete_allocation(
                 fs_path="/foo", name="foo", protocols=["nfs"], export_path="bar"
             )
@@ -17,7 +18,7 @@ class DeleteAllocation(TestCase):
 
     def test_gets_smb_export_id(self, mock_RestClient: MagicMock):
         with patch.object(QumuloAPI, "get_id", MagicMock()) as mock_get_id:
-            qumulo_instance = QumuloAPI()
+            qumulo_instance = StorageControllerFactory().create_connection("Storage2")
             qumulo_instance._delete_allocation(
                 fs_path="/foo", name="foo", protocols=["smb"], export_path="bar"
             )
@@ -28,7 +29,7 @@ class DeleteAllocation(TestCase):
         with patch.object(
             QumuloAPI, "delete_protocol", MagicMock()
         ) as mock_delete_protocol:
-            qumulo_instance = QumuloAPI()
+            qumulo_instance = StorageControllerFactory().create_connection("Storage2")
             qumulo_instance._delete_allocation(
                 fs_path="/foo", export_path="bar", name="foo", protocols=["nfs"]
             )
@@ -42,7 +43,7 @@ class DeleteAllocation(TestCase):
         with patch.object(
             QumuloAPI, "delete_protocol", MagicMock()
         ) as mock_delete_protocol:
-            qumulo_instance = QumuloAPI()
+            qumulo_instance = StorageControllerFactory().create_connection("Storage2")
             qumulo_instance._delete_allocation(
                 fs_path="/foo", export_path="bar", name="foo", protocols=["smb"]
             )
@@ -56,7 +57,7 @@ class DeleteAllocation(TestCase):
         with patch.object(
             QumuloAPI, "delete_protocol", MagicMock()
         ) as mock_delete_protocol:
-            qumulo_instance = QumuloAPI()
+            qumulo_instance = StorageControllerFactory().create_connection("Storage2")
             qumulo_instance._delete_allocation(
                 fs_path="/foo",
                 export_path="bar",
@@ -75,7 +76,7 @@ class DeleteAllocation(TestCase):
         with patch.object(
             QumuloAPI, "delete_protocol", MagicMock()
         ) as mock_delete_protocol:
-            qumulo_instance = QumuloAPI()
+            qumulo_instance = StorageControllerFactory().create_connection("Storage2")
             qumulo_instance._delete_allocation(
                 fs_path="/foo",
                 export_path="bar",
@@ -92,7 +93,7 @@ class DeleteAllocation(TestCase):
             assert mock_delete_protocol.call_count == 2
 
     def test_rejects_when_incorrect_protocol(self, mock_RestClient: MagicMock):
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with self.assertRaises(ValueError):
             qumulo_instance._delete_allocation(
@@ -105,7 +106,7 @@ class DeleteAllocation(TestCase):
         with patch.object(
             QumuloAPI, "delete_protocol", MagicMock()
         ) as mock_delete_protocol:
-            qumulo_instance = QumuloAPI()
+            qumulo_instance = StorageControllerFactory().create_connection("Storage2")
             qumulo_instance._delete_allocation(
                 fs_path="/foo", export_path="bar", protocols=["nfs", "smb"]
             )
@@ -119,7 +120,7 @@ class DeleteAllocation(TestCase):
             assert mock_delete_protocol.call_count == 2
 
     def test_calls_delete_quota(self, mock_RestClient: MagicMock):
-        qumulo_instance = QumuloAPI()
+        qumulo_instance = StorageControllerFactory().create_connection("Storage2")
 
         with patch.object(QumuloAPI, "delete_quota", MagicMock()) as mock_delete_quota:
             qumulo_instance._delete_allocation(

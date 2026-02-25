@@ -4,20 +4,20 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
 
-from coldfront.plugins.qumulo.tests.fixtures import create_allocation_assets
+from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing
 
 
 class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
         self.migrate = MigrateToColdfront()
-        create_allocation_assets()
+        create_metadata_for_testing()
 
     @tag("integration")
     def test_migrate_to_coldfront_by_fileset_name_found(self):
         raised = False
         try:
-            self.migrate.by_fileset_name("kchoi_active")
+            self.migrate.by_fileset_name("kchoi_active", "Storage2")
         except Exception:
             raised = True
         self.assertFalse(raised)
@@ -36,7 +36,7 @@ class TestMigrateToColdfront(TestCase):
     def test_migrate_to_coldfront_by_storage_provision_name_found(self):
         raised = False
         try:
-            self.migrate.by_storage_provision_name("/vol/rdcw-fs1/kchoi")
+            self.migrate.by_storage_provision_name("/vol/rdcw-fs1/kchoi", "Storage2")
         except Exception:
             raised = True
         self.assertFalse(raised)

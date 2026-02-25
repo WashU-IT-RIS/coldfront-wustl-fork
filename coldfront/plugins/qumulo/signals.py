@@ -5,12 +5,17 @@ import logging
 import json
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
+from coldfront.plugins.qumulo.utils.update_user_data import (
+    update_user_with_additional_data,
+)
 from coldfront.plugins.qumulo.tasks import reset_allocation_acls
-
 
 from coldfront.core.allocation.models import (
     Allocation,
+    AllocationLinkage,
+    AllocationAttribute,
 )
 from coldfront.core.allocation.signals import (
     allocation_activate,
@@ -18,13 +23,8 @@ from coldfront.core.allocation.signals import (
     allocation_change_approved,
 )
 
-
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-
-from coldfront.plugins.qumulo.utils.update_user_data import (
-    update_user_with_additional_data,
-)
 
 
 @receiver(post_save, sender=User)
@@ -38,9 +38,11 @@ def on_allocation_save_retrieve_additional_user_data(
 @receiver(allocation_activate)
 def on_allocation_activate(sender, **kwargs):
     logger = logging.getLogger(__name__)
-    qumulo_api = QumuloAPI()
 
     allocation = Allocation.objects.get(pk=kwargs["allocation_pk"])
+    resource = allocation.resources.first()
+
+    qumulo_api = StorageControllerFactory().create_connection(resource.name)
 
     fs_path = allocation.get_attribute(name="storage_filesystem_path")
     export_path = allocation.get_attribute(name="storage_export_path")
@@ -86,14 +88,16 @@ def on_allocation_disable(sender, **kwargs):
 
 @receiver(allocation_change_approved)
 def on_allocation_change_approved(sender, **kwargs):
-    qumulo_api = QumuloAPI()
     allocation_obj = Allocation.objects.get(pk=kwargs["allocation_pk"])
+    resource = allocation_obj.resources.first()
 
+    qumulo_api = StorageControllerFactory().create_connection(resource.name)
     fs_path = allocation_obj.get_attribute(name="storage_filesystem_path")
     export_path = allocation_obj.get_attribute(name="storage_export_path")
     protocols = json.loads(allocation_obj.get_attribute(name="storage_protocols"))
     name = allocation_obj.get_attribute(name="storage_name")
     limit_in_bytes = allocation_obj.get_attribute(name="storage_quota") * (2**40)
+    limit_in_tb = allocation_obj.get_attribute(name="storage_quota")
 
     qumulo_api.update_allocation(
         protocols=protocols,
@@ -102,3 +106,25 @@ def on_allocation_change_approved(sender, **kwargs):
         name=name,
         limit_in_bytes=limit_in_bytes,
     )
+
+    try:
+        allocation_link = AllocationLinkage.objects.get(parent=kwargs["allocation_pk"])
+    except AllocationLinkage.DoesNotExist:
+        return
+
+    children = allocation_link.children.all()
+    for child in children:
+        child_fs_path = child.get_attribute(name="storage_filesystem_path")
+
+        AllocationAttribute.objects.filter(
+            allocation=child,
+            allocation_attribute_type__name="storage_quota",
+        ).update(value=limit_in_tb)
+
+        try:
+            qumulo_api.update_quota(
+                fs_path=child_fs_path,
+                limit_in_bytes=limit_in_bytes,
+            )
+        except:
+            print("Quota update for {child} unsuccesful")

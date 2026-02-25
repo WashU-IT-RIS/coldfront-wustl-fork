@@ -31,6 +31,7 @@ from coldfront.core.allocation.models import (
     AllocationUserStatusChoice,
     AllocationAttributeChangeRequest,
     AttributeType as AAttributeType,
+    AllocationLinkage,
 )
 from coldfront.core.grant.models import GrantFundingAgency, GrantStatusChoice
 from coldfront.core.publication.models import PublicationSource
@@ -264,6 +265,22 @@ class AllocationAttributeUsageFactory(DjangoModelFactory):
     allocation_attribute = SubFactory(AllocationAttributeFactory)
     value = 1024
 
+
+### Allocation Linkage factories ###
+
+class AllocationLinkageFactory(DjangoModelFactory):
+    class Meta:
+        model = AllocationLinkage
+
+    parent = SubFactory(AllocationFactory)
+
+    @factory.post_generation
+    def children(self, create, extracted, **kwargs):
+        if not create:
+            return
+        if extracted:
+            for child in extracted:
+                self.children.add(child)
 
 
 ### Allocation Change Request factories ###

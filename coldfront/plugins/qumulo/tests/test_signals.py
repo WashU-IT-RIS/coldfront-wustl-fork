@@ -1,5 +1,5 @@
 from django.test import TestCase, Client
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     create_allocation,
@@ -24,7 +24,6 @@ def mock_get_attribute(name):
     return attribute_dict[name]
 
 
-@patch("coldfront.plugins.qumulo.signals.QumuloAPI")
 class TestSignals(TestCase):
     def setUp(self) -> int:
         self.client = Client()
@@ -46,8 +45,8 @@ class TestSignals(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "general",
             "billing_cycle": "monthly",
+            "service_rate_category": "general",
         }
 
         self.client.force_login(self.user)
@@ -56,18 +55,47 @@ class TestSignals(TestCase):
             self.project, self.user, self.form_data
         )
 
+    def _createSubAllocation(self):
+        sub_form_data = {
+            "storage_filesystem_path": "/this/path/should/filter",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 4,
+            "protocols": ["nfs"],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "general",
+        }
+
+        return create_allocation(
+            project=self.project,
+            user=self.user,
+            form_data=sub_form_data,
+            parent=self.storage_allocation,
+        )
+
     @patch("coldfront.plugins.qumulo.signals.async_task")
+    @patch(
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
+    )
     def test_allocation_activate_creates_allocation(
         self,
+        mock_create_connection: MagicMock,
         mock_async_task: MagicMock,
-        mock_QumuloAPI: MagicMock,
     ):
-        qumulo_instance = mock_QumuloAPI.return_value
+        qumulo_instance = MagicMock()
+        qumulo_instance.create_allocation = MagicMock()
+        mock_create_connection.return_value = qumulo_instance
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
 
-        mock_QumuloAPI.assert_called_once()
+        mock_create_connection.assert_called_once()
         qumulo_instance.create_allocation.assert_called_once_with(
             protocols=["nfs"],
             fs_path=mock_get_attribute("storage_filesystem_path"),
@@ -78,31 +106,40 @@ class TestSignals(TestCase):
 
     @patch("coldfront.plugins.qumulo.signals.logging.getLogger")
     @patch("coldfront.plugins.qumulo.signals.async_task")
+    @patch(
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
+    )
     def test_allocation_activate_handles_missing_attribute_error(
         self,
+        mock_create_connection: MagicMock,
         mock_async_task: MagicMock,
         mock_getLogger: MagicMock,
-        mock_QumuloAPI: MagicMock,
     ):
-        qumulo_instance = mock_QumuloAPI.return_value
+        qumulo_instance = MagicMock()
         qumulo_instance.create_allocation = MagicMock(side_effect=ValueError())
+        mock_create_connection.return_value = qumulo_instance
 
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
         )
 
-        mock_QumuloAPI.assert_called_once()
+        mock_create_connection.assert_called_once()
         qumulo_instance.create_allocation.assert_called_once()
 
         mock_getLogger.return_value.warn.assert_called_once_with(
             "Can't create allocation: Some attributes are missing or invalid"
         )
 
+    @patch(
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
+    )
     def test_allocation_change_approved_updates_allocation(
         self,
-        mock_QumuloAPI: MagicMock,
+        mock_create_connection: MagicMock,
     ):
-        qumulo_instance = mock_QumuloAPI.return_value
+        qumulo_instance = MagicMock()
+        qumulo_instance.update_allocation = MagicMock()
+        mock_create_connection.return_value = qumulo_instance
 
         allocation_change_approved.send(
             sender=self.__class__,
@@ -110,14 +147,89 @@ class TestSignals(TestCase):
             allocation_change_pk=1,
         )
 
+        byte_limit = mock_get_attribute("storage_quota") * (2**40)
+
         qumulo_instance.update_allocation.assert_called_once_with(
             protocols=["nfs"],
             fs_path=mock_get_attribute("storage_filesystem_path"),
             export_path=mock_get_attribute("storage_export_path"),
             name=mock_get_attribute("storage_name"),
-            limit_in_bytes=mock_get_attribute("storage_quota") * (2**40),
+            limit_in_bytes=byte_limit,
         )
 
+    @patch(
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
+    )
+    def test_allocation_change_approved_updates_allocation_one_sub_alloc(
+        self,
+        mock_create_connection: MagicMock,
+    ):
+        sub_alloc = self._createSubAllocation()
+        qumulo_instance = mock_create_connection.return_value
+
+        allocation_change_approved.send(
+            sender=self.__class__,
+            allocation_pk=self.storage_allocation.pk,
+            allocation_change_pk=1,
+        )
+
+        byte_limit = mock_get_attribute("storage_quota") * (2**40)
+        tb_limit = mock_get_attribute("storage_quota")
+        qumulo_instance.update_allocation.assert_called_once_with(
+            protocols=["nfs"],
+            fs_path=mock_get_attribute("storage_filesystem_path"),
+            export_path=mock_get_attribute("storage_export_path"),
+            name=mock_get_attribute("storage_name"),
+            limit_in_bytes=byte_limit,
+        )
+
+        qumulo_instance.update_quota.assert_called_once_with(
+            fs_path=sub_alloc.get_attribute(name="storage_filesystem_path"),
+            limit_in_bytes=byte_limit,
+        )
+        self.assertEqual(sub_alloc.get_attribute(name="storage_quota"), tb_limit)
+
+    @patch(
+        "coldfront.plugins.qumulo.signals.StorageControllerFactory.create_connection"
+    )
+    def test_allocation_change_approved_updates_allocation_multiple_sub_allocs(
+        self,
+        mock_create_connection: MagicMock,
+    ):
+        sub_alloc = self._createSubAllocation()
+        sub_alloc2 = self._createSubAllocation()
+        qumulo_instance = mock_create_connection.return_value
+
+        allocation_change_approved.send(
+            sender=self.__class__,
+            allocation_pk=self.storage_allocation.pk,
+            allocation_change_pk=1,
+        )
+
+        byte_limit = mock_get_attribute("storage_quota") * (2**40)
+        tb_limit = mock_get_attribute("storage_quota")
+        qumulo_instance.update_allocation.assert_called_once_with(
+            protocols=["nfs"],
+            fs_path=mock_get_attribute("storage_filesystem_path"),
+            export_path=mock_get_attribute("storage_export_path"),
+            name=mock_get_attribute("storage_name"),
+            limit_in_bytes=byte_limit,
+        )
+
+        qumulo_instance.update_quota.has_calls(
+            call(
+                fs_path=sub_alloc.get_attribute(name="storage_filesystem_path"),
+                limit_in_bytes=byte_limit,
+            ),
+            call(
+                fs_path=sub_alloc2.get_attribute(name="storage_filesystem_path"),
+                limit_in_bytes=byte_limit,
+            ),
+        )
+        self.assertEqual(sub_alloc.get_attribute(name="storage_quota"), tb_limit)
+        self.assertEqual(sub_alloc2.get_attribute(name="storage_quota"), tb_limit)
+
+    @patch("coldfront.plugins.qumulo.signals.QumuloAPI")
     def test_allocation_disable_removes_acls(
         self,
         mock_QumuloAPI: MagicMock,

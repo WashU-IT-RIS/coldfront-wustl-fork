@@ -5,7 +5,9 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
 )
-from coldfront.plugins.qumulo.forms import CreateSubAllocationForm
+from coldfront.plugins.qumulo.forms.CreateSubAllocationForm import (
+    CreateSubAllocationForm,
+)
 from coldfront.plugins.qumulo.views.update_allocation_view import UpdateAllocationView
 
 
@@ -26,6 +28,7 @@ class CreateSubAllocationView(UpdateAllocationView):
 
         form_data = {
             "project_pk": parent_allocation.project.pk,
+            "storage_type": parent_allocation.resources.first().name,
             "parent_allocation_name": parent_allocation.get_attribute(
                 name="storage_name"
             ),
@@ -42,7 +45,7 @@ class CreateSubAllocationView(UpdateAllocationView):
             "billing_cycle",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
         ]
 
         for key in allocation_attribute_keys:

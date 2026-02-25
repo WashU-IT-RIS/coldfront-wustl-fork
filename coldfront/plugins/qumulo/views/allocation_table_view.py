@@ -5,7 +5,9 @@ from django.core.paginator import EmptyPage, Paginator
 from django.db.models.query import QuerySet
 from django.views.generic import ListView
 
-from coldfront.plugins.qumulo.forms import AllocationTableSearchForm
+from coldfront.plugins.qumulo.forms.AllocationTableSearchForm import (
+    AllocationTableSearchForm,
+)
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -13,7 +15,7 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationLinkage,
 )
-from coldfront.core.resource.models import Resource
+from coldfront.core.resource.models import Resource, ResourceType
 
 from django.db.models import OuterRef, Subquery
 
@@ -32,7 +34,7 @@ class AllocationListItem:
     pi_user_name: str
     itsd_ticket: str
     file_path: str
-    service_rate: str
+    service_rate_category: str
     child_allocation_ids: List[str]
     is_child: bool
 
@@ -64,8 +66,8 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
         if allocation_search_form.is_valid():
             data = allocation_search_form.cleaned_data
-            resource = Resource.objects.get(name="Storage2")
-            allocations = Allocation.objects.filter(resources=resource)
+            resource = Resource.objects.filter(resource_type__name="Storage")
+            allocations = Allocation.objects.filter(resources__in=resource)
 
             # find type objects
             department_type = AllocationAttributeType.objects.get(
@@ -80,7 +82,11 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 name="storage_filesystem_path"
             )
 
-            service_rate_type = AllocationAttributeType.objects.get(name="service_rate")
+            storage_name_type = AllocationAttributeType.objects.get(name="storage_name")
+
+            service_rate_category_type = AllocationAttributeType.objects.get(
+                name="service_rate_category"
+            )
 
             # add sub-queries
             department_sub_q = AllocationAttribute.objects.filter(
@@ -95,15 +101,20 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocation=OuterRef("pk"), allocation_attribute_type=file_path_type
             ).values("value")[:1]
 
-            service_rate_sub_q = AllocationAttribute.objects.filter(
-                allocation=OuterRef("pk"), allocation_attribute_type=service_rate_type
+            service_rate_category_sub_q = AllocationAttribute.objects.filter(
+                allocation=OuterRef("pk"), allocation_attribute_type=service_rate_category_type
+            ).values("value")[:1]
+
+            storage_name_sub_q = AllocationAttribute.objects.filter(
+                allocation=OuterRef("pk"), allocation_attribute_type=storage_name_type
             ).values("value")[:1]
 
             allocations = allocations.annotate(
                 department_number=Subquery(department_sub_q),
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
                 file_path=Subquery(file_path_sub_q),
-                service_rate=Subquery(service_rate_sub_q),
+                service_rate_category=Subquery(service_rate_category_sub_q),
+                name=Subquery(storage_name_sub_q),
             )
 
             # add filters
@@ -122,6 +133,11 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                     project__pi__first_name__icontains=data.get("pi_first_name")
                 )
 
+            if data.get("pi_user_name"):
+                allocations = allocations.filter(
+                    project__pi__username__icontains=data.get("pi_user_name")
+                )
+
             if data.get("status"):
                 allocations = allocations.filter(status__in=data.get("status"))
 
@@ -132,6 +148,11 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
             if data.get("itsd_ticket"):
                 allocations = allocations.filter(itsd_ticket=data.get("itsd_ticket"))
+
+            if data.get("allocation_name"):
+                allocations = allocations.filter(
+                    name__icontains=data.get("allocation_name")
+                )
 
             # for now, use a "brute force" approach to
             # group child allocs with parents
@@ -157,7 +178,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                     department_number=Subquery(department_sub_q),
                     itsd_ticket=Subquery(itsd_ticket_sub_q),
                     file_path=Subquery(file_path_sub_q),
-                    service_rate=Subquery(service_rate_sub_q),
+                    service_rate_category=Subquery(service_rate_category_sub_q),
                 )
                 linkage_children = linkage_children.order_by(order_by)
                 children = [str(child.id) for child in linkage_children]
@@ -176,12 +197,12 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                                 pi_user_name=allocation.project.pi.username,
                                 project_id=allocation.project.pk,
                                 project_name=allocation.project.title,
-                                resource_name=resource.name,
+                                resource_name=allocation.get_resources_as_string,
                                 allocation_status=allocation.status.name,
                                 department_number=allocation.department_number,
                                 itsd_ticket=allocation.itsd_ticket,
                                 file_path=allocation.file_path,
-                                service_rate=allocation.service_rate,
+                                service_rate_category=allocation.service_rate_category,
                                 child_allocation_ids=parent_to_children_map[
                                     allocation.id
                                 ],
@@ -200,12 +221,12 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                                         pi_user_name=child_allocation.project.pi.username,
                                         project_id=child_allocation.project.pk,
                                         project_name=child_allocation.project.title,
-                                        resource_name=resource.name,
+                                        resource_name=child_allocation.get_resources_as_string,
                                         allocation_status=child_allocation.status.name,
                                         department_number=child_allocation.department_number,
                                         itsd_ticket=child_allocation.itsd_ticket,
                                         file_path=child_allocation.file_path,
-                                        service_rate=child_allocation.service_rate,
+                                        service_rate_category=child_allocation.service_rate_category,
                                         child_allocation_ids=[],
                                         is_child=True,
                                     )
@@ -219,12 +240,12 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                             pi_user_name=allocation.project.pi.username,
                             project_id=allocation.project.pk,
                             project_name=allocation.project.title,
-                            resource_name=resource.name,
+                            resource_name=allocation.get_resources_as_string,
                             allocation_status=allocation.status.name,
                             department_number=allocation.department_number,
                             itsd_ticket=allocation.itsd_ticket,
                             file_path=allocation.file_path,
-                            service_rate=allocation.service_rate,
+                            service_rate_category=allocation.service_rate_category,
                             child_allocation_ids=parent_to_children_map[allocation.id],
                             is_child=(str(allocation.pk) in all_children),
                         )

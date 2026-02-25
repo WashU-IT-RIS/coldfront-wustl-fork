@@ -1,6 +1,8 @@
 from icecream import ic
 
 from django.core.management.base import BaseCommand
+from coldfront.core.resource.models import Resource
+from coldfront.plugins.qumulo.constants import DEFAULT_STORAGE_TYPE
 
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
@@ -13,6 +15,15 @@ class Command(BaseCommand):
         parser.add_argument(
             "fileset", type=str, help="The fileset_name or fileset_alias"
         )
+
+        parser.add_argument(
+            "resource_name",
+            nargs='?',
+            type=str,
+            help=f"The storage resource_name (Defaults to {DEFAULT_STORAGE_TYPE})",
+            default=Resource.objects.get(name=DEFAULT_STORAGE_TYPE).name,
+        )
+
         parser.add_argument(
             "--fileset_alias",
             action="store_true",
@@ -24,20 +35,54 @@ class Command(BaseCommand):
             help="Queries by name instead of by fileset_name",
         )
 
+        parser.add_argument(
+            "--dry-run",
+            action="store_true",
+            help="Execute validations but does not create any records",
+        )
+
+        parser.add_argument(
+            "--ticket-number",
+            nargs="?",
+            type=str,
+            help="Overrides the ITSD ticket number to associate with the migration (optional)",
+        )
+
     def handle(self, *args, **options) -> None:
         fileset = options["fileset"]
         ic(fileset)
+
+        resource_name = options["resource_name"]
+        ic(resource_name)
+
         find_by_alias = options["fileset_alias"]
         ic(find_by_alias)
+
         find_by_storage_provision_name = options["storage_provision_name"]
         ic(find_by_storage_provision_name)
 
-        migrate_from_itsm_to_coldfront = MigrateToColdfront()
+        dry_run = options["dry_run"]
+        ic(dry_run)
+
+        ticket_number = options["ticket_number"]
+        ic(ticket_number)
+
+        migrate_from_itsm_to_coldfront = MigrateToColdfront(dry_run)
+
+        if ticket_number:
+            migrate_from_itsm_to_coldfront.set_override("service_desk_ticket_number", ticket_number)
+
         if find_by_alias:
-            result = migrate_from_itsm_to_coldfront.by_fileset_alias(fileset)
+            result = migrate_from_itsm_to_coldfront.by_fileset_alias(
+                fileset, resource_name
+            )
         elif find_by_storage_provision_name:
-            result = migrate_from_itsm_to_coldfront.by_storage_provision_name(fileset)
+            result = migrate_from_itsm_to_coldfront.by_storage_provision_name(
+                fileset, resource_name
+            )
         else:
-            result = migrate_from_itsm_to_coldfront.by_fileset_name(fileset)
+            result = migrate_from_itsm_to_coldfront.by_fileset_name(
+                fileset, resource_name
+            )
 
         ic(result)

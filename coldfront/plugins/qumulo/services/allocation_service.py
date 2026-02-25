@@ -11,16 +11,18 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
-    Project,
     AllocationLinkage,
     AllocationStatusChoice,
-    Resource,
     AllocationUserStatusChoice,
     AllocationUser,
+    Project,
+    Resource,
+    User,
 )
 
 from coldfront.plugins.qumulo.tasks import addMembersToADGroup
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
 from datetime import datetime
 
@@ -30,8 +32,10 @@ class AllocationService:
     # This is the entry point and the only public method for this service
     @staticmethod
     def create_new_allocation(
-        form_data: Dict[str, Any], user, parent_allocation: Optional[Allocation] = None
-    ):
+        form_data: Dict[str, Any],
+        user: User,
+        parent_allocation: Optional[Allocation] = None,
+    ) -> Dict[str, Any]:
         if parent_allocation:
             form_data["storage_name"] = (
                 AllocationService.__handle_sub_allocation_scoping(
@@ -39,7 +43,6 @@ class AllocationService:
                     parent_allocation.get_attribute(name="storage_name"),
                 )
             )
-
         project_pk = form_data.get("project_pk")
         project = get_object_or_404(Project, pk=project_pk)
 
@@ -54,8 +57,8 @@ class AllocationService:
         AllocationUser.objects.create(
             allocation=allocation, user=user, status=active_status
         )
-
-        resource = Resource.objects.get(name="Storage2")
+        resource_type = form_data["storage_type"]
+        resource = Resource.objects.get(name=resource_type)
         allocation.resources.add(resource)
 
         AllocationService.__set_allocation_attributes(
@@ -87,6 +90,36 @@ class AllocationService:
             )
 
         return {"allocation": allocation, "access_allocations": access_allocations}
+
+    @staticmethod
+    def create_sub_allocation(
+        sub_allocation_form_data: Dict[str, Any],
+        pi_user: User,
+        parent_allocation: Allocation,
+    ) -> Dict[str, Any]:
+        if not parent_allocation:
+            raise ValueError("Parent allocation must be provided for sub-allocation.")
+        
+        if pi_user:
+            parent_allocation_pi_user = parent_allocation.allocationuser_set.filter(
+                status=AllocationUserStatusChoice.objects.get(name="Active")
+            ).first()
+
+        else:
+            raise ValueError("PI user does not exist.")
+        
+        if sub_allocation_form_data.get("project_pk") != parent_allocation.project.pk:
+            raise ValueError("Sub-allocation project must match parent allocation project.")
+        
+        if sub_allocation_form_data.get("storage_type") != parent_allocation.resources.first().name:
+            raise ValueError("Sub-allocation storage type must match parent allocation storage type.")
+    
+
+        return AllocationService.create_new_allocation(
+            form_data=sub_allocation_form_data,
+            user=pi_user,
+            parent_allocation=parent_allocation,
+        )
 
     @staticmethod
     def __handle_sub_allocation_scoping(
@@ -153,10 +186,11 @@ class AllocationService:
         storage_acl_name_attribute = AllocationAttributeType.objects.get(
             name="storage_acl_name"
         )
+        resource_name = storage_allocation.resources.first().name.lower()
         AllocationAttribute.objects.create(
             allocation_attribute_type=storage_acl_name_attribute,
             allocation=access_allocation,
-            value="storage-{0}-{1}".format(storage_name, access_data["resource"]),
+            value=f"{resource_name}-{storage_name}-{access_data['resource']}",
         )
 
         storage_allocation_pk_attribute = AllocationAttributeType.objects.get(
@@ -200,7 +234,7 @@ class AllocationService:
             "department_number",
             "technical_contact",
             "billing_contact",
-            "service_rate",
+            "service_rate_category",
             "billing_cycle",
             "prepaid_time",
             "prepaid_billing_date",
@@ -216,6 +250,9 @@ class AllocationService:
             if allocation_attribute_name == "storage_protocols":
                 protocols = form_data.get("protocols")
 
+                if protocols is None:
+                    continue
+
                 AllocationAttribute.objects.create(
                     allocation_attribute_type=allocation_attribute_type,
                     allocation=allocation,
@@ -225,10 +262,11 @@ class AllocationService:
                 value = form_data.get(allocation_attribute_name)
                 if value is None:
                     continue
-
+                resource_type = form_data.get("storage_type")
                 if allocation_attribute_name == "storage_filesystem_path":
                     if parent_allocation is None:
-                        storage_root_path = os.environ.get("STORAGE2_PATH", "")
+                        qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+                        storage_root_path = qumulo_info[resource_type]["path"]
                     else:
                         storage_root_path = "{:s}/Active".format(
                             parent_allocation.get_attribute(
@@ -255,7 +293,7 @@ class AllocationService:
         allocation_defaults = {
             "secure": "No",
             "audit": "No",
-            "subsidized": "No",
+            "subsidized": "Yes",
         }
 
         for attr, value in allocation_defaults.items():
@@ -265,3 +303,48 @@ class AllocationService:
                 allocation=allocation,
                 value=value,
             )
+
+    @staticmethod
+    def set_access_users(
+        access_key: str,
+        access_users: list[str],
+        storage_allocation: Allocation,
+    ):
+        AllocationService.add_access_users(access_key, access_users, storage_allocation)
+
+        active_directory_api = ActiveDirectoryAPI()
+
+        access_allocation = AclAllocations.get_access_allocation(
+            storage_allocation, access_key
+        )
+        allocation_users = AllocationUser.objects.filter(allocation=access_allocation)
+        allocation_usernames = [
+            allocation_user.user.username for allocation_user in allocation_users
+        ]
+        users_to_remove = set(allocation_usernames) - set(access_users)
+
+        for allocation_username in users_to_remove:
+            allocation_users.get(user__username=allocation_username).delete()
+            active_directory_api.remove_member_from_group(
+                allocation_username,
+                access_allocation.get_attribute("storage_acl_name"),
+            )
+
+    @staticmethod
+    def add_access_users(
+        access_key: str, access_users: list[str], storage_allocation: Allocation
+    ):
+        access_allocation = AclAllocations.get_access_allocation(
+            storage_allocation, access_key
+        )
+
+        allocation_users = AllocationUser.objects.filter(allocation=access_allocation)
+        allocation_usernames = [
+            allocation_user.user.username for allocation_user in allocation_users
+        ]
+
+        users_to_add = list(set(access_users) - set(allocation_usernames))
+        create_group_time = datetime.now()
+        async_task(
+            addMembersToADGroup, users_to_add, access_allocation, create_group_time
+        )

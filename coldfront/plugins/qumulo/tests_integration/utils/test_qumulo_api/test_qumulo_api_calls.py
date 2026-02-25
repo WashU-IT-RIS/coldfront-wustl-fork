@@ -5,6 +5,7 @@ from django.test import TestCase, tag
 from unittest import mock
 
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.tests_integration.utils.test_qumulo_api.utils import (
     print_all_quotas_with_usage,
 )
@@ -17,7 +18,9 @@ class TestQumuloApiCalls(TestCase):
     @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
     @tag("integration")
     def test_print_all_quotas_with_usage(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = qumulo_api = StorageControllerFactory().create_connection(
+            "Storage2"
+        )
         print_all_quotas_with_usage(qumulo_api)
 
     # Currently the page limit was hard coded in the code and is used
@@ -27,7 +30,9 @@ class TestQumuloApiCalls(TestCase):
     @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": ""})
     @tag("integration")
     def test_get_quotas_with_usage_page_limit_not_specified(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = qumulo_api = StorageControllerFactory().create_connection(
+            "Storage2"
+        )
         all_quotas = qumulo_api.get_all_quotas_with_usage()
         paging = all_quotas.get("paging")
 
@@ -41,7 +46,7 @@ class TestQumuloApiCalls(TestCase):
     )  # Arbitrary large number
     @tag("integration")
     def test_get_quotas_with_usage_page_limit_exceeding_qumulo_allocations(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         all_quotas = qumulo_api.get_all_quotas_with_usage()
         paging = all_quotas.get("paging")
 
@@ -53,7 +58,7 @@ class TestQumuloApiCalls(TestCase):
     @mock.patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2"})
     @tag("integration")
     def test_get_quotas_with_usage_page_limit_specified(self):
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         all_quotas = qumulo_api.get_all_quotas_with_usage()
         paging = all_quotas.get("paging")
 
@@ -70,7 +75,7 @@ class TestQumuloApiCalls(TestCase):
 
     @tag("integration")
     def test_get_file_system_capacity(self) -> None:
-        qumulo_api = QumuloAPI()
+        qumulo_api = StorageControllerFactory().create_connection("Storage2")
         file_system_capacity_stats = qumulo_api.get_file_system_stats()
         size_bytes_keys = file_system_capacity_stats.keys()
         self.assertIn("total_size_bytes", size_bytes_keys)

@@ -1,11 +1,7 @@
 import datetime
-import importlib
-import json
 import logging
-from ast import literal_eval
 from enum import Enum
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -68,6 +64,33 @@ class AllocationStatusChoice(TimeStampedModel):
         return (self.name,)
 
 
+class AllocationQuerySet(models.QuerySet):
+    def active_storage(self):
+        return self.filter(
+            status__name="Active", resources__resource_type__name="Storage"
+        )
+
+    def parents(self):
+        return self.filter(parent_links=None)
+
+    def consumption(self):
+        return self.filter(
+            allocationattribute__allocation_attribute_type__name="service_rate_category",
+            allocationattribute__value="consumption",
+        )
+
+    def not_exempt(self):
+        return self.exclude(
+            allocationattribute__allocation_attribute_type__name="billing_exempt",
+            allocationattribute__value="yes",
+        )
+
+    def reserved_statuses(self):
+        return self.filter(
+            status__name__in=["Pending", "Active", "New"]
+        )
+
+
 class Allocation(TimeStampedModel):
     """An allocation provides users access to a resource.
 
@@ -110,6 +133,7 @@ class Allocation(TimeStampedModel):
     description = models.CharField(max_length=512, blank=True, null=True)
     is_locked = models.BooleanField(default=False)
     is_changeable = models.BooleanField(default=False)
+    objects = AllocationQuerySet.as_manager()
     history = HistoricalRecords()
 
     def clean(self):
@@ -301,6 +325,31 @@ class Allocation(TimeStampedModel):
 
         usage.value = value
         usage.save()
+
+    def get_usage_kb_by_date(self, usage_date: datetime.date) -> float:
+        """
+        Params:
+            usage_date (date): date for which to retrieve the usage
+
+        Returns:
+            float or None: the value of the allocation's storage_quota usage on the specified date in KB,
+            or None if (not found or error)
+        """
+        try:
+            usage = (
+                AllocationAttributeUsage.history.filter(
+                    allocation_attribute__allocation=self.id,
+                    allocation_attribute__allocation_attribute_type__name="storage_quota",
+                    history_date__date__range=(usage_date, usage_date)
+                )
+                .values("value")
+                .first()
+            )
+            if usage is None or "value" not in usage:
+                return None
+            return float(usage["value"]) / 1024
+        except Exception:
+            return None
 
     def get_attribute_list(self, name, expand=True, typed=True, extra_allocations=[]):
         """

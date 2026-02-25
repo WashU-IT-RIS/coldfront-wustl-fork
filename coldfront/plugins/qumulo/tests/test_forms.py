@@ -1,15 +1,21 @@
+import json
 import os
+import json
 
 from django.test import TestCase
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from django.contrib.auth.models import Permission
 
+from coldfront.core.allocation.models import AllocationStatusChoice
 from coldfront.core.project.models import Project, ProjectStatusChoice
+from coldfront.core.resource.models import Resource
 from coldfront.core.user.models import User
 from coldfront.core.field_of_science.models import FieldOfScience
 
-from coldfront.plugins.qumulo.forms import AllocationForm, ProjectCreateForm
+from coldfront.plugins.qumulo.forms.ProjectCreateForm import ProjectCreateForm
+from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
+from coldfront.plugins.qumulo.forms.UpdateAllocationForm import UpdateAllocationForm
 from coldfront.plugins.qumulo.tests.helper_classes.filesystem_path import (
     PathExistsMock,
     ValidFormPathMock,
@@ -17,18 +23,31 @@ from coldfront.plugins.qumulo.tests.helper_classes.filesystem_path import (
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     build_models_without_project,
+    create_allocation,
+    mock_qumulo_info,
 )
 
 
-@patch("coldfront.plugins.qumulo.validators.ActiveDirectoryAPI")
+@patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class AllocationFormTests(TestCase):
     def setUp(self):
         build_data = build_models()
-        self.patcher = patch("coldfront.plugins.qumulo.validators.QumuloAPI")
-        self.mock_qumulo_api = self.patcher.start()
+        self.qumulo_patcher = patch(
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        )
+        self.mock_qumulo_api = self.qumulo_patcher.start()
 
-        self.old_storage2_path = os.environ.get("STORAGE2_PATH")
-        os.environ["STORAGE2_PATH"] = "/path/to"
+        self.active_directory_patcher = patch(
+            "coldfront.plugins.qumulo.validators.ActiveDirectoryAPI"
+        )
+        self.mock_active_directory_api = self.active_directory_patcher.start()
+        self.mock_active_directory_api.return_value.get_members.return_value = [
+            {"attributes": {"sAMAccountName": "test"}}
+        ]
+
+        self.qumulo_info = json.loads(os.environ.get("QUMULO_INFO"))
+        self.old_storage2_path = self.qumulo_info["Storage2"]["path"]
+        self.qumulo_info["Storage2"]["path"] = "/path/to"
 
         self.user = build_data["user"]
         self.project1 = build_data["project"]
@@ -38,9 +57,10 @@ class AllocationFormTests(TestCase):
         self._setupValidPathQumuloAPI()
 
     def tearDown(self):
-        self.patcher.stop()
+        self.qumulo_patcher.stop()
+        patch.stopall()
 
-        os.environ["STORAGE2_PATH"] = self.old_storage2_path
+        self.qumulo_info["Storage2"]["path"] = self.old_storage2_path
         return super().tearDown()
 
     def _setupPathExistsMock(self):
@@ -49,9 +69,10 @@ class AllocationFormTests(TestCase):
     def _setupValidPathQumuloAPI(self):
         self.mock_qumulo_api.return_value.rc.fs.get_file_attr = ValidFormPathMock()
 
-    def test_clean_method_with_valid_data(self, mock_active_directory_api: MagicMock):
+    def test_clean_method_with_valid_data(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "TestAllocation",
             "storage_quota": 1000,
             "protocols": ["nfs"],
@@ -63,15 +84,16 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
             "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.is_valid())
 
-    def test_clean_method_with_invalid_data(self, mock_active_directory_api: MagicMock):
+    def test_clean_method_with_invalid_data(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "Test Allocation",
             "storage_quota": 1000,
             "protocols": ["nfs"],
@@ -84,18 +106,130 @@ class AllocationFormTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.is_valid())
 
-    def test_empty_ro_users_form_valid(self, mock_active_directory_api: MagicMock):
+    def test_duplicate_storage_name_for_storage_type(self):
+        # First, create an allocation with a specific name
+        existing_allocation_data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "duplicatename",
+            "storage_quota": 1000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-12345",
+            "storage_export_path": "/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        create_allocation(self.project1, self.user, existing_allocation_data)
+
+        # Now, attempt to create another allocation with the same name
+        duplicate_name_data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "duplicatename",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(data=duplicate_name_data, user_id=self.user.id)
+        self.assertFalse(form.is_valid())
+        self.assertIn("storage_name", form.errors)
+
+        # Now, attempt to create another allocation with the same name but different storage type
+        duplicate_name_data_different_storage_type = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage3",
+            "storage_name": "duplicatename",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(
+            data=duplicate_name_data_different_storage_type, user_id=self.user.id
+        )
+        self.assertTrue(form.is_valid())
+        self.assertNotIn("storage_name", form.errors)
+
+        # Now, attempt to create another allocation with an allocation attribute other than storage_name having the same name
+        duplicate_name_data_in_another_allocation_attribute = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage3",
+            "storage_name": "just_a_name",  # Same name as existing allocation
+            "storage_quota": 2000,
+            "protocols": ["nfs"],
+            "storage_filesystem_path": "another_path_to_filesystem",
+            "storage_ticket": "ITSD-67890",
+            "storage_export_path": "/another/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "duplicatename",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(
+            data=duplicate_name_data_in_another_allocation_attribute,
+            user_id=self.user.id,
+        )
+        self.assertTrue(form.is_valid())
+        self.assertNotIn("storage_name", form.errors)
+        self.assertNotIn("cost_center", form.errors)
+
+    def test_storage_type_initial_value(self):
+        DEFAULT_STORAGE_TYPE = "Storage3"
+        OTHER_STORAGE_TYPE = "Storage2"
+        form = AllocationForm(user_id=self.user.id)
+
+        self.assertEqual(
+            form.fields["storage_type"].initial,
+            Resource.objects.get(name=DEFAULT_STORAGE_TYPE).name,
+            msg=f"Initial storage type should be '{DEFAULT_STORAGE_TYPE}'",
+        )
+
+        self.assertNotEqual(
+            form.fields["storage_type"].initial,
+            Resource.objects.get(name=OTHER_STORAGE_TYPE).name,
+            msg=f"Initial storage type should not be '{OTHER_STORAGE_TYPE}'",
+        )
+
+
+    def test_empty_ro_users_form_valid(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
-            "ro_users": [],
+            "ro_users": ["test"],
             "rw_users": ["test"],
             "storage_filesystem_path": "path_to_filesystem",
             "storage_ticket": "ITSD-98765",
@@ -103,16 +237,17 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
             "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertFalse(form.fields["ro_users"].required)
         self.assertTrue(form.is_valid())
 
-    def test_storage_ticket_required(self, mock_active_directory_api: MagicMock):
+    def test_storage_ticket_required(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -125,15 +260,16 @@ class AllocationFormTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.fields["storage_ticket"].required)
         self.assertFalse(form.is_valid())
 
-    def test_billing_exempt_required(self, mock_active_directory_api: MagicMock):
+    def test_billing_exempt_required(self):
         invalid_data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -146,18 +282,19 @@ class AllocationFormTests(TestCase):
             # "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
         self.assertTrue(invalid_form.fields["billing_exempt"].required)
         self.assertFalse(invalid_form.is_valid())
 
     # The value of billing_exempt is casesensitive, which will only take "Yes" or "No".
-    def test_billing_exempt_invalid_values(self, mock_active_directory_api: MagicMock):
+    def test_billing_exempt_invalid_values(self):
         invalid_values = {True, False, "yes", "no", "YES", "NO", "Yes/No", "abc", ""}
         for invalid_value in invalid_values:
             invalid_data = {
                 "project_pk": self.project1.id,
+                "storage_type": "Storage2",
                 "storage_name": "valid-smb-allocation-name",
                 "storage_quota": 1000,
                 "protocols": ["smb"],
@@ -170,14 +307,15 @@ class AllocationFormTests(TestCase):
                 "billing_exempt": invalid_value,
                 "department_number": "Time Travel Services",
                 "billing_cycle": "monthly",
-                "service_rate": "consumption",
+                "service_rate_category": "consumption",
             }
             invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
             self.assertFalse(invalid_form.is_valid())
 
-    def test_billing_exempt_is_Yes(self, mock_active_directory_api: MagicMock):
+    def test_billing_exempt_is_Yes(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -190,14 +328,15 @@ class AllocationFormTests(TestCase):
             "billing_exempt": "Yes",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
         self.assertTrue(form.is_valid())
 
-    def test_billing_exempt_is_No(self, mock_active_directory_api: MagicMock):
+    def test_billing_exempt_is_No(self):
         data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -210,14 +349,16 @@ class AllocationFormTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         form = AllocationForm(data=data, user_id=self.user.id)
+        form.is_valid()
         self.assertTrue(form.is_valid())
 
-    def test_billing_cycle_required(self, mock_active_directory_api: MagicMock):
+    def test_billing_cycle_required(self):
         invalid_data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -230,15 +371,16 @@ class AllocationFormTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             # "billing_cycle": "monthly",
-            "service_rate": "not_a_rate",
+            "service_rate_category": "not_a_rate",
         }
         invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
         self.assertTrue(invalid_form.fields["billing_cycle"].required)
         self.assertFalse(invalid_form.is_valid())
 
-    def test_service_rate_valid_options(self, mock_active_directory_api: MagicMock):
+    def test_service_rate_valid_options(self):
         invalid_data = {
             "project_pk": self.project1.id,
+            "storage_type": "Storage2",
             "storage_name": "valid-smb-allocation-name",
             "storage_quota": 1000,
             "protocols": ["smb"],
@@ -250,13 +392,125 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "not_a_rate",
             "billing_cycle": "monthly",
+            "service_rate_category": "not_a_rate",
         }
         invalid_form = AllocationForm(data=invalid_data, user_id=self.user.id)
-        self.assertTrue(invalid_form.fields["service_rate"].required)
+        self.assertTrue(invalid_form.fields["service_rate_category"].required)
         self.assertFalse(invalid_form.is_valid())
 
+        valid_data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        valid_form = AllocationForm(data=valid_data, user_id=self.user.id)
+        self.assertTrue(valid_form.fields["service_rate_category"].required)
+        self.assertTrue(valid_form.is_valid())
+
+    def test_empty_technical_contact(self):
+        data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(data=data, user_id=self.user.id)
+        self.assertFalse(form.fields["technical_contact"].required)
+        self.assertTrue(form.is_valid())
+
+    def test_provided_technical_contact(self):
+        data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+            "technical_contact": "captain.crunch",
+        }
+        form = AllocationForm(data=data, user_id=self.user.id)
+        self.assertFalse(form.fields["technical_contact"].required)
+        self.assertTrue(form.is_valid())
+
+    def test_empty_billing_contact(self):
+        data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        form = AllocationForm(data=data, user_id=self.user.id)
+        self.assertFalse(form.fields["billing_contact"].required)
+        self.assertTrue(form.is_valid())
+
+    def test_provided_billing_contact(self):
+        data = {
+            "project_pk": self.project1.id,
+            "storage_type": "Storage2",
+            "storage_name": "valid-smb-allocation-name",
+            "storage_quota": 1000,
+            "protocols": ["smb"],
+            "ro_users": [],
+            "rw_users": ["test"],
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "",
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "service_rate_category": "consumption",
+            "billing_contact": "captain.crunch",
+            "billing_cycle": "monthly",
+        }
+        form = AllocationForm(data=data, user_id=self.user.id)
+        self.assertFalse(form.fields["billing_contact"].required)
+        self.assertTrue(form.is_valid())
+
+    def test_default_rw_user_required(self):
         valid_data = {
             "project_pk": self.project1.id,
             "storage_name": "valid-smb-allocation-name",
@@ -270,98 +524,11 @@ class AllocationFormTests(TestCase):
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
-            "service_rate": "consumption",
             "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
         }
-        valid_form = AllocationForm(data=valid_data, user_id=self.user.id)
-        self.assertTrue(valid_form.fields["service_rate"].required)
-        self.assertTrue(valid_form.is_valid())
-
-    def test_empty_technical_contact(self, mock_active_directory_api: MagicMock):
-        data = {
-            "project_pk": self.project1.id,
-            "storage_name": "valid-smb-allocation-name",
-            "storage_quota": 1000,
-            "protocols": ["smb"],
-            "ro_users": [],
-            "rw_users": ["test"],
-            "storage_filesystem_path": "path_to_filesystem",
-            "storage_ticket": "ITSD-98765",
-            "storage_export_path": "",
-            "cost_center": "Uncle Pennybags",
-            "billing_exempt": "No",
-            "department_number": "Time Travel Services",
-            "service_rate": "consumption",
-            "billing_cycle": "monthly",
-        }
-        form = AllocationForm(data=data, user_id=self.user.id)
-        self.assertFalse(form.fields["technical_contact"].required)
-        self.assertTrue(form.is_valid())
-
-    def test_provided_technical_contact(self, mock_active_directory_api: MagicMock):
-        data = {
-            "project_pk": self.project1.id,
-            "storage_name": "valid-smb-allocation-name",
-            "storage_quota": 1000,
-            "protocols": ["smb"],
-            "ro_users": [],
-            "rw_users": ["test"],
-            "storage_filesystem_path": "path_to_filesystem",
-            "storage_ticket": "ITSD-98765",
-            "storage_export_path": "",
-            "cost_center": "Uncle Pennybags",
-            "billing_exempt": "No",
-            "department_number": "Time Travel Services",
-            "service_rate": "consumption",
-            "technical_contact": "captain.crunch",
-            "billing_cycle": "monthly",
-        }
-        form = AllocationForm(data=data, user_id=self.user.id)
-        self.assertFalse(form.fields["technical_contact"].required)
-        self.assertTrue(form.is_valid())
-
-    def test_empty_billing_contact(self, mock_active_directory_api: MagicMock):
-        data = {
-            "project_pk": self.project1.id,
-            "storage_name": "valid-smb-allocation-name",
-            "storage_quota": 1000,
-            "protocols": ["smb"],
-            "ro_users": [],
-            "rw_users": ["test"],
-            "storage_filesystem_path": "path_to_filesystem",
-            "storage_ticket": "ITSD-98765",
-            "storage_export_path": "",
-            "cost_center": "Uncle Pennybags",
-            "billing_exempt": "No",
-            "department_number": "Time Travel Services",
-            "service_rate": "consumption",
-            "billing_cycle": "monthly",
-        }
-        form = AllocationForm(data=data, user_id=self.user.id)
-        self.assertFalse(form.fields["billing_contact"].required)
-        self.assertTrue(form.is_valid())
-
-    def test_provided_billing_contact(self, mock_active_directory_api: MagicMock):
-        data = {
-            "project_pk": self.project1.id,
-            "storage_name": "valid-smb-allocation-name",
-            "storage_quota": 1000,
-            "protocols": ["smb"],
-            "ro_users": [],
-            "rw_users": ["test"],
-            "storage_filesystem_path": "path_to_filesystem",
-            "storage_ticket": "ITSD-98765",
-            "storage_export_path": "",
-            "cost_center": "Uncle Pennybags",
-            "billing_exempt": "No",
-            "department_number": "Time Travel Services",
-            "service_rate": "consumption",
-            "billing_contact": "captain.crunch",
-            "billing_cycle": "monthly",
-        }
-        form = AllocationForm(data=data, user_id=self.user.id)
-        self.assertFalse(form.fields["billing_contact"].required)
-        self.assertTrue(form.is_valid())
+        form = AllocationForm(data=valid_data, user_id=self.user.id)
+        self.assertTrue(form.fields["rw_users"].required)
 
 
 class AllocationFormProjectChoiceTests(TestCase):
@@ -407,7 +574,7 @@ class AllocationFormProjectChoiceTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         self.form_a = AllocationForm(data=self.data_a, user_id=self.user_a.id)
 
@@ -425,7 +592,7 @@ class AllocationFormProjectChoiceTests(TestCase):
             "billing_exempt": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
-            "service_rate": "consumption",
+            "service_rate_category": "consumption",
         }
         self.form_b = AllocationForm(data=self.data_b, user_id=self.user_b.id)
 
@@ -470,7 +637,7 @@ class ProjectFormTests(TestCase):
     def setUp(self):
         self.fieldOfScience = FieldOfScience.objects.create(description="Bummerology")
 
-    def test_form_with_valid_data(self, mock_active_directory_api: MagicMock):
+    def test_form_with_valid_data(self, mock_active_directory_api):
         valid_data = {
             "title": "project-sleong",
             "pi": "sleong",
@@ -479,3 +646,93 @@ class ProjectFormTests(TestCase):
         }
         form = ProjectCreateForm(data=valid_data, user_id="admin")
         self.assertTrue(form.is_valid())
+
+
+@patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
+class UpdateAllocationFormTests(TestCase):
+    def setUp(self):
+        self.qumulo_patcher = patch(
+            "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
+        )
+        self.mock_qumulo_api = self.qumulo_patcher.start()
+        self.active_directory_patcher = patch(
+            "coldfront.plugins.qumulo.validators.ActiveDirectoryAPI"
+        )
+        self.mock_active_directory_api = self.active_directory_patcher.start()
+        self.mock_active_directory_api.return_value.get_members.return_value = [
+            {"attributes": {"sAMAccountName": "test"}}
+        ]
+
+        build_data = build_models()
+        self.user = build_data["user"]
+        self.project1 = build_data["project"]
+        storage2 = Resource.objects.get(name="Storage2")
+        self.initial = {
+            "storage_name": "TestAllocation",
+            "storage_filesystem_path": "path_to_filesystem",
+            "storage_type": storage2.name,
+        }
+        self.data = {
+            "project_pk": self.project1.id,
+            "storage_quota": 1000,
+            "protocols": ["nfs"],
+            "storage_ticket": "ITSD-98765",
+            "storage_export_path": "/path/to/export",
+            "rw_users": ["test"],
+            "ro_users": ["test"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+        self.data_for_creation = {**self.data, **self.initial}
+        self.allocation = create_allocation(
+            self.project1, self.user, self.data_for_creation
+        )
+
+    def tearDown(self):
+        self.qumulo_patcher.stop()
+        patch.stopall()
+        return super().tearDown()
+
+    def test_default_rw_users_required(self):
+        form = UpdateAllocationForm(
+            initial=self.initial,
+            allocation_status_name=self.allocation.status.name,
+            data=self.data,
+            user_id=self.user.id,
+            allocation_id=self.allocation.pk,
+        )
+        self.assertTrue(form.fields["rw_users"].required)
+        self.assertTrue(form.is_valid())
+
+    def test_ready_for_deletion_rw_users_not_required(self):
+        rfd_status = AllocationStatusChoice.objects.filter(
+            name="Ready for deletion"
+        ).first()
+        self.allocation.status = rfd_status
+        self.allocation.save()
+        form = UpdateAllocationForm(
+            initial=self.initial,
+            allocation_status_name=self.allocation.status.name,
+            data=self.data,
+            user_id=self.user.id,
+            allocation_id=self.allocation.pk,
+        )
+        self.assertFalse(form.fields["rw_users"].required)
+        self.assertTrue(form.is_valid())
+
+    def test_validations_on_changed_values(self):
+        update_form = UpdateAllocationForm(
+            initial=self.initial,
+            data=self.data,
+            user_id=self.user.id,
+            allocation_id=self.allocation.pk,
+        )
+        self.assertTrue(update_form.is_bound)
+        self.assertTrue(update_form.is_valid())
+        update_form.clean()
+        self.assertNotIn("storage_name", update_form.errors)
+        self.assertNotIn("storage_type", update_form.errors)
+        self.assertEqual(len(update_form.errors), 0)

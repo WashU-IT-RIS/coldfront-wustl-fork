@@ -1,9 +1,11 @@
 from django.db.models import Q
 from django.contrib.auth.models import User
-from django_q.tasks import async_task
 
+import os
 import json
 import logging
+import time
+from datetime import datetime
 
 from coldfront.config.env import ENV
 from coldfront.core.allocation.models import (
@@ -22,13 +24,10 @@ from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 from qumulo.lib.request import RequestError
 
-import time
-from datetime import datetime
-
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 SECONDS_IN_AN_HOUR = 60 * 60
@@ -39,17 +38,22 @@ def poll_ad_group(
     acl_allocation: Allocation,
     expiration_seconds: int = SECONDS_IN_A_DAY,
 ) -> None:
-    qumulo_api = QumuloAPI()
+    storage_allocation = Allocation.objects.get(
+        pk=acl_allocation.get_attribute(name="storage_allocation_pk")
+    )
+    qumulo_api = StorageControllerFactory().create_connection(
+        storage_allocation.resources.first().name
+    )
 
     storage_acl_name = acl_allocation.get_attribute("storage_acl_name")
-    group_dn = ActiveDirectoryAPI.generate_group_dn(storage_acl_name)
+    group_dn = ActiveDirectoryAPI.generate_group_dn(storage_acl_name).strip()
 
     success = False
 
     try:
         qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
         success = True
-    except RequestError:
+    except RequestError as qumulo_request_error:
         logger.warn(f'Allocation Group "{group_dn}" not found')
         success = False
 
@@ -92,8 +96,10 @@ def conditionally_update_storage_allocation_status(allocation: Allocation) -> No
 
 
 def conditionally_update_storage_allocation_statuses() -> None:
-    resource = Resource.objects.get(name="Storage2")
-    allocations = Allocation.objects.filter(status__name="Pending", resources=resource)
+    storage_resources = Resource.objects.filter(resource_type__name="Storage")
+    allocations = Allocation.objects.filter(
+        status__name="Pending", resources__in=storage_resources
+    )
     logger.warn(f"Checking {len(allocations)} qumulo allocations")
 
     for allocation in allocations:
@@ -104,14 +110,20 @@ def conditionally_update_storage_allocation_statuses() -> None:
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
-    qumulo_api = QumuloAPI()
-    quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
-    base_allocation_quota_usages = list(
-        filter(
-            lambda quota_usage: AclAllocations.is_base_allocation(quota_usage["path"]),
-            quota_usages,
+    connection_info = json.loads(os.environ.get("QUMULO_INFO", "{}"))
+
+    base_allocation_quota_usages = []
+    for storage_key in connection_info.keys():
+        qumulo_api = StorageControllerFactory().create_connection(storage_key)
+        quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
+        base_allocation_quota_usages += list(
+            filter(
+                lambda quota_usage: AclAllocations.is_base_allocation(
+                    quota_usage["path"], storage_key
+                ),
+                quota_usages,
+            )
         )
-    )
 
     __set_daily_quota_usages(base_allocation_quota_usages, logger)
     __validate_results(base_allocation_quota_usages, logger)
@@ -121,54 +133,52 @@ def addMembersToADGroup(
     wustlkeys: list[str],
     acl_allocation: Allocation,
     create_group_time: datetime,
-    bad_keys: Optional[list[str]] = None,
-    good_keys: Optional[list[dict]] = None,
 ) -> None:
-    if bad_keys is None:
-        bad_keys = []
-    if good_keys is None:
-        good_keys = []
+    bad_keys = []
+    good_members = []
 
     if len(wustlkeys) == 0:
-        return __ad_members_and_handle_errors(
-            wustlkeys, acl_allocation, create_group_time, good_keys, bad_keys
-        )
+        return
 
     active_directory_api = ActiveDirectoryAPI()
-    wustlkey = wustlkeys[0]
 
-    try:
-        member = active_directory_api.get_member(wustlkey)
-        is_group = "group" in member["attributes"]["objectClass"]
+    gotten_members = active_directory_api.get_members(wustlkeys)
+    gotten_keys = [member["attributes"]["sAMAccountName"] for member in gotten_members]
 
-        good_keys.append(
-            {"wustlkey": wustlkey, "dn": member["dn"], "is_group": is_group}
-        )
-    except ValueError:
-        bad_keys.append(wustlkey)
+    for wustlkey in wustlkeys:
+        if wustlkey in gotten_keys:
+            member = __find_member(wustlkey, gotten_members)
+            is_group = "group" in member["attributes"]["objectClass"]
+            good_members.append(
+                {"wustlkey": wustlkey, "dn": member["dn"], "is_group": is_group}
+            )
+        else:
+            bad_keys.append(wustlkey)
 
-    async_task(
-        addMembersToADGroup,
-        wustlkeys[1:],
-        acl_allocation,
-        create_group_time,
-        bad_keys,
-        good_keys,
+    return __add_members_and_handle_errors(
+        wustlkeys, acl_allocation, create_group_time, good_members, bad_keys
     )
 
 
-def __ad_members_and_handle_errors(
+def __find_member(wustlkey: str, members: list[dict]) -> dict:
+    for member in members:
+        if member["attributes"]["sAMAccountName"] == wustlkey:
+            return member
+    return None
+
+
+def __add_members_and_handle_errors(
     wustlkeys: list[str],
     acl_allocation: Allocation,
     create_group_time: datetime,
-    good_keys: list[dict],
+    good_members: list[dict],
     bad_keys: list[str],
 ) -> None:
     active_directory_api = ActiveDirectoryAPI()
     group_name = acl_allocation.get_attribute("storage_acl_name")
 
-    if len(good_keys) > 0:
-        member_dns = [member["dn"] for member in good_keys]
+    if len(good_members) > 0:
+        member_dns = [member["dn"] for member in good_members]
 
         current_time = datetime.now()
         logger.warn(
@@ -190,7 +200,7 @@ def __ad_members_and_handle_errors(
             __send_error_adding_users_email(acl_allocation, wustlkeys)
             return
 
-        for member in good_keys:
+        for member in good_members:
             AclAllocations.add_user_to_access_allocation(
                 member["wustlkey"], acl_allocation, member["is_group"]
             )
@@ -369,7 +379,9 @@ class ResetAcl:
     # or dependent objects (SSL-related) "couldn't be pickled"
     def _setup_qumulo_api(self):
         if self.qumulo_api is None:
-            self.qumulo_api = QumuloAPI()
+            self.qumulo_api = StorageControllerFactory().create_connection(
+                self.allocation.resources.first().name
+            )
 
     def _set_directory_content_acls(self, contents):
         self._setup_qumulo_api()
