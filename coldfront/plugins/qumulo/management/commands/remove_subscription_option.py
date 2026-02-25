@@ -7,7 +7,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         print("Changing all Subscription Service Rate Categories to Consumption")
+        self.change_subscription_to_consumption()
 
+    def change_subscription_to_consumption(self):
         storage_resources = Resource.objects.filter(resource_type__name="Storage")
         allocations = list(
             Allocation.objects.filter(
