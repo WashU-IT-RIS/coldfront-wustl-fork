@@ -1,0 +1,3 @@
+A::OWNER@:rwaDxtTnNcy
+A:dg:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaDxtTnNcy
+A:fig:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaDxtTnNcy

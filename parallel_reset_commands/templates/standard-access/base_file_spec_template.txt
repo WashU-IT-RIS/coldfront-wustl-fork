@@ -1,0 +1,4 @@
+A::OWNER@:rwaxtTnNcoy
+A:g:RIS-IT-ADMIN@accounts.ad.wustl.edu:rwaxtTnNcy
+A:g:storage<STORAGE_SUFFIX>-<ALLOC>-rw@accounts.ad.wustl.edu:rwaxtTnNcy
+A:g:storage<STORAGE_SUFFIX>-<ALLOC>-ro@accounts.ad.wustl.edu:rtncy
