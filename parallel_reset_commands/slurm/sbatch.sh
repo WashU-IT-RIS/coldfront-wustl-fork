@@ -15,8 +15,8 @@ module load python3
 # formatted as: wustlkey,storage2_allocation,{storage2_suballocation2,storage2_suballocation2,...}
 input_file="./slurm/inputs.csv"
 input_line=$(sed -n "$((SLURM_ARRAY_TASK_ID + 1))p" $input_file)
-allocation_root=$(echo $input_line | cut -d',' -f2)
-sub_allocations=$(echo $input_line | cut -d',' -f3 | tr -d '{}')
+allocation_root=$(echo $input_line | cut -d',' -f1)
+sub_allocations=$(echo $input_line | cut -d',' -f2 | tr -d '{}')
 storage_suffix=$(echo "$allocation_root" | grep -Po '(?<=storage)\d+')
 
 # Print the parameters for logging
