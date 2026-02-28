@@ -7,11 +7,12 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 )
 from coldfront.core.allocation.models import (
     Allocation,
+    AllocationStatusChoice
 )
 
-from coldfront.plugins.qumulo.management.commands.remove_subscription_option import change_subscription_to_consumption
+from django.core.management import call_command
 
-class TestRemoveSubscriptionOption(TestCase):
+class TestChangeSubscriptionToConsumption(TestCase):
     def setUp(self):
         self.client = Client()
 
@@ -30,8 +31,12 @@ class TestRemoveSubscriptionOption(TestCase):
     def test_one_subscription_allocation(self):
         non_subscription_allocation = create_allocation(self.project, self.user, self.no_subscription_form_data)
         subscription_allocation = create_allocation(self.project, self.user, self.subscription_form_data)
+        subscription_allocation.status = AllocationStatusChoice.objects.get(name="Active")
+        subscription_allocation.save()
+        non_subscription_allocation.status = AllocationStatusChoice.objects.get(name="Active")
+        non_subscription_allocation.save()
 
-        change_subscription_to_consumption()
+        call_command("change_subscription_to_consumption")
 
         subscription_allocations = Allocation.objects.filter(allocationattribute__allocation_attribute_type__name="service_rate_category", allocationattribute__value="subscription").values("pk")
         consumption_allocations = Allocation.objects.filter(allocationattribute__allocation_attribute_type__name="service_rate_category", allocationattribute__value="consumption").values("pk")
@@ -43,11 +48,35 @@ class TestRemoveSubscriptionOption(TestCase):
     def test_no_subscription_allocations(self):
         allocation_one = create_allocation(self.project, self.user, self.no_subscription_form_data)
         allocation_two = create_allocation(self.project, self.user, self.no_subscription_form_data)
+        allocation_one.status = AllocationStatusChoice.objects.get(name="Active")
+        allocation_one.save()
+        allocation_two.status = AllocationStatusChoice.objects.get(name="Active")
+        allocation_two.save()
 
-        change_subscription_to_consumption()
+        call_command("change_subscription_to_consumption")
 
         subscription_allocations = Allocation.objects.filter(allocationattribute__allocation_attribute_type__name="service_rate_category", allocationattribute__value="subscription").values("pk")
         consumption_allocations = Allocation.objects.filter(allocationattribute__allocation_attribute_type__name="service_rate_category", allocationattribute__value="consumption").values("pk")
         
         self.assertEqual(subscription_allocations.count(), 0)
+        self.assertEqual(consumption_allocations.count(), 2)
+    
+    def test_deleted_subscription_allocation(self):
+        non_subscription_allocation = create_allocation(self.project, self.user, self.no_subscription_form_data)
+        subscription_allocation = create_allocation(self.project, self.user, self.subscription_form_data)
+        deleted_subscription_allocation = create_allocation(self.project, self.user, self.subscription_form_data)
+        
+        subscription_allocation.status = AllocationStatusChoice.objects.get(name="Active")
+        subscription_allocation.save()
+        non_subscription_allocation.status = AllocationStatusChoice.objects.get(name="Active")
+        non_subscription_allocation.save()
+        deleted_subscription_allocation.status = AllocationStatusChoice.objects.get(name="Deleted")
+        deleted_subscription_allocation.save()
+
+        call_command("change_subscription_to_consumption")
+
+        subscription_allocations = Allocation.objects.filter(allocationattribute__allocation_attribute_type__name="service_rate_category", allocationattribute__value="subscription").values("pk")
+        consumption_allocations = Allocation.objects.filter(allocationattribute__allocation_attribute_type__name="service_rate_category", allocationattribute__value="consumption").values("pk")
+        
+        self.assertEqual(subscription_allocations.count(), 1)
         self.assertEqual(consumption_allocations.count(), 2)
