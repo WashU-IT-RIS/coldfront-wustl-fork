@@ -42,6 +42,12 @@ class TestChangeSubscriptionToConsumption(TestCase):
         )
         non_subscription_allocation.save()
 
+        subscription_allocations = Allocation.objects.filter(
+            allocationattribute__allocation_attribute_type__name="service_rate_category",
+            allocationattribute__value="subscription",
+        )
+        self.assertEqual(subscription_allocations.count(), 1)
+
         call_command("change_subscription_to_consumption")
 
         subscription_allocations = Allocation.objects.filter(
@@ -105,6 +111,12 @@ class TestChangeSubscriptionToConsumption(TestCase):
             name="Deleted"
         )
         deleted_subscription_allocation.save()
+
+        subscription_allocations = Allocation.objects.filter(
+            allocationattribute__allocation_attribute_type__name="service_rate_category",
+            allocationattribute__value="subscription",
+        )
+        self.assertEqual(subscription_allocations.count(), 2)
 
         call_command("change_subscription_to_consumption")
 
