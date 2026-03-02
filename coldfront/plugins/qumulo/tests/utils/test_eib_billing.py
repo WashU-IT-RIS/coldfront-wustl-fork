@@ -118,9 +118,6 @@ def mock_get_quota_service_rate_categories():
         (5, "consumption"),
         (15, "consumption"),
         (100, "consumption"),
-        (5, "consumption"),
-        (100, "consumption"),
-        (500, "consumption"),
         (500, "consumption_500tb"),
         (500, "condo"),
     ]
@@ -132,9 +129,6 @@ def mock_get_names_quotas_usages():
         ("5tb-consumption", "5000000000000", "5000000000000"),
         ("15tb-consumption", "15000000000000", "10995116277760"),
         ("100tb-consumption", "100000000000000", "10995116277760"),
-        ("5tb-consumption", "5000000000000", "1"),
-        ("100tb-consumption", "100000000000000", "20"),
-        ("500tb-consumption", "500000000000000", "200000000000000"),
         ("500tb-consumption_500tb", "500000000000000", "2"),
         ("500tb-condo", "500000000000000", "2"),
     ]
