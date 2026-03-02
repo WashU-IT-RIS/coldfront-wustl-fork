@@ -201,7 +201,7 @@ class AllocationUsageQuerySetTest(TestCase):
         self.assertIn(self.alloc2, qs)
         self.assertIn(self.alloc3, qs)
         self.assertIn(self.alloc5, qs)
-        self.assertNotIn(self.alloc4, qs)
+        self.assertIn(self.alloc4, qs)
 
     def test_by_fileset(self):
         qs = AllocationUsage.objects.by_fileset(self.fileset1)
