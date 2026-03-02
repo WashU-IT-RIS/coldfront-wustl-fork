@@ -69,6 +69,25 @@ class AllocationViewTests(TestCase):
             "service_rate_category": "consumption",
         }
 
+        self.sub_form_data_no_protocols = {
+            "project_pk": self.project.id,
+            "storage_type": self.parent_form_data["storage_type"],
+            "parent_allocation_name": self.parent_form_data["storage_name"],
+            "storage_filesystem_path": "no_protocols_sub_allocation",
+            "storage_export_path": "",
+            "storage_ticket": "ITSD-78910",
+            "storage_name": "general_store",
+            "storage_quota": 8,
+            "protocols": [],
+            "rw_users": ["test2"],
+            "ro_users": ["test3"],
+            "cost_center": "CC-3232",
+            "billing_exempt": "No",
+            "department_number": "Whale-watching",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+
     def test_create_sub_allocation(
         self,
         mock_ActiveDirectoryAPI_validator: MagicMock,
@@ -114,3 +133,57 @@ class AllocationViewTests(TestCase):
         )
 
         self.assertEqual(child_storage_name.value, "baz-general_store")
+
+    def test_create_sub_allocation_when_user_selects_no_protocols(
+        self,
+        mock_ActiveDirectoryAPI_validator: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
+        mock_async_task: MagicMock,
+    ):
+        parent_result = AllocationService.create_new_allocation(
+            self.parent_form_data, self.user
+        )
+
+        # verifying that a new Allocation object was created
+        self.assertEqual(Allocation.objects.count(), 3)
+
+        storage_resources = Resource.objects.filter(resource_type__name="Storage")
+        storage_allocations = Allocation.objects.filter(resources__in=storage_resources)
+        self.assertEqual(len(storage_allocations), 1)
+
+        self.assertEqual(AllocationLinkage.objects.count(), 0)
+
+        # create a sub-allocation with no protocols
+        sub_result = AllocationService.create_new_allocation(
+            self.sub_form_data_no_protocols, self.user, parent_allocation=parent_result["allocation"]
+        )
+
+        # verifying that a new sub-Allocation object was created
+        self.assertEqual(Allocation.objects.count(), 6)
+        storage_allocations = Allocation.objects.filter(resources__in=storage_resources)
+        self.assertEqual(storage_allocations.count(), 2)
+
+        # assert that an allocationlinkage was created
+        self.assertEqual(AllocationLinkage.objects.count(), 1)
+
+        linkage = AllocationLinkage.objects.first()
+
+        self.assertEqual(linkage.parent, parent_result["allocation"])
+        self.assertEqual(linkage.children.count(), 1)
+        self.assertEqual(linkage.children.first(), sub_result["allocation"])
+
+        storage_name_type = AllocationAttributeType.objects.get(name="storage_name")
+        child_storage_name = AllocationAttribute.objects.get(
+            allocation=sub_result["allocation"],
+            allocation_attribute_type=storage_name_type,
+        )
+
+        self.assertEqual(child_storage_name.value, "baz-general_store")
+
+        # verify that protocols attribute is set to empty list
+        protocols_type = AllocationAttributeType.objects.get(name="storage_protocols")
+        child_protocols = AllocationAttribute.objects.get(
+            allocation=sub_result["allocation"],
+            allocation_attribute_type=protocols_type,
+        )
+        self.assertEqual(child_protocols.value, "[]")

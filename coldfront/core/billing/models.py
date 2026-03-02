@@ -59,7 +59,7 @@ class AllocationUsageQuerySet(models.QuerySet):
 
     # From the queryset of monthly_billable consumption allocations
     def _is_all_subsidized_valid(self) -> bool:
-        pis = self.values_list("sponsor_pi", flat=True).distinct()
+        pis = self.values_list("sponsor_pi", flat=True).order_by("sponsor_pi").distinct()
         for pi in pis:
             if not self._is_subsidized_valid_by_pi(pi):
                 return False  # Found a PI with more than one subsidized allocation
@@ -79,7 +79,7 @@ class AllocationUsageQuerySet(models.QuerySet):
         if not self._is_all_subsidized_valid():
             return False  # Found a PI with more than one subsidized allocation
 
-        pis = self.values_list("sponsor_pi", flat=True).distinct()
+        pis = self.values_list("sponsor_pi", flat=True).order_by("sponsor_pi").distinct()
         for pi in pis:
             if self._count_subsidized_by_pi(pi) == 0:
                 if not self._set_subsidized_by_pi(pi):

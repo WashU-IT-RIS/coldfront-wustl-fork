@@ -1,6 +1,8 @@
 from icecream import ic
 
 from django.core.management.base import BaseCommand
+from coldfront.core.resource.models import Resource
+from coldfront.plugins.qumulo.constants import DEFAULT_STORAGE_TYPE
 
 from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
@@ -15,7 +17,11 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "resource_name", type=str, help="The resource_name (Ex: Storage2)"
+            "resource_name",
+            nargs='?',
+            type=str,
+            help=f"The storage resource_name (Defaults to {DEFAULT_STORAGE_TYPE})",
+            default=Resource.objects.get(name=DEFAULT_STORAGE_TYPE).name,
         )
 
         parser.add_argument(
@@ -35,6 +41,13 @@ class Command(BaseCommand):
             help="Execute validations but does not create any records",
         )
 
+        parser.add_argument(
+            "--ticket-number",
+            nargs="?",
+            type=str,
+            help="Overrides the ITSD ticket number to associate with the migration (optional)",
+        )
+
     def handle(self, *args, **options) -> None:
         fileset = options["fileset"]
         ic(fileset)
@@ -51,7 +64,14 @@ class Command(BaseCommand):
         dry_run = options["dry_run"]
         ic(dry_run)
 
+        ticket_number = options["ticket_number"]
+        ic(ticket_number)
+
         migrate_from_itsm_to_coldfront = MigrateToColdfront(dry_run)
+
+        if ticket_number:
+            migrate_from_itsm_to_coldfront.set_override("service_desk_ticket_number", ticket_number)
+
         if find_by_alias:
             result = migrate_from_itsm_to_coldfront.by_fileset_alias(
                 fileset, resource_name

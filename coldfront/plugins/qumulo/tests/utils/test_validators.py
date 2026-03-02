@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
-from coldfront.plugins.qumulo.validators import validate_leading_forward_slash
+from coldfront.plugins.qumulo.validators import validate_leading_forward_slash, is_float
 
 
 class TestValidateLeadingForwardSlash(TestCase):
@@ -23,3 +23,9 @@ class TestValidateLeadingForwardSlash(TestCase):
             self.fail(
                 "validate_leading_forward_slash raised ExceptionType unexpectedly!"
             )
+
+    def test_is_float(self):
+        self.assertTrue(is_float('123.45'))
+        self.assertTrue(is_float(123.45))
+        self.assertFalse(is_float('abc'))
+        self.assertFalse(is_float(None))

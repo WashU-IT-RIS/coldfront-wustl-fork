@@ -11,6 +11,7 @@ from coldfront.core.test_helpers.factories import (
     AllocationAttributeTypeFactory,
     AllocationStatusChoiceFactory,
     AllocationUserStatusChoiceFactory,
+    AllocationLinkageFactory,
     FieldOfScienceFactory,
     ProjectAttributeFactory,
     ProjectAttributeTypeFactory,
@@ -302,3 +303,12 @@ def create_allocation_attribute(
         allocation_attribute_type=allocation_attribute_type,
         value=value,
     )
+
+
+def create_allocation_linkage(
+    parent: Allocation,
+    children: list[Allocation],
+) -> AllocationLinkageFactory:
+    linkage = AllocationLinkageFactory(parent=parent, children=children)
+    return linkage
+

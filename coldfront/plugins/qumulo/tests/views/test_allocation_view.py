@@ -41,6 +41,24 @@ class AllocationViewTests(TestCase):
             "service_rate_category": "consumption",
         }
 
+        self.form_data_no_protocols = {
+            "project_pk": self.project.id,
+            "storage_type": "Storage2",
+            "storage_filesystem_path": "foo",
+            "storage_export_path": "bar",
+            "storage_ticket": "ITSD-54321",
+            "storage_name": "baz",
+            "storage_quota": 7,
+            "protocols": [],
+            "rw_users": ["test"],
+            "ro_users": ["test1"],
+            "cost_center": "Uncle Pennybags",
+            "billing_exempt": "No",
+            "department_number": "Time Travel Services",
+            "billing_cycle": "monthly",
+            "service_rate_category": "consumption",
+        }
+
     def test_create_new_allocation_create_allocation(
         self,
         mock_ActiveDirectoryValidator: MagicMock,
@@ -75,6 +93,47 @@ class AllocationViewTests(TestCase):
             )
             self.assertEqual(num_attrs, 1)
 
+    def test_create_new_allocation_create_allocation_no_protocols(
+        self,
+        mock_ActiveDirectoryValidator: MagicMock,
+        mock_async_task: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
+    ):
+        AllocationService.create_new_allocation(self.form_data_no_protocols, self.user)
+
+        # verifying that a new Allocation object was created
+        self.assertEqual(Allocation.objects.count(), 3)
+
+        # Accessing the created Allocation object
+        allocation = Allocation.objects.first()
+
+        # verifying that Allocation attributes were set correctly
+        self.assertEqual(allocation.project, self.project)
+
+        # verify that the allocation has the right default attributes
+        allocation_defaults = {
+            "secure": "No",
+            "audit": "No",
+            "billing_exempt": "No",
+            "subsidized": "Yes",
+        }
+        for attr in allocation_defaults.keys():
+            attribute_type = AllocationAttributeType.objects.get(name=attr)
+            num_attrs = len(
+                AllocationAttribute.objects.filter(
+                    allocation_attribute_type=attribute_type,
+                    allocation=allocation,
+                )
+            )
+            self.assertEqual(num_attrs, 1)
+
+        protocols_type = AllocationAttributeType.objects.get(name="storage_protocols")
+        child_protocols = AllocationAttribute.objects.get(
+            allocation=allocation,
+            allocation_attribute_type=protocols_type,
+        )
+        self.assertEqual(child_protocols.value, "[]")
+
     def test_new_allocation_status_is_pending(
         self,
         mock_ActiveDirectoryValidator: MagicMock,
@@ -84,4 +143,3 @@ class AllocationViewTests(TestCase):
         AllocationService.create_new_allocation(self.form_data, self.user)
         allocation = Allocation.objects.first()
         self.assertEqual(allocation.status.name, "Pending")
-
