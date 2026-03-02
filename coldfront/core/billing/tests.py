@@ -111,7 +111,7 @@ class AllocationUsageQuerySetTest(TestCase):
             usage_date=self.usage_date,
             exempt=False,
             billing_cycle="prepaid",
-            service_rate_category="subscription",
+            service_rate_category="consumption",
             sponsor_pi=self.pi2,
             storage_cluster=self.storage_cluster3,
             filesystem_path=self.filesystem_path2,

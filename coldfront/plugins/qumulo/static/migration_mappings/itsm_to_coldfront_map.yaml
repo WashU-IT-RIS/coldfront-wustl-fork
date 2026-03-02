@@ -321,12 +321,12 @@ itsm_to_coldfront_map:
               type: string
               transforms: null
               validates:
-                inclusion: ["condo", "consumption", "subscription"]
+                inclusion: ["condo", "consumption"]
     itsm_value:
       entity: service_provision
       attribute: service_rate_category
       type: string
-      values: ["condo", "consumption", "subscription"] # if the status is active
+      values: ["condo", "consumption"] # if the status is active
       nulls: true
       defaults_to: consumption
   comment:

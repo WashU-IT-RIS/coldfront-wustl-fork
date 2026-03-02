@@ -283,7 +283,7 @@
             "fileset_name": "mocker_active",
             "fileset_alias": "mocker_active",
             "exempt": false,
-            "service_rate_category": "subscription",
+            "service_rate_category": "consumption",
             "comment": "{\"afm_cache_enable\":true,\"_jenkins\":\"https://systems-ci.gsc.wustl.edu/job/storage1_allocation/2652\",\"add_archive\":\"true\"}",
             "billing_cycle": "monthly",
             "subsidized": true,

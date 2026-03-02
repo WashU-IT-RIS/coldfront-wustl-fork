@@ -173,21 +173,21 @@ class BillingGenerator:
                         FALSE exempt,
                         CASE service_rate_category
                             {additional_category_case_monthly}
-                            WHEN 'subscription' THEN 634
-                            WHEN 'subscription_500tb' THEN 2643
+                            WHEN 'consumption' THEN 634
+                            WHEN 'consumption_500tb' THEN 2643
                             WHEN 'condo' THEN 529
                         END rate,
                         storage_quota,
                         CASE service_rate_category
                             {additional_category_case_monthly_cast}
-                            WHEN 'subscription' THEN CEILING(CAST(storage_quota AS FLOAT8) /100)
-                            WHEN 'subscription_500tb' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
+                            WHEN 'consumption' THEN CEILING(CAST(storage_quota AS FLOAT8) /100)
+                            WHEN 'consumption_500tb' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
                             WHEN 'condo' THEN CEILING(CAST(storage_quota AS FLOAT8) /500)
                         END billing_amount_tb,
                         CASE service_rate_category
                             {additional_category_case_monthly_unit}
-                            WHEN 'subscription' THEN '100TB'
-                            WHEN 'subscription_500tb' THEN '500TB'
+                            WHEN 'consumption' THEN '100TB'
+                            WHEN 'consumption_500tb' THEN '500TB'
                             WHEN 'condo' THEN '500TB'
                         END service_unit,
                         storage_filesystem_path

@@ -46,7 +46,7 @@ def process_prepaid_billing_cycle_changes(
             AllocationAttribute.objects.filter(
                 allocation=allocation,
                 allocation_attribute_type__name="service_rate_category",
-            ).update(value="subscription")
+            ).update(value="consumption")
 
 
 def calculate_prepaid_expiration(
