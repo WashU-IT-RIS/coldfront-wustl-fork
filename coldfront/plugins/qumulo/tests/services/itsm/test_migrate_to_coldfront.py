@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
+    AllocationLinkage,
 )
 from coldfront.core.project.models import Project, ProjectAttribute
 
@@ -503,6 +504,81 @@ class TestMigrateToColdfront(TestCase):
             self.assertIn(attribute_value, allocation_attribute_values)
 
         self.assertEqual(allocation_attributes.count(), 21)
+
+        # test for sub-allocation creation based on dir_projects in itsm_comment
+        sub_allocations = AllocationLinkage.objects.get(
+            parent=allocation
+        ).children.filter(resources__resource_type__name="Storage")
+
+        self.assertEqual(sub_allocations.count(), 9)  # 9 dir_projects in itsm_comment
+
+        # validate that sub-allocation has correct attributes based on itsm_comment and parent allocation attributes
+        for sub_allocation in sub_allocations:
+            sub_allocation_attributes = AllocationAttribute.objects.filter(
+                allocation=sub_allocation
+            ).values_list("allocation_attribute_type__name", "value")
+            # Inherits some of the parent allocation attributes
+            inheritable_attributes = [
+                "storage_ticket",
+                "storage_quota",
+                "billing_exempt",
+                "service_rate_category",
+                "subsidized",
+                "department_number",
+                "cost_center",
+            ]
+            for attribute_name in inheritable_attributes:
+                self.assertIn(
+                    (
+                        attribute_name,
+                        allocation_attributes.get(
+                            allocation_attribute_type__name=attribute_name
+                        ).value,
+                    ),
+                    sub_allocation_attributes,
+                )
+
+            # context: sub-allocations have no protocols or export paths in Coldfront, and their filesystem paths are based on the parent allocation's filesystem path with the dir_project name appended
+            self.assertIn(
+                ("storage_protocols", "[]"),
+                sub_allocation_attributes,
+            )
+            self.assertIn(
+                ("storage_export_path", ""),
+                sub_allocation_attributes,
+            )
+
+            # hackalicious: there is no clean way to match the sub-allocations created from the dir_projects in itsm_comment to the specific dir_projects since they have the same attributes and are only differentiated by their storage name and filesystem path which are generated based on the parent allocation's storage name and filesystem path with the dir_project name appended, so we will validate that the storage name and filesystem path for each sub-allocation is correctly generated based on the parent allocation's storage name and filesystem path with the dir_project name appended
+            sub_allocation_name = sub_allocation.get_attribute("storage_name").split(
+                "-"
+            )[
+                -1
+            ]  # get the dir_project name appended to the parent storage name to form the sub-allocation storage name
+            # storage name is a combination of parent allocation's storage name and dir_project name in itsm_comment since sub-allocations are not represented in ITSM with their own storage names
+            parent_storage_name = allocation_attributes.get(
+                allocation_attribute_type__name="storage_name"
+            ).value
+
+            expected_sub_allocation_storage_name = (
+                f"{parent_storage_name}-{sub_allocation_name}"
+            )
+            self.assertIn(
+                ("storage_name", expected_sub_allocation_storage_name),
+                sub_allocation_attributes,
+            )
+
+            # storage filesystem path is parent allocation's filesystem path with dir_project name appended since sub-allocations are not represented in ITSM with their own filesystem paths
+            parent_filesystem_path = allocation_attributes.get(
+                allocation_attribute_type__name="storage_filesystem_path"
+            ).value
+
+            expected_sub_allocation_filesystem_path = (
+                f"{parent_filesystem_path}/Active/{sub_allocation_name}"
+            )
+            self.assertIn(
+                ("storage_filesystem_path", expected_sub_allocation_filesystem_path),
+                sub_allocation_attributes,
+            )
 
     def test_migrate_to_coldfront_with_itsm_comment_dir_projects_with_errors_and_warnings(
         self,
