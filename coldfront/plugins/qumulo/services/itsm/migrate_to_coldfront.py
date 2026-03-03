@@ -354,7 +354,7 @@ class MigrateToColdfront:
         ).name
         sub_allocation_form_data["storage_filesystem_path"] = sub_allocation_name
         sub_allocation_form_data["storage_export_path"] = (
-            ""  # not migrated from ITSM because sub-allocations do not have export paths in Coldfront
+            ""  # sub-allocations migarated from ITSM do not have export paths, so we will set storage_export_path to an empty string.
         )
         for field in [
             sub_allocation_field
