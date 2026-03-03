@@ -522,11 +522,13 @@ class TestMigrateToColdfront(TestCase):
                 "storage_ticket",
                 "storage_quota",
                 "billing_exempt",
+                "billing_cycle",
                 "service_rate_category",
                 "subsidized",
                 "department_number",
                 "cost_center",
             ]
+
             for attribute_name in inheritable_attributes:
                 self.assertIn(
                     (
