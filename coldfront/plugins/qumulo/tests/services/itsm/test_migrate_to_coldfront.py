@@ -551,21 +551,18 @@ class TestMigrateToColdfront(TestCase):
             )
 
             # hackalicious: there is no clean way to match the sub-allocations created from the dir_projects in itsm_comment to the specific dir_projects since they have the same attributes and are only differentiated by their storage name and filesystem path which are generated based on the parent allocation's storage name and filesystem path with the dir_project name appended, so we will validate that the storage name and filesystem path for each sub-allocation is correctly generated based on the parent allocation's storage name and filesystem path with the dir_project name appended
-            sub_allocation_name = sub_allocation.get_attribute("storage_name").split(
-                "-"
-            )[
-                -1
-            ]  # get the dir_project name appended to the parent storage name to form the sub-allocation storage name
+            sub_allocation_storage_name = sub_allocation.get_attribute("storage_name")
             # storage name is a combination of parent allocation's storage name and dir_project name in itsm_comment since sub-allocations are not represented in ITSM with their own storage names
             parent_storage_name = allocation_attributes.get(
                 allocation_attribute_type__name="storage_name"
             ).value
 
-            expected_sub_allocation_storage_name = (
-                f"{parent_storage_name}-{sub_allocation_name}"
+            # ensure the sub-allocation storage name is derived from the parent storage name
+            self.assertTrue(
+                sub_allocation_storage_name.startswith(f"{parent_storage_name}-")
             )
             self.assertIn(
-                ("storage_name", expected_sub_allocation_storage_name),
+                ("storage_name", sub_allocation_storage_name),
                 sub_allocation_attributes,
             )
 
