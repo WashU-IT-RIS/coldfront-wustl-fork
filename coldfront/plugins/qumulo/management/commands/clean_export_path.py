@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from coldfront.core.allocation.models import Allocation, AllocationAttribute
-from icecream import ic
+from coldfront.core.allocation.models import AllocationAttribute
 
 
 class Command(BaseCommand):
@@ -39,13 +38,13 @@ class Command(BaseCommand):
 def clean_export_path(
     export_path: str, allocation_ids: list[int], dry_run: bool
 ) -> None:
-    ic(allocation_ids)
-    ic(export_path)
-    ic(dry_run)
+    print(f"{allocation_ids=}")
+    print(f"{export_path=}")
+    print(f"{dry_run=}")
 
     allocation_attributes_to_be_cleaned = AllocationAttribute.objects.filter(
         allocation_id__in=allocation_ids,
-        allocation__status__name__in=[ "New", "Active", "Pending"],
+        allocation__status__name__in=["New", "Active", "Pending"],
         allocation_attribute_type__name="storage_export_path",
     )
 
@@ -53,14 +52,16 @@ def clean_export_path(
         "allocation_id", "value"
     )
     if dry_run:
-        ic("Dry run enabled. The following storage_export_path would be cleaned:")
+        print("Dry run enabled. The following storage_export_path would be cleaned: ")
         for allocation_id, current_export_path in before_values:
-            print(f" - Allocation ID: {allocation_id}, current_export_path:{current_export_path}")
+            print(
+                f' - Allocation ID: {allocation_id}, current_export_path: "{current_export_path}"'
+            )
         return None
 
     allocation_attributes_to_be_cleaned.update(value=export_path)
 
-    ic("Storage export paths have been cleaned for the following allocations:")
+    print("Storage export paths have been cleaned for the following allocations: ")
     for allocation_id, export_path in allocation_attributes_to_be_cleaned.values_list(
         "allocation_id", "value"
     ):
