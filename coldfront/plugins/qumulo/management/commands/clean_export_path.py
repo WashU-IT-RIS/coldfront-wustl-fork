@@ -46,21 +46,21 @@ def clean_export_path(
     allocation_attributes_to_be_cleaned = AllocationAttribute.objects.filter(
         allocation_id__in=allocation_ids,
         allocation__status__name__in=[ "New", "Active", "Pending"],
-        allocation_attribute_type__name="export_path",
+        allocation_attribute_type__name="storage_export_path",
     )
 
     before_values = allocation_attributes_to_be_cleaned.values_list(
         "allocation_id", "value"
     )
     if dry_run:
-        ic("Dry run enabled. The following export paths would be cleaned:")
+        ic("Dry run enabled. The following storage_export_path would be cleaned:")
         for allocation_id, current_export_path in before_values:
             ic(f" - Allocation ID {allocation_id}: {current_export_path}")
         return None
 
     allocation_attributes_to_be_cleaned.update(value=export_path)
 
-    ic("Export paths have been cleaned for the following allocations:")
+    ic("Storage export paths have been cleaned for the following allocations:")
     for allocation_id, _ in allocation_attributes_to_be_cleaned.values_list(
         "allocation_id", "value"
     ):
