@@ -30,20 +30,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options) -> None:
-        allocation_ids_input = options["allocation_ids"]
-        if not allocation_ids_input:
-            self.stdout.write(
-                self.style.ERROR("At least one allocation ID must be provided.")
-            )
-            return
-
-        ic(allocation_ids_input)
-        allocation_ids = [
-            int(n)
-            for n in allocation_ids_input.split(
-                "," if "," in allocation_ids_input else None
-            )
-        ]
+        allocation_ids = options["allocation_ids"]
         export_path = options["export_path"]
         dry_run = options["dry_run"]
         clean_export_path(export_path, allocation_ids, dry_run)
