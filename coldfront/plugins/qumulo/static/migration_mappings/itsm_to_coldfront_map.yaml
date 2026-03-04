@@ -371,6 +371,17 @@ itsm_to_coldfront_map:
                 length:
                   maximum: 128
                 inclusion: [monthly, yearly, quarterly, prepaid, fiscal year]
+      - entity: sub_allocation_form
+        attributes:
+          - name: billing_cycle
+            value:
+              type: string
+              transforms: null
+              validates:
+                presence: true
+                length:
+                  maximum: 128
+                inclusion: [monthly, yearly, quarterly, prepaid, fiscal year]
     itsm_value:
       entity: service_provision
       attribute: billing_cycle
