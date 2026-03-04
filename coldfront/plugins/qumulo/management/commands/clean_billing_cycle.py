@@ -62,6 +62,12 @@ def clean_billing_cycle(
             defaults={"value": billing_cycle},
         )
 
-    print("Billing cycles have been created for the following allocations:")
-    for allocation_id in allocation_to_be_cleaned.values_list("id", flat=True):
-        print(f' - Allocation ID {allocation_id}: "{billing_cycle}"')
+    print("Billing cycles have been created for the following allocations: ")
+    cleaned_allocations = Allocation.objects.filter(
+        id__in=allocation_ids,
+        status__name__in=["New", "Active", "Pending"],
+        allocationattribute__allocation_attribute_type__name="billing_cycle",
+    ).values_list("id", "allocationattribute__value", flat=True)
+
+    for allocation_id, billing_cycle in cleaned_allocations:
+        print(f' - Allocation ID: {allocation_id}, billing_cycle: "{billing_cycle}"')
