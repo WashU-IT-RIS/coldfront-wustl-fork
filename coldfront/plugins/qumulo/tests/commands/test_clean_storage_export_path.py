@@ -23,7 +23,7 @@ class CleanStorageExportPathTest(TestCase):
             )
             self.storage_allocations.append(result[1]["storage_allocation"])
 
-    def test_command_output(self):
+    def test_command_output_success(self):
 
         out = StringIO()
         ids = [str(allocation.id) for allocation in self.storage_allocations]
@@ -39,6 +39,30 @@ class CleanStorageExportPathTest(TestCase):
             allocation_attribute_type__name="storage_export_path",
         ).values_list("value", flat=True)
         self.assertTrue(all(value == "" for value in values))
+
+        output = out.getvalue()
+        self.assertEqual(
+            'allocation_ids=[1, 4, 7]\nexport_path=\'\'\ndry_run=False\n\x1b[32;1mStorage export paths have been cleaned for the following allocations: \x1b[0m\n\x1b[32;1m - Allocation ID: 1, export_path: ""\x1b[0m\n\x1b[32;1m - Allocation ID: 4, export_path: ""\x1b[0m\n\x1b[32;1m - Allocation ID: 7, export_path: ""\x1b[0m\n',
+            output,
+        )
+
+    def test_command_output_dry_run(self):
+
+        out = StringIO()
+        ids = [str(allocation.id) for allocation in self.storage_allocations]
+        call_command(
+            "clean_storage_export_path",
+            "--allocation-ids",
+            ids,
+            "--dry-run",
+            stdout=out,
+        )
+        # Assertions
+        values = AllocationAttribute.objects.filter(
+            allocation__in=self.storage_allocations,
+            allocation_attribute_type__name="storage_export_path",
+        ).values_list("value", flat=True)
+        self.assertTrue(all(value != "" for value in values))
 
         output = out.getvalue()
         self.assertIn(
