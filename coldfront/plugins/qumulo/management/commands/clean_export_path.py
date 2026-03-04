@@ -55,13 +55,13 @@ def clean_export_path(
     if dry_run:
         ic("Dry run enabled. The following storage_export_path would be cleaned:")
         for allocation_id, current_export_path in before_values:
-            ic(f" - Allocation ID {allocation_id}: {current_export_path}")
+            print(f" - Allocation ID: {allocation_id}, current_export_path:{current_export_path}")
         return None
 
     allocation_attributes_to_be_cleaned.update(value=export_path)
 
     ic("Storage export paths have been cleaned for the following allocations:")
-    for allocation_id, _ in allocation_attributes_to_be_cleaned.values_list(
+    for allocation_id, export_path in allocation_attributes_to_be_cleaned.values_list(
         "allocation_id", "value"
     ):
-        ic(f' - Allocation ID {allocation_id}: "{export_path}"')
+        print(f' - Allocation ID: {allocation_id}, export_path: "{export_path}"')
