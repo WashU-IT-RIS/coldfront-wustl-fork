@@ -45,7 +45,7 @@ def clean_export_path(
 
     allocation_attributes_to_be_cleaned = AllocationAttribute.objects.filter(
         allocation_id__in=allocation_ids,
-        allocation__status__name="Active",
+        allocation__status__name__in=[ "New", "Active", "Pending"],
         allocation_attribute_type__name="export_path",
     )
 
