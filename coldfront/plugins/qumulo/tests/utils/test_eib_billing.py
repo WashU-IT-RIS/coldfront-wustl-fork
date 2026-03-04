@@ -118,7 +118,10 @@ def mock_get_quota_service_rate_categories():
         (5, "consumption"),
         (15, "consumption"),
         (100, "consumption"),
-        (500, "consumption_500tb"),
+        (5, "subscription"),
+        (100, "subscription"),
+        (500, "subscription"),
+        (500, "subscription_500tb"),
         (500, "condo"),
     ]
     return allocation_attributes
@@ -129,7 +132,10 @@ def mock_get_names_quotas_usages():
         ("5tb-consumption", "5000000000000", "5000000000000"),
         ("15tb-consumption", "15000000000000", "10995116277760"),
         ("100tb-consumption", "100000000000000", "10995116277760"),
-        ("500tb-consumption_500tb", "500000000000000", "2"),
+        ("5tb-subscription", "5000000000000", "1"),
+        ("100tb-subscription", "100000000000000", "20"),
+        ("500tb-subscription", "500000000000000", "200000000000000"),
+        ("500tb-subscription_500tb", "500000000000000", "2"),
         ("500tb-condo", "500000000000000", "2"),
     ]
     return names_quotas_usages
@@ -432,13 +438,13 @@ class TestEIBBilling(TestCase):
                 self.assertEqual(float(billing_amount) - 65.0, 0)
             elif fileset_memo == "100tb-consumption":
                 self.assertEqual(float(billing_amount) - 65.0, 0)
-            elif fileset_memo == "5tb-consumption":
+            elif fileset_memo == "5tb-subscription":
                 self.assertEqual(float(billing_amount) - 634.0, 0)
-            elif fileset_memo == "100tb-consumption":
+            elif fileset_memo == "100tb-subscription":
                 self.assertEqual(float(billing_amount) - 634.0, 0)
-            elif fileset_memo == "500tb-consumption":
+            elif fileset_memo == "500tb-subscription":
                 self.assertEqual(float(billing_amount) - 3170.0, 0)
-            elif fileset_memo == "500tb-consumption_500tb":
+            elif fileset_memo == "500tb-subscription_500tb":
                 self.assertEqual(float(billing_amount) - 2643.0, 0)
             elif fileset_memo == "500tb-condo":
                 self.assertEqual(float(billing_amount) - 529.0, 0)
@@ -461,7 +467,7 @@ class TestEIBBilling(TestCase):
         allocation = create_allocation(
             project=self.project,
             user=self.user,
-            form_data=construct_allocation_form_data(100, "consumption"),
+            form_data=construct_allocation_form_data(100, "subscription"),
         )
 
         allocation.status = AllocationStatusChoice.objects.get(name="Active")
@@ -533,6 +539,6 @@ class TestEIBBilling(TestCase):
             fileset_memo = billing_entries[index][fileset_memo_index].replace('"', "")
 
             # Confirm no billing entry for the sub allocation
-            self.assertEqual(fileset_memo, "100tb-consumption")
+            self.assertEqual(fileset_memo, "100tb-subscription")
 
         os.remove(filename)
