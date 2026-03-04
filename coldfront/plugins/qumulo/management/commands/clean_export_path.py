@@ -58,9 +58,7 @@ def clean_export_path(
             ic(f" - Allocation ID {allocation_id}: {current_export_path}")
         return None
 
-    allocation_attributes_to_be_cleaned.update(
-        value=export_path, updated_at=None
-    )  # Set updated_at to None to trigger auto_now on update
+    allocation_attributes_to_be_cleaned.update(value=export_path)
 
     ic("Export paths have been cleaned for the following allocations:")
     for allocation_id, _ in allocation_attributes_to_be_cleaned.values_list(
