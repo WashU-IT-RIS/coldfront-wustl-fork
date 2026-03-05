@@ -46,7 +46,7 @@ class CleanStorageExportPathTest(TestCase):
 
         output = out.getvalue()
         self.assertIn(
-            'Billing cycles have been created for the following allocations:',
+            "Billing cycles have been created for the following allocations:",
             output,
         )
 
