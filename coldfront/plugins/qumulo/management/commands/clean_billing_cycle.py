@@ -1,6 +1,10 @@
 from django.core.management.base import BaseCommand
 
-from coldfront.core.allocation.models import Allocation, AllocationAttribute, AllocationAttributeType
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttribute,
+    AllocationAttributeType,
+)
 
 
 class Command(BaseCommand):
