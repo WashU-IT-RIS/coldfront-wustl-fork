@@ -22,6 +22,7 @@ class CleanStorageExportPathTest(TestCase):
 
     def test_command_output_success(self):
 
+        # Assert that no billing_cycle attributes exist before the command is run
         self.assertFalse(
             AllocationAttribute.objects.filter(
                 allocation__in=self.storage_allocations,
@@ -36,7 +37,7 @@ class CleanStorageExportPathTest(TestCase):
             ids,
             stdout=out,
         )
-        # Assertions
+        # Assert that billing_cycle attributes have been created for the specified allocations
         self.assertTrue(
             AllocationAttribute.objects.filter(
                 allocation__in=self.storage_allocations,
@@ -52,6 +53,14 @@ class CleanStorageExportPathTest(TestCase):
 
     def test_command_output_dry_run(self):
 
+        # Assert that no billing_cycle attributes exist before the command is run
+        self.assertFalse(
+            AllocationAttribute.objects.filter(
+                allocation__in=self.storage_allocations,
+                allocation_attribute_type__name="billing_cycle",
+            ).exists()
+        )
+
         out = StringIO()
         ids = [allocation.id for allocation in self.storage_allocations]
         call_command(
@@ -61,14 +70,13 @@ class CleanStorageExportPathTest(TestCase):
             "--dry-run",
             stdout=out,
         )
-        # Assertions
-
         # Assert that no billing_cycle attributes have been created
-        values = AllocationAttribute.objects.filter(
-            allocation__in=self.storage_allocations,
-            allocation_attribute_type__name="billing_cycle",
-        ).exists()
-        self.assertFalse(values)
+        self.assertFalse(
+            AllocationAttribute.objects.filter(
+                allocation__in=self.storage_allocations,
+                allocation_attribute_type__name="billing_cycle",
+            ).exists()
+        )
 
         output = out.getvalue()
         self.assertIn(
