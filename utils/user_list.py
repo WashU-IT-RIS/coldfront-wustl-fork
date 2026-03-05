@@ -11,9 +11,10 @@ from coldfront.core.user.models import User
 
 requested_storage_resource = os.environ.get("USER_LIST_RESOURCE", None)
 storage_resources_qs = Resource.objects.filter(resource_type__name="Storage")
-if not requested_storage_resource or not storage_resources_qs.filter(
-    name=requested_storage_resource
-).exists():
+if (
+    not requested_storage_resource
+    or not storage_resources_qs.filter(name=requested_storage_resource).exists()
+):
     storage_resource_names = storage_resources_qs.values_list("name", flat=True)
     print(
         "Invalid USER_LIST_RESOURCE configuration: "
@@ -29,7 +30,7 @@ for allocation in Allocation.objects.filter(resources__name=requested_storage_re
     # TODO: optimize this query to avoid N+1 queries, maybe by using select_related or prefetch_related
     #
     # allocation_ids = Allocation.objects.filter(
-    #                       resources__name=requested_storage_resource, 
+    #                       resources__name=requested_storage_resource,
     #                       status__name="Active")
     #                       .values_list("id", flat=True)
     # user_group_allocations = Allocation.objects.filter(
@@ -53,16 +54,22 @@ for allocation in Allocation.objects.filter(resources__name=requested_storage_re
 
     for attribute in AllocationAttribute.objects.filter(value=allocation.pk):
         acl_allocation_id = attribute.allocation_id
+
         for allocation_user in AllocationUser.objects.filter(
             allocation_id=acl_allocation_id
         ):
             user = User.objects.get(pk=allocation_user.user_id)
             if "@" in user.email:
                 emails.append(user.email)
-            else:
-                no_emails.append(user.username)
+                continue
 
-for email in set(emails):
+            no_emails.append(user.username)
+
+print("######################################")
+print("# User e-mail addresses:             #")
+print("######################################")
+email_set = set(emails)
+for email in email_set:
     print(email)
 
 if len(no_emails) > 0:
