@@ -121,6 +121,8 @@ def anything_to_comsumption(value: Optional[str]) -> str:
 def anything_to_empty_list(value: Optional[str]) -> list[None]:
     return []
 
+def truthy_or_falsy_to_yes(value) -> str:
+    return "Yes"
 
 def comment_to_dir_projects(
     comment: Optional[str],
