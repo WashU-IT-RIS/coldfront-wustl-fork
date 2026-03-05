@@ -2,11 +2,12 @@ import json
 from django.test import TestCase
 
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
+    AllocationLinkage,
 )
 from coldfront.core.project.models import Project, ProjectAttribute
 
@@ -14,18 +15,42 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
     MigrateToColdfront,
 )
 from coldfront.plugins.qumulo.tests.fixtures import create_metadata_for_testing
+from coldfront.plugins.qumulo.tests.helper_classes.filesystem_path import (
+    ValidFormPathMock,
+)
 from coldfront.plugins.qumulo.tests.utils.mock_data import mock_qumulo_info
 
 QUMULO_INFO = mock_qumulo_info
 storage2_path = QUMULO_INFO["Storage2"]["path"]
 
 
+def ad_lookup_get_user_side_effect(value: str):
+    if value != "no-exist":
+        return {"dn": "user_dn", "attributes": {"other_attr": "value"}}
+    else:
+        raise ValueError("User not found")
+
+
 @patch.dict("os.environ", {"QUMULO_INFO": json.dumps(QUMULO_INFO)})
+@mock.patch(
+    "coldfront.plugins.qumulo.services.itsm.fields.validators.ActiveDirectoryAPI"
+)
+@mock.patch("coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient")
+@mock.patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
+@mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
 class TestMigrateToColdfront(TestCase):
 
     def setUp(self) -> None:
-        self.migrate = MigrateToColdfront()
         create_metadata_for_testing()
+        self.mock_factory = patch(
+            "coldfront.plugins.qumulo.validators.StorageControllerFactory"
+        ).start()
+
+        self.mock_qumulo_api = MagicMock()
+        self.mock_factory.return_value.create_connection.return_value = (
+            self.mock_qumulo_api
+        )
+
         self.expected_allocation_attributes = [
             ("storage_name", "mocker"),
             ("storage_quota", "200"),
@@ -34,10 +59,10 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate_category", "subscription"),
+            ("service_rate_category", "consumption"),
             ("secure", "No"),
             ("audit", "No"),
-            ("billing_exempt", "No"),
+            ("billing_exempt", "Yes"),
             ("subsidized", "Yes"),
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
@@ -61,10 +86,10 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker_missing_contacts"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate_category", "subscription"),
+            ("service_rate_category", "consumption"),
             ("secure", "No"),
             ("audit", "No"),
-            ("billing_exempt", "No"),
+            ("billing_exempt", "Yes"),
             ("subsidized", "Yes"),
             ("storage_ticket", "ITSD-2222"),
             ("billing_startdate", "2020-04-15T00: 00: 00.000Z"),
@@ -86,10 +111,10 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate_category", "subscription"),
+            ("service_rate_category", "consumption"),
             ("secure", "No"),
             ("audit", "No"),
-            ("billing_exempt", "No"),
+            ("billing_exempt", "Yes"),
             ("subsidized", "Yes"),
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
@@ -112,10 +137,10 @@ class TestMigrateToColdfront(TestCase):
             ("storage_export_path", f"{storage2_path}/mocker"),
             ("cost_center", "CC0004259"),
             ("department_number", "CH00409"),
-            ("service_rate_category", "subscription"),
+            ("service_rate_category", "consumption"),
             ("secure", "No"),
             ("audit", "No"),
-            ("billing_exempt", "No"),
+            ("billing_exempt", "Yes"),
             ("subsidized", "Yes"),
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
@@ -126,18 +151,42 @@ class TestMigrateToColdfront(TestCase):
             ("sla_name", ""),
         ]
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
+        self.expected_allocation_attributes_itsm_comment_dir_projects = [
+            ("storage_name", "jin810"),
+            ("storage_quota", "200"),
+            ("storage_protocols", '["smb"]'),
+            ("storage_filesystem_path", f"{storage2_path}/jin810"),
+            ("storage_export_path", f"{storage2_path}/jin810"),
+            ("cost_center", "CC0004259"),
+            ("department_number", "CH00409"),
+            ("service_rate_category", "consumption"),
+            ("secure", "No"),
+            ("audit", "No"),
+            ("billing_exempt", "Yes"),
+            ("subsidized", "Yes"),
+            ("billing_contact", "jin810"),
+            ("technical_contact", "jin810"),
+            ("storage_ticket", "ITSD-2222"),
+            ("fileset_name", "jin810_active"),
+            ("fileset_alias", "jin810_active"),
+            ("billing_cycle", "monthly"),
+            ("sla_name", ""),
+            (
+                "itsm_comment",
+                '{"dir_projects":{"KHADER":{"ro":null,"rw":null},"KHADER_ADMIN":{"ro":null,"rw":["mushtaqahmed","pamelacamp"]},"KHADERLAB_PROTOCOLS":{"ro":["akter","bobba.suhas","chauhank","darya.urusova","lmellett","lulan","ncaleb","rswanson","s.thirunavukkarasu","sbmehta","yangyan"],"rw":["g.ananya","mushtaqahmed","shibalidas"]},"KHADERLAB_TBPROGRAM":{"ro":null,"rw":["akter","bobba.suhas","chauhank","darya.urusova","g.ananya","lmellett","lulan","mushtaqahmed","ncaleb","pamelacamp","rswanson","s.thirunavukkarasu","sbmehta","shibalidas","yangyan"]},"PAPER_2018":{"ro":null,"rw":["shibalidas"]},"Khader_lab":{"ro":null,"rw":["jmartin"]},"Khadercompute":{"ro":null,"rw":["akter","bobba.suhas","jmartin","mushtaqahmed","sakhader"]},"Shared_With_Max":{"ro":null,"rw":["akter","mushtaqahmed","shibalidas","storage-martyomov"]},"MGI_Data":{"rw":["barosa","jmartin","storage-sakhader-khaderlab_tbprogram-rw"],"ro":[]}}}',
+            ),
+        ]
+
+    def tearDown(self):
+        patch.stopall()
+        return super().tearDown()
+
     def test_migrate_to_coldfront_by_fileset_name(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
@@ -148,17 +197,26 @@ class TestMigrateToColdfront(TestCase):
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
 
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
         name = "mocker"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         self.assertDictEqual(
-            result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
+            result,
+            {
+                "allocation_id": 1,
+                "pi_user_id": 1,
+                "project_id": 1,
+                "warning_messages": {},
+            },
         )
 
         allocation = Allocation.objects.get(id=result["allocation_id"])
         project = Project.objects.get(id=result["project_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
         self.assertEqual(allocation.project, project)
-        self.assertEqual(allocation.project.title, name)
+        self.assertEqual(allocation.project.title, "jin810")
 
         allocation_attributes = AllocationAttribute.objects.filter(
             allocation=result["allocation_id"]
@@ -177,18 +235,12 @@ class TestMigrateToColdfront(TestCase):
         )
         self.assertEqual(len(project_attributes), 3)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_by_service_provision_name(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
@@ -201,17 +253,26 @@ class TestMigrateToColdfront(TestCase):
             )
             mock_itsm_client.return_value = itsm_client
 
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
         name = "mocker"
-        result = self.migrate.by_storage_provision_name(f"{name}", "Storage2")
+        result = MigrateToColdfront().by_storage_provision_name(f"{name}", "Storage2")
         self.assertDictEqual(
-            result, {"allocation_id": 1, "pi_user_id": 1, "project_id": 1}
+            result,
+            {
+                "allocation_id": 1,
+                "pi_user_id": 1,
+                "project_id": 1,
+                "warning_messages": {},
+            },
         )
 
         allocation = Allocation.objects.get(id=result["allocation_id"])
         project = Project.objects.get(id=result["project_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
         self.assertEqual(allocation.project, project)
-        self.assertEqual(allocation.project.title, name)
+        self.assertEqual(allocation.project.title, "jin810")
 
         allocation_attributes = AllocationAttribute.objects.filter(
             allocation=result["allocation_id"]
@@ -230,18 +291,12 @@ class TestMigrateToColdfront(TestCase):
         )
         self.assertEqual(len(project_attributes), 3)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_by_fileset_alias(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
@@ -252,19 +307,27 @@ class TestMigrateToColdfront(TestCase):
             itsm_client.get_fs1_allocation_by_fileset_alias.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
 
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
         fileset_alias = "mocker_active"
         name = "mocker"
-        result = self.migrate.by_fileset_alias(f"{fileset_alias}", "Storage2")
+        result = MigrateToColdfront().by_fileset_alias(f"{fileset_alias}", "Storage2")
         self.assertDictEqual(
             result,
-            {"allocation_id": 1, "pi_user_id": 1, "project_id": 1},
+            {
+                "allocation_id": 1,
+                "pi_user_id": 1,
+                "project_id": 1,
+                "warning_messages": {},
+            },
         )
 
         allocation = Allocation.objects.get(id=result["allocation_id"])
         project = Project.objects.get(id=result["project_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
         self.assertEqual(allocation.project, project)
-        self.assertEqual(allocation.project.title, name)
+        self.assertEqual(allocation.project.title, "jin810")
 
         allocation_attributes = AllocationAttribute.objects.filter(
             allocation=result["allocation_id"]
@@ -283,18 +346,12 @@ class TestMigrateToColdfront(TestCase):
         )
         self.assertEqual(len(project_attributes), 3)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_contacts_missing(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_missing_contacts.json",
@@ -305,39 +362,25 @@ class TestMigrateToColdfront(TestCase):
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
 
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
         name = "mocker_missing_contacts"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
-        allocation = Allocation.objects.get(id=result["allocation_id"])
-        self.assertEqual(allocation.id, result["allocation_id"])
 
-        allocation_attributes = AllocationAttribute.objects.filter(
-            allocation=result["allocation_id"]
-        )
-        allocation_attribute_values = allocation_attributes.values_list(
-            "allocation_attribute_type__name", "value"
+        self.assertRaises(
+            Exception,
+            MigrateToColdfront().by_fileset_name,
+            f"{name}_active",
+            "Storage2",
+            msg="{'errors': {'sponsor': ['mocker_missing_contacts does not exist in Active Directory']}, 'warnings': {}}",
         )
 
-        for attribute_value in self.expected_allocation_attributes_missing_contacts:
-            self.assertIn(attribute_value, allocation_attribute_values)
-
-        self.assertEqual(allocation_attributes.count(), 19)
-        # optional fields with empty or missing values should not create
-        # allocation_attributes on create allocation
-        for value in [("billing_contact", ""), ("technical_contact", "")]:
-            self.assertNotIn(value, allocation_attribute_values)
-
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_billing_startdate_missing(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_billing_startdate_not_found.json",
@@ -348,8 +391,11 @@ class TestMigrateToColdfront(TestCase):
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
 
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
         name = "mocker"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
 
@@ -371,18 +417,12 @@ class TestMigrateToColdfront(TestCase):
         for value in [("billing_startdate", "")]:
             self.assertNotIn(value, allocation_attribute_values)
 
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront.ItsmClient"
-    )
-    @mock.patch(
-        "coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI"
-    )
-    @mock.patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     def test_migrate_to_coldfront_with_itsm_comment_missing(
         self,
         mock_async_task: mock.MagicMock,
         mock_active_directory_api: mock.MagicMock,
         mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
     ) -> None:
         with open(
             "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_itsm_comment_empty.json",
@@ -393,8 +433,11 @@ class TestMigrateToColdfront(TestCase):
             itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
             mock_itsm_client.return_value = itsm_client
 
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
         name = "mocker"
-        result = self.migrate.by_fileset_name(f"{name}_active", "Storage2")
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
         allocation = Allocation.objects.get(id=result["allocation_id"])
         self.assertEqual(allocation.id, result["allocation_id"])
 
@@ -413,3 +456,187 @@ class TestMigrateToColdfront(TestCase):
         # allocation_attributes on create allocation
         for value in [("itsm_comment", None)]:
             self.assertNotIn(value, allocation_attribute_values)
+
+    def test_migrate_to_coldfront_with_itsm_comment_dir_projects(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_itsm_comment_dir_projects.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
+            mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
+        name = "jin810"
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
+        allocation = Allocation.objects.get(id=result["allocation_id"])
+        self.assertEqual(allocation.id, result["allocation_id"])
+
+        allocation_attributes = AllocationAttribute.objects.filter(
+            allocation=result["allocation_id"]
+        )
+        allocation_attribute_values = allocation_attributes.values_list(
+            "allocation_attribute_type__name", "value"
+        )
+
+        for (
+            attribute_value
+        ) in self.expected_allocation_attributes_itsm_comment_dir_projects:
+            if attribute_value[0] == "itsm_comment":
+                self.assertDictEqual(
+                    json.loads(
+                        allocation_attribute_values.get(
+                            allocation_attribute_type__name="itsm_comment"
+                        )[1]
+                    ),
+                    json.loads(attribute_value[1]),
+                )
+                continue
+            self.assertIn(attribute_value, allocation_attribute_values)
+
+        self.assertEqual(allocation_attributes.count(), 21)
+
+        # test for sub-allocation creation based on dir_projects in itsm_comment
+        sub_allocations = AllocationLinkage.objects.get(
+            parent=allocation
+        ).children.filter(resources__resource_type__name="Storage")
+
+        self.assertEqual(sub_allocations.count(), 9)  # 9 dir_projects in itsm_comment
+
+        # validate that sub-allocation has correct attributes based on itsm_comment and parent allocation attributes
+        for sub_allocation in sub_allocations:
+            sub_allocation_attributes = AllocationAttribute.objects.filter(
+                allocation=sub_allocation
+            ).values_list("allocation_attribute_type__name", "value")
+            # Inherits some of the parent allocation attributes
+            inheritable_attributes = [
+                "storage_ticket",
+                "storage_quota",
+                "billing_exempt",
+                "billing_cycle",
+                "service_rate_category",
+                "subsidized",
+                "department_number",
+                "cost_center",
+            ]
+
+            for attribute_name in inheritable_attributes:
+                self.assertIn(
+                    (
+                        attribute_name,
+                        allocation_attributes.get(
+                            allocation_attribute_type__name=attribute_name
+                        ).value,
+                    ),
+                    sub_allocation_attributes,
+                )
+
+            # context: sub-allocations have no protocols or export paths in Coldfront, and their filesystem paths are based on the parent allocation's filesystem path with the dir_project name appended
+            self.assertIn(
+                ("storage_protocols", "[]"),
+                sub_allocation_attributes,
+            )
+            self.assertIn(
+                ("storage_export_path", ""),
+                sub_allocation_attributes,
+            )
+
+            # hackalicious: there is no clean way to match the sub-allocations created from the dir_projects in itsm_comment to the specific dir_projects since they have the same attributes and are only differentiated by their storage name and filesystem path which are generated based on the parent allocation's storage name and filesystem path with the dir_project name appended, so we will validate that the storage name and filesystem path for each sub-allocation is correctly generated based on the parent allocation's storage name and filesystem path with the dir_project name appended
+            sub_allocation_name = sub_allocation.get_attribute("storage_name").split(
+                "-"
+            )[
+                -1
+            ]  # get the dir_project name appended to the parent storage name to form the sub-allocation storage name
+            # storage name is a combination of parent allocation's storage name and dir_project name in itsm_comment since sub-allocations are not represented in ITSM with their own storage names
+            parent_storage_name = allocation_attributes.get(
+                allocation_attribute_type__name="storage_name"
+            ).value
+
+            expected_sub_allocation_storage_name = (
+                f"{parent_storage_name}-{sub_allocation_name}"
+            )
+            self.assertIn(
+                ("storage_name", expected_sub_allocation_storage_name),
+                sub_allocation_attributes,
+            )
+
+            # storage filesystem path is parent allocation's filesystem path with dir_project name appended since sub-allocations are not represented in ITSM with their own filesystem paths
+            parent_filesystem_path = allocation_attributes.get(
+                allocation_attribute_type__name="storage_filesystem_path"
+            ).value
+
+            expected_sub_allocation_filesystem_path = (
+                f"{parent_filesystem_path}/Active/{sub_allocation_name}"
+            )
+            self.assertIn(
+                ("storage_filesystem_path", expected_sub_allocation_filesystem_path),
+                sub_allocation_attributes,
+            )
+
+    def test_migrate_to_coldfront_with_itsm_comment_dir_projects_with_errors_and_warnings(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_itsm_comment_dir_projects_with_errors_and_warnings.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
+            mock_itsm_client.return_value = itsm_client
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+
+        name = "jin810"
+        self.assertRaises(
+            Exception,
+            MigrateToColdfront().by_fileset_name,
+            f"{name}_active",
+            "Storage2",
+            msg="{'errors': {'comment': [['sub-allocation name KHADER ADMIN is invalid']]}, 'warnings': {'acl_group_members': [['no-exist does not exist in Active Directory']]}}",
+        )
+
+    def test_migrate_to_coldfront_by_fileset_name_override_ticket_number(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
+            mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
+        name = "jin810"
+        ticket_number_override = "ITSD-54321"
+        migrate = MigrateToColdfront()
+        migrate.set_override("service_desk_ticket_number", ticket_number_override)
+        result = migrate.by_fileset_name(f"{name}_active", "Storage2")
+
+        ticket_number_allocation_attribute_value = AllocationAttribute.objects.get(
+            allocation=result["allocation_id"],
+            allocation_attribute_type__name="storage_ticket",
+        ).value
+        self.assertEqual(
+            ticket_number_allocation_attribute_value, ticket_number_override
+        )

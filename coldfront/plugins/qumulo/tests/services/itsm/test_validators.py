@@ -14,7 +14,6 @@ from coldfront.plugins.qumulo.services.itsm.fields.validators import (
     presence,
     validate_ticket,
     validate_json,
-    uniqueness,
 )
 
 
@@ -176,28 +175,4 @@ class TestValidators(TestCase):
         self.assertEqual(
             inclusion(["smb", "exoteric_protocol"], accepted_values),
             "['smb', 'exoteric_protocol'] is not amongst ['smb', 'nfs']",
-        )
-
-    def test_ad_record_exist(self):
-        # TODO how?
-        pass
-
-    def test_uniqueness(self):
-        allocation_attribute_type = AllocationAttributeTypeFactory(name="storage_name")
-        value_to_be_compared = "i_exist"
-        AllocationAttributeFactory(
-            value=value_to_be_compared,
-            allocation_attribute_type=allocation_attribute_type,
-        )
-
-        conditions = {
-            "entity": "AllocationAttribute",
-            "entity_attribute": "allocation_attribute_type__name",
-            "attribute_name_value": "storage_name",
-        }
-        self.assertIsNone(uniqueness("i_do_not_exist", conditions))
-
-        self.assertEqual(
-            uniqueness(value_to_be_compared, conditions),
-            f"{value_to_be_compared} is not unique for storage_name",
         )
