@@ -19,7 +19,7 @@ class Command(BaseCommand):
             nargs="+",
             type=int,
             required=True,
-            help="List of storage allocation IDs to consider for export path cleanup separated by space (e.g. --allocation-ids 1 2 3) or by comma (e.g. --allocation-ids 1,2,3)",
+            help="List of storage allocation IDs to consider for export path cleanup separated by space (e.g. --allocation-ids 1 2 3)",
         )
 
         parser.add_argument(
