@@ -140,6 +140,8 @@ def ad_record_exist(
                 ActiveDirectoryAPI().get_user(element)
             except ValueError:
                 error_messages.append(f"{element} does not exist in Active Directory")
+            except Exception as err:
+                return f"LDAP look up unavailable {err}"
 
         if error_messages:
             return error_messages
@@ -150,6 +152,8 @@ def ad_record_exist(
         ActiveDirectoryAPI().get_user(value)
     except ValueError:
         return f"{value} does not exist in Active Directory"
+    except Exception as err:
+        return f"LDAP look up unavailable {err}"
 
     return None
 
