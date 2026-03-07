@@ -114,7 +114,7 @@ class AllocationUsage(TimeStampedModel):
         billing_contact (str): indicates who is the main contact for billing issues
         fileset_name (str): represents the commonly used name of the allocation
         status (str): indicates the current status of the allocation in lowercases (ex. active, new, pending, jenkins error, inactive, etc.)
-        service_rate_category (str): indicates the billing rate of the allocation (ex. consumption, subscription, condo)
+        service_rate_category (str): indicates the billing rate of the allocation (ex. consumption, condo)
         usage_tb (decimal): indicates the consumption of the allocation in TB at the point of time, usage_date
         funding_number (str): indicates the funding source aka cost center number
         exempt (bool): indicates if the fee is waived by RIS
