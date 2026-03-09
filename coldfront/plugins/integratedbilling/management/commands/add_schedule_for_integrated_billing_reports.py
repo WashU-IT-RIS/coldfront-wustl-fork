@@ -2,6 +2,7 @@ import arrow
 from datetime import datetime, timezone
 
 from django.core.management.base import BaseCommand
+from coldfront.plugins.integratedbilling.constants import ServiceTiers
 from django_q.tasks import schedule
 from django_q.models import Schedule
 
@@ -28,7 +29,16 @@ def generate_integrated_billing_report() -> None:
     usage_date = datetime.now(tz=timezone.utc).replace(
         day=1, hour=18, minute=0, second=0, microsecond=0
     )
+    __generate_integrated_billing_report_for(ServiceTiers.Active, usage_date)
+    __generate_integrated_billing_report_for(ServiceTiers.Archive, usage_date)
 
-    report_generator = ReportGenerator(usage_date)
-    success = report_generator.generate()
-    print("Integrated Monthly Billing Report generation success: ", success)
+
+def __generate_integrated_billing_report_for(
+    tier: ServiceTiers, usage_date: datetime
+) -> None:
+    active_storage_report_generator = ReportGenerator(usage_date=usage_date, tier=tier)
+    success = active_storage_report_generator.generate()
+    print(
+        f"Integrated Monthly {tier.name} Storage Billing Report generation success: ",
+        success,
+    )
