@@ -289,7 +289,7 @@
             "subsidized": true,
             "quota": "200T",
             "allow_nonfaculty": null,
-            "acl_group_members": "b.cooper,c.m.choi,fup,jin810,k.mariam,k.prashantkumar,kuangyingyang,shohaibshaffiey,shujuanzhao,spencer.king,WG-amarsheth,WG-fu.po-ying,WG-kareena,WG-kesava,WG-nicholas.diab,yung-chun,w.max",
+            "acl_group_members": "fup,jin810",
             "who": "rpokorne",
             "parent_id": null,
             "is_condo_group": false,

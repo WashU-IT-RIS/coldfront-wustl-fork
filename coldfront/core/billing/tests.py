@@ -111,7 +111,7 @@ class AllocationUsageQuerySetTest(TestCase):
             usage_date=self.usage_date,
             exempt=False,
             billing_cycle="prepaid",
-            service_rate_category="subscription",
+            service_rate_category="consumption",
             sponsor_pi=self.pi2,
             storage_cluster=self.storage_cluster3,
             filesystem_path=self.filesystem_path2,
@@ -201,7 +201,7 @@ class AllocationUsageQuerySetTest(TestCase):
         self.assertIn(self.alloc2, qs)
         self.assertIn(self.alloc3, qs)
         self.assertIn(self.alloc5, qs)
-        self.assertNotIn(self.alloc4, qs)
+        self.assertIn(self.alloc4, qs)
 
     def test_by_fileset(self):
         qs = AllocationUsage.objects.by_fileset(self.fileset1)

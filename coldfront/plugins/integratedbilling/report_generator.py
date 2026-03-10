@@ -37,7 +37,8 @@ class ReportGenerator:
 
         filtered_allocation_usages = self.__get_allocation_usages()
 
-        self.__handle_subsidies(filtered_allocation_usages)
+        if not self.__handle_subsidies(filtered_allocation_usages):
+            return False
 
         calculated_usage_costs = self.__calculate_usage_fee(filtered_allocation_usages)
 
@@ -97,7 +98,21 @@ class ReportGenerator:
     def __handle_subsidies(
         self, filtered_allocation_usages: list[AllocationUsage]
     ) -> None:
-        filtered_allocation_usages.set_and_validate_all_subsidized()
+        valid = filtered_allocation_usages.set_and_validate_all_subsidized()
+        if not valid:
+            self.__log_failed_subsidized_entries(filtered_allocation_usages)
+            return False
+        else:
+            return True
+
+    def __log_failed_subsidized_entries(self, billable_alloc_usages):
+        # Find PIs and allocations when the PI has more than one subsidized allocation
+        pis = billable_alloc_usages.values_list('sponsor_pi', flat=True).order_by().distinct()
+        for pi in pis:
+            if not billable_alloc_usages._is_subsidized_valid_by_pi(pi):
+                print(f"[Subsidized Validation Failure] PI {pi} has multiple subsidized allocations.")
+                for usage in billable_alloc_usages.filter(sponsor_pi=pi):
+                    print(f"    Allocation: source={usage.source}, external_key={usage.external_key}, filesystem_path={usage.filesystem_path}, exempt={usage.exempt}, subsidized={usage.subsidized}")
 
 
 # helper function to get the default billing date (first day of the current month)

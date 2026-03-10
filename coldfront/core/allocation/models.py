@@ -326,6 +326,31 @@ class Allocation(TimeStampedModel):
         usage.value = value
         usage.save()
 
+    def get_usage_kb_by_date(self, usage_date: datetime.date) -> float:
+        """
+        Params:
+            usage_date (date): date for which to retrieve the usage
+
+        Returns:
+            float or None: the value of the allocation's storage_quota usage on the specified date in KB,
+            or None if (not found or error)
+        """
+        try:
+            usage = (
+                AllocationAttributeUsage.history.filter(
+                    allocation_attribute__allocation=self.id,
+                    allocation_attribute__allocation_attribute_type__name="storage_quota",
+                    history_date__date__range=(usage_date, usage_date)
+                )
+                .values("value")
+                .first()
+            )
+            if usage is None or "value" not in usage:
+                return None
+            return float(usage["value"]) / 1024
+        except Exception:
+            return None
+
     def get_attribute_list(self, name, expand=True, typed=True, extra_allocations=[]):
         """
         Params:
