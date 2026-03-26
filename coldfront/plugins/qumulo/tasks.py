@@ -143,14 +143,20 @@ def addMembersToADGroup(
     active_directory_api = ActiveDirectoryAPI()
 
     gotten_members = active_directory_api.get_members(wustlkeys)
-    gotten_keys = [member["attributes"]["sAMAccountName"] for member in gotten_members]
+    gotten_keys = [
+        member["attributes"]["sAMAccountName"].lower() for member in gotten_members
+    ]
 
     for wustlkey in wustlkeys:
-        if wustlkey in gotten_keys:
+        if wustlkey.lower() in gotten_keys:
             member = __find_member(wustlkey, gotten_members)
             is_group = "group" in member["attributes"]["objectClass"]
             good_members.append(
-                {"wustlkey": wustlkey, "dn": member["dn"], "is_group": is_group}
+                {
+                    "wustlkey": member["attributes"]["sAMAccountName"],
+                    "dn": member["dn"],
+                    "is_group": is_group,
+                }
             )
         else:
             bad_keys.append(wustlkey)
@@ -162,7 +168,7 @@ def addMembersToADGroup(
 
 def __find_member(wustlkey: str, members: list[dict]) -> dict:
     for member in members:
-        if member["attributes"]["sAMAccountName"] == wustlkey:
+        if member["attributes"]["sAMAccountName"].lower() == wustlkey.lower():
             return member
     return None
 

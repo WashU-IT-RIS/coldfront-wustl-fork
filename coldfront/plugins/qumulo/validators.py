@@ -32,10 +32,12 @@ def validate_ad_users(ad_users: list[str]):
     bad_users = []
 
     gotten_users = active_directory_api.get_members(ad_users)
-    gotten_user_names = [user["attributes"]["sAMAccountName"] for user in gotten_users]
+    gotten_user_names = [
+        user["attributes"]["sAMAccountName"].lower() for user in gotten_users
+    ]
 
     for user in ad_users:
-        if user not in gotten_user_names:
+        if user.lower() not in gotten_user_names:
             bad_users.append(user)
 
     if len(bad_users) > 0:
@@ -213,12 +215,16 @@ def validate_prepaid_start_date(prepaid_billing_date: date):
     return
 
 
-def validate_condo_project_quota(project_pk: str, storage_quota: int, current_quota=None):
-    if current_quota==None:
+def validate_condo_project_quota(
+    project_pk: str, storage_quota: int, current_quota=None
+):
+    if current_quota == None:
         quota_total = create_calculate_total_project_quotas(project_pk, storage_quota)
     else:
-        quota_total = update_calculate_total_project_quotas(project_pk, storage_quota, current_quota)
-    
+        quota_total = update_calculate_total_project_quotas(
+            project_pk, storage_quota, current_quota
+        )
+
     if quota_total > CONDO_PROJECT_QUOTA:
         remaining_quota = calculate_remaining_condo_quota(project_pk)
         raise ValidationError(
@@ -227,49 +233,61 @@ def validate_condo_project_quota(project_pk: str, storage_quota: int, current_qu
             )
         )
 
+
 def existing_project_quota(project_pk: str):
     storage_resources = Resource.objects.filter(resource_type__name="Storage")
-    status_choices = AllocationStatusChoice.objects.filter(name__in=["Pending", "Active", "New"])
+    status_choices = AllocationStatusChoice.objects.filter(
+        name__in=["Pending", "Active", "New"]
+    )
     project_allocations = Allocation.objects.filter(
         project__id=project_pk,
         resources__in=storage_resources,
         status__in=status_choices,
     )
     project_child_allocations = Allocation.objects.filter(
-        pk__in=AllocationLinkage.objects.filter(children__in=project_allocations).values_list("children", flat=True)
+        pk__in=AllocationLinkage.objects.filter(
+            children__in=project_allocations
+        ).values_list("children", flat=True)
     )
-    project_top_level_allocations = project_allocations.exclude(pk__in=project_child_allocations.values_list("pk", flat=True))
+    project_top_level_allocations = project_allocations.exclude(
+        pk__in=project_child_allocations.values_list("pk", flat=True)
+    )
     storage_quota_sub_query = AllocationAttribute.objects.filter(
         allocation=OuterRef("pk"),
         allocation_attribute_type__name="storage_quota",
     ).values("value")[:1]
     project_top_level_allocations = project_top_level_allocations.annotate(
         storage_quota_str=Subquery(storage_quota_sub_query)
-    ).annotate(
-        storage_quota=Cast('storage_quota_str', IntegerField())
-    )
+    ).annotate(storage_quota=Cast("storage_quota_str", IntegerField()))
     total_storage_quota = (
-        project_top_level_allocations.aggregate(total=Sum("storage_quota"))["total"] or 0
+        project_top_level_allocations.aggregate(total=Sum("storage_quota"))["total"]
+        or 0
     )
     return total_storage_quota
-        
+
+
 def create_calculate_total_project_quotas(project_pk: str, storage_quota: int):
     total_existing_quota = existing_project_quota(project_pk)
     total_storage_quota = total_existing_quota + storage_quota
     return total_storage_quota
 
-def update_calculate_total_project_quotas(project_pk: str, storage_quota: int, current_quota: int):
+
+def update_calculate_total_project_quotas(
+    project_pk: str, storage_quota: int, current_quota: int
+):
     total_existing_quota = existing_project_quota(project_pk)
     diff = 0
     if storage_quota != current_quota:
         diff = storage_quota - current_quota
-        total_storage_quota = total_existing_quota + diff                   
+        total_storage_quota = total_existing_quota + diff
     return total_storage_quota
+
 
 def calculate_remaining_condo_quota(project_pk: str):
     total_existing_quota = existing_project_quota(project_pk)
     remaining_quota = CONDO_PROJECT_QUOTA - total_existing_quota
     return remaining_quota
+
 
 def validate_storage2_quota_increase(storage_quota: int, current_quota: int):
     diff = storage_quota - current_quota
@@ -278,6 +296,7 @@ def validate_storage2_quota_increase(storage_quota: int, current_quota: int):
             f"Increases of {MAX_STORAGE2_QUOTA_INCREASE}TB or more for Storage2 allocations require approval. Please contact support.",
         )
     return
+
 
 def __ad_user_validation_helper(ad_user: str) -> bool:
     active_directory_api = ActiveDirectoryAPI()
@@ -319,10 +338,10 @@ def __ldap_usernames_and_groups_validator(name: str) -> bool:
 
     return True
 
+
 def is_float(val) -> bool:
     try:
         float(val)
         return True
     except (ValueError, TypeError):
         return False
-
