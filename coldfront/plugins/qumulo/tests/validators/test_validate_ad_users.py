@@ -105,3 +105,22 @@ class TestValidateAdUsers(TestCase):
         self.assertIn(users[0], context_manager.exception)
         self.assertNotIn(users[1], context_manager.exception)
         self.assertIn(users[2], context_manager.exception)
+
+    def test_is_case_insensitive(self):
+        user = "uSerKEy"
+        self.mock_get_members.return_value = [
+            {
+                "dn": "user_dn",
+                "attributes": {"other_attr": "value", "sAMAccountName": user.lower()},
+            }
+        ]
+
+        try:
+            validate_ad_users([user])
+        except ValidationError:
+            self.fail("Failed to validate for case insensitivity")
+
+        try:
+            validate_single_ad_user(user)
+        except ValidationError:
+            self.fail("Failed to validate for case insensitivity")
