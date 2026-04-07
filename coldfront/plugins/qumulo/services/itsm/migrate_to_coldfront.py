@@ -264,7 +264,7 @@ class MigrateToColdfront:
 
         for key, dir_project in dir_projects_raw.items():
             print(key)
-            print(dir_project.get("name"))
+            print(allocation_data)
             print(dir_project.get("archive"))
             print(dir_project.get("link"))
             if (
