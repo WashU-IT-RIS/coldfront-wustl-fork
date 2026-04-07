@@ -261,7 +261,12 @@ class MigrateToColdfront:
 
         dir_projects_raw = allocation_data.get("dir_projects")
         dir_projects_filtered = {}
+
         for key, dir_project in dir_projects_raw.items():
+            print(key)
+            print(dir_project.get("name"))
+            print(dir_project.get("archive"))
+            print(dir_project.get("link"))
             if (
                 hasattr(dir_project, "archive")
                 and dir_project.get("archive") is True
