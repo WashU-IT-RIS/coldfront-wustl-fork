@@ -133,8 +133,8 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
 
     def test_group_usage_data(self):
         # Use coldfront_attribute for correct keys
-        usage_key = self.report.coldfront_attribute["usage"]
-        pi_key = self.report.coldfront_attribute["pi"]
+        usage_key = self.report.report_attribute["usage"]
+        pi_key = self.report.report_attribute["pi"]
         data = [
             {pi_key: "a", usage_key: 100},
             {pi_key: "a", usage_key: 200},
@@ -148,7 +148,7 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
         self.assertEqual(b_entry[usage_key], 50)
 
     def test_append_dept_unit_name_to_usage_data(self):
-        coldfront = self.report.coldfront_attribute
+        coldfront = self.report.report_attribute
         usage_data = [
             {
                 coldfront["dept_number"]: "D1",
@@ -177,7 +177,7 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
         self.assertEqual(result[1]["name"], "Dept2")
 
     def test_format_csv_usage_report(self):
-        coldfront = self.report.coldfront_attribute
+        coldfront = self.report.report_attribute
         data = [
             {
                 "fiscal_year": "FY24",

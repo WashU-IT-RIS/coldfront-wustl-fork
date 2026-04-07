@@ -159,9 +159,10 @@ class StorageUsageReport:
     ) -> None:
         self.usage_date = usage_date
         self.tier = tier
-        self.coldfront_attribute = {
+        self.report_attribute = {
             key: value["coldfront"] for key, value in QUERY_ATTRIBUTE.items()
         }
+        self.report_attribute |= {"unit": "unit", "name": "name"}
 
     def generate_report(self) -> str:
         itsm_service_usage = ItsmServiceUsage(self.usage_date, self.tier)
@@ -172,11 +173,11 @@ class StorageUsageReport:
         storage23_usage = ColdfrontServiceUsage(self.usage_date, self.tier).get_data()
         storage_usage = storage1_usage + storage23_usage
         sort_group_keys = [
-            self.coldfront_attribute["usage_date"],
-            self.coldfront_attribute["service"],
-            self.coldfront_attribute["dept_number"],
-            self.coldfront_attribute["pi"],
-            self.coldfront_attribute["service_rate_category"],
+            self.report_attribute["usage_date"],
+            self.report_attribute["service"],
+            self.report_attribute["dept_number"],
+            self.report_attribute["pi"],
+            self.report_attribute["service_rate_category"],
         ]
         sorted_storage_usage = self.__sort_usage_data(storage_usage, sort_group_keys)
         grouped_storage_usage = self.__group_usage_data(
@@ -207,8 +208,8 @@ class StorageUsageReport:
             if key not in grouped_usage:
                 grouped_usage[key] = entry
             else:
-                grouped_usage[key][self.coldfront_attribute["usage"]] += entry[
-                    self.coldfront_attribute["usage"]
+                grouped_usage[key][self.report_attribute["usage"]] += entry[
+                    self.report_attribute["usage"]
                 ]
         return list(grouped_usage.values())
 
@@ -218,18 +219,22 @@ class StorageUsageReport:
         dept_dictionary: dict[str, dict[str, str]],
     ) -> list[dict[str, str]]:
         for entry in usage_data:
-            dept_number = entry[self.coldfront_attribute["dept_number"]]
-            entry["unit"] = dept_dictionary.get(dept_number, {}).get("unit", "Unknown")
-            entry["name"] = dept_dictionary.get(dept_number, {}).get("name", "Unknown")
+            dept_number = entry[self.report_attribute["dept_number"]]
+            entry[self.report_attribute["unit"]] = dept_dictionary.get(
+                dept_number, {}
+            ).get("unit", "Unknown")
+            entry[self.report_attribute["name"]] = dept_dictionary.get(
+                dept_number, {}
+            ).get("name", "Unknown")
 
         return self.__sort_usage_data(
             usage_data,
             [
-                self.coldfront_attribute["usage_date"],
-                self.coldfront_attribute["service"],
-                "unit",
-                "name",
-                self.coldfront_attribute["pi"],
+                self.report_attribute["usage_date"],
+                self.report_attribute["service"],
+                self.report_attribute["unit"],
+                self.report_attribute["name"],
+                self.report_attribute["pi"],
             ],
         )
 
@@ -253,14 +258,14 @@ class StorageUsageReport:
                     fiscal_year,
                     usage_month,
                     service,
-                    entry.get("unit", "Unknown"),
-                    entry.get("name", "Unknown"),
-                    entry.get(self.coldfront_attribute["pi"], "Unknown"),
+                    entry.get(self.report_attribute["unit"], "Unknown"),
+                    entry.get(self.report_attribute["name"], "Unknown"),
+                    entry.get(self.report_attribute["pi"], "Unknown"),
                     entry.get(
-                        self.coldfront_attribute["service_rate_category"], "Unknown"
+                        self.report_attribute["service_rate_category"], "Unknown"
                     ),
                     "KB",
-                    str(entry.get(self.coldfront_attribute["usage"], 0)),
+                    str(entry.get(self.report_attribute["usage"], 0)),
                 ]
             )
             formatted_report += formatted_entry + "\n"
