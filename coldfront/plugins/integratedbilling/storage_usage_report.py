@@ -5,7 +5,7 @@ from coldfront.plugins.qumulo.reports.storage_usage_report import (
     StorageUsageReport as ColdFrontStorageUsageReport,
 )
 
-USAGE_REPORT_HEADER_MAPPING = {
+CSV_USAGE_REPORT_HEADER_MAPPING = {
     "fiscal_year": "Fiscal Year",
     "usage_month": "Date",
     "service": "Service",
@@ -19,6 +19,14 @@ USAGE_REPORT_HEADER_MAPPING = {
 
 
 class ItsmServiceUsage:
+    """
+    Handles ITSM (IT Service Management) service usage data retrieval and normalization for ColdFront integrated billing.
+
+    This class is responsible for:
+    - Querying ITSM usage data for a given date and service tier using the ItsmClientHandler.
+    - Mapping ITSM attributes to ColdFront report fields.
+    - Normalizing raw ITSM report data into the format expected by ColdFront reports.
+    """
 
     def __init__(
         self, usage_date: date, tier: ServiceTiers = ServiceTiers.Active
@@ -67,6 +75,14 @@ class ItsmServiceUsage:
 
 
 class ColdfrontServiceUsage:
+    """
+    Retrieves and formats ColdFront service usage data for integrated billing reports.
+
+    This class is responsible for:
+    - Querying ColdFront allocation and usage data for a given date and service tier.
+    - Mapping ColdFront attributes to report fields as defined in QUERY_ATTRIBUTE.
+    - Producing usage records in the format expected for integrated billing and reporting.
+    """
 
     def __init__(
         self, usage_date: date, tier: ServiceTiers = ServiceTiers.Active
@@ -80,7 +96,7 @@ class ColdfrontServiceUsage:
     def get_data(self) -> list[dict[str, str]]:
         usage_date_str = self.usage_date.strftime("%Y-%m-%d")
         coldfront_usage_report = ColdFrontStorageUsageReport(usage_date=usage_date_str)
-        allocations = coldfront_usage_report.get_allocations_by_school()
+        allocations = coldfront_usage_report.get_allocations()
         s23_usages = list()
         department_key = self.coldfront_attribute["dept_number"]
         service_rate_category_key = self.coldfront_attribute["service_rate_category"]
@@ -103,6 +119,14 @@ class ColdfrontServiceUsage:
 
 
 class ItsmDepartmentClient:
+    """
+    Client for retrieving department information from the ITSM system.
+
+    This class is responsible for:
+    - Querying department data from the ITSM API endpoint.
+    - Filtering departments by number prefix (e.g., CH or AU).
+    - Returning department data as a dictionary keyed by department number.
+    """
 
     def __init__(self) -> None:
         self.itsm_client = ItsmClientHandler("/v2/rest/attr/info/department")
@@ -120,6 +144,15 @@ class ItsmDepartmentClient:
 
 
 class StorageUsageReport:
+    """
+    Generates a comprehensive storage usage report for integrated billing.
+
+    This class is responsible for:
+    - Aggregating and normalizing usage data from ITSM and ColdFront sources for a given date and service tier.
+    - Merging, sorting, and grouping usage data by department, PI, and service attributes.
+    - Enriching usage data with department information from ITSM.
+    - Formatting the final report as a CSV string for export or further processing.
+    """
 
     def __init__(
         self, usage_date: date, tier: ServiceTiers = ServiceTiers.Active
@@ -154,7 +187,7 @@ class StorageUsageReport:
             grouped_storage_usage, dept_dictionary
         )
 
-        return self.__format_usage_report(storage_usage_with_dept_info)
+        return self.__format_csv_usage_report(storage_usage_with_dept_info)
 
     def __sort_usage_data(
         self, usage_data: list[dict[str, str]], sort_keys: list[str]
@@ -200,9 +233,10 @@ class StorageUsageReport:
             ],
         )
 
-    def __format_usage_report(self, usage_data: list[dict[str, str]]) -> str:
+    def __format_csv_usage_report(self, usage_data: list[dict[str, str]]) -> str:
         report_header = [
-            USAGE_REPORT_HEADER_MAPPING[key] for key in USAGE_REPORT_HEADER_MAPPING
+            CSV_USAGE_REPORT_HEADER_MAPPING[key]
+            for key in CSV_USAGE_REPORT_HEADER_MAPPING
         ]
         formatted_report = ",".join(report_header) + "\n"
         fiscal_year = (

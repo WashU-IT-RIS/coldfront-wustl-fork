@@ -60,7 +60,7 @@ class TestColdfrontServiceUsage(unittest.TestCase):
         )
         mock_allocation.project.pi.username = "piuser"
         mock_allocation.get_usage_kb_by_date.return_value = "200"
-        mock_report.get_allocations_by_school.return_value = [mock_allocation]
+        mock_report.get_allocations.return_value = [mock_allocation]
         usage = ColdfrontServiceUsage(date(2024, 1, 1))
         data = usage.get_data()
         self.assertEqual(len(data), 1)
@@ -116,7 +116,7 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
     def setUp(self):
         self.usage_date = date(2024, 1, 1)
         self.report = StorageUsageReport(self.usage_date)
-        # Patch tier to avoid attribute errors in __format_usage_report
+        # Patch tier to avoid attribute errors in __format_csv_usage_report
         self.report.tier = MagicMock()
         self.report.tier.name = "Active"
 
@@ -176,7 +176,7 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
         self.assertEqual(result[1]["unit"], "School2")
         self.assertEqual(result[1]["name"], "Dept2")
 
-    def test_format_usage_report(self):
+    def test_format_csv_usage_report(self):
         coldfront = self.report.coldfront_attribute
         data = [
             {
@@ -190,7 +190,7 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
                 coldfront["usage"]: 1234,
             }
         ]
-        result = self.report._StorageUsageReport__format_usage_report(data)
+        result = self.report._StorageUsageReport__format_csv_usage_report(data)
         self.assertIn("Fiscal Year", result)
         self.assertIn("School1", result)
         self.assertIn("1234", result)
