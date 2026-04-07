@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
 
 def generate_monthly_storage_usage_report(
-    usage_date=datetime.now(timezone.utc).strftime("%Y-%m-01"),
+    usage_date=datetime.now(timezone.utc).replace(day=1).date(),
     email: str = None,
     **kwargs,
 ):
