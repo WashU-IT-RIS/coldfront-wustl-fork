@@ -264,14 +264,14 @@ class MigrateToColdfront:
 
         for key, dir_project in dir_projects_raw.items():
             print(key)
-            print(allocation_data)
+            print(allocation_data.get("storage_name"))
             print(dir_project.get("archive"))
             print(dir_project.get("link"))
             if (
                 hasattr(dir_project, "archive")
                 and dir_project.get("archive") is True
                 and dir_project.get("link").startswith(
-                    f"{allocation_data.get('name')}/Archive"
+                    f"/vol/rdcw-fs1/{allocation_data.get('storage_name')}/Archive"
                 )
             ):
                 continue
