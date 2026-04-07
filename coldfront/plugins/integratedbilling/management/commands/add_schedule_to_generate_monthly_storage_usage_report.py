@@ -29,7 +29,7 @@ class Command(BaseCommand):
             f"Scheduling to generate Monthly Storage Active Usage Report to {email}..."
         )
         schedule(
-            func="coldfront.plugins.integratedbilling.management.commands.add_scheduled_generate_storage_usage_report_monthly.generate_monthly_storage_usage_report",
+            func="coldfront.plugins.integratedbilling.management.commands.add_schedule_to_generate_monthly_storage_usage_report.generate_monthly_storage_usage_report",
             name="Generate Monthly Storage Active Usage Report",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
