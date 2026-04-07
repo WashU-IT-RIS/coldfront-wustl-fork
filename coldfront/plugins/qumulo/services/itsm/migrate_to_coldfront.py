@@ -258,6 +258,21 @@ class MigrateToColdfront:
         allocation_data = self.__get_allocation_data_from_fields(
             attributes_for_allocation, key, resource, project
         )
+
+        dir_projects_raw = allocation_data.get("dir_projects")
+        dir_projects_filtered = {}
+        for key, dir_project in dir_projects_raw.items():
+            if (
+                hasattr(dir_project, "archive")
+                and dir_project.get("archive") is True
+                and dir_project.get("link").startswith(
+                    f"{allocation_data.get('name')}/Archive"
+                )
+            ):
+                continue
+            dir_projects_filtered[key] = dir_project
+
+        allocation_data["dir_projects"] = dir_projects_filtered
         service_result = AllocationService.create_new_allocation(
             form_data=allocation_data, user=pi_user
         )
