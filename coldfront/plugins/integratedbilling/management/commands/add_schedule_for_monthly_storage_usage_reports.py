@@ -48,14 +48,13 @@ def generate_monthly_storage_usage_reports(
         report_agent = StorageUsageReport(usage_date=usage_date, tier=tier)
         filename = f"storage_{tier.name.lower()}_usage_report_{usage_date_str.replace('-', '')}.csv"
         filepath = os.path.join("/tmp", filename)
-        usage_report = report_agent.generate_report(filename=filepath)
-        usage_report = f"{usage_report}\n\n"
+        report_agent.generate_report(filename=filepath)
         if os.path.exists(filepath):
             file.append(filepath)
 
     email = EmailMessage(
         subject=f"Monthly Storage Usage Reports with consumptions on {usage_date_str}",
-        body=f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs:\n\n{usage_report}",
+        body=f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs.",
         to=[email] if email else [],
     )
     for filepath in file:
