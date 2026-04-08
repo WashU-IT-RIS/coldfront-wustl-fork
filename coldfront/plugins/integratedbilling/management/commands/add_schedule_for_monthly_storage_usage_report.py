@@ -21,7 +21,7 @@ class Command(BaseCommand):
         email = options["email"]
         print(f"Scheduling to generate Monthly Storage Usage Report to {email}...")
         schedule(
-            func="coldfront.plugins.integratedbilling.management.commands.add_schedule_to_generate_monthly_storage_usage_report.generate_monthly_storage_usage_report",
+            func="coldfront.plugins.integratedbilling.management.commands.add_schedule_for_monthly_storage_usage_report.generate_monthly_storage_usage_report",
             name="Generate Monthly Storage Usage Report",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
