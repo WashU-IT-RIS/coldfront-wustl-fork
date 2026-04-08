@@ -19,27 +19,27 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         email = options["email"]
-        print(f"Scheduling to generate Monthly Storage Usage Report to {email}...")
+        print(f"Scheduling to generate Monthly Storage Usage Reports to {email}...")
         schedule(
-            func="coldfront.plugins.integratedbilling.management.commands.add_schedule_for_monthly_storage_usage_report.generate_monthly_storage_usage_report",
-            name="Generate Monthly Storage Usage Report",
+            func="coldfront.plugins.integratedbilling.management.commands.add_schedule_for_monthly_storage_usage_reports.generate_monthly_storage_usage_reports",
+            name="Generate Monthly Storage Usage Reports",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
             email=email,
         )
 
 
-def generate_monthly_storage_usage_report(
+def generate_monthly_storage_usage_reports(
     usage_date=datetime.now(timezone.utc).replace(day=1).date(),
     email: str = None,
     **kwargs,
 ):
     """
-    Generate the Monthly Storage Usage Report and email it.
+    Generate the Monthly Storage Usage Reports and email them.
     """
     usage_date_str = usage_date.strftime("%Y-%m-%d")
     print(
-        f"Generating Monthly Storage Usage Report with consumptions on {usage_date_str} for emailing to {email}."
+        f"Generating Monthly Storage Usage Reports with consumptions on {usage_date_str} for emailing to {email}."
     )
 
     for tier in [ServiceTiers.Active, ServiceTiers.Archive]:
@@ -47,8 +47,8 @@ def generate_monthly_storage_usage_report(
         usage_report = report_agent.generate_report()
         usage_report = f"{usage_report}\n\n"
 
-    subject = f"Monthly Storage Usage Report with consumptions on {usage_date_str}"
-    message = f"Here is the Monthly Storage Usage report with consumptions on {usage_date_str} by department per PIs:\n\n{usage_report}"
+    subject = f"Monthly Storage Usage Reports with consumptions on {usage_date_str}"
+    message = f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs:\n\n{usage_report}"
     from_email = "noreply@gowustl.onmicrosoft.com"
     recipient_list = [email] if email else []
 
@@ -61,7 +61,7 @@ def generate_monthly_storage_usage_report(
             fail_silently=False,
         )
         print(
-            f"Monthly Storage Usage Report with consumptions on {usage_date_str} has been sent via email to {email}."
+            f"Monthly Storage Usage Reports with consumptions on {usage_date_str} have been sent via email to {email}."
         )
     else:
         print("No recipient email provided. Report not sent.")
