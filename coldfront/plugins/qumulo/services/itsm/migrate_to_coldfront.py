@@ -271,20 +271,18 @@ class MigrateToColdfront:
             print(hasattr(dir_project, "archive"))
             print(dir_project.get("archive") is True)
             print(
-                dir_project.get("link").startswith(
+                dir_project.get("link", "").startswith(
                     f"/vol/rdcw-fs1/{allocation_data.get('storage_name')}/Archive"
                 )
             )
 
-            if (
-                hasattr(dir_project, "archive")
-                and dir_project.get("archive") is True
-                and dir_project.get("link").startswith(
-                    f"/vol/rdcw-fs1/{allocation_data.get('storage_name')}/Archive"
-                )
+            if dir_project.get("archive", False) is True and dir_project.get(
+                "link", ""
+            ).startswith(
+                f"/vol/rdcw-fs1/{allocation_data.get('storage_name')}/Archive"
             ):
                 continue
-            dir_projects_filtered[key] = dir_project
+            # dir_projects_filtered[key] = dir_project
 
         allocation_data["dir_projects"] = dir_projects_filtered
         service_result = AllocationService.create_new_allocation(
