@@ -1,4 +1,5 @@
 import arrow
+import os
 from django.core.management.base import BaseCommand
 from django.core.mail import send_mail, EmailMessage
 from django_q.tasks import schedule
@@ -42,26 +43,28 @@ def generate_monthly_storage_usage_reports(
         f"Generating Monthly Storage Usage Reports with consumptions on {usage_date_str} for emailing to {email}."
     )
 
+    file = list()
     for tier in [ServiceTiers.Active, ServiceTiers.Archive]:
         report_agent = StorageUsageReport(usage_date=usage_date, tier=tier)
-        usage_report = report_agent.generate_report()
+        filename = f"storage_{tier.name.lower()}_usage_report_{usage_date_str.replace('-', '')}.csv"
+        filepath = os.path.join("/tmp", filename)
+        usage_report = report_agent.generate_report(filename=filepath)
         usage_report = f"{usage_report}\n\n"
+        if os.path.exists(filepath):
+            file.append(filepath)
 
-    subject = f"Monthly Storage Usage Reports with consumptions on {usage_date_str}"
-    message = f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs:\n\n{usage_report}"
-    from_email = "noreply@gowustl.onmicrosoft.com"
-    recipient_list = [email] if email else []
-
-    if recipient_list:
-        send_mail(
-            subject,
-            message,
-            from_email,
-            recipient_list,
-            fail_silently=False,
-        )
+    email = EmailMessage(
+        subject=f"Monthly Storage Usage Reports with consumptions on {usage_date_str}",
+        body=f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs:\n\n{usage_report}",
+        from_email="noreply@gowustl.onmicrosoft.com",
+        to=[email] if email else [],
+    )
+    for filepath in file:
+        email.attach_file(filepath)
+    if email.to:
+        email.send(fail_silently=False)
         print(
-            f"Monthly Storage Usage Reports with consumptions on {usage_date_str} have been sent via email to {email}."
+            f"Monthly Storage Usage Reports with consumptions on {usage_date_str} have been sent via email to {email.to}."
         )
     else:
         print("No recipient email provided. Report not sent.")

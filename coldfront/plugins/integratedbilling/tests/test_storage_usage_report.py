@@ -1,3 +1,4 @@
+import os
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import date
@@ -109,6 +110,33 @@ class TestStorageUsageReport(unittest.TestCase):
     def test_init(self):
         usage = StorageUsageReport(date(2024, 1, 1))
         self.assertEqual(usage.usage_date, date(2024, 1, 1))
+
+    def test_write_csv_to_tmp(self):
+
+        usage = StorageUsageReport(date(2024, 1, 1))
+        csv_rows = ["col1,col2", "val1,val2", "val3,val4"]
+        # Test with auto-generated filename
+        file_path = usage.write_csv_to_tmp("\n".join(csv_rows))
+        self.assertIsNotNone(file_path)
+        self.assertTrue(os.path.exists(file_path))
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        for row in csv_rows:
+            self.assertIn(row, content)
+        os.remove(file_path)
+
+        # Test with provided filename
+        custom_filename = "test_custom_storage_usage.csv"
+        file_path2 = usage.write_csv_to_tmp(
+            "\n".join(csv_rows), filename=custom_filename
+        )
+        self.assertIsNotNone(file_path2)
+        self.assertTrue(os.path.exists(file_path2))
+        with open(file_path2, "r", encoding="utf-8") as f:
+            content2 = f.read()
+        for row in csv_rows:
+            self.assertIn(row, content2)
+        os.remove(file_path2)
 
 
 # Additional tests for private methods of StorageUsageReport

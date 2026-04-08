@@ -164,7 +164,10 @@ class StorageUsageReport:
         }
         self.report_attribute |= {"unit": "unit", "name": "name"}
 
-    def generate_report(self) -> str:
+    def generate_report(self, filename: str = None) -> str:
+        """
+        Generate the storage usage report as a CSV string. If filename is provided, write the CSV to that file.
+        """
         itsm_service_usage = ItsmServiceUsage(self.usage_date, self.tier)
         storage1_usage_data = itsm_service_usage.get_data()
         storage1_usage = itsm_service_usage.normalized_to_coldfront_report(
@@ -187,8 +190,12 @@ class StorageUsageReport:
         storage_usage_with_dept_info = self.__append_dept_unit_name_to_usage_data(
             grouped_storage_usage, dept_dictionary
         )
-
-        return self.__format_csv_usage_report(storage_usage_with_dept_info)
+        csv_output = self.__format_csv_usage_report(storage_usage_with_dept_info)
+        if filename is not None:
+            # Write the CSV output to the specified file
+            self.write_csv_to_tmp(csv_output, filename)
+            print(f"Storage usage report written to {filename}")
+        return csv_output
 
     def __sort_usage_data(
         self, usage_data: list[dict[str, str]], sort_keys: list[str]
@@ -239,11 +246,12 @@ class StorageUsageReport:
         )
 
     def __format_csv_usage_report(self, usage_data: list[dict[str, str]]) -> str:
+        csv_row = list()
         report_header = [
             CSV_USAGE_REPORT_HEADER_MAPPING[key]
             for key in CSV_USAGE_REPORT_HEADER_MAPPING
         ]
-        formatted_report = ",".join(report_header) + "\n"
+        csv_row.append(",".join(report_header))
         fiscal_year = (
             self.usage_date.year
             if self.usage_date.month < 7
@@ -268,5 +276,27 @@ class StorageUsageReport:
                     str(entry.get(self.report_attribute["usage"], 0)),
                 ]
             )
-            formatted_report += formatted_entry + "\n"
+            csv_row.append(formatted_entry)
+            formatted_report = "\n".join(csv_row)
         return formatted_report
+
+    def write_csv_to_tmp(self, csv_rows: str, filename: str = None) -> str:
+        """
+        Write a CSV string to a file in /tmp.
+        If filename is None, generate a filename with usage_date and tier.
+        Returns the file path. Catches and reports file write errors.
+        """
+        import os
+
+        try:
+            if filename is None:
+                tier_name = self.tier.name.lower()
+                date_str = self.usage_date.strftime("%Y%m%d")
+                filename = f"storage_{tier_name}_usage_{date_str}.csv"
+            file_path = os.path.join("/tmp", filename)
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(csv_rows)
+            return file_path
+        except Exception as e:
+            print(f"Failed to write CSV to {filename or '/tmp'}: {e}")
+            return None
