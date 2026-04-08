@@ -270,7 +270,7 @@ class MigrateToColdfront:
             ):
                 print(f"Ignoring {key}")
                 continue
-            # dir_projects_filtered[key] = dir_project
+            dir_projects_filtered[key] = dir_project
 
         allocation_data["dir_projects"] = dir_projects_filtered
         service_result = AllocationService.create_new_allocation(
