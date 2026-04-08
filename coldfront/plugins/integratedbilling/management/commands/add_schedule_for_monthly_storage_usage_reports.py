@@ -56,7 +56,6 @@ def generate_monthly_storage_usage_reports(
     email = EmailMessage(
         subject=f"Monthly Storage Usage Reports with consumptions on {usage_date_str}",
         body=f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs:\n\n{usage_report}",
-        from_email="noreply@gowustl.onmicrosoft.com",
         to=[email] if email else [],
     )
     for filepath in file:
