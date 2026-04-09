@@ -52,4 +52,6 @@ for lc in local_configs:
 include(*coldfront_configs)
 
 # Default email address for outgoing mail
-DEFAULT_FROM_EMAIL = "noreply@gowustl.onmicrosoft.com"
+DEFAULT_FROM_EMAIL = ENV.str(
+    "DEFAULT_FROM_EMAIL", default="noreply@gowustl.onmicrosoft.com"
+)
