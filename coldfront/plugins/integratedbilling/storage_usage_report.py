@@ -200,7 +200,7 @@ class StorageUsageReport:
                 raise RuntimeError(
                     f"Failed to write storage usage report to {filename}"
                 )
-            print(f"Storage usage report written to /tmp/{filename}")
+            print(f"Storage usage report written to {written_file}")
         return csv_output
 
     def __sort_usage_data(
