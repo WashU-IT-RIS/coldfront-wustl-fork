@@ -87,14 +87,10 @@ class StorageUsageReport:
         return self.get_allocations_by_school("ALL")
 
     def get_allocations_by_school(self, unit="ALL") -> AllocationQuerySet:
-        allocations = (
-            Allocation.objects.filter(
-                allocationattribute__allocation_attribute_type__name="department_number",
-                allocationattribute__value__in=self.get_departments_by_school(unit),
-                status__name="Active",
-            )
-            .exclude(id__in=self._get_suballocation_ids())
-            .distinct()
+        allocations = Allocation.objects.parents().filter(
+            allocationattribute__allocation_attribute_type__name="department_number",
+            allocationattribute__value__in=self.get_departments_by_school(unit),
+            status__name="Active",
         )
         return allocations
 
