@@ -245,7 +245,3 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
         ]
         for header in expected_headers:
             self.assertIn(header, lines[0])
-
-
-if __name__ == "__main__":
-    unittest.main()
