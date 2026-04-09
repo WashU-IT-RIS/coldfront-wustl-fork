@@ -290,11 +290,14 @@ class StorageUsageReport:
         import os
 
         try:
+            tmp_dir = os.path.abspath("/tmp")
             if filename is None:
                 tier_name = self.tier.name.lower()
                 date_str = self.usage_date.strftime("%Y%m%d")
                 filename = f"storage_{tier_name}_usage_{date_str}.csv"
-            file_path = os.path.join("/tmp", filename)
+            file_path = os.path.abspath(os.path.join(tmp_dir, filename))
+            if os.path.commonpath([tmp_dir, file_path]) != tmp_dir:
+                raise ValueError("filename must resolve to a path under /tmp")
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(csv_rows)
             return file_path
