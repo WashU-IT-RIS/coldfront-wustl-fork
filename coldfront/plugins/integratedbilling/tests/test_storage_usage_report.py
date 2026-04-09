@@ -207,7 +207,7 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
         self.assertEqual(result[1]["name"], "Dept2")
 
     def test_format_csv_usage_report(self):
-        coldfront = self.report.report_attribute
+        report_attribute = self.report.report_attribute
         data = [
             {
                 "fiscal_year": "FY24",
@@ -215,15 +215,36 @@ class TestStorageUsageReportPrivateMethods(unittest.TestCase):
                 "service": "Storage Active",
                 "unit": "School1",
                 "name": "Dept1",
-                coldfront["pi"]: "piuser",
-                coldfront["service_rate_category"]: "Tier1",
-                coldfront["usage"]: 1234,
+                report_attribute["pi"]: "piuser",
+                report_attribute["service_rate_category"]: "Tier1",
+                report_attribute["usage"]: 1234,
             }
         ]
         result = self.report._StorageUsageReport__format_csv_usage_report(data)
         self.assertIn("Fiscal Year", result)
         self.assertIn("School1", result)
         self.assertIn("1234", result)
+
+    def test_format_csv_usage_report_empty(self):
+        # When the dataset is empty, only headers should be present
+        result = self.report._StorageUsageReport__format_csv_usage_report([])
+        # The result should contain only one line (the header)
+        lines = result.strip().split("\n")
+        self.assertEqual(len(lines), 1)
+        # Check that all expected headers are present
+        expected_headers = [
+            "Fiscal Year",
+            "Date",
+            "Service",
+            "School",
+            "Department",
+            "Sponsor",
+            "Tier",
+            "Unit",
+            "Usage",
+        ]
+        for header in expected_headers:
+            self.assertIn(header, lines[0])
 
 
 if __name__ == "__main__":

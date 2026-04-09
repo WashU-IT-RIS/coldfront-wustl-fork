@@ -110,7 +110,7 @@ class ColdfrontServiceUsage:
             entry[service_rate_category_key] = allocation.get_attribute(
                 service_rate_category_key
             )
-            entry[usage_key] = allocation.get_usage_kb_by_date(usage_date_str)
+            entry[usage_key] = allocation.get_usage_kb_by_date(self.usage_date)
             if entry[usage_key] is not None:
                 entry[usage_key] = int(entry[usage_key])
                 s23_usages.append(entry)
@@ -277,7 +277,7 @@ class StorageUsageReport:
                 ]
             )
             csv_row.append(formatted_entry)
-            formatted_report = "\n".join(csv_row)
+        formatted_report = "\n".join(csv_row)
         return formatted_report
 
     def write_csv_to_tmp(self, csv_rows: str, filename: str = None) -> str:
