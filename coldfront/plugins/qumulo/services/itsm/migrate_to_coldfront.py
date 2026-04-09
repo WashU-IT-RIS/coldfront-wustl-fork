@@ -259,20 +259,20 @@ class MigrateToColdfront:
             attributes_for_allocation, key, resource, project
         )
 
-        dir_projects_raw = allocation_data.get("dir_projects")
-        dir_projects_filtered = {}
+        # dir_projects= allocation_data.get("dir_projects")
+        # dir_projects_filtered = {}
 
-        for key, dir_project in dir_projects_raw.items():
-            if dir_project.get("archive", False) is True and dir_project.get(
-                "link", ""
-            ).startswith(
-                f"/vol/rdcw-fs1/{allocation_data.get('storage_name')}/Archive"
-            ):
-                print(f"Ignoring {key}")
-                continue
-            dir_projects_filtered[key] = dir_project
+        # for key, dir_project in dir_projects_raw.items():
+        #     if dir_project.get("archive", False) is True and dir_project.get(
+        #         "link", ""
+        #     ).startswith(
+        #         f"/vol/rdcw-fs1/{allocation_data.get('storage_name')}/Archive"
+        #     ):
+        #         print(f"Ignoring {key}")
+        #         continue
+        #     dir_projects_filtered[key] = dir_project
 
-        allocation_data["dir_projects"] = dir_projects_filtered
+        allocation_data["dir_projects"] = {}
         service_result = AllocationService.create_new_allocation(
             form_data=allocation_data, user=pi_user
         )
