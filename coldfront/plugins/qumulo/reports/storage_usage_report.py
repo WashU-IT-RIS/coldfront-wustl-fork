@@ -1,8 +1,12 @@
 from coldfront.plugins.qumulo.services.itsm.itsm_client_handler import ItsmClientHandler
 from coldfront.plugins.qumulo.validators import is_float
-from coldfront.core.allocation.models import Allocation, AllocationLinkage
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationLinkage,
+    AllocationQuerySet,
+)
 from datetime import datetime, date, time
-from typing import QuerySet
+from typing import Any
 import re
 
 
@@ -77,10 +81,10 @@ class StorageUsageReport:
         # ~* is case-insensitive regex match
         return '"number":{"operator":"~*","value":["^CH|^AU"]}'
 
-    def get_allocations(self) -> QuerySet[Allocation]:
+    def get_allocations(self) -> AllocationQuerySet:
         return self.get_allocations_by_school("ALL")
 
-    def get_allocations_by_school(self, unit="ALL") -> QuerySet[Allocation]:
+    def get_allocations_by_school(self, unit="ALL") -> AllocationQuerySet:
         allocations = (
             Allocation.objects.filter(
                 allocationattribute__allocation_attribute_type__name="department_number",
@@ -92,14 +96,14 @@ class StorageUsageReport:
         )
         return allocations
 
-    def _get_suballocation_ids(self) -> list:
+    def _get_suballocation_ids(self) -> list[int]:
         suballoc_ids = list()
         for linkage in AllocationLinkage.objects.all():
             for child in linkage.children.all():
                 suballoc_ids.append(child.pk)
         return suballoc_ids
 
-    def get_usages_by_pi_for_school(self, unit="ALL") -> list:
+    def get_usages_by_pi_for_school(self, unit="ALL") -> list[dict[str, Any]]:
         pi_usages = list()
         allocations = self.get_allocations_by_school(unit)
         for allocation in allocations:
