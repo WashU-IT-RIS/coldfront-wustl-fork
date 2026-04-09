@@ -111,6 +111,8 @@ class StorageUsageReport:
         for allocation in allocations:
             pi = allocation.project.pi.username
             usage = allocation.get_usage_kb_by_date(self.usage_date)
+            if usage is None:
+                continue
             if any(entry["pi"] == pi for entry in pi_usages):
                 for entry in pi_usages:
                     if entry["pi"] == pi:
