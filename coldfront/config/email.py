@@ -29,3 +29,8 @@ EMAIL_SIGNATURE = ENV.str("EMAIL_SIGNATURE", default="", multiline=True)
 EMAIL_ADMINS_ON_ALLOCATION_EXPIRE = ENV.bool(
     "EMAIL_ADMINS_ON_ALLOCATION_EXPIRE", default=False
 )
+
+# Default email address for outgoing mail
+DEFAULT_FROM_EMAIL = ENV.str(
+    "DEFAULT_FROM_EMAIL", default="noreply@gowustl.onmicrosoft.com"
+)

@@ -49,9 +49,4 @@ if ENV.str("COLDFRONT_CONFIG", default="") != "":
 for lc in local_configs:
     coldfront_configs.append(optional(lc))
 
-# Default email address for outgoing mail
-DEFAULT_FROM_EMAIL = ENV.str(
-    "DEFAULT_FROM_EMAIL", default="noreply@gowustl.onmicrosoft.com"
-)
-
 include(*coldfront_configs)
