@@ -167,7 +167,7 @@ class StorageUsageReport:
 
     def generate_report(self, filename: Optional[str] = None) -> str:
         """
-        Generate the storage usage report as a CSV string. If filename is provided, write the CSV to that file.
+        Generate the storage usage report as a CSV string. If filename is provided, write the CSV to that file under /tmp.
         """
         itsm_service_usage = ItsmServiceUsage(self.usage_date, self.tier)
         storage1_usage_data = itsm_service_usage.get_data()
@@ -193,13 +193,13 @@ class StorageUsageReport:
         )
         csv_output = self.__format_csv_usage_report(storage_usage_with_dept_info)
         if filename is not None:
-            # Write the CSV output to the specified file
+            # Write the CSV output to the specified file under /tmp
             written_file = self.write_csv_to_tmp(csv_output, filename)
             if written_file is None:
                 raise RuntimeError(
                     f"Failed to write storage usage report to {filename}"
                 )
-            print(f"Storage usage report written to {filename}")
+            print(f"Storage usage report written to /tmp/{filename}")
         return csv_output
 
     def __sort_usage_data(

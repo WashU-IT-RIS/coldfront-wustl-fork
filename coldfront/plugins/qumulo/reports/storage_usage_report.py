@@ -6,7 +6,7 @@ from coldfront.core.allocation.models import (
     AllocationQuerySet,
 )
 from datetime import datetime, date, time
-from typing import Any
+from typing import Any, Optional
 import re
 
 
@@ -101,7 +101,7 @@ class StorageUsageReport:
                 suballoc_ids.append(child.pk)
         return suballoc_ids
 
-    def get_usages_by_pi_for_school(self, unit="ALL") -> list[dict[str, Any]]:
+    def get_usages_by_pi_for_school(self, unit="ALL") -> list[Optional[dict[str, Any]]]:
         pi_usages = list()
         allocations = self.get_allocations_by_school(unit)
         for allocation in allocations:
@@ -125,6 +125,8 @@ class StorageUsageReport:
                 )
                 pi_usages.append(usage_entry)
 
+        if not pi_usages:
+            return []
         sorted_usages_by_pi = sorted(pi_usages, key=lambda x: x["pi"])
         return sorted_usages_by_pi
 
