@@ -286,7 +286,9 @@ class StorageUsageReport:
         formatted_report = "\n".join(csv_row)
         return formatted_report
 
-    def write_csv_to_tmp(self, csv_rows: str, filename: str = None) -> Optional[str]:
+    def write_csv_to_tmp(
+        self, csv_rows: str, filename: Optional[str] = None
+    ) -> Optional[str]:
         """
         Write a CSV string to a file in /tmp.
         If filename is None, generate a filename with usage_date and tier.
