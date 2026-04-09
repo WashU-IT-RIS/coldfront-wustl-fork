@@ -32,5 +32,5 @@ EMAIL_ADMINS_ON_ALLOCATION_EXPIRE = ENV.bool(
 
 # Default email address for outgoing mail
 DEFAULT_FROM_EMAIL = ENV.str(
-    "DEFAULT_FROM_EMAIL", default="noreply@gowustl.onmicrosoft.com"
+    "DEFAULT_FROM_EMAIL", default="No Reply <noreply@gowustl.onmicrosoft.com>"
 )
