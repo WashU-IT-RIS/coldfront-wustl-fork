@@ -1,7 +1,7 @@
 import arrow
 import os
 from django.core.management.base import BaseCommand
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import EmailMessage
 from django_q.tasks import schedule
 from django_q.models import Schedule
 from datetime import datetime, timezone
