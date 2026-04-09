@@ -52,17 +52,17 @@ def generate_monthly_storage_usage_reports(
         if os.path.exists(filepath):
             filepaths.append(filepath)
 
-    email = EmailMessage(
+    message = EmailMessage(
         subject=f"Monthly Storage Usage Reports with consumptions on {usage_date_str}",
         body=f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs.",
         to=[email] if email else [],
     )
-    for filepath in filepaths:
-        email.attach_file(filepath)
-    if email.to:
-        email.send(fail_silently=False)
+    for filepath in file:
+        message.attach_file(filepath)
+    if message.to:
+        message.send(fail_silently=False)
         print(
-            f"Monthly Storage Usage Reports with consumptions on {usage_date_str} have been sent via email to {email.to}."
+            f"Monthly Storage Usage Reports with consumptions on {usage_date_str} have been sent via email to {message.to}."
         )
     else:
         print("No recipient email provided. Report not sent.")
