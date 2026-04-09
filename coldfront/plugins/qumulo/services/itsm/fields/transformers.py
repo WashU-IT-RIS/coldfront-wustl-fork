@@ -141,15 +141,10 @@ def comment_to_dir_projects(
     if comment_json is None:
         return default_value
 
-    # print(comment_json)
-    # sub_allocations = comment_json.get("dir_projects", default_value)
     dir_projects = comment_json.get("dir_projects", default_value)
     sub_allocations = {}
 
     for key, dir_project in dir_projects.items():
-        # print(key)
-        # print(dir_project.get("archive"))
-        # print(dir_project.get("archive", False))
         if dir_project.get("archive", False) is not True:
             sub_allocations[key] = dir_project
 
