@@ -1,3 +1,4 @@
+from typing import Any, Optional
 from datetime import date, datetime
 from coldfront.plugins.integratedbilling.constants import ServiceTiers, QUERY_ATTRIBUTE
 from coldfront.plugins.qumulo.services.itsm.itsm_client_handler import ItsmClientHandler
@@ -38,7 +39,7 @@ class ItsmServiceUsage:
             key: value["itsm"] for key, value in QUERY_ATTRIBUTE.items()
         }
 
-    def get_data(self) -> list[dict[str, str]]:
+    def get_data(self) -> list[dict[str, Any]]:
         filters = self.__get_filters()
         attributes = ",".join(self.itsm_attribute.values())
         return self.itsm_client.get_data(attributes, filters)
@@ -51,8 +52,8 @@ class ItsmServiceUsage:
         return f'{{"{usage_date_key}":"{usage_date_str}","{service_key}":{self.tier.value}}}'
 
     def normalized_to_coldfront_report(
-        self, raw_report: list[dict[str, str]]
-    ) -> list[dict[str, str]]:
+        self, raw_report: list[dict[str, Any]]
+    ) -> list[dict[str, Any]]:
         key_mapping = {
             attribute["itsm"]: attribute["coldfront"]
             for attribute in QUERY_ATTRIBUTE.values()
@@ -93,7 +94,7 @@ class ColdfrontServiceUsage:
             key: value["coldfront"] for key, value in QUERY_ATTRIBUTE.items()
         }
 
-    def get_data(self) -> list[dict[str, str]]:
+    def get_data(self) -> list[dict[str, Any]]:
         usage_date_str = self.usage_date.strftime("%Y-%m-%d")
         coldfront_usage_report = ColdFrontStorageUsageReport(usage_date=self.usage_date)
         allocations = coldfront_usage_report.get_allocations()
@@ -198,8 +199,8 @@ class StorageUsageReport:
         return csv_output
 
     def __sort_usage_data(
-        self, usage_data: list[dict[str, str]], sort_keys: list[str]
-    ) -> list[dict[str, str]]:
+        self, usage_data: list[dict[str, Any]], sort_keys: list[str]
+    ) -> list[dict[str, Any]]:
         sorted_usage = sorted(
             usage_data,
             key=lambda x: tuple(x[key] for key in sort_keys),
@@ -207,8 +208,8 @@ class StorageUsageReport:
         return sorted_usage
 
     def __group_usage_data(
-        self, usage_data: list[dict[str, str]], key_attributes: list[str]
-    ) -> list[dict[str, str]]:
+        self, usage_data: list[dict[str, Any]], key_attributes: list[str]
+    ) -> list[dict[str, Any]]:
         grouped_usage = dict()
         for entry in usage_data:
             key = tuple(entry[attr] for attr in key_attributes)
@@ -222,9 +223,9 @@ class StorageUsageReport:
 
     def __append_dept_unit_name_to_usage_data(
         self,
-        usage_data: list[dict[str, str]],
+        usage_data: list[dict[str, Any]],
         dept_dictionary: dict[str, dict[str, str]],
-    ) -> list[dict[str, str]]:
+    ) -> list[dict[str, Any]]:
         for entry in usage_data:
             dept_number = entry[self.report_attribute["dept_number"]]
             entry[self.report_attribute["unit"]] = dept_dictionary.get(
@@ -280,7 +281,7 @@ class StorageUsageReport:
         formatted_report = "\n".join(csv_row)
         return formatted_report
 
-    def write_csv_to_tmp(self, csv_rows: str, filename: str = None) -> str:
+    def write_csv_to_tmp(self, csv_rows: str, filename: str = None) -> Optional[str]:
         """
         Write a CSV string to a file in /tmp.
         If filename is None, generate a filename with usage_date and tier.

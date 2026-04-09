@@ -2,6 +2,7 @@ from coldfront.plugins.qumulo.services.itsm.itsm_client_handler import ItsmClien
 from coldfront.plugins.qumulo.validators import is_float
 from coldfront.core.allocation.models import Allocation, AllocationLinkage
 from datetime import datetime, date, time
+from typing import QuerySet
 import re
 
 
@@ -76,10 +77,10 @@ class StorageUsageReport:
         # ~* is case-insensitive regex match
         return '"number":{"operator":"~*","value":["^CH|^AU"]}'
 
-    def get_allocations(self) -> list:
+    def get_allocations(self) -> QuerySet[Allocation]:
         return self.get_allocations_by_school("ALL")
 
-    def get_allocations_by_school(self, unit="ALL") -> list:
+    def get_allocations_by_school(self, unit="ALL") -> QuerySet[Allocation]:
         allocations = (
             Allocation.objects.filter(
                 allocationattribute__allocation_attribute_type__name="department_number",

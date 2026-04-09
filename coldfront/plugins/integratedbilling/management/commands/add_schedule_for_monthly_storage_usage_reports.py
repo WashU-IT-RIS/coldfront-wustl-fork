@@ -17,7 +17,11 @@ SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM = (
 class Command(BaseCommand):
 
     def add_arguments(self, parser):
-        parser.add_argument("--email", type=str, help="Recipient email address")
+        parser.add_argument(
+            "--email",
+            type=str,
+            help="Recipient email address separated by comma or semicolon for sending the reports",
+        )
 
     def handle(self, *args, **options):
         email = options["email"]
@@ -32,13 +36,13 @@ class Command(BaseCommand):
 
 
 def generate_monthly_storage_usage_reports(
-    usage_date=datetime.now(timezone.utc).replace(day=1).date(),
     email: str = None,
     **kwargs,
 ):
     """
     Generate the Monthly Storage Usage Reports and email them.
     """
+    usage_date = datetime.now(timezone.utc).replace(day=1).date()
     usage_date_str = usage_date.strftime("%Y-%m-%d")
     print(
         f"Generating Monthly Storage Usage Reports with consumptions on {usage_date_str} for emailing to {email}."
