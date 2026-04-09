@@ -11,7 +11,9 @@ import re
 
 
 class StorageUsageReport:
-    def __init__(self, usage_date=datetime.combine(date.today(), time.min)):
+    def __init__(self, usage_date=None):
+        if usage_date is None:
+            usage_date = datetime.combine(date.today(), time.min)
         self.usage_date = usage_date
 
     def _format_usage_report(self, usages: list) -> str:
