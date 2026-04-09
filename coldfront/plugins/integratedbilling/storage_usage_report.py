@@ -246,7 +246,7 @@ class StorageUsageReport:
             ],
         )
 
-    def __format_csv_usage_report(self, usage_data: list[dict[str, str]]) -> str:
+    def __format_csv_usage_report(self, usage_data: list[dict[str, Any]]) -> str:
         csv_row = list()
         report_header = [
             CSV_USAGE_REPORT_HEADER_MAPPING[key]
