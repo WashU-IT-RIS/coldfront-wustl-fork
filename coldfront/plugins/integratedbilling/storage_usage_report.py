@@ -130,7 +130,8 @@ class ItsmDepartmentClient:
     """
 
     def __init__(self) -> None:
-        self.itsm_client = ItsmClientHandler("/v2/rest/attr/info/department")
+        endpoint = "/v2/rest/attr/info/department"
+        self.itsm_client = ItsmClientHandler(endpoint)
         self.attributes = ["number", "unit", "name"]
 
     def get_dictionary_by_number(self) -> dict[str, dict[str, str]]:
@@ -299,7 +300,10 @@ class StorageUsageReport:
                 tier_name = self.tier.name.lower()
                 date_str = self.usage_date.strftime("%Y%m%d")
                 filename = f"storage_{tier_name}_usage_{date_str}.csv"
-            file_path = os.path.abspath(os.path.join(tmp_dir, filename))
+            if filename.startswith(tmp_dir + os.sep):
+                file_path = filename
+            else:
+                file_path = os.path.abspath(os.path.join(tmp_dir, filename))
             if os.path.commonpath([tmp_dir, file_path]) != tmp_dir:
                 raise ValueError("filename must resolve to a path under /tmp")
             with open(file_path, "w", encoding="utf-8") as f:

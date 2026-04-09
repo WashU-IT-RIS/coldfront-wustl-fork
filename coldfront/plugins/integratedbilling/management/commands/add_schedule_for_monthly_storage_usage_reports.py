@@ -35,6 +35,16 @@ class Command(BaseCommand):
         )
 
 
+def __create_report_for(tier: ServiceTiers, usage_date: datetime.date) -> str:
+    report_agent = StorageUsageReport(usage_date=usage_date, tier=tier)
+    filename = (
+        f"storage_{tier.name.lower()}_usage_report_{usage_date.strftime('%Y%m%d')}.csv"
+    )
+    filepath = os.path.join("/tmp", filename)
+    report_agent.generate_report(filename=filepath)
+    return filepath
+
+
 def generate_monthly_storage_usage_reports(
     email: str = None,
     **kwargs,
@@ -50,10 +60,7 @@ def generate_monthly_storage_usage_reports(
 
     filepaths = list()
     for tier in [ServiceTiers.Active, ServiceTiers.Archive]:
-        report_agent = StorageUsageReport(usage_date=usage_date, tier=tier)
-        filename = f"storage_{tier.name.lower()}_usage_report_{usage_date_str.replace('-', '')}.csv"
-        filepath = os.path.join("/tmp", filename)
-        report_agent.generate_report(filename=filepath)
+        filepath = __create_report_for(tier, usage_date)
         if os.path.exists(filepath):
             filepaths.append(filepath)
 
