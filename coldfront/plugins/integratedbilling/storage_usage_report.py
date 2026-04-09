@@ -95,7 +95,7 @@ class ColdfrontServiceUsage:
 
     def get_data(self) -> list[dict[str, str]]:
         usage_date_str = self.usage_date.strftime("%Y-%m-%d")
-        coldfront_usage_report = ColdFrontStorageUsageReport(usage_date=usage_date_str)
+        coldfront_usage_report = ColdFrontStorageUsageReport(usage_date=self.usage_date)
         allocations = coldfront_usage_report.get_allocations()
         s23_usages = list()
         department_key = self.coldfront_attribute["dept_number"]
