@@ -1,5 +1,6 @@
 import arrow
 import os
+import re
 from django.core.management.base import BaseCommand
 from django.core.mail import EmailMessage
 from django_q.tasks import schedule
@@ -52,12 +53,13 @@ def generate_monthly_storage_usage_reports(
         if os.path.exists(filepath):
             filepaths.append(filepath)
 
+    email = email.strip() if email else ""
     message = EmailMessage(
         subject=f"Monthly Storage Usage Reports with consumptions on {usage_date_str}",
         body=f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs.",
-        to=[email] if email else [],
+        to=re.split(r"[;,\s]", email) if email else [],
     )
-    for filepath in file:
+    for filepath in filepaths:
         message.attach_file(filepath)
     if message.to:
         message.send(fail_silently=False)
