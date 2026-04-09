@@ -141,16 +141,13 @@ def comment_to_dir_projects(
     if comment_json is None:
         return default_value
 
-    print(comment_json)
-    sub_allocations = comment_json.get("dir_projects", default_value)
-    # dir_projects = comment_json.get("dir_projects", default_value)
-    # sub_allocations = {}
+    # print(comment_json)
+    # sub_allocations = comment_json.get("dir_projects", default_value)
+    dir_projects = comment_json.get("dir_projects", default_value)
+    sub_allocations = {}
 
-    # for key, dir_project in dir_projects.items():
-    #     if dir_project.get("archive", False) is True and dir_project.get(
-    #         "link", ""
-    #     ).startswith(f"/vol/rdcw-fs1/{allocation_data.get('storage_name')}/Archive"):
-    #         continue
-    #     sub_allocations[key] = dir_project
+    for key, dir_project in dir_projects.items():
+        if dir_project.get("archive", False) is not True:
+            sub_allocations[key] = dir_project
 
     return sub_allocations
