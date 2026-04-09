@@ -165,7 +165,7 @@ class StorageUsageReport:
         }
         self.report_attribute |= {"unit": "unit", "name": "name"}
 
-    def generate_report(self, filename: str = None) -> str:
+    def generate_report(self, filename: Optional[str] = None) -> str:
         """
         Generate the storage usage report as a CSV string. If filename is provided, write the CSV to that file.
         """
