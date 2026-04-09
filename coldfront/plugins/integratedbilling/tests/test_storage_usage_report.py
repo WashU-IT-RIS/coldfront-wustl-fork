@@ -60,10 +60,12 @@ class TestColdfrontServiceUsage(unittest.TestCase):
             "val" if k != QUERY_ATTRIBUTE["dept_number"]["coldfront"] else "dept123"
         )
         mock_allocation.project.pi.username = "piuser"
-        mock_allocation.get_usage_kb_by_date.return_value = "200"
+        mock_allocation.get_usage_kb_by_date.return_value = 200.0
         mock_report.get_allocations.return_value = [mock_allocation]
-        usage = ColdfrontServiceUsage(date(2024, 1, 1))
+        usage_date = date(2024, 1, 1)
+        usage = ColdfrontServiceUsage(usage_date)
         data = usage.get_data()
+        mock_allocation.get_usage_kb_by_date.assert_called_once_with(usage_date)
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0][QUERY_ATTRIBUTE["usage"]["coldfront"]], 200)
         self.assertEqual(data[0][QUERY_ATTRIBUTE["pi"]["coldfront"]], "piuser")
