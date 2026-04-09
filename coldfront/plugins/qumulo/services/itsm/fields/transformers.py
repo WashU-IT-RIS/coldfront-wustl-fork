@@ -150,8 +150,7 @@ def comment_to_dir_projects(
         # print(key)
         # print(dir_project.get("archive"))
         # print(dir_project.get("archive", False))
-        if dir_project.get("archive", False) is True:
-            continue
-        sub_allocations[key] = dir_project
+        if dir_project.get("archive", False) is not True:
+            sub_allocations[key] = dir_project
 
     return sub_allocations

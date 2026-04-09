@@ -272,7 +272,7 @@ class MigrateToColdfront:
         #         continue
         #     dir_projects_filtered[key] = dir_project
 
-        allocation_data["dir_projects"] = {}
+        # allocation_data["dir_projects"] = dir_projects_filtered
         service_result = AllocationService.create_new_allocation(
             form_data=allocation_data, user=pi_user
         )
