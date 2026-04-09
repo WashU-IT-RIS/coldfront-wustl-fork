@@ -61,7 +61,7 @@ def generate_monthly_storage_usage_reports(
     message = EmailMessage(
         subject=f"Monthly Storage Usage Reports with consumptions on {usage_date_str}",
         body=f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs.",
-        to=re.split(r"[;,\s]", email) if email else [],
+        to=[part for part in re.split(r"[;,\s]+", email) if part] if email else [],
     )
     for filepath in filepaths:
         message.attach_file(filepath)
