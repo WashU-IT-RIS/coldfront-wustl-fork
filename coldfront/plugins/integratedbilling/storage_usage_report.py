@@ -1,3 +1,5 @@
+import os
+import tempfile
 from typing import Any, Optional
 from datetime import date, datetime
 from coldfront.plugins.integratedbilling.constants import ServiceTiers, QUERY_ATTRIBUTE
@@ -290,14 +292,13 @@ class StorageUsageReport:
         self, csv_rows: str, filename: Optional[str] = None
     ) -> Optional[str]:
         """
-        Write a CSV string to a file in /tmp.
+        Write CSV strings to a file in Linux system temporary directory.
         If filename is None, generate a filename with usage_date and tier.
         Returns the file path. Catches and reports file write errors.
         """
-        import os
+        tmp_dir = tempfile.gettempdir()
 
         try:
-            tmp_dir = os.path.abspath("/tmp")
             if filename is None:
                 tier_name = self.tier.name.lower()
                 date_str = self.usage_date.strftime("%Y%m%d")
@@ -307,10 +308,10 @@ class StorageUsageReport:
             else:
                 file_path = os.path.abspath(os.path.join(tmp_dir, filename))
             if os.path.commonpath([tmp_dir, file_path]) != tmp_dir:
-                raise ValueError("filename must resolve to a path under /tmp")
+                raise ValueError(f"filename must resolve to a path under {tmp_dir}")
             with open(file_path, "w", encoding="utf-8") as f:
                 f.write(csv_rows)
             return file_path
         except Exception as e:
-            print(f"Failed to write CSV to {filename or '/tmp'}: {e}")
+            print(f"Failed to write CSV to {filename or tmp_dir}: {e}")
             return None

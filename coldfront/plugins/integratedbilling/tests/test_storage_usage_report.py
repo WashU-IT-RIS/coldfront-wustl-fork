@@ -1,4 +1,6 @@
 import os
+import tempfile
+import shutil
 import unittest
 from unittest.mock import patch, MagicMock
 from datetime import date
@@ -109,12 +111,17 @@ class TestItsmDepartmentClient(unittest.TestCase):
 
 
 class TestStorageUsageReport(unittest.TestCase):
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir)
+
     def test_init(self):
         usage = StorageUsageReport(date(2024, 1, 1))
         self.assertEqual(usage.usage_date, date(2024, 1, 1))
 
     def test_write_csv_to_tmp(self):
-
         usage = StorageUsageReport(date(2024, 1, 1))
         csv_rows = ["col1,col2", "val1,val2", "val3,val4"]
         # Test with auto-generated filename
@@ -127,8 +134,8 @@ class TestStorageUsageReport(unittest.TestCase):
             self.assertIn(row, content)
         os.remove(file_path)
 
-        # Test with provided filename
-        custom_filename = "test_custom_storage_usage.csv"
+        # Test with provided filename in temp dir
+        custom_filename = os.path.join(self.test_dir, "test_custom_storage_usage.csv")
         file_path2 = usage.write_csv_to_tmp(
             "\n".join(csv_rows), filename=custom_filename
         )
