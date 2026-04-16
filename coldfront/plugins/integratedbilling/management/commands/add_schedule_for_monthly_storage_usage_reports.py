@@ -30,7 +30,7 @@ class Command(BaseCommand):
             name="Generate Monthly Storage Usage Reports",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
-            email=email,
+            kwargs={"email": email},
         )
 
 
