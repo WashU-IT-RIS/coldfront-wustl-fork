@@ -3,7 +3,6 @@ import os
 import re
 from django.core.management.base import BaseCommand
 from django.core.mail import EmailMessage
-from django_q.tasks import schedule
 from django_q.models import Schedule
 from datetime import datetime, timezone
 from coldfront.plugins.integratedbilling.storage_usage_report import StorageUsageReport
@@ -26,7 +25,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         email = options["email"]
         print(f"Scheduling to generate Monthly Storage Usage Reports to {email}...")
-        schedule(
+        Schedule.objects.get_or_create(
             func="coldfront.plugins.integratedbilling.management.commands.add_schedule_for_monthly_storage_usage_reports.generate_monthly_storage_usage_reports",
             name="Generate Monthly Storage Usage Reports",
             schedule_type=Schedule.MONTHLY,
@@ -43,6 +42,22 @@ def __create_report_for(tier: ServiceTiers, usage_date: datetime.date) -> str:
     filepath = os.path.join("/tmp", filename)
     report_agent.generate_report(filename=filepath)
     return filepath
+
+
+def __email_report(filepath: list[str], email: list[str], usage_date: datetime.date):
+    usage_date_str = usage_date.strftime("%Y-%m-%d")
+    message = EmailMessage(
+        subject=f"Monthly Storage Usage Report with consumptions on {usage_date_str}",
+        body=f"Here is the Monthly Storage Usage report with consumptions on {usage_date_str} by department per PIs.",
+        to=email,
+    )
+    for path in filepath:
+        message.attach_file(path)
+
+    message.send(fail_silently=False)
+    print(
+        f"Monthly Storage Usage Report with consumptions on {usage_date_str} has been sent via email to {email}."
+    )
 
 
 def generate_monthly_storage_usage_reports(
@@ -63,19 +78,13 @@ def generate_monthly_storage_usage_reports(
         filepath = __create_report_for(tier, usage_date)
         if os.path.exists(filepath):
             filepaths.append(filepath)
+    if len(filepaths) <= 0:
+        raise FileNotFoundError("No report files generated.")
 
     email = email.strip() if email else ""
-    message = EmailMessage(
-        subject=f"Monthly Storage Usage Reports with consumptions on {usage_date_str}",
-        body=f"Here are the Monthly Storage Usage reports with consumptions on {usage_date_str} by department per PIs.",
-        to=[part for part in re.split(r"[;,\s]+", email) if part] if email else [],
-    )
-    for filepath in filepaths:
-        message.attach_file(filepath)
-    if message.to:
-        message.send(fail_silently=False)
-        print(
-            f"Monthly Storage Usage Reports with consumptions on {usage_date_str} have been sent via email to {message.to}."
-        )
-    else:
-        print("No recipient email provided. Report not sent.")
+    email_to = [part for part in re.split(r"[;,\s]+", email) if part] if email else []
+    if len(email_to) <= 0:
+        print("No valid recipient email provided. Report will not be sent.")
+        return
+
+    __email_report(filepath=filepaths, email=email_to, usage_date=usage_date)
