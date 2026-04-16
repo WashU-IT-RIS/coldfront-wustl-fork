@@ -65,9 +65,9 @@ class StorageUsageReport:
         report = "\n".join([header, separator] + rows)
         return report
 
-    def get_departments_by_school(self, unit="ALL") -> list:
+    def get_departments_by_school(self, school_unit="ALL") -> list:
         itsm_client = ItsmClientHandler("/v2/rest/attr/info/department")
-        uri_filters = self._format_filter_for_dept_by_unit(unit)
+        uri_filters = self._format_filter_for_dept_by_unit(school_unit)
         departments = itsm_client.get_data("number", uri_filters)
         dept_numbers = [dept["number"] for dept in departments]
         return dept_numbers
@@ -86,10 +86,10 @@ class StorageUsageReport:
     def get_allocations(self) -> AllocationQuerySet:
         return self.get_allocations_by_school("ALL")
 
-    def get_allocations_by_school(self, unit="ALL") -> AllocationQuerySet:
+    def get_allocations_by_school(self, school_unit="ALL") -> AllocationQuerySet:
         allocations = Allocation.objects.parents().filter(
             allocationattribute__allocation_attribute_type__name="department_number",
-            allocationattribute__value__in=self.get_departments_by_school(unit),
+            allocationattribute__value__in=self.get_departments_by_school(school_unit),
             status__name="Active",
         )
         return allocations
@@ -101,9 +101,9 @@ class StorageUsageReport:
                 suballoc_ids.append(child.pk)
         return suballoc_ids
 
-    def get_usages_by_pi_for_school(self, unit="ALL") -> list[dict[str, Any]]:
+    def get_usages_by_pi_for_school(self, school_unit="ALL") -> list[dict[str, Any]]:
         pi_usages = list()
-        allocations = self.get_allocations_by_school(unit)
+        allocations = self.get_allocations_by_school(school_unit)
         for allocation in allocations:
             pi = allocation.project.pi.username
             usage = allocation.get_usage_kb_by_date(self.usage_date)
@@ -133,6 +133,6 @@ class StorageUsageReport:
     def _find_max_length_of_key(self, usage_list: list, key: str) -> int:
         return max(len(entry[key]) for entry in usage_list) if usage_list else 0
 
-    def generate_report_for_school(self, unit="ALL") -> str:
-        usages = self.get_usages_by_pi_for_school(unit)
+    def generate_report_for_school(self, school_unit="ALL") -> str:
+        usages = self.get_usages_by_pi_for_school(school_unit)
         return self._format_usage_report(usages)
