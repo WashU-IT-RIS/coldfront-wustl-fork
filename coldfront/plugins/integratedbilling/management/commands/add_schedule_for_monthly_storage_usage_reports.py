@@ -3,6 +3,7 @@ import os
 import re
 from django.core.management.base import BaseCommand
 from django.core.mail import EmailMessage
+from django_q.tasks import schedule
 from django_q.models import Schedule
 from datetime import datetime, timezone
 from coldfront.plugins.integratedbilling.storage_usage_report import StorageUsageReport
@@ -25,12 +26,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         email = options["email"]
         print(f"Scheduling to generate Monthly Storage Usage Reports to {email}...")
-        Schedule.objects.get_or_create(
+        schedule(
             func="coldfront.plugins.integratedbilling.management.commands.add_schedule_for_monthly_storage_usage_reports.generate_monthly_storage_usage_reports",
             name="Generate Monthly Storage Usage Reports",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
-            kwargs={"email": email},
+            email=email,
         )
 
 
