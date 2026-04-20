@@ -27,7 +27,7 @@ storage2_path = QUMULO_INFO["Storage2"]["path"]
 def ad_lookup_get_user_side_effect(washu_key: str):
     if washu_key == "no-exist":
         raise ValueError("User not found")
-    
+
     return {"dn": "user_dn", "attributes": {"other_attr": "value"}}
 
 
@@ -174,6 +174,32 @@ class TestMigrateToColdfront(TestCase):
             (
                 "itsm_comment",
                 '{"dir_projects":{"KHADER":{"ro":null,"rw":null},"KHADER_ADMIN":{"ro":null,"rw":["mushtaqahmed","pamelacamp"]},"KHADERLAB_PROTOCOLS":{"ro":["akter","bobba.suhas","chauhank","darya.urusova","lmellett","lulan","ncaleb","rswanson","s.thirunavukkarasu","sbmehta","yangyan"],"rw":["g.ananya","mushtaqahmed","shibalidas"]},"KHADERLAB_TBPROGRAM":{"ro":null,"rw":["akter","bobba.suhas","chauhank","darya.urusova","g.ananya","lmellett","lulan","mushtaqahmed","ncaleb","pamelacamp","rswanson","s.thirunavukkarasu","sbmehta","shibalidas","yangyan"]},"PAPER_2018":{"ro":null,"rw":["shibalidas"]},"Khader_lab":{"ro":null,"rw":["jmartin"]},"Khadercompute":{"ro":null,"rw":["akter","bobba.suhas","jmartin","mushtaqahmed","sakhader"]},"Shared_With_Max":{"ro":null,"rw":["akter","mushtaqahmed","shibalidas","storage-martyomov"]},"MGI_Data":{"rw":["barosa","jmartin","storage-sakhader-khaderlab_tbprogram-rw"],"ro":[]}}}',
+            ),
+        ]
+
+        self.expected_allocation_attributes_itsm_comment_dir_projects_archive = [
+            ("storage_name", "jin810"),
+            ("storage_quota", "200"),
+            ("storage_protocols", '["smb"]'),
+            ("storage_filesystem_path", f"{storage2_path}/jin810"),
+            ("storage_export_path", f"{storage2_path}/jin810"),
+            ("cost_center", "CC0004259"),
+            ("department_number", "CH00409"),
+            ("service_rate_category", "consumption"),
+            ("secure", "No"),
+            ("audit", "No"),
+            ("billing_exempt", "Yes"),
+            ("subsidized", "Yes"),
+            ("billing_contact", "jin810"),
+            ("technical_contact", "jin810"),
+            ("storage_ticket", "ITSD-2222"),
+            ("fileset_name", "jin810_active"),
+            ("fileset_alias", "jin810_active"),
+            ("billing_cycle", "monthly"),
+            ("sla_name", ""),
+            (
+                "itsm_comment",
+                '{"dir_projects":{"KHADER":{"ro":null,"rw":null},"KHADER_ADMIN":{"ro":null,"rw":["mushtaqahmed","pamelacamp"]},"KHADERLAB_PROTOCOLS":{"ro":["akter","bobba.suhas","chauhank","darya.urusova","lmellett","lulan","ncaleb","rswanson","s.thirunavukkarasu","sbmehta","yangyan"],"rw":["g.ananya","mushtaqahmed","shibalidas"]},"KHADERLAB_TBPROGRAM":{"ro":null,"rw":["akter","bobba.suhas","chauhank","darya.urusova","g.ananya","lmellett","lulan","mushtaqahmed","ncaleb","pamelacamp","rswanson","s.thirunavukkarasu","sbmehta","shibalidas","yangyan"]},"PAPER_2018":{"ro":null,"rw":["shibalidas"]},"Khader_lab":{"ro":null,"rw":["jmartin"]},"Khadercompute":{"ro":null,"rw":["akter","bobba.suhas","jmartin","mushtaqahmed","sakhader"]},"Shared_With_Max":{"ro":null,"rw":["akter","mushtaqahmed","shibalidas","storage-martyomov"]},"MGI_Data":{"rw":["barosa","jmartin","storage-sakhader-khaderlab_tbprogram-rw"],"ro":[]},"archive_test_data":{"rw":["barosa","jmartin"],"ro":[],"archive":true}}}',
             ),
         ]
 
@@ -640,3 +666,39 @@ class TestMigrateToColdfront(TestCase):
         self.assertEqual(
             ticket_number_allocation_attribute_value, ticket_number_override
         )
+
+    def test_migrate_to_coldfront_ignores_archive_dir_projects(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_service_provision_found_dir_project_archive.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
+            mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
+        name = "jin810"
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
+        allocation = Allocation.objects.get(id=result["allocation_id"])
+        self.assertEqual(allocation.id, result["allocation_id"])
+
+        sub_allocations = AllocationLinkage.objects.get(
+            parent=allocation
+        ).children.filter(resources__resource_type__name="Storage")
+
+        for sub_allocation in sub_allocations:
+
+            sub_allocation_name = sub_allocation.get_attribute("storage_name").split(
+                "-"
+            )[-1]
+
+            self.assertNotEqual(sub_allocation_name, "archive_test_data")
