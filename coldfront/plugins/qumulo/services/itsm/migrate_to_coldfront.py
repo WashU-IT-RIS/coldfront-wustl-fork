@@ -258,6 +258,7 @@ class MigrateToColdfront:
         allocation_data = self.__get_allocation_data_from_fields(
             attributes_for_allocation, key, resource, project
         )
+
         service_result = AllocationService.create_new_allocation(
             form_data=allocation_data, user=pi_user
         )

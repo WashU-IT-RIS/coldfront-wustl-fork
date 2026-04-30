@@ -1,0 +1,91 @@
+import arrow
+import os
+import re
+from django.core.management.base import BaseCommand
+from django.core.mail import EmailMessage
+from django_q.tasks import schedule
+from django_q.models import Schedule
+from datetime import datetime, timezone
+from coldfront.plugins.integratedbilling.storage_usage_report import StorageUsageReport
+from coldfront.plugins.integratedbilling.constants import ServiceTiers
+
+SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM = (
+    arrow.utcnow().replace(day=2, hour=6, minute=00).format(arrow.FORMAT_RFC3339)
+)
+
+
+class Command(BaseCommand):
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--email",
+            type=str,
+            help="Recipient email address separated by comma or semicolon for sending the reports",
+        )
+
+    def handle(self, *args, **options):
+        email = options["email"]
+        print(f"Scheduling to generate Monthly Storage Usage Reports to {email}...")
+        schedule(
+            func="coldfront.plugins.integratedbilling.management.commands.add_schedule_for_monthly_storage_usage_reports.generate_monthly_storage_usage_reports",
+            name="Generate Monthly Storage Usage Reports",
+            schedule_type=Schedule.MONTHLY,
+            next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
+            email=email,
+        )
+
+
+def __create_report_for(tier: ServiceTiers, usage_date: datetime.date) -> str:
+    report_agent = StorageUsageReport(usage_date=usage_date, tier=tier)
+    filename = (
+        f"storage_{tier.name.lower()}_usage_report_{usage_date.strftime('%Y%m%d')}.csv"
+    )
+    filepath = os.path.join("/tmp", filename)
+    report_agent.generate_report(filename=filepath)
+    return filepath
+
+
+def __email_report(filepath: list[str], email: list[str], usage_date: datetime.date):
+    usage_date_str = usage_date.strftime("%Y-%m-%d")
+    message = EmailMessage(
+        subject=f"Monthly Storage Usage Report with consumptions on {usage_date_str}",
+        body=f"Here is the Monthly Storage Usage report with consumptions on {usage_date_str} by department per PIs.",
+        to=email,
+    )
+    for path in filepath:
+        message.attach_file(path)
+
+    message.send(fail_silently=False)
+    print(
+        f"Monthly Storage Usage Report with consumptions on {usage_date_str} has been sent via email to {email}."
+    )
+
+
+def generate_monthly_storage_usage_reports(
+    email: str = None,
+    **kwargs,
+):
+    """
+    Generate the Monthly Storage Usage Reports and email them.
+    """
+    usage_date = datetime.now(timezone.utc).replace(day=1).date()
+    usage_date_str = usage_date.strftime("%Y-%m-%d")
+    print(
+        f"Generating Monthly Storage Usage Reports with consumptions on {usage_date_str} for emailing to {email}."
+    )
+
+    filepaths = list()
+    for tier in [ServiceTiers.Active, ServiceTiers.Archive]:
+        filepath = __create_report_for(tier, usage_date)
+        if os.path.exists(filepath):
+            filepaths.append(filepath)
+    if len(filepaths) <= 0:
+        raise FileNotFoundError("No report files generated.")
+
+    email = email.strip() if email else ""
+    email_to = [part for part in re.split(r"[;,\s]+", email) if part] if email else []
+    if len(email_to) <= 0:
+        print("No valid recipient email provided. Report will not be sent.")
+        return
+
+    __email_report(filepath=filepaths, email=email_to, usage_date=usage_date)
