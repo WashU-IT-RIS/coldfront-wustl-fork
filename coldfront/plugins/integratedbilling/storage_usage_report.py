@@ -1,7 +1,7 @@
 import os
 import tempfile
 from typing import Any, Optional
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from coldfront.plugins.integratedbilling.constants import ServiceTiers, QUERY_ATTRIBUTE
 from coldfront.plugins.qumulo.services.itsm.itsm_client_handler import ItsmClientHandler
 from coldfront.plugins.qumulo.reports.storage_usage_report import (
@@ -10,7 +10,7 @@ from coldfront.plugins.qumulo.reports.storage_usage_report import (
 
 CSV_USAGE_REPORT_HEADER_MAPPING = {
     "fiscal_year": "Fiscal Year",
-    "usage_month": "Date",
+    "report_month": "Date",
     "service": "Service",
     "unit": "School",
     "name": "Department",
@@ -266,13 +266,13 @@ class StorageUsageReport:
             else self.usage_date.year + 1
         )
         fiscal_year = f"FY{str(fiscal_year)[-2:]}"
-        usage_month = self.usage_date.strftime("%Y-%m")
+        report_month = (self.usage_date.replace(day=1) - timedelta(days=1)).strftime("%Y-%m")
         service = f"Storage {self.tier.name}"
         for entry in usage_data:
             formatted_entry = ",".join(
                 [
                     fiscal_year,
-                    usage_month,
+                    report_month,
                     service,
                     entry.get(self.report_attribute["unit"], "Unknown"),
                     entry.get(self.report_attribute["name"], "Unknown"),
