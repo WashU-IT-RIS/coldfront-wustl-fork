@@ -300,7 +300,7 @@ class AllocationService:
         allocation_defaults = {
             "secure": "No",
             "audit": "No",
-            "subsidized": "Yes",
+            "subsidized": "No",
         }
 
         for attr, value in allocation_defaults.items():
