@@ -247,6 +247,10 @@ Allocation Detail
           <thead>
             <tr>
               <th scope="col">Date Requested</th>
+              <th scope="col">User</th>
+              <th scope="col">Attribute</th>
+              <th scope="col">Old Value</th>
+              <th scope="col">New Value</th>
               <th scope="col">Status</th>
               <th scope="col">Notes</th>
               <th scope="col">Actions</th>
@@ -256,16 +260,20 @@ Allocation Detail
             {% for change_request in allocation_changes %}
                 <tr>
                   <td>{{ change_request.created|date:"M. d, Y" }}</td>
-                  {% if change_request.status.name == 'Approved' %}
-                    <td class="text-success">{{ change_request.status.name }}</td>
-                  {% elif change_request.status.name == 'Denied' %}
-                    <td class="text-danger">{{ change_request.status.name }}</td>
+                  <td>{{ change_request.allocation_change_request.user }}</td>
+                  <td>{{ change_request.allocation_attribute}}</td>
+                  <td>{{ change_request.old_value }}</td>
+                  <td>{{ change_request.new_value }}</td>
+                  {% if change_request.allocation_change_request.status.name == 'Approved' %}
+                    <td class="text-success">{{ change_request.allocation_change_request.status.name }}</td>
+                  {% elif change_request.allocation_change_request.status.name == 'Denied' %}
+                    <td class="text-danger">{{ change_request.allocation_change_request.status.name }}</td>
                   {% else %}
-                    <td class="text-info">{{ change_request.status.name }}</td>
+                    <td class="text-info">{{ change_request.allocation_change_request.status.name }}</td>
                   {% endif %}
                   </td>
-                  {% if change_request.notes %}
-                    <td>{{change_request.notes}}</td>
+                  {% if change_request.allocation_change_request.notes %}
+                    <td>{{change_request.allocation_change_request.notes}}</td>
                   {% else %}
                     <td></td>
                   {% endif %}
