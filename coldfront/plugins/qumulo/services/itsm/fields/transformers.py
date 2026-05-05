@@ -126,6 +126,10 @@ def truthy_or_falsy_to_yes(value) -> str:
     return "Yes"
 
 
+def truthy_or_falsy_to_no(value) -> str:
+    return "No"
+
+
 def comment_to_dir_projects(
     comment: Optional[str],
     default_value: Optional[dict[str, Optional[dict[str, Optional[list[str]]]]]] = {},

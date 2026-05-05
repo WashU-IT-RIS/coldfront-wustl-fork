@@ -462,7 +462,7 @@ itsm_to_coldfront_map:
           - name: value
             value:
               type: Yes/No
-              transforms: truthy_or_falsy_to_boolean
+              transforms: truthy_or_falsy_to_no
               validates:
                 inclusion: ["Yes", "No"]
     itsm_value:
@@ -470,7 +470,7 @@ itsm_to_coldfront_map:
       attribute: subsidized
       type: boolean
       nulls: true
-      defaults_to: true
+      defaults_to: false
   quota:
     coldfront:
       - entity: allocation_form
