@@ -1805,7 +1805,8 @@ class AllocationChangeView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             attribute_change_request_obj = AllocationAttributeChangeRequest.objects.create(
                 allocation_change_request=allocation_change_request_obj,
                 allocation_attribute=attribute[0],
-                new_value=attribute[1]
+                new_value=attribute[1],
+                old_value=attribute[0].value,
                 )
 
         messages.success(request, 'Allocation change request successfully submitted.')

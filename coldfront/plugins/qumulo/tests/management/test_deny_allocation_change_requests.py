@@ -60,6 +60,7 @@ class TestDenyAllocationChangeRequests(TestCase):
             allocation_attribute=attribute,
             allocation_change_request=allocation_change_request,
             new_value="ITSD-54322",
+            old_value=attribute.value,
         )
 
     def test_denies_pending_allocation_change_requests(self):

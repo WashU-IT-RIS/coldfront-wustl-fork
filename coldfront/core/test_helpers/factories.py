@@ -309,6 +309,7 @@ class AllocationAttributeChangeRequestFactory(DjangoModelFactory):
     allocation_change_request = SubFactory(AllocationChangeRequestFactory)
     allocation_attribute = SubFactory(AllocationAttributeFactory)
     new_value = 1000
+    old_value = 2048
 
 
 
