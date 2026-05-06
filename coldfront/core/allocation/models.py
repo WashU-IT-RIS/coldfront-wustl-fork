@@ -847,7 +847,7 @@ class AllocationAttributeChangeRequest(TimeStampedModel):
         AllocationAttribute, on_delete=models.CASCADE
     )
     old_value = models.CharField(max_length=128)
-    new_value = models.CharField(max_length=128)
+    new_value = models.CharField(max_length=128, default="none")
     history = HistoricalRecords()
 
     def __str__(self):
