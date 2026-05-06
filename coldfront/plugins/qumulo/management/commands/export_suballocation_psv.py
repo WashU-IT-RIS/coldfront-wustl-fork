@@ -42,6 +42,6 @@ class Command(BaseCommand):
             path_suffix = filesystem_path.removeprefix(path_prefix)
             suballocations.append(path_suffix)
           
-          output_lines = allocation_path + "|{" + ",".join(suballocations) + "}"
+          output_lines.append(allocation_path + "|{" + ",".join(suballocations) + "}")
         
-        self.stdout.write(output_lines)
+        self.stdout.write("\n".join(output_lines))
