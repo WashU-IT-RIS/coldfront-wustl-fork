@@ -811,6 +811,7 @@ class AllocationChangeRequest(TimeStampedModel):
     justification = models.TextField()
     notes = models.CharField(max_length=512, blank=True, null=True)
     history = HistoricalRecords()
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     @property
     def get_parent_resource(self):
