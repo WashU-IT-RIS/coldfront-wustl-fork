@@ -22,4 +22,6 @@ class UpdateAllocationForm(AllocationForm):
         self.fields["rw_users"].required = (
             self.allocation_status_name != "READY FOR DELETION"
         )
-        
+
+    class Media:
+        js = ("allocation.js",)
