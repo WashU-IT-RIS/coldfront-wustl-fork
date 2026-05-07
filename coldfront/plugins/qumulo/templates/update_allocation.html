@@ -40,6 +40,7 @@ Update Allocation
     <div class="d-flex justify-content-end">
       <button type="submit" class="btn btn-primary mr-2" id="allocation_form_submit">Submit</button>
       <button type="reset" class="btn btn-primary">Reset</button>
+      <button type="button" class="btn btn-secondary ml-2" id="allocation_change_history">Change History</button>
     </div>
   </form>
 </div>
@@ -47,4 +48,22 @@ Update Allocation
 
 {% block javascript %}
 {{ form.media }}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    var changeHistoryBtn = document.getElementById("allocation_change_history");
+    if (changeHistoryBtn) {
+      changeHistoryBtn.addEventListener("click", function() {
+        // Extract allocation_id from the correct URL pattern: /allocation/allocationId
+        var match = window.location.pathname.match(/\/allocation\/(\d+)/);
+        if (match && match[1]) {
+          var allocationId = match[1];
+          // Redirect to the change history page for this allocation
+          window.location.href = "/allocation/" + allocationId + "/history/";
+        } else {
+          alert("Could not determine allocation ID from URL.");
+        }
+      });
+    }
+  });
+</script>
 {% endblock javascript%}
