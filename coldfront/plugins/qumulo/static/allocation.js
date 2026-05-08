@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (match && match[1]) {
         var allocationId = match[1];
         // Redirect to the change history page for this allocation
-        window.location.href = "/allocation/" + allocationId;
+        window.location.href = "/allocation/" + allocationId + "/";
       } else {
         alert("Could not determine allocation ID from URL.");
       }
