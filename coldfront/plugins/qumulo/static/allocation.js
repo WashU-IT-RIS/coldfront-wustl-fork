@@ -5,10 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
     allocDetailBtn.addEventListener("click", function () {
       // Extract allocation_id from the correct URL pattern: /allocation/allocationId
       var match = window.location.pathname.match(/\/allocation\/(\d+)/);
-      console.log("Match result for allocation ID extraction:", match);
       if (match && match[1]) {
         var allocationId = match[1];
-        console.log("Extracted allocation ID:", allocationId);
         // Redirect to the change history page for this allocation
         window.location.href = "/allocation/" + allocationId + "/";
       } else {
