@@ -1,12 +1,14 @@
 // Handler for Change History button on update_allocation.html
 document.addEventListener("DOMContentLoaded", function () {
-  var changeHistoryBtn = document.getElementById("allocation_detail_page");
-  if (changeHistoryBtn) {
-    changeHistoryBtn.addEventListener("click", function () {
+  var allocDetailBtn = document.getElementById("allocation_detail_page");
+  if (allocDetailBtn) {
+    allocDetailBtn.addEventListener("click", function () {
       // Extract allocation_id from the correct URL pattern: /allocation/allocationId
       var match = window.location.pathname.match(/\/allocation\/(\d+)/);
+      console.log("Match result for allocation ID extraction:", match);
       if (match && match[1]) {
         var allocationId = match[1];
+        console.log("Extracted allocation ID:", allocationId);
         // Redirect to the change history page for this allocation
         window.location.href = "/allocation/" + allocationId + "/";
       } else {
