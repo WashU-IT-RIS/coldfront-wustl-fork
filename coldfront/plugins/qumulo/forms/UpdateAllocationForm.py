@@ -23,5 +23,5 @@ class UpdateAllocationForm(AllocationForm):
             self.allocation_status_name != "READY FOR DELETION"
         )
 
-    class Media:
-        js = ("allocation.js",)
+    # class Media:
+    #     js = ("allocation.js",)
