@@ -4,7 +4,10 @@ from django_q.tasks import async_task
 import logging
 import json
 
-from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
+from coldfront.plugins.qumulo.utils.qumulo_api import (
+        AllocationDirectoryError,
+        QumuloAPI
+)
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.update_user_data import (
@@ -26,6 +29,8 @@ from coldfront.core.allocation.signals import (
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
+class AllocationActivationWarning(Exception):
+    pass
 
 @receiver(post_save, sender=User)
 def on_allocation_save_retrieve_additional_user_data(
@@ -59,9 +64,13 @@ def on_allocation_activate(sender, **kwargs):
             name=name,
             limit_in_bytes=limit_in_bytes,
         )
+    except ValueError:
+        logger.warn("Can't create allocation: Some attributes are missing or invalid")
+    except AllocationDirectoryError:
+        raise
 
+    try:
         qumulo_api.setup_allocation(fs_path)
-
     except ValueError:
         logger.warn("Can't create allocation: Some attributes are missing or invalid")
 
@@ -77,6 +86,9 @@ def on_allocation_activate(sender, **kwargs):
         False,
         q_options={"retry": 90000, "timeout": 86400},
     )
+
+    if qumulo_api.create_allocation_message:
+        raise AllocationActivationWarning(qumulo_api.create_allocation_message)
 
 
 @receiver(allocation_disable)

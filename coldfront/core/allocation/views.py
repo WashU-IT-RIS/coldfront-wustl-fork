@@ -61,7 +61,8 @@ from coldfront.core.project.models import (Project, ProjectUser, ProjectPermissi
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import get_domain_url, import_from_settings
 from coldfront.core.utils.mail import send_allocation_admin_email, send_allocation_customer_email, send_email_template, build_link
-
+from coldfront.plugins.qumulo.utils.qumulo_api import AllocationDirectoryError
+from coldfront.plugins.qumulo.signals import AllocationActivationWarning
 ALLOCATION_ENABLE_ALLOCATION_RENEWAL = import_from_settings(
     'ALLOCATION_ENABLE_ALLOCATION_RENEWAL', True)
 ALLOCATION_DEFAULT_ALLOCATION_LENGTH = import_from_settings(
@@ -222,15 +223,24 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
 
             allocation_obj.save()
 
-            allocation_activate.send(
-                sender=self.__class__, allocation_pk=allocation_obj.pk)
+            activation_warnings = False
+            try:
+                allocation_activate.send(
+                    sender=self.__class__, allocation_pk=allocation_obj.pk)
+            except AllocationActivationWarning as aaw:
+                messages.warning(request, str(aaw))
+                activation_warnings = True
+            except AllocationDirectoryError as ade:
+                messages.error(request, str(ade))
+                return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': pk}))
+
             allocation_users = allocation_obj.allocationuser_set.exclude(status__name__in=['Removed', 'Error'])
             for allocation_user in allocation_users:
                 allocation_activate_user.send(
                     sender=self.__class__, allocation_user_pk=allocation_user.pk)
 
             # send_allocation_customer_email(allocation_obj, 'Allocation Activated', 'email/allocation_activated.txt', domain_url=get_domain_url(self.request))
-            if action != 'auto-approve':
+            if action != 'auto-approve' and not activation_warnings:
                 messages.success(request, 'Allocation Activated!')
 
         elif old_status != allocation_obj.status.name in ['Denied', 'New', 'Revoked']:
