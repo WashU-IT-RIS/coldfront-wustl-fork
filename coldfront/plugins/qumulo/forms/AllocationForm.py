@@ -47,7 +47,7 @@ class AllocationForm(forms.Form):
         ).name
 
     class Media:
-        js = ("plugins/qumulo/static/allocation.js",)
+        js = ("allocation.js",)
 
     storage_type = forms.ChoiceField(
         label="Storage Type",
