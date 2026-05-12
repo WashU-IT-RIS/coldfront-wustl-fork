@@ -18,9 +18,6 @@ from pathlib import PurePath
 
 load_dotenv(override=True)
 
-class AllocationDirectoryError(Exception):
-    pass
-
 class QumuloAPI:
     def __init__(self, connection_info: Dict[str, str]) -> None:
         self.host = connection_info["host"]
@@ -69,13 +66,6 @@ class QumuloAPI:
             self.create_allocation_message = (
                 'WARNING: The allocation was created with an existing path: '
                 f'{fs_path}'
-            )
-        elif is_parent_allocation:
-            raise AllocationDirectoryError(
-                (
-                    f'ERROR: The path {fs_path} already exists.  Allocation '
-                    'creation cannot proceed.'
-                )
             )
 
         self.validate_protocols(protocols)

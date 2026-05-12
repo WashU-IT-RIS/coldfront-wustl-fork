@@ -61,7 +61,6 @@ from coldfront.core.project.models import (Project, ProjectUser, ProjectPermissi
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import get_domain_url, import_from_settings
 from coldfront.core.utils.mail import send_allocation_admin_email, send_allocation_customer_email, send_email_template, build_link
-from coldfront.plugins.qumulo.utils.qumulo_api import AllocationDirectoryError
 from coldfront.plugins.qumulo.signals import AllocationActivationWarning
 ALLOCATION_ENABLE_ALLOCATION_RENEWAL = import_from_settings(
     'ALLOCATION_ENABLE_ALLOCATION_RENEWAL', True)
@@ -230,9 +229,6 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             except AllocationActivationWarning as aaw:
                 messages.warning(request, str(aaw))
                 activation_warnings = True
-            except AllocationDirectoryError as ade:
-                messages.error(request, str(ade))
-                return HttpResponseRedirect(reverse('allocation-detail', kwargs={'pk': pk}))
 
             allocation_users = allocation_obj.allocationuser_set.exclude(status__name__in=['Removed', 'Error'])
             for allocation_user in allocation_users:

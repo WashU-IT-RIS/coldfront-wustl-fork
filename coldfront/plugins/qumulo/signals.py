@@ -4,10 +4,7 @@ from django_q.tasks import async_task
 import logging
 import json
 
-from coldfront.plugins.qumulo.utils.qumulo_api import (
-        AllocationDirectoryError,
-        QumuloAPI
-)
+from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.update_user_data import (
@@ -66,8 +63,6 @@ def on_allocation_activate(sender, **kwargs):
         )
     except ValueError:
         logger.warn("Can't create allocation: Some attributes are missing or invalid")
-    except AllocationDirectoryError:
-        raise
 
     try:
         qumulo_api.setup_allocation(fs_path)
