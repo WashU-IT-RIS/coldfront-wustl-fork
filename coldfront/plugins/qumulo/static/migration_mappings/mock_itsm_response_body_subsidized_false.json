@@ -286,7 +286,7 @@
             "service_rate_category": "subscription",
             "comment": "{\"afm_cache_enable\":true,\"_jenkins\":\"https://systems-ci.gsc.wustl.edu/job/storage1_allocation/2652\",\"add_archive\":\"true\"}",
             "billing_cycle": "monthly",
-            "subsidized": true,
+            "subsidized": false,
             "quota": "200T",
             "allow_nonfaculty": null,
             "acl_group_members": "fup,jin810",
