@@ -98,6 +98,16 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             return True
 
         return allocation_obj.has_perm(self.request.user, AllocationPermission.USER)
+    
+    def _get_old_value_for_change_request(change_request):
+        """
+        Returns the previous value of the allocation attribute using django-simple-history.
+        """
+        changing_allocation_attribute = change_request.allocation_attribute
+        history = changing_allocation_attribute.history.filter(history_date__lt=change_request.created).order_by('-history_date')
+        if history.exists():
+            return history.first().value
+        return None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -134,6 +144,9 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         context['guage_data'] = guage_data
         context['attributes_with_usage'] = attributes_with_usage
         context['attributes'] = attributes
+        
+        for change_request in allocation_changes:
+            change_request.old_value = self._get_old_value_for_change_request(change_request)
         context['allocation_changes'] = allocation_changes
 
         # Can the user update the project?

@@ -846,7 +846,7 @@ class AllocationAttributeChangeRequest(TimeStampedModel):
     allocation_attribute = models.ForeignKey(
         AllocationAttribute, on_delete=models.CASCADE
     )
-    old_value = models.CharField(max_length=128, default="none")
+    # Removed old_value field; now dynamically fetched from history
     new_value = models.CharField(max_length=128)
     history = HistoricalRecords()
 
