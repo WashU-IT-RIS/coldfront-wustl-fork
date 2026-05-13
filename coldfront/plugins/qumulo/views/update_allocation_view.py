@@ -218,7 +218,6 @@ class UpdateAllocationView(AllocationView):
                     allocation_attribute=attribute,
                     allocation_change_request=allocation_change_request,
                     new_value=change[1],
-                    old_value=attribute.value,
                 )
 
         # RW and RO users are not handled via an AllocationChangeRequest
