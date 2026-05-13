@@ -90,6 +90,7 @@ class TestSignals(TestCase):
     ):
         qumulo_instance = MagicMock()
         qumulo_instance.create_allocation = MagicMock()
+        qumulo_instance.create_allocation_message = None
         mock_create_connection.return_value = qumulo_instance
         allocation_activate.send(
             sender=self.__class__, allocation_pk=self.storage_allocation.pk
