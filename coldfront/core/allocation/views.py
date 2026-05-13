@@ -99,7 +99,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
 
         return allocation_obj.has_perm(self.request.user, AllocationPermission.USER)
     
-    def _get_old_value_for_change_request(change_request):
+    def _get_old_value_for_change_request(self, change_request):
         """
         Returns the previous value of the allocation attribute using django-simple-history.
         """
