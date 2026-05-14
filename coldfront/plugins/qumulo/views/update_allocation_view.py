@@ -77,6 +77,7 @@ class UpdateAllocationView(AllocationView):
             "storage_ticket",
             "cost_center",
             "billing_exempt",
+            "subsidized",
             "department_number",
             "billing_cycle",
             "technical_contact",
@@ -182,6 +183,7 @@ class UpdateAllocationView(AllocationView):
         attributes_to_check = [
             "cost_center",
             "billing_exempt",
+            "subsidized",
             "department_number",
             "billing_cycle",
             "technical_contact",
