@@ -249,7 +249,7 @@ Allocation Detail
               <th scope="col">Date Requested</th>
               <th scope="col">User</th>
               <th scope="col">Attribute</th>
-              <th scope="col">Old Value</th>
+              <th scope="col">Previous Value</th>
               <th scope="col">New Value</th>
               <th scope="col">Status</th>
               <th scope="col">Notes</th>
@@ -260,7 +260,7 @@ Allocation Detail
             {% for change_request in allocation_changes %}
                 <tr>
                   <td>{{ change_request.created|date:"M. d, Y" }}</td>
-                  <td>{{ change_request.allocation_change_request.user }}</td>
+                  <td>{{ change_request.user }}</td>
                   <td>{{ change_request.allocation_attribute}}</td>
                   <td>{{ change_request.old_value }}</td>
                   <td>{{ change_request.new_value }}</td>

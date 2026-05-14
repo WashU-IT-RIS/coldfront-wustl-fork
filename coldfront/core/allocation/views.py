@@ -99,7 +99,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
 
         return allocation_obj.has_perm(self.request.user, AllocationPermission.USER)
     
-    def _get_old_value_for_change_request(self, change_request):
+    def _get_previous_value_for_change_request(self, change_request):
         """
         Returns the previous value of the allocation attribute using django-simple-history.
         """
@@ -107,6 +107,18 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         history = changing_allocation_attribute.history.filter(history_date__lt=change_request.created).order_by('-history_date')
         if history.exists():
             return history.first().value
+        return None
+
+    def _get_change_request_user(self, allocation_obj, created_time):
+        """
+        Returns the user who created the allocation change request by inspecting Allocation history.
+        :param allocation_obj: Allocation instance
+        :param created_time: datetime of the change request creation
+        :return: User instance or None
+        """
+        history = allocation_obj.history.filter(history_date__lte=created_time).order_by('-history_date')
+        if history.exists():
+            return history.first().history_user
         return None
 
     def get_context_data(self, **kwargs):
@@ -146,7 +158,8 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         context['attributes'] = attributes
         
         for change_request in allocation_changes:
-            change_request.old_value = self._get_old_value_for_change_request(change_request)
+            change_request.previous_value = self._get_previous_value_for_change_request(change_request)
+            change_request.user = self._get_change_request_user(allocation_obj, change_request.created)
         context['allocation_changes'] = allocation_changes
 
         # Can the user update the project?
@@ -1819,7 +1832,6 @@ class AllocationChangeView(LoginRequiredMixin, UserPassesTestMixin, FormView):
                 allocation_change_request=allocation_change_request_obj,
                 allocation_attribute=attribute[0],
                 new_value=attribute[1],
-                old_value=attribute[0].value,
                 )
 
         messages.success(request, 'Allocation change request successfully submitted.')
