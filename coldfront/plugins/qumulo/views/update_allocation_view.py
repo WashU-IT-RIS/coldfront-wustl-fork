@@ -206,7 +206,6 @@ class UpdateAllocationView(AllocationView):
                 justification="updating",
                 notes="updating",
                 end_date_extension=10,
-                user=self.request.user,
             )
 
             for change in attribute_changes:
