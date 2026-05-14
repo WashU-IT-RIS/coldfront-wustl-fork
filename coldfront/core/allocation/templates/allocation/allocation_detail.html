@@ -262,7 +262,7 @@ Allocation Detail
                   <td>{{ change_request.created|date:"M. d, Y" }}</td>
                   <td>{{ change_request.user }}</td>
                   <td>{{ change_request.allocation_attribute}}</td>
-                  <td>{{ change_request.old_value }}</td>
+                  <td>{{ change_request.previous_value }}</td>
                   <td>{{ change_request.new_value }}</td>
                   {% if change_request.allocation_change_request.status.name == 'Approved' %}
                     <td class="text-success">{{ change_request.allocation_change_request.status.name }}</td>
