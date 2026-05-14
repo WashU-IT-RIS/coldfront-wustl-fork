@@ -238,6 +238,7 @@ class AllocationService:
             "storage_export_path",
             "cost_center",
             "billing_exempt",
+            "subsidized",
             "department_number",
             "technical_contact",
             "billing_contact",
@@ -300,7 +301,6 @@ class AllocationService:
         allocation_defaults = {
             "secure": "No",
             "audit": "No",
-            "subsidized": "No",
         }
 
         for attr, value in allocation_defaults.items():
