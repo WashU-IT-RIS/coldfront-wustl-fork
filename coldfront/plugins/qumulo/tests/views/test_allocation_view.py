@@ -36,6 +36,7 @@ class AllocationViewTests(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
+            "subsidized": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -54,6 +55,7 @@ class AllocationViewTests(TestCase):
             "ro_users": ["test1"],
             "cost_center": "Uncle Pennybags",
             "billing_exempt": "No",
+            "subsidized": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -81,7 +83,7 @@ class AllocationViewTests(TestCase):
             "secure": "No",
             "audit": "No",
             "billing_exempt": "No",
-            "subsidized": "Yes",
+            "subsidized": "No",
         }
         for attr in allocation_defaults.keys():
             attribute_type = AllocationAttributeType.objects.get(name=attr)
@@ -115,7 +117,7 @@ class AllocationViewTests(TestCase):
             "secure": "No",
             "audit": "No",
             "billing_exempt": "No",
-            "subsidized": "Yes",
+            "subsidized": "No",
         }
         for attr in allocation_defaults.keys():
             attribute_type = AllocationAttributeType.objects.get(name=attr)

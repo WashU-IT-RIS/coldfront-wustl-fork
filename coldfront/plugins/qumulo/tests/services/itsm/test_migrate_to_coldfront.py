@@ -598,7 +598,6 @@ class TestMigrateToColdfront(TestCase):
                 "billing_exempt",
                 "billing_cycle",
                 "service_rate_category",
-                "subsidized",
                 "department_number",
                 "cost_center",
             ]
