@@ -118,6 +118,7 @@ class TestSignals(TestCase):
     ):
         qumulo_instance = MagicMock()
         qumulo_instance.create_allocation = MagicMock(side_effect=ValueError())
+        qumulo_instance.create_allocation_message = None
         mock_create_connection.return_value = qumulo_instance
 
         allocation_activate.send(
