@@ -51,6 +51,7 @@ class TestDenyAllocationChangeRequests(TestCase):
             justification="updating",
             notes="updating",
             end_date_extension=10,
+            user=self.user,
         )
         attribute = AllocationAttribute.objects.get(
             allocation=self.alloc,
@@ -60,7 +61,6 @@ class TestDenyAllocationChangeRequests(TestCase):
             allocation_attribute=attribute,
             allocation_change_request=allocation_change_request,
             new_value="ITSD-54322",
-            old_value=attribute.value,
         )
 
     def test_denies_pending_allocation_change_requests(self):
@@ -75,6 +75,7 @@ class TestDenyAllocationChangeRequests(TestCase):
             justification="updating",
             notes="updating",
             end_date_extension=10,
+            user=self.user,
         )
         call_command("deny_allocation_change_requests")
         denied_requests = AllocationChangeRequest.objects.filter(status__name="Denied")
