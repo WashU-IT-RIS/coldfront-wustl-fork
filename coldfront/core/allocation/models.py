@@ -798,6 +798,7 @@ class AllocationChangeRequest(TimeStampedModel):
         end_date_extension (int): represents the number of days to extend the allocation's end date
         justification (str): represents input from the user justifying why they want to change the allocation
         notes (str): represents notes for users changing allocations
+        user (User): represents the User object of the user who made the change request
     """
 
     allocation = models.ForeignKey(
@@ -811,6 +812,7 @@ class AllocationChangeRequest(TimeStampedModel):
     justification = models.TextField()
     notes = models.CharField(max_length=512, blank=True, null=True)
     history = HistoricalRecords()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     @property
     def get_parent_resource(self):

@@ -260,7 +260,7 @@ Allocation Detail
             {% for change_request in allocation_changes %}
                 <tr>
                   <td>{{ change_request.created|date:"M. d, Y" }}</td>
-                  <td>{{ change_request.user }}</td>
+                  <td>{{ change_request.allocation_change_request.user }}</td>
                   <td>{{ change_request.allocation_attribute}}</td>
                   <td>{{ change_request.previous_value }}</td>
                   <td>{{ change_request.new_value }}</td>
