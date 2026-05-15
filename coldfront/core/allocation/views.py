@@ -1810,7 +1810,8 @@ class AllocationChangeView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             allocation=allocation_obj,
             end_date_extension=end_date_extension,
             justification=justification,
-            status=change_request_status_obj
+            status=change_request_status_obj,
+            user=self.request.user,
             )
 
 
