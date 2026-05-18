@@ -100,9 +100,6 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         return allocation_obj.has_perm(self.request.user, AllocationPermission.USER)
     
     def _get_previous_value_for_change_request(self, change_request):
-        """
-        Returns the previous value of the allocation attribute using django-simple-history.
-        """
         changing_allocation_attribute = change_request.allocation_attribute
         history = changing_allocation_attribute.history.filter(history_date__lt=change_request.created).order_by('-history_date')
         if history.exists():
@@ -1811,7 +1808,7 @@ class AllocationChangeView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             end_date_extension=end_date_extension,
             justification=justification,
             status=change_request_status_obj,
-            user=self.request.user,
+            user=self.request.user
             )
 
 
@@ -1819,7 +1816,7 @@ class AllocationChangeView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             attribute_change_request_obj = AllocationAttributeChangeRequest.objects.create(
                 allocation_change_request=allocation_change_request_obj,
                 allocation_attribute=attribute[0],
-                new_value=attribute[1],
+                new_value=attribute[1]
                 )
 
         messages.success(request, 'Allocation change request successfully submitted.')

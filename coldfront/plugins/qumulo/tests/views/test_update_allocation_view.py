@@ -345,7 +345,6 @@ class UpdateAllocationViewTests(TestCase):
     ):
         # allocation and allocation attributes already created
 
-        # Simulate a request for the view
         request = RequestFactory().post("/irrelevant")
         request.user = self.user
 
@@ -430,7 +429,6 @@ class UpdateAllocationViewTests(TestCase):
             self.project, self.user, form_data_missing_contacts
         )
 
-        # Simulate a request for the view
         request = RequestFactory().post("/irrelevant")
         request.user = self.user
 
@@ -460,7 +458,6 @@ class UpdateAllocationViewTests(TestCase):
             ],
         )
 
-        # Simulate a request for the view for form_valid
         request = RequestFactory().post("/irrelevant")
         request.user = self.user
         form = UpdateAllocationForm(
