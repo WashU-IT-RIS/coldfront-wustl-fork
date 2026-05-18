@@ -160,9 +160,7 @@ class UpdateAllocationView(AllocationView):
             )
 
             comparand = (
-                int(attribute.value)
-                if type(change[1]) is int
-                else attribute.value
+                int(attribute.value) if type(change[1]) is int else attribute.value
             )
             if comparand != change[1]:
                 new_values.append((change[0], change[1]))
