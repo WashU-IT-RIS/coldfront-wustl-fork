@@ -18,6 +18,7 @@ from coldfront.core.field_of_science.models import FieldOfScience
 from coldfront.plugins.qumulo.forms.ProjectCreateForm import ProjectCreateForm
 from coldfront.plugins.qumulo.forms.AllocationForm import AllocationForm
 from coldfront.plugins.qumulo.forms.UpdateAllocationForm import UpdateAllocationForm
+from coldfront.plugins.qumulo.forms.CreateSubAllocationForm import CreateSubAllocationForm
 from coldfront.plugins.qumulo.tests.helper_classes.filesystem_path import (
     PathExistsMock,
     ValidFormPathMock,
@@ -497,12 +498,17 @@ class AllocationFormTests(TestCase):
         }
 
         # The form should not require or show 'subsidized' for suballocations
-        form = AllocationForm(data=suballocation_data, user_id=parent_user.id)
+        form = CreateSubAllocationForm(
+            data=suballocation_data,
+            user_id=parent_user.id,
+            allocation_id=None,
+            initial={"parent_allocation_name": "parent_alloc"},
+        )
         # The field may exist but should be hidden or set to 'No' automatically for suballocations
         # Check that the field is either not in the form or is set to 'No' by default
         self.assertIn("subsidized", form.fields)
         # Assert the field is hidden (widget.is_hidden is True)
-        # self.assertTrue(form.fields["subsidized"].widget.is_hidden, "'subsidized' field should be hidden in suballocation form")
+        self.assertTrue(form.fields["subsidized"].widget.is_hidden, "'subsidized' field should be hidden in suballocation form")
         # Simulate the logic that would hide or set subsidized to 'No' for suballocations
         self.assertEqual(form.fields["subsidized"].initial, "No")
         # If the form is valid, the cleaned_data should have subsidized as 'No'
