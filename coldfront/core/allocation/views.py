@@ -98,6 +98,13 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             return True
 
         return allocation_obj.has_perm(self.request.user, AllocationPermission.USER)
+    
+    def _get_previous_value_for_change_request(self, change_request):
+        changing_allocation_attribute = change_request.allocation_attribute
+        history = changing_allocation_attribute.history.filter(history_date__lt=change_request.created).order_by('-history_date')
+        if history.exists():
+            return history.first().value
+        return None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -111,7 +118,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         attributes_with_usage = [a for a in alloc_attr_set if hasattr(a, 'allocationattributeusage')]
         attributes = alloc_attr_set
 
-        allocation_changes = allocation_obj.allocationchangerequest_set.all().order_by('-pk')
+        allocation_changes = AllocationAttributeChangeRequest.objects.filter(allocation_change_request__allocation=allocation_obj).order_by('-pk')
 
         guage_data = []
         invalid_attributes = []
@@ -134,6 +141,9 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         context['guage_data'] = guage_data
         context['attributes_with_usage'] = attributes_with_usage
         context['attributes'] = attributes
+        
+        for change_request in allocation_changes:
+            change_request.previous_value = self._get_previous_value_for_change_request(change_request)
         context['allocation_changes'] = allocation_changes
 
         # Can the user update the project?
@@ -1797,7 +1807,8 @@ class AllocationChangeView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             allocation=allocation_obj,
             end_date_extension=end_date_extension,
             justification=justification,
-            status=change_request_status_obj
+            status=change_request_status_obj,
+            user=self.request.user
             )
 
 
