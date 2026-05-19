@@ -39,6 +39,8 @@ class QumuloAPI:
         name: str,
         limit_in_bytes: int,
     ):
+        # bmulligan 20260519: the "name" parameter is required above and
+        # validated below, but unused before it gets re-assigned
 
         if name == None:
             raise ValueError("name must be defined.")
@@ -50,6 +52,7 @@ class QumuloAPI:
             protocols = []
 
         dir_path = str(PurePath(fs_path).parent)
+        # bmulligan 20260519: this overwrites "name" before it gets used.
         name = str(PurePath(fs_path).name)
 
         directory_exists = True
