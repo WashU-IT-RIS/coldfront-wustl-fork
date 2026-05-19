@@ -82,4 +82,6 @@ class Command(BaseCommand):
         allocation.status = AllocationStatusChoice.objects.get(name="Active")
         allocation.save()
 
+        # bmulligan 20260519: the send_robust() function could be of use here,
+        # but maybe reconsider using signals at all in this spot.
         allocation_activate.send(sender=self.__class__, allocation_pk=allocation.pk)
