@@ -45,6 +45,7 @@ class AllocationViewTests(TestCase):
             "ro_users": ["test1"],
             "cost_center": "CC-1234",
             "billing_exempt": "No",
+            "subsidized": "No",
             "department_number": "Time Travel Services",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -64,6 +65,7 @@ class AllocationViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "CC-3232",
             "billing_exempt": "No",
+            "subsidized": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -83,6 +85,7 @@ class AllocationViewTests(TestCase):
             "ro_users": ["test3"],
             "cost_center": "CC-3232",
             "billing_exempt": "No",
+            "subsidized": "No",
             "department_number": "Whale-watching",
             "billing_cycle": "monthly",
             "service_rate_category": "consumption",
@@ -187,3 +190,31 @@ class AllocationViewTests(TestCase):
             allocation_attribute_type=protocols_type,
         )
         self.assertEqual(child_protocols.value, "[]")
+
+    def test_suballocation_subsidized_does_not_inherit_from_parent(
+        self,
+        mock_ActiveDirectoryAPI_validator: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
+        mock_async_task: MagicMock,
+    ):
+        self.parent_form_data["subsidized"] = "Yes"
+
+        parent_result = AllocationService.create_new_allocation(
+            self.parent_form_data, self.user
+        )
+        sub_result = AllocationService.create_new_allocation(
+            self.sub_form_data, self.user, parent_allocation=parent_result["allocation"]
+        )
+
+        subsidized_type = AllocationAttributeType.objects.get(name="subsidized")
+        parent_subsidized = AllocationAttribute.objects.get(
+            allocation=parent_result["allocation"],
+            allocation_attribute_type=subsidized_type,
+        )
+        child_subsidized = AllocationAttribute.objects.get(
+            allocation=sub_result["allocation"],
+            allocation_attribute_type=subsidized_type,
+        )
+
+        self.assertEqual(parent_subsidized.value, "Yes")
+        self.assertEqual(child_subsidized.value, "No")

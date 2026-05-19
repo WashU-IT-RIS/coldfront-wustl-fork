@@ -28,3 +28,4 @@ class CreateSubAllocationForm(AllocationForm):
         }
 
         self.fields["storage_type"].disabled = True
+        self.fields["subsidized"].widget = forms.HiddenInput()
