@@ -354,12 +354,15 @@ class UpdateAllocationViewTests(TestCase):
     ):
         # allocation and allocation attributes already created
 
+        request = RequestFactory().post("/irrelevant")
+        request.user = self.user
+
         form = UpdateAllocationForm(data=self.form_data, user_id=self.user.id, allocation_id=self.storage_allocation.pk)
         form.cleaned_data = self.form_data
         form.clean()
         # No changes in the form data, so no AllocationAttributeChangeRequest should be created
         view = UpdateAllocationView(form=form, user_id=self.user.id)
-        view.kwargs = {"allocation_id": self.storage_allocation.id}
+        view.setup(request, allocation_id=self.storage_allocation.id)
         view._updated_fields_handler(
             form=form, parent_allocation=self.storage_allocation
         )
@@ -389,7 +392,7 @@ class UpdateAllocationViewTests(TestCase):
         form.cleaned_data = updated_form_data
         form.clean()
         view = UpdateAllocationView(form=form, user_id=self.user.id)
-        view.kwargs = {"allocation_id": self.storage_allocation.id}
+        view.setup(request, allocation_id=self.storage_allocation.id)
         view._updated_fields_handler(
             form=form, parent_allocation=self.storage_allocation
         )
@@ -437,6 +440,9 @@ class UpdateAllocationViewTests(TestCase):
             self.project, self.user, form_data_missing_contacts
         )
 
+        request = RequestFactory().post("/irrelevant")
+        request.user = self.user
+
         form = UpdateAllocationForm(
             data=form_data_missing_contacts, user_id=self.user.id, allocation_id=storage_allocation_missing_contacts.pk
         )
@@ -445,7 +451,7 @@ class UpdateAllocationViewTests(TestCase):
         form.cleaned_data = form_data_missing_contacts
         form.clean()
         view = UpdateAllocationView(form=form, user_id=self.user.id)
-        view.kwargs = {"allocation_id": storage_allocation_missing_contacts.id}
+        view.setup(request, allocation_id=storage_allocation_missing_contacts.id)
         view._updated_fields_handler(
             form=form, parent_allocation=storage_allocation_missing_contacts
         )
@@ -464,6 +470,7 @@ class UpdateAllocationViewTests(TestCase):
         )
 
         request = RequestFactory().post("/irrelevant")
+        request.user = self.user
         form = UpdateAllocationForm(
             data=form_data_missing_contacts, user_id=self.user.id, allocation_id=storage_allocation_missing_contacts.pk
         )

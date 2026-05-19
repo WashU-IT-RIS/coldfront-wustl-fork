@@ -299,6 +299,7 @@ class AllocationChangeRequestFactory(DjangoModelFactory):
     allocation = SubFactory(AllocationFactory)
     status = SubFactory(AllocationChangeStatusChoiceFactory)
     justification = factory.Faker('sentence')
+    user = SubFactory(UserFactory)
 
 
 class AllocationAttributeChangeRequestFactory(DjangoModelFactory):

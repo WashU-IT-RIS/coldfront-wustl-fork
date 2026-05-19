@@ -1,3 +1,13 @@
+document.addEventListener("DOMContentLoaded", function () {
+  const allocDetailBtn = document.getElementById("allocation_detail_page");
+  if (allocDetailBtn) {
+    allocDetailBtn.addEventListener("click", function () {
+      let match = window.location.pathname.match(/\/allocation\/(\d+)/);
+      let allocationId = match[1];
+      window.location.href = "/allocation/" + allocationId + "/";
+    });
+  }
+});
 // Initialize Select2 for project_pk field
 $(document).ready(function () {
   const $dropdown = $(".select2");
@@ -14,13 +24,13 @@ $(document).ready(function () {
 // allocation.js
 document.addEventListener(
   "DOMContentLoaded",
-  prepaidDisplayOptionsInitialPageLoad
+  prepaidDisplayOptionsInitialPageLoad,
 );
 
 const protocols = Array.from(
   document.querySelectorAll(
-    "#div_id_protocols div div.form-check input.form-check-input"
-  )
+    "#div_id_protocols div div.form-check input.form-check-input",
+  ),
 );
 
 const nfsCheckBox = protocols.find((protocol) => protocol.value === "nfs");
@@ -45,7 +55,7 @@ if (billOptions.value !== "prepaid") {
 }
 billOptions.addEventListener(
   "change",
-  prepaidDisplayOptionsDuringBillingCycleSelection
+  prepaidDisplayOptionsDuringBillingCycleSelection,
 );
 
 let confirmed = false;
@@ -106,7 +116,7 @@ function handleExportPathInput(event) {
 function prepaidDateAndTimeVisibility(
   prepaid_billing_date,
   prepaid_time,
-  visible_setting
+  visible_setting,
 ) {
   prepaid_billing_date.style.visibility = visible_setting;
   prepaid_time.style.visibility = visible_setting;
@@ -117,10 +127,10 @@ function prepaidDisplayOptionsDuringBillingCycleSelection(event) {
   const prepaid_time = document.getElementById("div_id_prepaid_time");
   const prepaid_time_value = document.getElementById("id_prepaid_time").value;
   const prepaid_billing_date = document.getElementById(
-    "div_id_prepaid_billing_date"
+    "div_id_prepaid_billing_date",
   );
   const prepaid_billing_date_value = document.getElementById(
-    "id_prepaid_billing_date"
+    "id_prepaid_billing_date",
   ).value;
 
   if (
@@ -135,20 +145,20 @@ function prepaidDisplayOptionsDuringBillingCycleSelection(event) {
   prepaidDateAndTimeVisibility(
     prepaid_billing_date,
     prepaid_time,
-    field_visibility
+    field_visibility,
   );
 }
 
 function prepaidDisplayOptionsInitialPageLoad() {
   const prepaid_billing_date = document.getElementById(
-    "div_id_prepaid_billing_date"
+    "div_id_prepaid_billing_date",
   );
   const prepaid_time = document.getElementById("div_id_prepaid_time");
 
   const bill_cycle_value = document.getElementById("id_billing_cycle").value;
   const prepaid_time_value = document.getElementById("id_prepaid_time").value;
   const prepaid_billing_date_value = document.getElementById(
-    "id_prepaid_billing_date"
+    "id_prepaid_billing_date",
   ).value;
 
   if (
@@ -169,6 +179,6 @@ function prepaidDisplayOptionsInitialPageLoad() {
   prepaidDateAndTimeVisibility(
     prepaid_billing_date,
     prepaid_time,
-    field_visibility
+    field_visibility,
   );
 }
