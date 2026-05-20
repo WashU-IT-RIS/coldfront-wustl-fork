@@ -63,7 +63,7 @@ class TestMigrateToColdfront(TestCase):
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "Yes"),
-            ("subsidized", "Yes"),
+            ("subsidized", "No"),
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
             ("storage_ticket", "ITSD-2222"),
@@ -90,7 +90,7 @@ class TestMigrateToColdfront(TestCase):
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "Yes"),
-            ("subsidized", "Yes"),
+            ("subsidized", "No"),
             ("storage_ticket", "ITSD-2222"),
             ("billing_startdate", "2020-04-15T00: 00: 00.000Z"),
             ("fileset_name", "mocker_missing_contacts_active"),
@@ -115,7 +115,7 @@ class TestMigrateToColdfront(TestCase):
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "Yes"),
-            ("subsidized", "Yes"),
+            ("subsidized", "No"),
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
             ("storage_ticket", "ITSD-2222"),
@@ -141,7 +141,7 @@ class TestMigrateToColdfront(TestCase):
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "Yes"),
-            ("subsidized", "Yes"),
+            ("subsidized", "No"),
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
             ("storage_ticket", "ITSD-2222"),
@@ -163,7 +163,7 @@ class TestMigrateToColdfront(TestCase):
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "Yes"),
-            ("subsidized", "Yes"),
+            ("subsidized", "No"),
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
             ("storage_ticket", "ITSD-2222"),
@@ -189,7 +189,7 @@ class TestMigrateToColdfront(TestCase):
             ("secure", "No"),
             ("audit", "No"),
             ("billing_exempt", "Yes"),
-            ("subsidized", "Yes"),
+            ("subsidized", "No"),
             ("billing_contact", "jin810"),
             ("technical_contact", "jin810"),
             ("storage_ticket", "ITSD-2222"),
@@ -316,6 +316,54 @@ class TestMigrateToColdfront(TestCase):
             project=result["project_id"]
         )
         self.assertEqual(len(project_attributes), 3)
+
+    def test_migrate_to_coldfront_by_service_provision_name_with_subsidized_false(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_subsidized_false.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_storage_provision_name.return_value = (
+                mock_response
+            )
+            mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
+        name = "mocker"
+        result = MigrateToColdfront().by_storage_provision_name(f"{name}", "Storage2")
+        self.assertDictEqual(
+            result,
+            {
+                "allocation_id": 1,
+                "pi_user_id": 1,
+                "project_id": 1,
+                "warning_messages": {},
+            },
+        )
+
+        allocation = Allocation.objects.get(id=result["allocation_id"])
+        project = Project.objects.get(id=result["project_id"])
+        self.assertEqual(allocation.id, result["allocation_id"])
+        self.assertEqual(allocation.project, project)
+
+        allocation_attributes = AllocationAttribute.objects.filter(
+            allocation=result["allocation_id"]
+        )
+        allocation_attribute_values = allocation_attributes.values_list(
+            "allocation_attribute_type__name", "value"
+        )
+        allocation_attribute_dict = dict(allocation_attribute_values)
+        self.assertIn("subsidized", allocation_attribute_dict)
+        self.assertEqual(allocation_attribute_dict["subsidized"], "No")
 
     def test_migrate_to_coldfront_by_fileset_alias(
         self,
@@ -550,7 +598,6 @@ class TestMigrateToColdfront(TestCase):
                 "billing_exempt",
                 "billing_cycle",
                 "service_rate_category",
-                "subsidized",
                 "department_number",
                 "cost_center",
             ]
@@ -573,6 +620,12 @@ class TestMigrateToColdfront(TestCase):
             )
             self.assertIn(
                 ("storage_export_path", ""),
+                sub_allocation_attributes,
+            )
+
+            # context: sub-allocations will always have subsidized set to "No" in Coldfront
+            self.assertIn(
+                ("subsidized", "No"),
                 sub_allocation_attributes,
             )
 
@@ -702,3 +755,57 @@ class TestMigrateToColdfront(TestCase):
             )[-1]
 
             self.assertNotEqual(sub_allocation_name, "archive_test_data")
+
+    def test_migrate_to_coldfront_with_subsidized_false(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_subsidized_false.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
+            mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
+        name = "mocker"
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
+        self.assertDictEqual(
+            result,
+            {
+                "allocation_id": 1,
+                "pi_user_id": 1,
+                "project_id": 1,
+                "warning_messages": {},
+            },
+        )
+
+        allocation = Allocation.objects.get(id=result["allocation_id"])
+        project = Project.objects.get(id=result["project_id"])
+        self.assertEqual(allocation.id, result["allocation_id"])
+        self.assertEqual(allocation.project, project)
+        self.assertEqual(allocation.project.title, "jin810")
+
+        allocation_attributes = AllocationAttribute.objects.filter(
+            allocation=result["allocation_id"]
+        )
+        allocation_attribute_values = allocation_attributes.values_list(
+            "allocation_attribute_type__name", "value"
+        )
+
+        for attribute_value in self.expected_allocation_attributes:
+            self.assertIn(attribute_value, allocation_attribute_values)
+
+        self.assertEqual(allocation_attributes.count(), 21)
+
+        project_attributes = ProjectAttribute.objects.filter(
+            project=result["project_id"]
+        )
+        self.assertEqual(len(project_attributes), 3)
