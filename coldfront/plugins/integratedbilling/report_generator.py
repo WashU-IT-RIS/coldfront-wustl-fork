@@ -92,6 +92,7 @@ class ReportGenerator:
         ).replace(day=1)
         return first_of_previous_month
 
+    # TODO: move to config or constants file since this is used in multiple places
     def __get_report_file_name(self) -> str:
         return f"/tmp/RIS-{self.delivery_month}-storage-{self.tier.name.lower()}-billing.csv"
 
@@ -105,6 +106,7 @@ class ReportGenerator:
         else:
             return True
 
+    # This function logs details of subsidized validation failures, including the PI and allocation details for each failed entry.q
     def __log_failed_subsidized_entries(self, billable_alloc_usages):
         # Find PIs and allocations when the PI has more than one subsidized allocation
         pis = billable_alloc_usages.values_list('sponsor_pi', flat=True).order_by().distinct()

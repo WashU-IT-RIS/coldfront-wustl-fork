@@ -3,12 +3,11 @@ from datetime import datetime
 from django.db import models
 from django.db.models.functions import Lower
 
+# TODO: consider if we want to move the billing related constants,
+# such as billable statuses, to a separate config or constants file
+# to avoid circular imports and improve maintainability
 from coldfront.config.env import PROJECT_ROOT
 from coldfront.core.constants import BILLABLE_STATUSES
-from coldfront.core.allocation.models import *
-from coldfront.core.project.models import *
-from coldfront.core.resource.models import *
-from coldfront.core.user.models import *
 from model_utils.models import TimeStampedModel
 from simple_history.models import HistoricalRecords
 
@@ -16,18 +15,20 @@ from simple_history.models import HistoricalRecords
 class AllocationUsageQuerySet(models.QuerySet):
 
     def monthly_billable(self, usage_date, tier="Active"):
-        return self.annotate(
-                status_lower=Lower("status")
-            ).filter(
+        return (
+            self.annotate(status_lower=Lower("status"))
+            .filter(
                 usage_date=usage_date,
                 tier=tier,
                 usage_tb__gt=0,
                 exempt=False,
                 billing_cycle="monthly",
-                status_lower__in=BILLABLE_STATUSES
-            ).exclude(
+                status_lower__in=BILLABLE_STATUSES,
+            )
+            .exclude(
                 service_rate_category="condo",
             )
+        )
 
     def with_usage_date(self, usage_date):
         return self.filter(usage_date=usage_date)
@@ -46,9 +47,10 @@ class AllocationUsageQuerySet(models.QuerySet):
     def by_pi(self, sponsor_pi):
         return self.filter(sponsor_pi=sponsor_pi)
 
+    # TODO this has no references in the codebase, consider if we want to keep this or remove this.
+    # if it needs to stay, consider renaming this to be more specific to the context of its usage, for example, has_usage or has_positive_usage
     def only_positive_usage(self):
         return self.filter(usage_tb__gt=0)
-
 
     # From the queryset of monthly_billable consumption allocations
     def _count_subsidized_by_pi(self, sponsor_pi) -> int:
@@ -59,7 +61,9 @@ class AllocationUsageQuerySet(models.QuerySet):
 
     # From the queryset of monthly_billable consumption allocations
     def _is_all_subsidized_valid(self) -> bool:
-        pis = self.values_list("sponsor_pi", flat=True).order_by("sponsor_pi").distinct()
+        pis = (
+            self.values_list("sponsor_pi", flat=True).order_by("sponsor_pi").distinct()
+        )
         for pi in pis:
             if not self._is_subsidized_valid_by_pi(pi):
                 return False  # Found a PI with more than one subsidized allocation
@@ -68,10 +72,10 @@ class AllocationUsageQuerySet(models.QuerySet):
     # From the queryset of monthly_billable consumption allocations
     def _is_subsidized_valid_by_pi(self, sponsor_pi) -> bool:
         return self._count_subsidized_by_pi(sponsor_pi) <= 1
-    
+
     # From the queryset of monthly_billable consumption allocations
     def set_and_validate_all_subsidized(self) -> bool:
-        tier=self.first().tier
+        tier = self.first().tier
         if tier != "Active":
             self.all().update(subsidized=False)
             return True  # Only Active tier allocations are considered for subsidized setting
@@ -79,13 +83,15 @@ class AllocationUsageQuerySet(models.QuerySet):
         if not self._is_all_subsidized_valid():
             return False  # Found a PI with more than one subsidized allocation
 
-        pis = self.values_list("sponsor_pi", flat=True).order_by("sponsor_pi").distinct()
+        pis = (
+            self.values_list("sponsor_pi", flat=True).order_by("sponsor_pi").distinct()
+        )
         for pi in pis:
             if self._count_subsidized_by_pi(pi) == 0:
                 if not self._set_subsidized_by_pi(pi):
                     return False  # Failed to set subsidized allocation for this PI
-        return self._is_all_subsidized_valid() 
-        
+        return self._is_all_subsidized_valid()
+
     # From the queryset of monthly_billable consumption allocations
     def _set_subsidized_by_pi(self, sponsor_pi) -> bool:
         # No subsidized allocation for this PI, set the first one by external_key
@@ -96,6 +102,7 @@ class AllocationUsageQuerySet(models.QuerySet):
             return True
         return False
 
+    # TODO this has no references in the codebase, consider if we want to keep this or remove this
     def manually_exempt_fileset(self, fileset_name):
         return self.exclude(
             fileset_name=fileset_name,
@@ -128,7 +135,7 @@ class AllocationUsage(TimeStampedModel):
     """
 
     class Meta:
-        ordering=[
+        ordering = [
             "tier",
             "usage_date",
             "sponsor_pi",
@@ -137,27 +144,29 @@ class AllocationUsage(TimeStampedModel):
             "filesystem_path",
         ]
 
-        unique_together = (("tier", "storage_cluster", "filesystem_path", "usage_date"),)
+        unique_together = (
+            ("tier", "storage_cluster", "filesystem_path", "usage_date"),
+        )
 
-    external_key=models.IntegerField()
-    source=models.CharField(max_length=256)
-    tier=models.CharField(max_length=256)
-    filesystem_path=models.CharField(max_length=512)
-    sponsor_pi=models.CharField(max_length=512)
-    billing_contact=models.CharField(max_length=512)
-    fileset_name=models.CharField(max_length=256)
-    status=models.CharField(max_length=256)
-    service_rate_category=models.CharField(max_length=256)
-    usage_tb=models.DecimalField(max_digits=20, decimal_places=6)
-    funding_number=models.CharField(max_length=256)
-    exempt=models.BooleanField()
-    subsidized=models.BooleanField()
-    is_condo_group=models.BooleanField()
-    parent_id_key=models.IntegerField(null=True, blank=True)
-    quota=models.CharField(max_length=256)
-    billing_cycle=models.CharField(max_length=256)
-    usage_date=models.DateField()
-    storage_cluster=models.CharField(max_length=256)
+    external_key = models.IntegerField()
+    source = models.CharField(max_length=256)
+    tier = models.CharField(max_length=256)
+    filesystem_path = models.CharField(max_length=512)
+    sponsor_pi = models.CharField(max_length=512)
+    billing_contact = models.CharField(max_length=512)
+    fileset_name = models.CharField(max_length=256)
+    status = models.CharField(max_length=256)
+    service_rate_category = models.CharField(max_length=256)
+    usage_tb = models.DecimalField(max_digits=20, decimal_places=6)
+    funding_number = models.CharField(max_length=256)
+    exempt = models.BooleanField()
+    subsidized = models.BooleanField()
+    is_condo_group = models.BooleanField()
+    parent_id_key = models.IntegerField(null=True, blank=True)
+    quota = models.CharField(max_length=256)
+    billing_cycle = models.CharField(max_length=256)
+    usage_date = models.DateField()
+    storage_cluster = models.CharField(max_length=256)
     objects = AllocationUsageQuerySet.as_manager()
     history = HistoricalRecords()
 
@@ -176,12 +185,12 @@ class MonthlyStorageBilling(AllocationUsage):
     class Meta:
         managed = False  # This model does not create a database table
 
+    # TODO move to constants file if there are more billing related constants in the future
     HEADER_LINE_NO = 5
     # ISP: Internal Service Provider
     ISP_ACTIVE = "ISP0000030"
     ISP_ARCHIVE = "ISP0000199"
     # ISP_COMPUTE = "ISP0000370"
-
 
     @classmethod
     def _copy_template_headers_to_file(cls, template_filepath, target_filepath):
@@ -193,8 +202,12 @@ class MonthlyStorageBilling(AllocationUsage):
             with open(template_filepath, "r") as template_file:
                 headers = []
                 for _ in range(cls.HEADER_LINE_NO):
-                    line = template_file.readline().strip()  # Read a line and remove trailing whitespace
-                    if not line:  # Handle cases where the template file has fewer than 5 lines
+                    line = (
+                        template_file.readline().strip()
+                    )  # Read a line and remove trailing whitespace
+                    if (
+                        not line
+                    ):  # Handle cases where the template file has fewer than 5 lines
                         break
                     headers.append(line + "\n")
 
@@ -202,7 +215,9 @@ class MonthlyStorageBilling(AllocationUsage):
             with open(target_filepath, "w") as target_file:
                 target_file.writelines(headers)
 
-            print(f"Header successfully copied from '{template_filepath}' to '{target_filepath}'.")
+            print(
+                f"Header successfully copied from '{template_filepath}' to '{target_filepath}'."
+            )
 
         except FileNotFoundError:
             print("Error: One of the files was not found.")
@@ -215,7 +230,9 @@ class MonthlyStorageBilling(AllocationUsage):
         Reads and returns the template of billing entry from the template file.
         """
 
-        billing_entry_line_no = cls.HEADER_LINE_NO + 1  # Line number where billing entry is expected
+        billing_entry_line_no = (
+            cls.HEADER_LINE_NO + 1
+        )  # Line number where billing entry is expected
         try:
             with open(template_filepath, "r") as template_file:
                 lines = template_file.readlines()
@@ -223,7 +240,9 @@ class MonthlyStorageBilling(AllocationUsage):
                     billing_entry = lines[billing_entry_line_no - 1].strip()
                     return billing_entry
                 else:
-                    print("Error: Template file does not contain enough lines for billing entry.")
+                    print(
+                        "Error: Template file does not contain enough lines for billing entry."
+                    )
                     return None
 
         except FileNotFoundError:
@@ -231,7 +250,7 @@ class MonthlyStorageBilling(AllocationUsage):
             return None
         except Exception as e:
             print(f"An error occurred: {e}")
-            return None 
+            return None
 
     @classmethod
     def _get_fiscal_year(cls, a_date):
@@ -284,7 +303,9 @@ class MonthlyStorageBilling(AllocationUsage):
             template_path = f"{PROJECT_ROOT()}/coldfront/core/billing/templates/RIS-monthly-storage-billing-template.csv"
 
         a_tier = billing_objects[0].tier
-        a_delivery_date = datetime.strptime(billing_objects[0].delivery_date, "%Y-%m-%d")
+        a_delivery_date = datetime.strptime(
+            billing_objects[0].delivery_date, "%Y-%m-%d"
+        )
 
         if output_path is None:
             output_filename = cls._generate_report_filename(a_tier, a_delivery_date)
