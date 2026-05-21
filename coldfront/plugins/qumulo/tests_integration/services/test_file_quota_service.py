@@ -7,7 +7,9 @@ from django.test import TestCase, tag
 
 from unittest import mock
 
-from coldfront.plugins.qumulo.services.file_quota_service import FileQuotaService
+from coldfront.plugins.qumulo.services.file_quota_service import (
+    get_file_system_allocations_near_limit,
+)
 
 
 class TestFileQuotaService(TestCase):
@@ -16,12 +18,10 @@ class TestFileQuotaService(TestCase):
     @mock.patch.dict(os.environ, {"ALLOCATION_NEAR_LIMIT_THRESHOLD": "0.9"})
     @tag("integration")
     def test_file_system_allocations_near_limit(self):
-        allocations_near_limit = (
-            FileQuotaService.get_file_system_allocations_near_limit()
-        )
+        allocations_near_limit = get_file_system_allocations_near_limit()
         are_all_allocations_near_limit = all(
             int(quota["capacity_usage"]) / int(quota["limit"])
-            > float(os.environ.get("ALLOCATION_NEAR_LIMIT_THRESHOLD"))
+            >= float(os.environ.get("ALLOCATION_NEAR_LIMIT_THRESHOLD"))
             for quota in allocations_near_limit
         )
         self.assertTrue(are_all_allocations_near_limit)

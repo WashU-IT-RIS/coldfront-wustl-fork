@@ -1,9 +1,14 @@
 import os
-from dotenv import load_dotenv
+
+from django.test import TestCase
+
+from unittest.mock import MagicMock, patch
 
 from formencode.validators import Email
 
-from coldfront.core.utils.mail import allocation_email_recipients
+from coldfront.plugins.qumulo.services.file_quota_service import (
+    get_file_system_allocations_near_limit,
+)
 from coldfront.plugins.qumulo.services.notifications_service import (
     send_email_for_near_limit_allocation,
 )
@@ -16,13 +21,9 @@ from coldfront.plugins.qumulo.tests.fixtures import (
 from coldfront.plugins.qumulo.tests.utils.mock_data import get_mock_quota_response
 from coldfront.plugins.qumulo.utils.mail import allocation_user_recipients_for_ris
 
-load_dotenv(override=True)
-
-from django.test import TestCase
-
-from unittest.mock import patch, MagicMock
-
-from coldfront.plugins.qumulo.services.file_quota_service import FileQuotaService
+from coldfront.plugins.qumulo.services.file_quota_service import (
+    get_file_system_allocations_near_limit,
+)
 
 
 @patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
@@ -78,9 +79,7 @@ class TestFileQuotaService(TestCase):
         self, create_connection_mock: MagicMock
     ) -> None:
         create_connection_mock.return_value = self.qumulo_api
-        allocations_near_limit = (
-            FileQuotaService.get_file_system_allocations_near_limit()
-        )
+        allocations_near_limit = get_file_system_allocations_near_limit()
 
         are_all_allocations_near_limit = all(
             int(quota["capacity_usage"]) / int(quota["limit"])
@@ -91,7 +90,6 @@ class TestFileQuotaService(TestCase):
         self.assertEqual(
             len(self.mock_quota_allocations), 5, "Expects QUMULO to have 5 allocations"
         )
-        # breakpoint() # the test is failing here --- Come back later ---
         self.assertEqual(
             len(allocations_near_limit),
             4,
@@ -107,9 +105,7 @@ class TestFileQuotaService(TestCase):
     )
     def test_create_email_receiver_list(self, qumulo_api_mock: MagicMock) -> None:
         qumulo_api_mock.return_value = self.qumulo_api
-        allocations_near_limit = (
-            FileQuotaService.get_file_system_allocations_near_limit()
-        )
+        allocations_near_limit = get_file_system_allocations_near_limit()
         for quota in allocations_near_limit:
             project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
             recipients = allocation_user_recipients_for_ris(project)
@@ -121,9 +117,7 @@ class TestFileQuotaService(TestCase):
     )
     def test_send_email_for_allocations_near_limit(self, qumulo_api_mock: MagicMock):
         qumulo_api_mock.return_value = self.qumulo_api
-        allocations_near_limit = (
-            FileQuotaService.get_file_system_allocations_near_limit()
-        )
+        allocations_near_limit = get_file_system_allocations_near_limit()
         for quota in allocations_near_limit:
             project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
             recipients = allocation_user_recipients_for_ris(project)
@@ -137,10 +131,14 @@ class TestFileQuotaService(TestCase):
         self, qumulo_api_mock: MagicMock
     ):
         qumulo_api_mock.return_value = self.qumulo_api
-        allocations_near_limit = (
-            FileQuotaService.get_file_system_allocations_near_limit()
-        )
+        allocations_near_limit = get_file_system_allocations_near_limit()
         for quota in allocations_near_limit:
             project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
 
         notify_users_with_allocations_near_limit()
+        for quota in allocations_near_limit:
+            project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
+            recipients = allocation_user_recipients_for_ris(project)
+            self.assertIsInstance(recipients, list)
+            self.assertTrue(all(Email.to_python(recipient) for recipient in recipients))
+            send_email_for_near_limit_allocation(quota, recipients)

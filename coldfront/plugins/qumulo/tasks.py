@@ -18,7 +18,10 @@ from coldfront.core.resource.models import Resource
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
 
-from coldfront.plugins.qumulo.services.file_quota_service import FileQuotaService
+from coldfront.plugins.qumulo.services.file_quota_service import (
+    get_file_system_allocations_near_limit,
+    ingest_quotas_with_daily_usage,
+)
 from coldfront.plugins.qumulo.services.notifications_service import (
     send_email_for_near_limit_allocation,
 )
@@ -56,7 +59,7 @@ def poll_ad_group(
         qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
         success = True
     except RequestError as qumulo_request_error:
-        logger.warn(f'Allocation Group "{group_dn}" not found')
+        logger.warning(f'Allocation Group "{group_dn}" not found')
         success = False
 
     acl_group_name = acl_allocation.get_attribute("storage_acl_name")
@@ -64,9 +67,9 @@ def poll_ad_group(
 
     if success:
         acl_allocation.status = AllocationStatusChoice.objects.get(name="Active")
-        logger.warn(f'Allocation Group "{acl_group_name}" found')
+        logger.warning(f'Allocation Group "{acl_group_name}" found')
     elif time_since_creation > expiration_seconds:
-        logger.warn(
+        logger.warning(
             f'Allocation Group "{acl_group_name}" not found after {expiration_seconds/SECONDS_IN_AN_HOUR} hours'
         )
         acl_allocation.status = AllocationStatusChoice.objects.get(name="Expired")
@@ -80,7 +83,7 @@ def poll_ad_groups() -> None:
         status__name="Pending", resources__in=resources
     )
 
-    logger.warn(f"Polling {len(acl_allocations)} ACL allocations")
+    logger.warning(f"Polling {len(acl_allocations)} ACL allocations")
 
     for acl_allocation in acl_allocations:
         poll_ad_group(acl_allocation)
@@ -102,7 +105,7 @@ def conditionally_update_storage_allocation_statuses() -> None:
     allocations = Allocation.objects.filter(
         status__name="Pending", resources__in=storage_resources
     )
-    logger.warn(f"Checking {len(allocations)} qumulo allocations")
+    logger.warning(f"Checking {len(allocations)} qumulo allocations")
 
     for allocation in allocations:
         conditionally_update_storage_allocation_status(allocation)
@@ -110,11 +113,11 @@ def conditionally_update_storage_allocation_statuses() -> None:
 
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
-    FileQuotaService.ingest_quotas_with_daily_usage(logger)
+    ingest_quotas_with_daily_usage(logger)
 
 
 def notify_users_with_allocations_near_limit() -> None:
-    qumulo_allocations = FileQuotaService.get_file_system_allocations_near_limit()
+    qumulo_allocations = get_file_system_allocations_near_limit()
     as_it_paths = list(map(lambda quota: quota["path"], qumulo_allocations))
     paths_without_trailing_slash = list(map(lambda path: path.rstrip("/"), as_it_paths))
     allocation_attributes = AllocationAttribute.objects.select_related(
