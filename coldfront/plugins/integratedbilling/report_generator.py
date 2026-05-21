@@ -106,7 +106,7 @@ class ReportGenerator:
             return True
 
     def __log_failed_subsidized_entries(self, billable_alloc_usages):
-        # Find PIs and allocations when the PI has more than one subsidized allocation
+        # Find PIs and allocations when the PI has more than one subsidized allocationw
         pis = billable_alloc_usages.values_list('sponsor_pi', flat=True).order_by().distinct()
         for pi in pis:
             if not billable_alloc_usages._is_subsidized_valid_by_pi(pi):
