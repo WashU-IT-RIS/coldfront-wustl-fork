@@ -20,12 +20,9 @@ class BillableUser:
         # TODO: add additional eligibility criteria here, such as checking if the user has a certain role or is part of a specific group
         # if user.is_staff:
         #    is_eligible = False
-        #    return
-        # is the user a PI on any allocations?
-        # if Allocation.objects.filter(pi=self.user).exists():
+        #    return is_eligible
+        # if user.is_pi:
         #     is_eligble = True
-
-
         return is_eligble
         # placeholder for inspecting the user's allocations and determining if they are eligible for a subsidy
 
