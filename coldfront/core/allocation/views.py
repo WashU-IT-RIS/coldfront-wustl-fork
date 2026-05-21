@@ -61,7 +61,7 @@ from coldfront.core.project.models import (Project, ProjectUser, ProjectPermissi
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import get_domain_url, import_from_settings
 from coldfront.core.utils.mail import send_allocation_admin_email, send_allocation_customer_email, send_email_template, build_link
-
+from coldfront.plugins.qumulo.signals import AllocationActivationWarning
 ALLOCATION_ENABLE_ALLOCATION_RENEWAL = import_from_settings(
     'ALLOCATION_ENABLE_ALLOCATION_RENEWAL', True)
 ALLOCATION_DEFAULT_ALLOCATION_LENGTH = import_from_settings(
@@ -98,6 +98,13 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             return True
 
         return allocation_obj.has_perm(self.request.user, AllocationPermission.USER)
+    
+    def _get_previous_value_for_change_request(self, change_request):
+        changing_allocation_attribute = change_request.allocation_attribute
+        history = changing_allocation_attribute.history.filter(history_date__lt=change_request.created).order_by('-history_date')
+        if history.exists():
+            return history.first().value
+        return None
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -111,7 +118,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         attributes_with_usage = [a for a in alloc_attr_set if hasattr(a, 'allocationattributeusage')]
         attributes = alloc_attr_set
 
-        allocation_changes = allocation_obj.allocationchangerequest_set.all().order_by('-pk')
+        allocation_changes = AllocationAttributeChangeRequest.objects.filter(allocation_change_request__allocation=allocation_obj).order_by('-pk')
 
         guage_data = []
         invalid_attributes = []
@@ -134,6 +141,9 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         context['guage_data'] = guage_data
         context['attributes_with_usage'] = attributes_with_usage
         context['attributes'] = attributes
+        
+        for change_request in allocation_changes:
+            change_request.previous_value = self._get_previous_value_for_change_request(change_request)
         context['allocation_changes'] = allocation_changes
 
         # Can the user update the project?
@@ -222,15 +232,21 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
 
             allocation_obj.save()
 
-            allocation_activate.send(
-                sender=self.__class__, allocation_pk=allocation_obj.pk)
+            activation_warnings = False
+            try:
+                allocation_activate.send(
+                    sender=self.__class__, allocation_pk=allocation_obj.pk)
+            except AllocationActivationWarning as aaw:
+                messages.warning(request, str(aaw))
+                activation_warnings = True
+
             allocation_users = allocation_obj.allocationuser_set.exclude(status__name__in=['Removed', 'Error'])
             for allocation_user in allocation_users:
                 allocation_activate_user.send(
                     sender=self.__class__, allocation_user_pk=allocation_user.pk)
 
             # send_allocation_customer_email(allocation_obj, 'Allocation Activated', 'email/allocation_activated.txt', domain_url=get_domain_url(self.request))
-            if action != 'auto-approve':
+            if action != 'auto-approve' and not activation_warnings:
                 messages.success(request, 'Allocation Activated!')
 
         elif old_status != allocation_obj.status.name in ['Denied', 'New', 'Revoked']:
@@ -1797,7 +1813,8 @@ class AllocationChangeView(LoginRequiredMixin, UserPassesTestMixin, FormView):
             allocation=allocation_obj,
             end_date_extension=end_date_extension,
             justification=justification,
-            status=change_request_status_obj
+            status=change_request_status_obj,
+            user=self.request.user
             )
 
 

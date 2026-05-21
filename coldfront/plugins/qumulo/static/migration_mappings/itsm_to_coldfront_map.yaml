@@ -455,22 +455,28 @@ itsm_to_coldfront_map:
       defaults_to: monthly
   subsidized:
     coldfront:
-      - entity: allocation_attribute
+      - entity: allocation_form
         attributes:
-          - name: allocation_attribute_type__name
-            value: subsidized
-          - name: value
+          - name: subsidized
             value:
               type: Yes/No
-              transforms: truthy_or_falsy_to_boolean
+              transforms: truthy_or_falsy_to_no
               validates:
-                inclusion: ["Yes", "No"]
+                inclusion: ["No"]
+      - entity: sub_allocation_form
+        attributes:
+          - name: subsidized
+            value:
+              type: Yes/No
+              transforms: truthy_or_falsy_to_no
+              validates:
+                inclusion: ["No"]
     itsm_value:
       entity: service_provision
       attribute: subsidized
       type: boolean
       nulls: true
-      defaults_to: true
+      defaults_to: false
   quota:
     coldfront:
       - entity: allocation_form

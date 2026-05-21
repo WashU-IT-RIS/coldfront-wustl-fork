@@ -78,6 +78,14 @@ class AllocationForm(forms.Form):
         widget=forms.RadioSelect,
         required=True,
     )
+    subsidized = forms.ChoiceField(
+        help_text="Subsidized allocation is offerred once per PI. Sub allocations will not inherit the subsidized status.",
+        label="Subsidized",
+        choices=[("Yes", "Yes"), ("No", "No")],
+        initial="No",
+        widget=forms.RadioSelect,
+        required=True,
+    )
     department_number = forms.CharField(
         help_text="The department for billing",
         label="Department Number",

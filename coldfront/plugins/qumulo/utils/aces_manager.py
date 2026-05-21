@@ -545,7 +545,7 @@ class AcesManager(object):
 
     @staticmethod
     def normalize_trustee(trustee: dict):
-        if "name" not in trustee:
+        if trustee.get("name", None) == None:
             return trustee
         domain = None
         name = trustee["name"].replace("ACCOUNTS\\", "").lower()

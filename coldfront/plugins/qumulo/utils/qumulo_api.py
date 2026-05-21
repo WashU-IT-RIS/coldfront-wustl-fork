@@ -18,13 +18,13 @@ from pathlib import PurePath
 
 load_dotenv(override=True)
 
-
 class QumuloAPI:
     def __init__(self, connection_info: Dict[str, str]) -> None:
         self.host = connection_info["host"]
         self.port = connection_info["port"]
         self.username = connection_info["user"]
         self.password = connection_info["pass"]
+        self.create_allocation_message = None
         self.rc: RestClient = RestClient(self.host, self.port)
         self.rc.login(self.username, self.password)
         self.valid_protocols = list(
@@ -39,6 +39,8 @@ class QumuloAPI:
         name: str,
         limit_in_bytes: int,
     ):
+        # bmulligan 20260519: the "name" parameter is required above and
+        # validated below, but unused before it gets re-assigned
 
         if name == None:
             raise ValueError("name must be defined.")
@@ -50,8 +52,24 @@ class QumuloAPI:
             protocols = []
 
         dir_path = str(PurePath(fs_path).parent)
+        # bmulligan 20260519: this overwrites "name" before it gets used.
         name = str(PurePath(fs_path).name)
-        self.rc.fs.create_directory(dir_path=dir_path, name=name)
+
+        directory_exists = True
+        is_parent_allocation = QumuloAPI.is_allocation_root_path(fs_path)
+        try:
+            file_attr = self.rc.fs.get_file_attr(path=fs_path)
+        except RequestError as e:
+            if e.status_code == 404:
+                directory_exists = False
+
+        if not directory_exists:
+            self.rc.fs.create_directory(dir_path=dir_path, name=name)
+        elif not is_parent_allocation:
+            self.create_allocation_message = (
+                'WARNING: The allocation was created with an existing path: '
+                f'{fs_path}'
+            )
 
         self.validate_protocols(protocols)
 
