@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ldap3 import Server, Connection, ALL, NTLM, MODIFY_DELETE
 from ldap3.extend.microsoft.addMembersToGroups import (
     ad_add_members_to_groups,
@@ -24,12 +26,15 @@ class ActiveDirectoryAPI:
         if not self.conn.bind():
             raise self.conn.result
 
-    def get_user(self, wustlkey: str):
+    def get_user(self, wustlkey: str, search_base: Optional[str] = None):
         if not wustlkey:
             raise ValueError(("wustlkey must be defined"))
+        
+        if search_base is None:
+            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
             attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
@@ -39,13 +44,16 @@ class ActiveDirectoryAPI:
 
         return self.conn.response[0]
 
-    def get_users(self, wustlkeys: list[str]):
+    def get_users(self, wustlkeys: list[str], search_base: Optional[str] = None):
+        if search_base is None:
+            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
         user_filter_base = lambda user: f"(sAMAccountName={user})"
 
         user_filters = f"(|{''.join(map(user_filter_base, wustlkeys))})"
 
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(objectClass=person){user_filters})",
             attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
@@ -55,9 +63,12 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
-    def get_member(self, account_name: str):
+    def get_member(self, account_name: str, search_base: Optional[str] = None):
+        if search_base is None:
+            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(|(objectClass=group)(objectClass=person))(sAMAccountName={account_name}))",
             attributes=["sAMAccountName", "objectClass"],
         )
@@ -67,15 +78,18 @@ class ActiveDirectoryAPI:
 
         return self.conn.response[0]
 
-    def get_members(self, account_names: list[str]):
+    def get_members(self, account_names: list[str], search_base: Optional[str] = None):
         if not account_names:
             return []
+
+        if search_base is None:
+            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         member_filter_base = lambda member: f"(sAMAccountName={member})"
         member_filters = f"(|{''.join(map(member_filter_base, account_names))})"
 
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(|(objectClass=group)(objectClass=person)){member_filters})",
             attributes=["sAMAccountName", "objectClass"],
         )
@@ -85,9 +99,12 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
-    def get_user_by_email(self, email: str):
+    def get_user_by_email(self, email: str, search_base: Optional[str] = None):
         if not email:
             raise ValueError(("email must be defined"))
+
+        if search_base is None:
+            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
@@ -151,3 +168,11 @@ class ActiveDirectoryAPI:
     def generate_group_dn(group_name: str) -> str:
         groups_OU = os.environ.get("AD_GROUPS_OU")
         return f"cn={group_name},{groups_OU}"
+
+    def is_staff_member(self, wustlkey: str) -> bool:
+        user = self.get_user(wustlkey)
+        return "staff" in user["sAMAccountName"].lower()
+
+    def is_pi_member(self, wustlkey: str) -> bool:
+        user = self.get_user(wustlkey)
+        return "pi" in user["sAMAccountName"].lower()

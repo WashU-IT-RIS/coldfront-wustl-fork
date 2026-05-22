@@ -2,6 +2,7 @@ from datetime import date
 import factory
 from factory.django import DjangoModelFactory
 from coldfront.plugins.integratedbilling.models import ServiceRateCategory
+from coldfront.plugins.integratedbilling.subsidies import BillableUser
 
 
 class ServiceRateCategoryFactory(DjangoModelFactory):
@@ -55,7 +56,7 @@ class ServiceRateCategoryFactory(DjangoModelFactory):
 
 class BillableUserFactory(factory.Factory):
     class Meta:
-        model = "integratedbilling.BillableUser"
+        model = BillableUser
 
     user = factory.SubFactory("coldfront.core.factories.UserFactory")
 
