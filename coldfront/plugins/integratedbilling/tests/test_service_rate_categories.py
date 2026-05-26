@@ -38,7 +38,7 @@ class TestServiceRateCategories(TestCase):
             .for_cycle(cycle)
         )
 
-        self.assertEquals(categories.count(), 1)
+        self.assertEqual(categories.count(), 1)
         category = categories.get()
         self.assertEqual(category.model_name, model_name)
         self.assertEqual(category.tier_name, tier_name)
@@ -58,7 +58,7 @@ class TestServiceRateCategories(TestCase):
             .for_tier(tier_name)
             .for_cycle(cycle)
         )
-        self.assertEquals(categories.count(), 0)
+        self.assertEqual(categories.count(), 0)
 
     def test_service_rate_category_multiple_matches(self):
         usage_date = date(2024, 6, 15)
@@ -71,10 +71,11 @@ class TestServiceRateCategories(TestCase):
             .for_cycle(cycle)
         )
         self.assertGreater(categories.count(), 0)  # Ensure at least one match exists
+        breakpoint()
         for category in categories:
-            assert category.model_name == model_name
-            assert category.cycle == cycle
-            assert category.start_date <= usage_date <= category.end_date
+            self.assertEqual(category.model_name, model_name)
+            self.assertEqual(category.cycle, cycle)
+            self.assertTrue(category.start_date <= usage_date <= category.end_date)
 
     def test_service_rate_category_edge_dates(self):
         model_name = "consumption"
@@ -122,4 +123,4 @@ class TestServiceRateCategories(TestCase):
             .for_cycle(cycle)
         )
 
-        assert categories.count() == 0  # Expecting no matches for invalid date
+        self.assertEqual(categories.count(), 0)  # Expecting no matches for invalid date
