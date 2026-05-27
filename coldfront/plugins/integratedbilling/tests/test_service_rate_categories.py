@@ -65,6 +65,7 @@ class TestServiceRateCategories(TestCase):
         model_name = "consumption"
         cycle = "monthly"
 
+        # the tier is not specified, so both active and archive categories should match for the given date and model
         categories = (
             ServiceRateCategory.rates.for_date(usage_date)
             .for_model(model_name)
