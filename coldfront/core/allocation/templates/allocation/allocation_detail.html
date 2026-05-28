@@ -257,13 +257,13 @@ Allocation Detail
             </tr>
           </thead>
           <tbody>
-            {% for change_request in allocation_changes %}
+            {% for change in allocation_and_user_changes %}
                 <tr>
-                  <td>{{ change_request.created|date:"M. d, Y" }}</td>
-                  <td>{{ change_request.allocation_change_request.user }}</td>
-                  <td>{{ change_request.allocation_attribute}}</td>
-                  <td>{{ change_request.previous_value }}</td>
-                  <td>{{ change_request.new_value }}</td>
+                  <td>{{ change.created|date:"M. d, Y" }}</td>
+                  <td>{{ change.allocation_change_request.user }}</td>
+                  <td>{{ change.allocation_attribute}}</td>
+                  <td>{{ change.previous_value }}</td>
+                  <td>{{ change.new_value }}</td>
                   {% if change_request.allocation_change_request.status.name == 'Approved' %}
                     <td class="text-success">{{ change_request.allocation_change_request.status.name }}</td>
                   {% elif change_request.allocation_change_request.status.name == 'Denied' %}
