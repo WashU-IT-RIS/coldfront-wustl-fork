@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 
 from factory import faker
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.core.project.models import Project
 from coldfront.core.test_helpers.factories import (
     AllocationAttributeFactory,
@@ -118,6 +118,29 @@ class TestExportSuballocationPsv(TestCase):
         expected_output = "".join(f"{path}|{{}}\n" for path in paths)
 
         self.assertEqual(expected_output, out)
+
+    def test_multiple_basic_allocations_from_allocation_attributes(self):
+        storage_filesystem_paths: list[AllocationAttribute] = (
+            AllocationAttributeFactory.create_batch(
+                2,
+                value=faker.Faker("file_path", depth=3, extension=""),
+                allocation_attribute_type=self.storage_filesystem_path_type,
+            )
+        )
+        paths = [attr.value for attr in storage_filesystem_paths]
+
+        out, _ = self.call_command(
+            "export_suballocation_psv",
+            "--allocations",
+            *paths,
+        )
+        expected_output = "".join(f"{path}|{{}}\n" for path in paths)
+
+        self.assertEqual(expected_output, out)
+
+        # has an allocation!
+        for attr in storage_filesystem_paths:
+            self.assertIsNotNone(attr.allocation)
 
     @patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
     @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
