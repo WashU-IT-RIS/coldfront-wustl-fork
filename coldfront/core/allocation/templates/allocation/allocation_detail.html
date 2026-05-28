@@ -237,11 +237,11 @@ Allocation Detail
 <!-- Start Allocation Change Requests -->
 <div class="card mb-3">
   <div class="card-header">
-    <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> Allocation Change Requests</h3> <span class="badge badge-secondary">{{allocation_changes.count}}</span>
+    <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> Allocation Change Requests</h3> <span class="badge badge-secondary">{{allocation_and_user_changes|length}}</span>
   </div>
   
   <div class="card-body">
-    {% if allocation_changes %}
+    {% if allocation_and_user_changes %}
       <div class="table-responsive">
         <table id="allocation_change_table" class="table table-bordered table-sm">
           <thead>
@@ -260,24 +260,28 @@ Allocation Detail
             {% for change in allocation_and_user_changes %}
                 <tr>
                   <td>{{ change.created|date:"M. d, Y" }}</td>
-                  <td>{{ change.allocation_change_request.user }}</td>
-                  <td>{{ change.allocation_attribute}}</td>
+                  <td>{{ change.actor }}</td>
+                  <td>{{ change.attribute }}</td>
                   <td>{{ change.previous_value }}</td>
                   <td>{{ change.new_value }}</td>
-                  {% if change_request.allocation_change_request.status.name == 'Approved' %}
-                    <td class="text-success">{{ change_request.allocation_change_request.status.name }}</td>
-                  {% elif change_request.allocation_change_request.status.name == 'Denied' %}
-                    <td class="text-danger">{{ change_request.allocation_change_request.status.name }}</td>
+                  {% if change.status.name == 'Approved' %}
+                    <td class="text-success">{{ change.status.name }}</td>
+                  {% elif change.status.name == 'Denied' %}
+                    <td class="text-danger">{{ change.status.name }}</td>
                   {% else %}
-                    <td class="text-info">{{ change_request.allocation_change_request.status.name }}</td>
+                    <td class="text-info">{{ change.status.name }}</td>
                   {% endif %}
                   </td>
-                  {% if change_request.allocation_change_request.notes %}
-                    <td>{{change_request.allocation_change_request.notes}}</td>
+                  {% if change.notes %}
+                    <td>{{ change.notes }}</td>
                   {% else %}
                     <td></td>
                   {% endif %}
-                  <td><a href="{% url 'allocation-change-detail' change_request.allocation_change_request.pk %}"><i class="far fa-edit" aria-hidden="true"></i><span class="sr-only">Edit</span></a></td>
+                  <td>
+                    {% if change.request_pk %}
+                      <a href="{% url 'allocation-change-detail' change.request_pk %}"><i class="far fa-edit" aria-hidden="true"></i><span class="sr-only">Edit</span></a>
+                    {% endif %}
+                  </td>
                 </tr>
             {% endfor %}
           </tbody>

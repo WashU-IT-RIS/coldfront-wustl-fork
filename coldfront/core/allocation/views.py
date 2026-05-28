@@ -142,11 +142,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         allocation_obj = get_object_or_404(Allocation, pk=pk)
         allocation_users = allocation_obj.allocationuser_set.exclude(
             status__name__in=['Removed']).order_by('user__username')
-        allocation_and_user_changes = {}
-
-        for user in allocation_users:
-            username = self._get_change_actor_username(allocation_user=user)
-            allocation_and_user_changes.setdefault(username, []).extend(self._get_user_history(user))
+        allocation_and_user_changes = []
 
         # set visible usage attributes
         alloc_attr_set = allocation_obj.get_attribute_set(self.request.user)
@@ -177,26 +173,41 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         context['attributes_with_usage'] = attributes_with_usage
         context['attributes'] = attributes
         
+        for user in allocation_obj.allocationuser_set.all().order_by('user__username'):
+            for user_change in self._get_user_history(user):
+                allocation_and_user_changes.append({
+                    'created': user_change.get('date'),
+                    'actor': self._get_change_actor_username(allocation_user=user),
+                    'attribute': 'Users in Allocation',
+                    'previous_value': '',
+                    'new_value': user_change.get('change_type'),
+                    'status': user_change.get('status'),
+                    'notes': '',
+                    'request_pk': None,
+                })
+
         for change_request in allocation_changes:
             change_request.previous_value = self._get_previous_value_for_change_request(change_request)
-            requested_by = getattr(change_request.allocation_change_request, 'requested_by', None)
-            username = self._get_change_actor_username(requested_by=requested_by)
-            allocation_and_user_changes.setdefault(username, []).append({
-                'change_type': 'Allocation Change Request',
-                'date': change_request.created,
-                'changed_by': requested_by,
-                'status': getattr(change_request.allocation_change_request, 'status', None),
-                'change_request': change_request,
+            request_obj = change_request.allocation_change_request
+            requested_by = getattr(request_obj, 'user', None)
+            allocation_and_user_changes.append({
+                'created': change_request.created,
+                'actor': self._get_change_actor_username(requested_by=requested_by),
+                'attribute': change_request.allocation_attribute,
+                'previous_value': change_request.previous_value,
+                'new_value': change_request.new_value,
+                'status': getattr(request_obj, 'status', None),
+                'notes': getattr(request_obj, 'notes', ''),
+                'request_pk': request_obj.pk,
             })
 
-        for username in allocation_and_user_changes:
-            allocation_and_user_changes[username] = sorted(
-                allocation_and_user_changes[username],
-                key=lambda entry: entry.get('date') or datetime.datetime.min,
-                reverse=True,
-            )
+        allocation_and_user_changes = sorted(
+            allocation_and_user_changes,
+            key=lambda entry: entry.get('created') or datetime.datetime.min,
+            reverse=True,
+        )
         context['allocation_changes'] = allocation_changes
-        context['allocation_and_user_changes'] = allocation_and_user_changes        
+        context['allocation_and_user_changes'] = allocation_and_user_changes
 
         # Can the user update the project?
         context['is_allowed_to_update_project'] = allocation_obj.project.has_perm(self.request.user, ProjectPermission.UPDATE)
