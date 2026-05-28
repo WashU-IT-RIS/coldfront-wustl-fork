@@ -247,7 +247,7 @@ Allocation Detail
           <thead>
             <tr>
               <th scope="col">Date Requested</th>
-              <th scope="col">User</th>
+              <th scope="col">Changed By</th>
               <th scope="col">Attribute</th>
               <th scope="col">Previous Value</th>
               <th scope="col">New Value</th>
@@ -260,7 +260,7 @@ Allocation Detail
             {% for change in allocation_and_user_changes %}
                 <tr>
                   <td>{{ change.created|date:"M. d, Y" }}</td>
-                  <td>{{ change.actor }}</td>
+                  <td>{{ change.changed_by }}</td>
                   <td>{{ change.attribute }}</td>
                   <td>{{ change.previous_value }}</td>
                   <td>{{ change.new_value }}</td>

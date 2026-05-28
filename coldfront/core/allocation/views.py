@@ -62,6 +62,7 @@ from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import get_domain_url, import_from_settings
 from coldfront.core.utils.mail import send_allocation_admin_email, send_allocation_customer_email, send_email_template, build_link
 from coldfront.plugins.qumulo.signals import AllocationActivationWarning
+from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 ALLOCATION_ENABLE_ALLOCATION_RENEWAL = import_from_settings(
     'ALLOCATION_ENABLE_ALLOCATION_RENEWAL', True)
 ALLOCATION_DEFAULT_ALLOCATION_LENGTH = import_from_settings(
@@ -126,20 +127,28 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
                 'status': record.status,
             })
         return user_history
-
-    def _get_change_actor_username(self, allocation_user=None, requested_by=None):
-        if requested_by and getattr(requested_by, 'username', None):
-            return requested_by.username
-        if allocation_user and getattr(allocation_user, 'user', None) and getattr(allocation_user.user, 'username', None):
-            return allocation_user.user.username
-        if allocation_user and getattr(allocation_user, 'username', None):
-            return allocation_user.username
-        return 'Unknown'
+    
+    def _construct_user_change_history(self, acl_allocation):
+        allocation_and_user_changes = []
+        for user in acl_allocation.allocationuser_set.all().order_by('user__username'):
+            for user_change in self._get_user_history(user):
+                allocation_and_user_changes.append({
+                    'created': user_change.get('date'),
+                    'changed_by': user_change.get('changed_by'),
+                    'attribute': 'Users in Allocation',
+                    'previous_value': acl_allocation,
+                    'new_value': user,
+                    'status': user_change.get('status'),
+                    'notes': user_change.get('change_type'),
+                    'request_pk': None,
+                })
+        return allocation_and_user_changes
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
         allocation_obj = get_object_or_404(Allocation, pk=pk)
+        acl_allocations = AclAllocations.get_access_allocations(allocation_obj)
         allocation_users = allocation_obj.allocationuser_set.exclude(
             status__name__in=['Removed']).order_by('user__username')
         allocation_and_user_changes = []
@@ -173,26 +182,16 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         context['attributes_with_usage'] = attributes_with_usage
         context['attributes'] = attributes
         
-        for user in allocation_obj.allocationuser_set.all().order_by('user__username'):
-            for user_change in self._get_user_history(user):
-                allocation_and_user_changes.append({
-                    'created': user_change.get('date'),
-                    'actor': self._get_change_actor_username(allocation_user=user),
-                    'attribute': 'Users in Allocation',
-                    'previous_value': '',
-                    'new_value': user_change.get('change_type'),
-                    'status': user_change.get('status'),
-                    'notes': '',
-                    'request_pk': None,
-                })
+        for acl_allocation in acl_allocations:
+            user_history = self._construct_user_change_history(acl_allocation)
+            allocation_and_user_changes.extend(user_history)
 
         for change_request in allocation_changes:
             change_request.previous_value = self._get_previous_value_for_change_request(change_request)
             request_obj = change_request.allocation_change_request
-            requested_by = getattr(request_obj, 'user', None)
             allocation_and_user_changes.append({
                 'created': change_request.created,
-                'actor': self._get_change_actor_username(requested_by=requested_by),
+                'changed_by': request_obj.user,
                 'attribute': change_request.allocation_attribute,
                 'previous_value': change_request.previous_value,
                 'new_value': change_request.new_value,
@@ -206,7 +205,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             key=lambda entry: entry.get('created') or datetime.datetime.min,
             reverse=True,
         )
-        context['allocation_changes'] = allocation_changes
+        
         context['allocation_and_user_changes'] = allocation_and_user_changes
 
         # Can the user update the project?
