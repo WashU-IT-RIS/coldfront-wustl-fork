@@ -107,8 +107,15 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             return history.first().value
         return None
     
-    def _get_user_history(self, allocation_user):
-        history = allocation_user.history.all().order_by('-history_date')
+    def _get_user_history(self, allocation_user=None, allocation=None):
+        if allocation is not None:
+            # Query class-level history so deleted AllocationUser rows are included.
+            history = AllocationUser.history.filter(allocation=allocation).order_by('-history_date')
+        elif allocation_user is not None:
+            history = allocation_user.history.all().order_by('-history_date')
+        else:
+            return []
+
         user_history = []
         for record in history:
             if record.history_type == '+':
@@ -124,24 +131,25 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
                 'change_type': change_type,
                 'date': record.history_date,
                 'changed_by': record.history_user,
+                'user': getattr(record, 'user', None),
                 'status': record.status,
             })
         return user_history
     
     def _construct_user_change_history(self, acl_allocation):
         allocation_and_user_changes = []
-        for user in acl_allocation.allocationuser_set.all().order_by('user__username'):
-            for user_change in self._get_user_history(user):
-                allocation_and_user_changes.append({
-                    'created': user_change.get('date'),
-                    'changed_by': user_change.get('changed_by'),
-                    'attribute': 'Users in Allocation',
-                    'previous_value': acl_allocation,
-                    'new_value': user,
-                    'status': user_change.get('status'),
-                    'notes': user_change.get('change_type'),
-                    'request_pk': None,
-                })
+        for user_change in self._get_user_history(allocation=acl_allocation):
+            action = user_change.get('change_type')
+            allocation_and_user_changes.append({
+                'created': user_change.get('date'),
+                'changed_by': user_change.get('changed_by'),
+                'attribute': 'Users in Allocation',
+                'previous_value': '',
+                'new_value': user_change.get('user'),
+                'status': user_change.get('status'),
+                'notes': f"{action}, {acl_allocation}",
+                'request_pk': None,
+            })
         return allocation_and_user_changes
 
     def get_context_data(self, **kwargs):
