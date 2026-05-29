@@ -107,14 +107,8 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             return history.first().value
         return None
     
-    def _get_user_history(self, allocation_user=None, allocation=None):
-        if allocation is not None:
-            # Query class-level history so deleted AllocationUser rows are included.
-            history = AllocationUser.history.filter(allocation=allocation).order_by('-history_date')
-        elif allocation_user is not None:
-            history = allocation_user.history.all().order_by('-history_date')
-        else:
-            return []
+    def _get_user_history(self, allocation):
+        history = AllocationUser.history.filter(allocation=allocation).order_by('-history_date')
 
         user_history = []
         for record in history:
@@ -144,8 +138,8 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
                 'created': user_change.get('date'),
                 'changed_by': user_change.get('changed_by'),
                 'attribute': 'Users in Allocation',
-                'previous_value': '',
-                'new_value': user_change.get('user'),
+                'previous_value': user_change.get('user') if action == 'Removed' else '',
+                'new_value': '' if action == 'Removed' else user_change.get('user'),
                 'status': user_change.get('status'),
                 'notes': f"{action}, {acl_allocation}",
                 'request_pk': None,
