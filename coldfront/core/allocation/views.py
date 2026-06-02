@@ -132,8 +132,16 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
     
     def _construct_user_change_history(self, acl_allocation):
         allocation_and_user_changes = []
+        acl_allocation_str = str(acl_allocation).lower()
+        acl = ''
+        if 'rw' in acl_allocation_str:
+            acl = 'rw'
+        elif 'ro' in acl_allocation_str:
+            acl = 'ro'
+
         for user_change in self._get_user_history(allocation=acl_allocation):
             action = user_change.get('change_type')
+            
             allocation_and_user_changes.append({
                 'created': user_change.get('date'),
                 'changed_by': user_change.get('changed_by'),
@@ -141,7 +149,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
                 'previous_value': user_change.get('user') if action == 'Removed' else '',
                 'new_value': '' if action == 'Removed' else user_change.get('user'),
                 'status': user_change.get('status'),
-                'notes': f"{action}, {acl_allocation}",
+                'notes': f"{action}, {acl}",
                 'request_pk': None,
             })
         return allocation_and_user_changes
