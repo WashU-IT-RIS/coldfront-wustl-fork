@@ -130,7 +130,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             })
         return user_history
     
-    def _construct_user_change_history(self, acl_allocation):
+    def _construct_user_change_history(self, acl_allocation: Allocation):
         allocation_and_user_changes = []
         acl_allocation_str = str(acl_allocation).lower()
         acl = ''
@@ -625,8 +625,13 @@ class AllocationCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         allocation_user_active_status = AllocationUserStatusChoice.objects.get(
             name='Active')
         for user in users:
-            AllocationUser.objects.create(allocation=allocation_obj, user=user,
-                                            status=allocation_user_active_status)
+            allocation_user_obj = AllocationUser(
+                allocation=allocation_obj,
+                user=user,
+                status=allocation_user_active_status,
+            )
+            allocation_user_obj._history_user = self.request.user
+            allocation_user_obj.save()
 
         # send_allocation_admin_email(
         #     allocation_obj,
@@ -646,6 +651,19 @@ class AllocationCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
 class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'allocation/allocation_add_users.html'
+
+    def _save_allocation_user_with_actor(self, allocation_user_obj):
+        allocation_user_obj._history_user = self.request.user
+        allocation_user_obj.save()
+
+    def _create_allocation_user_with_actor(self, allocation_obj, user_obj, status_choice):
+        allocation_user_obj = AllocationUser(
+            allocation=allocation_obj,
+            user=user_obj,
+            status=status_choice,
+        )
+        self._save_allocation_user_with_actor(allocation_user_obj)
+        return allocation_user_obj
 
     def test_func(self):
         """ UserPassesTestMixin Tests"""
@@ -739,10 +757,13 @@ class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
                         allocation_user_obj = allocation_obj.allocationuser_set.get(
                             user=user_obj)
                         allocation_user_obj.status = allocation_user_active_status_choice
-                        allocation_user_obj.save()
+                        self._save_allocation_user_with_actor(allocation_user_obj)
                     else:
-                        allocation_user_obj = AllocationUser.objects.create(
-                            allocation=allocation_obj, user=user_obj, status=allocation_user_active_status_choice)
+                        allocation_user_obj = self._create_allocation_user_with_actor(
+                            allocation_obj,
+                            user_obj,
+                            allocation_user_active_status_choice,
+                        )
 
                     allocation_activate_user.send(sender=self.__class__,
                                                   allocation_user_pk=allocation_user_obj.pk)
@@ -758,6 +779,10 @@ class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
 
 class AllocationRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'allocation/allocation_remove_users.html'
+
+    def _save_allocation_user_with_actor(self, allocation_user_obj):
+        allocation_user_obj._history_user = self.request.user
+        allocation_user_obj.save()
 
     def test_func(self):
         """ UserPassesTestMixin Tests"""
@@ -845,7 +870,7 @@ class AllocationRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, Templat
                     allocation_user_obj = allocation_obj.allocationuser_set.get(
                         user=user_obj)
                     allocation_user_obj.status = allocation_user_removed_status_choice
-                    allocation_user_obj.save()
+                    self._save_allocation_user_with_actor(allocation_user_obj)
                     allocation_remove_user.send(sender=self.__class__,
                                                 allocation_user_pk=allocation_user_obj.pk)
 
@@ -1148,6 +1173,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
                         allocation_user_obj = allocation_obj.allocationuser_set.get(
                             user=user_obj)
                         allocation_user_obj.status = allocation_user_removed_status_choice
+                        allocation_user_obj._history_user = self.request.user
                         allocation_user_obj.save()
 
                         allocation_remove_user.send(
@@ -1161,6 +1187,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
                             allocation_user_obj = active_allocation.allocationuser_set.get(
                                 user=user_obj)
                             allocation_user_obj.status = allocation_user_removed_status_choice
+                            allocation_user_obj._history_user = self.request.user
                             allocation_user_obj.save()
                             allocation_remove_user.send(
                                 sender=self.__class__, allocation_user_pk=allocation_user_obj.pk)
