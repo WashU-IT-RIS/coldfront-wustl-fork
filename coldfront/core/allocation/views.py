@@ -625,13 +625,8 @@ class AllocationCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
         allocation_user_active_status = AllocationUserStatusChoice.objects.get(
             name='Active')
         for user in users:
-            allocation_user_obj = AllocationUser(
-                allocation=allocation_obj,
-                user=user,
-                status=allocation_user_active_status,
-            )
-            allocation_user_obj._history_user = self.request.user
-            allocation_user_obj.save()
+            AllocationUser.objects.create(allocation=allocation_obj, user=user,
+                                            status=allocation_user_active_status)
 
         # send_allocation_admin_email(
         #     allocation_obj,
@@ -651,19 +646,6 @@ class AllocationCreateView(LoginRequiredMixin, UserPassesTestMixin, FormView):
 
 class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'allocation/allocation_add_users.html'
-
-    def _save_allocation_user_with_actor(self, allocation_user_obj):
-        allocation_user_obj._history_user = self.request.user
-        allocation_user_obj.save()
-
-    def _create_allocation_user_with_actor(self, allocation_obj, user_obj, status_choice):
-        allocation_user_obj = AllocationUser(
-            allocation=allocation_obj,
-            user=user_obj,
-            status=status_choice,
-        )
-        self._save_allocation_user_with_actor(allocation_user_obj)
-        return allocation_user_obj
 
     def test_func(self):
         """ UserPassesTestMixin Tests"""
@@ -729,7 +711,6 @@ class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
     def post(self, request, *args, **kwargs):
         pk = self.kwargs.get('pk')
         allocation_obj = get_object_or_404(Allocation, pk=pk)
-        target_allocations = [allocation_obj, *AclAllocations.get_access_allocations(allocation_obj)]
 
         users_to_add = self.get_users_to_add(allocation_obj)
 
@@ -754,21 +735,17 @@ class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
                     user_obj = get_user_model().objects.get(
                         username=user_form_data.get('username'))
 
-                    for target_allocation in target_allocations:
-                        if target_allocation.allocationuser_set.filter(user=user_obj).exists():
-                            allocation_user_obj = target_allocation.allocationuser_set.get(
-                                user=user_obj)
-                            allocation_user_obj.status = allocation_user_active_status_choice
-                            self._save_allocation_user_with_actor(allocation_user_obj)
-                        else:
-                            allocation_user_obj = self._create_allocation_user_with_actor(
-                                target_allocation,
-                                user_obj,
-                                allocation_user_active_status_choice,
-                            )
+                    if allocation_obj.allocationuser_set.filter(user=user_obj).exists():
+                        allocation_user_obj = allocation_obj.allocationuser_set.get(
+                            user=user_obj)
+                        allocation_user_obj.status = allocation_user_active_status_choice
+                        allocation_user_obj.save()
+                    else:
+                        allocation_user_obj = AllocationUser.objects.create(
+                            allocation=allocation_obj, user=user_obj, status=allocation_user_active_status_choice)
 
-                        allocation_activate_user.send(sender=self.__class__,
-                                                      allocation_user_pk=allocation_user_obj.pk)
+                    allocation_activate_user.send(sender=self.__class__,
+                                                  allocation_user_pk=allocation_user_obj.pk)
 
             user_plural = "user" if users_added_count == 1 else "users"
             messages.success(request, f'Added {users_added_count} {user_plural} to allocation.')
@@ -781,10 +758,6 @@ class AllocationAddUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
 
 class AllocationRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
     template_name = 'allocation/allocation_remove_users.html'
-
-    def _save_allocation_user_with_actor(self, allocation_user_obj):
-        allocation_user_obj._history_user = self.request.user
-        allocation_user_obj.save()
 
     def test_func(self):
         """ UserPassesTestMixin Tests"""
@@ -845,7 +818,6 @@ class AllocationRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, Templat
     def post(self, request, *args, **kwargs):
         pk = self.kwargs.get('pk')
         allocation_obj = get_object_or_404(Allocation, pk=pk)
-        target_allocations = [allocation_obj, *AclAllocations.get_access_allocations(allocation_obj)]
 
         users_to_remove = self.get_users_to_remove(allocation_obj)
 
@@ -870,17 +842,12 @@ class AllocationRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, Templat
                     if allocation_obj.project.pi == user_obj:
                         continue
 
-                    for target_allocation in target_allocations:
-                        allocation_user_obj = target_allocation.allocationuser_set.filter(
-                            user=user_obj
-                        ).exclude(status__name='Removed').first()
-                        if not allocation_user_obj:
-                            continue
-
-                        allocation_user_obj.status = allocation_user_removed_status_choice
-                        self._save_allocation_user_with_actor(allocation_user_obj)
-                        allocation_remove_user.send(sender=self.__class__,
-                                                    allocation_user_pk=allocation_user_obj.pk)
+                    allocation_user_obj = allocation_obj.allocationuser_set.get(
+                        user=user_obj)
+                    allocation_user_obj.status = allocation_user_removed_status_choice
+                    allocation_user_obj.save()
+                    allocation_remove_user.send(sender=self.__class__,
+                                                allocation_user_pk=allocation_user_obj.pk)
 
             user_plural = "user" if remove_users_count == 1 else "users"
             messages.success(request, f'Removed {remove_users_count} {user_plural} from allocation.')
