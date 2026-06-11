@@ -45,7 +45,7 @@ def home(request):
         except AttributeError:
             pass
     else:
-        # TODO get non-authenticated home page content from settings or a plugin
+        # TODO get non-authenticated home page url from settings or a plugin
         redirect_url = settings.LOGIN_URL + '?next=' + request.path
         return redirect(redirect_url)
 
