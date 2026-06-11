@@ -4,7 +4,7 @@ from collections import Counter
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Count, Q, Sum
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.cache import cache_page
 
 from coldfront.core.allocation.models import Allocation, AllocationUser
@@ -45,7 +45,9 @@ def home(request):
         except AttributeError:
             pass
     else:
-        template_name = 'portal/nonauthorized_home.html'
+        # TODO get non-authenticated home page content from settings or a plugin
+        redirect_url = settings.LOGIN_URL + '?next=' + request.path
+        return redirect(redirect_url)
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
