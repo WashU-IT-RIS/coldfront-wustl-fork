@@ -46,8 +46,7 @@ def home(request):
             pass
     else:
         # TODO get non-authenticated home page url from settings or a plugin
-        redirect_url = settings.LOGIN_URL + '?next=' + request.path
-        return redirect(redirect_url)
+        template_name = 'user/login.html'
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
