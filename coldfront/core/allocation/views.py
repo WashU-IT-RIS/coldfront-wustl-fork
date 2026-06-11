@@ -131,7 +131,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         return user_history
     
     def _construct_user_change_history(self, acl_allocation: Allocation):
-        allocation_and_user_changes = []
+        user_changes = []
         acl_allocation_str = str(acl_allocation).lower()
         acl = ''
         if 'rw' in acl_allocation_str:
@@ -142,17 +142,14 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         for user_change in self._get_user_history(allocation=acl_allocation):
             action = user_change.get('change_type')
             
-            allocation_and_user_changes.append({
+            user_changes.append({
                 'created': user_change.get('date'),
                 'changed_by': user_change.get('changed_by'),
-                'attribute': 'Users in Allocation',
-                'previous_value': user_change.get('user') if action == 'Removed' else '',
-                'new_value': '' if action == 'Removed' else user_change.get('user'),
-                'status': user_change.get('status'),
-                'notes': f"{action}, {acl}",
-                'request_pk': None,
+                'operation': action,
+                'user': user_change.get('user'),
+                'user_type': acl,
             })
-        return allocation_and_user_changes
+        return user_changes
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -161,7 +158,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         acl_allocations = AclAllocations.get_access_allocations(allocation_obj)
         allocation_users = allocation_obj.allocationuser_set.exclude(
             status__name__in=['Removed']).order_by('user__username')
-        allocation_and_user_changes = []
+        user_changes = []
 
         # set visible usage attributes
         alloc_attr_set = allocation_obj.get_attribute_set(self.request.user)
@@ -194,29 +191,19 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         
         for acl_allocation in acl_allocations:
             user_history = self._construct_user_change_history(acl_allocation)
-            allocation_and_user_changes.extend(user_history)
+            user_changes.extend(user_history)
 
         for change_request in allocation_changes:
             change_request.previous_value = self._get_previous_value_for_change_request(change_request)
-            request_obj = change_request.allocation_change_request
-            allocation_and_user_changes.append({
-                'created': change_request.created,
-                'changed_by': request_obj.user,
-                'attribute': change_request.allocation_attribute,
-                'previous_value': change_request.previous_value,
-                'new_value': change_request.new_value,
-                'status': getattr(request_obj, 'status', None),
-                'notes': getattr(request_obj, 'notes', ''),
-                'request_pk': request_obj.pk,
-            })
+        context['allocation_changes'] = allocation_changes
 
-        allocation_and_user_changes = sorted(
-            allocation_and_user_changes,
+        user_changes = sorted(
+            user_changes,
             key=lambda entry: entry.get('created') or datetime.datetime.min,
             reverse=True,
         )
         
-        context['allocation_and_user_changes'] = allocation_and_user_changes
+        context['user_changes'] = user_changes
 
         # Can the user update the project?
         context['is_allowed_to_update_project'] = allocation_obj.project.has_perm(self.request.user, ProjectPermission.UPDATE)

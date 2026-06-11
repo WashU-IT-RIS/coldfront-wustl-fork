@@ -237,11 +237,11 @@ Allocation Detail
 <!-- Start Allocation Change Requests -->
 <div class="card mb-3">
   <div class="card-header">
-    <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> Allocation Change Requests</h3> <span class="badge badge-secondary">{{allocation_and_user_changes|length}}</span>
+    <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> Allocation Change Requests</h3> <span class="badge badge-secondary">{{allocation_changes|length}}</span>
   </div>
   
   <div class="card-body">
-    {% if allocation_and_user_changes %}
+    {% if allocation_changes %}
       <div class="table-responsive">
         <table id="allocation_change_table" class="table table-bordered table-sm">
           <thead>
@@ -257,31 +257,27 @@ Allocation Detail
             </tr>
           </thead>
           <tbody>
-            {% for change in allocation_and_user_changes %}
+            {% for change_request in allocation_changes %}
                 <tr>
-                  <td>{{ change.created|date:"M. d, Y" }}</td>
-                  <td>{{ change.changed_by }}</td>
-                  <td>{{ change.attribute }}</td>
-                  <td>{{ change.previous_value }}</td>
-                  <td>{{ change.new_value }}</td>
-                  {% if change.status.name == 'Approved' %}
-                    <td class="text-success">{{ change.status.name }}</td>
-                  {% elif change.status.name == 'Denied' %}
-                    <td class="text-danger">{{ change.status.name }}</td>
+                  <td>{{ change_request.created|date:"M. d, Y" }}</td>
+                  <td>{{ change_request.allocation_change_request.user }}</td>
+                  <td>{{ change_request.allocation_attribute}}</td>
+                  <td>{{ change_request.previous_value }}</td>
+                  <td>{{ change_request.new_value }}</td>
+                  {% if change_request.allocation_change_request.status.name == 'Approved' %}
+                    <td class="text-success">{{ change_request.allocation_change_request.status.name }}</td>
+                  {% elif change_request.allocation_change_request.status.name == 'Denied' %}
+                    <td class="text-danger">{{ change_request.allocation_change_request.status.name }}</td>
                   {% else %}
-                    <td class="text-info">{{ change.status.name }}</td>
+                    <td class="text-info">{{ change_request.allocation_change_request.status.name }}</td>
                   {% endif %}
                   </td>
-                  {% if change.notes %}
-                    <td>{{ change.notes }}</td>
+                  {% if change_request.allocation_change_request.notes %}
+                    <td>{{change_request.allocation_change_request.notes}}</td>
                   {% else %}
                     <td></td>
                   {% endif %}
-                  <td>
-                    {% if change.request_pk %}
-                      <a href="{% url 'allocation-change-detail' change.request_pk %}"><i class="far fa-edit" aria-hidden="true"></i><span class="sr-only">Edit</span></a>
-                    {% endif %}
-                  </td>
+                  <td><a href="{% url 'allocation-change-detail' change_request.allocation_change_request.pk %}"><i class="far fa-edit" aria-hidden="true"></i><span class="sr-only">Edit</span></a></td>
                 </tr>
             {% endfor %}
           </tbody>
@@ -345,6 +341,46 @@ Allocation Detail
         </tbody>
       </table>
     </div>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> User Changes </h3> <span class="badge badge-secondary">{{user_changes|length}}</span>
+  </div>
+  
+  <div class="card-body">
+    {% if user_changes %}
+      <div class="table-responsive">
+        <table id="allocation_change_table" class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Date Requested</th>
+              <th scope="col">Changed By</th>
+              <th scope="col">Operation</th>
+              <th scope="col">User</th>
+              <th scope="col">User Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in user_changes %}
+                <tr>
+                  <td>{{ user.created|date:"M. d, Y" }}</td>
+                  <td>{{ user.changed_by }}</td>
+                  <td>{{ user.operation }}</td>
+                  <td>{{ user.user }}</td>
+                  <td>{{ user.user_type }}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle" aria-hidden="true"></i>
+         There are no allocation changes to display.
+      </div>
+    {% endif %}
   </div>
 </div>
 
