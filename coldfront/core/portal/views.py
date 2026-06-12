@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Count, Q, Sum
 from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.views.decorators.cache import cache_page
 
 from coldfront.core.allocation.models import Allocation, AllocationUser
@@ -46,7 +47,7 @@ def home(request):
             pass
     else:
         # TODO get non-authenticated home page url from settings or a plugin
-        template_name = 'user/login.html'
+        return redirect(reverse_lazy('login'))
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
