@@ -115,6 +115,7 @@ class TestAddMembersToADGroup(TestCase):
                 datetime_now,
                 [],
                 ["foo", "bar"],
+                None,
             )
 
     def test_appends_good_user_list_on_valid_user(
@@ -165,6 +166,7 @@ class TestAddMembersToADGroup(TestCase):
                     }
                 ],
                 ["bar"],
+                None,
             )
 
     def test_appends_good_group_with_is_group(
@@ -215,6 +217,7 @@ class TestAddMembersToADGroup(TestCase):
                     }
                 ],
                 [],
+                None,
             ),
 
     @patch("coldfront.plugins.qumulo.tasks.send_email_template")
