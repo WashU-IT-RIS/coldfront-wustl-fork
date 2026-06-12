@@ -40,3 +40,6 @@ if 'django_su.backends.SuBackend' in settings.AUTHENTICATION_BACKENDS:
     
 if 'coldfront.plugins.qumulo' in settings.INSTALLED_APPS:
     urlpatterns.append(path('qumulo/', include('coldfront.plugins.qumulo.urls'), name='qumulo'))
+
+if 'coldfront.plugins.reporting' in settings.INSTALLED_APPS:
+    urlpatterns.append(path('reporting/', include('coldfront.plugins.reporting.urls'), name='reporting'))
