@@ -106,7 +106,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         if history.exists():
             return history.first().value
         return None
-    
+
     def _get_user_history(self, allocation):
         history = AllocationUser.history.filter(allocation=allocation).order_by('-history_date')
 
@@ -130,6 +130,75 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             })
         return user_history
     
+    def _is_active_allocation_user_status(self, status_obj):
+        if status_obj is None:
+            return False
+        return status_obj.name not in ['Removed', 'Error']
+
+    def _get_usernames_from_history(self, history_records):
+        users = set()
+
+        for record in history_records:
+            record_user = getattr(record, 'user', None)
+            username = record_user.username if record_user else None
+            if not username:
+                continue
+
+            if record.history_type == '-':
+                users.discard(username)
+            elif self._is_active_allocation_user_status(record.status):
+                users.add(username)
+            else:
+                users.discard(username)
+
+        return sorted(users)
+
+    def _get_previous_users_for_change(self, record, acl_allocation: Allocation):
+        record_date = getattr(record, 'history_date', None)
+        if record_date is None and isinstance(record, dict):
+            record_date = record.get('date')
+
+        record_history_id = getattr(record, 'history_id', None)
+
+        previous_history = AllocationUser.history.filter(allocation=acl_allocation)
+
+        if record_date is not None and record_history_id is not None:
+            previous_history = previous_history.filter(
+                Q(history_date__lt=record_date) |
+                (Q(history_date=record_date) & Q(history_id__lt=record_history_id))
+            )
+        elif record_date is not None:
+            previous_history = previous_history.filter(history_date__lt=record_date)
+        else:
+            previous_history = previous_history.none()
+
+        previous_history = previous_history.order_by('history_date', 'history_id')
+
+        return self._get_usernames_from_history(previous_history)
+
+    def _get_current_users_for_change(self, record, acl_allocation: Allocation):
+        record_date = getattr(record, 'history_date', None)
+        if record_date is None and isinstance(record, dict):
+            record_date = record.get('date')
+
+        record_history_id = getattr(record, 'history_id', None)
+
+        current_history = AllocationUser.history.filter(allocation=acl_allocation)
+
+        if record_date is not None and record_history_id is not None:
+            current_history = current_history.filter(
+                Q(history_date__lt=record_date) |
+                (Q(history_date=record_date) & Q(history_id__lte=record_history_id))
+            )
+        elif record_date is not None:
+            current_history = current_history.filter(history_date__lte=record_date)
+        else:
+            current_history = current_history.none()
+
+        current_history = current_history.order_by('history_date', 'history_id')
+
+        return self._get_usernames_from_history(current_history)
+    
     def _construct_user_change_history(self, acl_allocation: Allocation):
         user_changes = []
         user_type = acl_allocation.resources.get(resource_type__name="ACL").name
@@ -143,8 +212,11 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
                 'operation': action,
                 'user': user_change.get('user'),
                 'user_type': user_type,
+                'previous_users': self._get_previous_users_for_change(user_change, acl_allocation),
+                'current_users': self._get_current_users_for_change(user_change,acl_allocation),
             })
         return user_changes
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

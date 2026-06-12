@@ -362,7 +362,7 @@ Allocation Detail
               <th scope="col">User</th>
               <th scope="col">User Type</th>
               <th scope="col">Previous User List</th>
-              <th scope="col">New User List</th>
+              <th scope="col">Current User List</th>
             </tr>
           </thead>
           <tbody>
@@ -373,8 +373,8 @@ Allocation Detail
                   <td>{{ user.operation }}</td>
                   <td>{{ user.user }}</td>
                   <td>{{ user.user_type }}</td>
-                  <td>Previous</td>
-                  <td>New</td>
+                  <td>{{ user.previous_users }}</td>
+                  <td>{{ user.current_users }}</td>
                 </tr>
             {% endfor %}
           </tbody>
