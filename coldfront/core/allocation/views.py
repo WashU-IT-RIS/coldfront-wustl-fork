@@ -132,12 +132,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
     
     def _construct_user_change_history(self, acl_allocation: Allocation):
         user_changes = []
-        acl_allocation_str = str(acl_allocation).lower()
-        acl = ''
-        if 'rw' in acl_allocation_str:
-            acl = 'rw'
-        elif 'ro' in acl_allocation_str:
-            acl = 'ro'
+        user_type = acl_allocation.resources.get(resource_type__name="ACL").name
 
         for user_change in self._get_user_history(allocation=acl_allocation):
             action = user_change.get('change_type')
@@ -147,7 +142,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
                 'changed_by': user_change.get('changed_by'),
                 'operation': action,
                 'user': user_change.get('user'),
-                'user_type': acl,
+                'user_type': user_type,
             })
         return user_changes
 
