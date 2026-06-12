@@ -47,7 +47,9 @@ def home(request):
             pass
     else:
         # TODO get non-authenticated home page url from settings or a plugin
-        return render(request, 'login.html')
+        # template_name = 'qumulo/home.html'
+        # template_name = 'portal/nonauthorized_home.html'
+        template_name = 'user/login.html'
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
