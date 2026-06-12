@@ -47,7 +47,7 @@ def home(request):
             pass
     else:
         # TODO get non-authenticated home page url from settings or a plugin
-        return redirect(reverse_lazy('login'))
+        return render(request, 'login.html')
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
