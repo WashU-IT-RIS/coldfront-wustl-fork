@@ -154,11 +154,8 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         return sorted(users)
 
     def _get_previous_users_for_change(self, record, acl_allocation: Allocation):
-        record_date = getattr(record, 'history_date', None)
-        if record_date is None and isinstance(record, dict):
-            record_date = record.get('date')
-
-        record_history_id = getattr(record, 'history_id', None)
+        record_date = record.get('date')
+        record_history_id = record.get('history_id')
 
         previous_history = AllocationUser.history.filter(allocation=acl_allocation)
 
@@ -177,11 +174,8 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         return self._get_usernames_from_history(previous_history)
 
     def _get_current_users_for_change(self, record, acl_allocation: Allocation):
-        record_date = getattr(record, 'history_date', None)
-        if record_date is None and isinstance(record, dict):
-            record_date = record.get('date')
-
-        record_history_id = getattr(record, 'history_id', None)
+        record_date = record.get('date')
+        record_history_id = record.get('history_id')
 
         current_history = AllocationUser.history.filter(allocation=acl_allocation)
 
