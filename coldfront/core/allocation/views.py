@@ -155,42 +155,12 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
 
     def _get_previous_users_for_change(self, record, acl_allocation: Allocation):
         record_date = record.get('date')
-        record_history_id = record.get('history_id')
-
-        previous_history = AllocationUser.history.filter(allocation=acl_allocation)
-
-        if record_date is not None and record_history_id is not None:
-            previous_history = previous_history.filter(
-                Q(history_date__lt=record_date) |
-                (Q(history_date=record_date) & Q(history_id__lt=record_history_id))
-            )
-        elif record_date is not None:
-            previous_history = previous_history.filter(history_date__lt=record_date)
-        else:
-            previous_history = previous_history.none()
-
-        previous_history = previous_history.order_by('history_date', 'history_id')
-
+        previous_history = AllocationUser.history.filter(allocation=acl_allocation,history_date__lt=record_date).order_by('history_date', 'history_id')
         return self._get_usernames_from_history(previous_history)
 
     def _get_current_users_for_change(self, record, acl_allocation: Allocation):
         record_date = record.get('date')
-        record_history_id = record.get('history_id')
-
-        current_history = AllocationUser.history.filter(allocation=acl_allocation)
-
-        if record_date is not None and record_history_id is not None:
-            current_history = current_history.filter(
-                Q(history_date__lt=record_date) |
-                (Q(history_date=record_date) & Q(history_id__lte=record_history_id))
-            )
-        elif record_date is not None:
-            current_history = current_history.filter(history_date__lte=record_date)
-        else:
-            current_history = current_history.none()
-
-        current_history = current_history.order_by('history_date', 'history_id')
-
+        current_history = AllocationUser.history.filter(allocation=acl_allocation,history_date__lte=record_date).order_by('history_date', 'history_id')
         return self._get_usernames_from_history(current_history)
     
     def _construct_user_change_history(self, acl_allocation: Allocation):
