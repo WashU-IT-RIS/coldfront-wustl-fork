@@ -29,7 +29,7 @@ class UserAccessManagementView(LoginRequiredMixin, TemplateView):
                     "ro",
                     ro_users,
                     allocation,
-                    request.user,
+                    self.request.user.id,
                 )
             if len(rw_users) > 0:
                 async_task(
@@ -37,7 +37,7 @@ class UserAccessManagementView(LoginRequiredMixin, TemplateView):
                     "rw",
                     rw_users,
                     allocation,
-                    request.user,
+                    self.request.user.id,
                 )
 
         return HttpResponse()
