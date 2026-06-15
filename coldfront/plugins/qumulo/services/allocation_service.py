@@ -353,5 +353,5 @@ class AllocationService:
         users_to_add = list(set(access_users) - set(allocation_usernames))
         create_group_time = datetime.now()
         async_task(
-            addMembersToADGroup, users_to_add, access_allocation, create_group_time
+            addMembersToADGroup, users_to_add, access_allocation, create_group_time, actor_user_id
         )
