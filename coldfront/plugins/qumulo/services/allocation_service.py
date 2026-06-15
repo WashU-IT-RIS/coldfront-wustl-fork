@@ -339,7 +339,7 @@ class AllocationService:
 
     @staticmethod
     def add_access_users(
-        access_key: str, access_users: list[str], storage_allocation: Allocation
+        access_key: str, access_users: list[str], storage_allocation: Allocation, actor_user_id: Optional[int] = None,
     ):
         access_allocation = AclAllocations.get_access_allocation(
             storage_allocation, access_key
