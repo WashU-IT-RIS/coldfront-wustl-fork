@@ -224,13 +224,14 @@ class UpdateAllocationView(AllocationView):
 
         # RW and RO users are not handled via an AllocationChangeRequest
         access_keys = ["rw", "ro"]
+        context_data = self.get_context_data()
         for key in access_keys:
             access_users = form_data[key + "_users"]
             self.set_access_users(
                 key,
                 access_users,
                 allocation,
-                actor_user_id=self.request.user.id,
+                context=context_data,
             )
 
         # needed for redirect logic to work
@@ -241,7 +242,7 @@ class UpdateAllocationView(AllocationView):
         access_key: str,
         access_users: list[str],
         storage_allocation: Allocation,
-        actor_user_id: Optional[int] = None,
+        context,
     ):
         active_directory_api = ActiveDirectoryAPI()
 
@@ -262,7 +263,7 @@ class UpdateAllocationView(AllocationView):
             users_to_add,
             access_allocation,
             create_group_time,
-            actor_user_id,
+            context,
         )
 
         users_to_remove = set(allocation_usernames) - set(access_users)
