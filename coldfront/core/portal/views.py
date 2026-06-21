@@ -23,7 +23,7 @@ def home(request):
 
     context = {}
     context["EXTRA_APPS"] = settings.INSTALLED_APPS
-    
+
     if request.user.is_authenticated:
         template_name = 'portal/authorized_home.html'
         project_list = Project.objects.filter(
@@ -49,7 +49,9 @@ def home(request):
             pass
     else:
         # template_name = 'portal/nonauthorized_home.html'
-        return redirect("login")
+        # return redirect("login")
+        redirect_url = reverse('login') + '?next=' + reverse('home')
+        return redirect(redirect_url)
 
     # context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
