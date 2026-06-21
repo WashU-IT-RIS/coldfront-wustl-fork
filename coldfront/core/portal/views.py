@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Count, Q, Sum
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views.decorators.cache import cache_page
 
 from coldfront.core.allocation.models import Allocation, AllocationUser
@@ -21,6 +22,8 @@ from coldfront.core.research_output.models import ResearchOutput
 def home(request):
 
     context = {}
+    context["EXTRA_APPS"] = settings.INSTALLED_APPS
+    
     if request.user.is_authenticated:
         template_name = 'portal/authorized_home.html'
         project_list = Project.objects.filter(
@@ -45,13 +48,10 @@ def home(request):
         except AttributeError:
             pass
     else:
-        # TODO get non-authenticated home page url from settings or a plugin
-        # template_name = 'qumulo/home.html'
         # template_name = 'portal/nonauthorized_home.html'
-        # template_name = 'user/login.html'
-        return redirect('login')
+        return redirect("login")
 
-    context['EXTRA_APPS'] = settings.INSTALLED_APPS
+    # context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
     if 'coldfront.plugins.system_monitor' in settings.INSTALLED_APPS:
         from coldfront.plugins.system_monitor.utils import get_system_monitor_context
