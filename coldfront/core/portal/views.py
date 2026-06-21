@@ -50,7 +50,7 @@ def home(request):
     else:
         # template_name = 'portal/nonauthorized_home.html'
         # return redirect("login")
-        redirect_url = reverse('login') + '?next=' + reverse('home')
+        redirect_url = f"{reverse('login')}?next={reverse('home')}"
         return redirect(redirect_url)
 
     # context['EXTRA_APPS'] = settings.INSTALLED_APPS
