@@ -49,7 +49,6 @@ def home(request):
     else:
         # template_name = 'portal/nonauthorized_home.html'
         template_name = 'user/login.html'
-        context['next'] = reverse('portal:home')
         context['form'] = None
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
