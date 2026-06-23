@@ -48,8 +48,8 @@ def home(request):
             pass
     else:
         # template_name = 'portal/nonauthorized_home.html'
-        template_name = 'user/login.html'
-        context['form'] = None
+        template_name = settings.LOGIN_URL
+
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
