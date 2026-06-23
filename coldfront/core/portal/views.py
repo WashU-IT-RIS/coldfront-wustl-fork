@@ -46,9 +46,8 @@ def home(request):
             context['ondemand_url'] = settings.ONDEMAND_URL
         except AttributeError:
             pass
-    else:
-        # template_name = 'portal/nonauthorized_home.html'
-        template_name = settings.LOGIN_URL
+    else:  
+        return redirect('user:login')
 
 
     context['EXTRA_APPS'] = settings.INSTALLED_APPS
