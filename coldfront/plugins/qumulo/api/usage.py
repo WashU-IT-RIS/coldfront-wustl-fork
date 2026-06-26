@@ -10,6 +10,8 @@ from coldfront.core.allocation.models import Allocation, AllocationAttributeUsag
 class Usage(LoginRequiredMixin, View):
     def get(self, request: HttpRequest, *args, **kwargs):
         allocation_id_str = request.GET.get("allocation_id", "")
+        start_date_str = request.GET.get("start_date", "")
+        start_date = datetime.date.fromisoformat(start_date_str) if start_date_str != "" else None
         date_str = request.GET.get("date", datetime.date.today().isoformat())
         date = datetime.date.fromisoformat(date_str)
 
@@ -39,6 +41,9 @@ class Usage(LoginRequiredMixin, View):
             else:
                 new_month = current_month - i + 12
                 working_date = date.replace(day=1, month=new_month, year=date.year - 1)
+                
+            if isinstance(start_date, datetime.date) and start_date > working_date:
+              break        
 
             working_usage: AllocationAttributeUsage = (
                 AllocationAttributeUsage.history.as_of(working_date)
