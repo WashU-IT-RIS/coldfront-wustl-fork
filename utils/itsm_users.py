@@ -87,7 +87,9 @@ for service in service_data:
             if resolved_id['id_is_user']:
                 storage_users.add(uid)
             elif resolved_id['id_is_group']:
-                storage_users.update(resolved_id['data'])
+                storage_users.update(
+                    ad_utils._process_group_members(list(resolved_id['data']))
+                )
             else:
                 print(f'WARNING: skipping non-user, non-group ID: {uid}')
     # Examples:
