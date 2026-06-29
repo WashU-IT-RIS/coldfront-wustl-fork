@@ -13,7 +13,7 @@ class Usage(LoginRequiredMixin, View):
         allocation_id_str = request.GET.get("allocation_id", "")
         
         start_date_str = request.GET.get("start_date", "")
-        start_datetime = date.fromisoformat(start_date_str + eod) if start_date_str != "" else None
+        start_datetime = datetime.fromisoformat(start_date_str + eod) if start_date_str != "" else None
         
         end_date_str = request.GET.get("end_date", date.today().isoformat())
         end_datetime = datetime.fromisoformat(end_date_str + eod)
