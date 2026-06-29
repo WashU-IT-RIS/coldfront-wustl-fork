@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date, datetime
 import pprint
 from random import random
 
@@ -82,28 +82,28 @@ class TestUsageGet(TestCase):
         self.assertEqual(content["quota"], expected_quota_tib * 1024)
         self.assertListEqual(content["usage"], [{"date": date.today().isoformat() , 'usage': expected_usage}])
 
-    # def test_returns_usage_for_specific_date(self) -> None:
-    #     expected_quota_tib = 5
-    #     current_usage_gib = 3.25 * 1024
-    #     expected_usage_gib = 2.6 * 1024
-    #     specific_date = "2025-01-01"
+    def test_returns_usage_for_specific_date(self) -> None:
+        expected_quota_tib = 5
+        current_usage_gib = 3.25 * 1024
+        expected_usage_gib = 2.6 * 1024
+        specific_date = "2025-01-01"
 
-    #     (storage_allocation, usage_object) = _create_allocation_with_usage(
-    #         expected_quota_tib, current_usage_gib
-    #     )
+        (storage_allocation, usage_object) = _create_allocation_with_usage(
+            expected_quota_tib, current_usage_gib
+        )
 
-    #     usage_object.value = expected_usage_gib * 2**30
-    #     usage_object._history_date = date.fromisoformat(specific_date)
-    #     usage_object.save()
+        usage_object.value = expected_usage_gib * 2**30
+        usage_object._history_date = datetime.fromisoformat(specific_date+"T00:00:00+00:00")
+        usage_object.save()
 
-    #     self.request.GET.update({"allocation_id": storage_allocation.pk, "end_date": specific_date})
-    #     response = self.usage.get(self.request)
-    #     content = json.loads(response.content)
+        self.request.GET.update({"allocation_id": storage_allocation.pk, "end_date": specific_date})
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
 
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(content["allocation_id"], storage_allocation.pk)
-    #     self.assertEqual(content["quota"], expected_quota_tib * 1024)
-    #     self.assertEqual(content["usage"][0]["usage"], expected_usage_gib)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertEqual(content["quota"], expected_quota_tib * 1024)
+        self.assertEqual(content["usage"][0]["usage"], expected_usage_gib)
 
     # def test_returns_monthly_list_by_year(self) -> None:
     #     expected_quota_tib = 5
