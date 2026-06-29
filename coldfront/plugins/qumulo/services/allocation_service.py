@@ -339,7 +339,7 @@ class AllocationService:
 
     @staticmethod
     def add_access_users(
-        access_key: str, access_users: list[str], storage_allocation: Allocation,
+        access_key: str, access_users: list[str], storage_allocation: Allocation, actor_user_id: Optional[int] = None,
     ):
         access_allocation = AclAllocations.get_access_allocation(
             storage_allocation, access_key
@@ -352,4 +352,4 @@ class AllocationService:
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
         create_group_time = datetime.now()
-        async_task(addMembersToADGroup, users_to_add, access_allocation, create_group_time)
+        async_task(addMembersToADGroup, users_to_add, access_allocation, create_group_time, actor_user_id)

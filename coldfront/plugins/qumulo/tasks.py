@@ -135,7 +135,7 @@ def addMembersToADGroup(
     wustlkeys: list[str],
     acl_allocation: Allocation,
     create_group_time: datetime,
-    context: Optional[dict] = None,
+    actor_user_id: int = None,
 ) -> None:
     bad_keys = []
     good_members = []
@@ -170,7 +170,7 @@ def addMembersToADGroup(
         create_group_time,
         good_members,
         bad_keys,
-        context,
+        actor_user_id,
     )
 
 
@@ -187,7 +187,7 @@ def __add_members_and_handle_errors(
     create_group_time: datetime,
     good_members: list[dict],
     bad_keys: list[str],
-    context: Optional[dict] = None,
+    actor_user_id: int = None,
 ) -> None:
     active_directory_api = ActiveDirectoryAPI()
     group_name = acl_allocation.get_attribute("storage_acl_name")
@@ -220,6 +220,7 @@ def __add_members_and_handle_errors(
                 member["wustlkey"],
                 acl_allocation,
                 member["is_group"],
+                history_user_id=actor_user_id,
             )
     if len(bad_keys) > 0:
         __send_invalid_users_email(acl_allocation, bad_keys)
