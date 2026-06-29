@@ -102,7 +102,15 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
                 member_wustlkey = member_data.get('attributes', {}) \
                                     .get('sAMAccountName')
                 if member_wustlkey:
-                    group_members.add(member_wustlkey)
+                    resolved_member = self.resolve_id(member_wustlkey)
+                    if resolved_member['id_is_user']:
+                        group_members.add(member_wustlkey)
+                    elif resolved_member['id_is_group']:
+                        group_members.update(
+                            self._process_group_members(
+                                list(resolved_member['data'])
+                            )
+                        )
         return group_members
 
     def resolve_id(self, identifier):
