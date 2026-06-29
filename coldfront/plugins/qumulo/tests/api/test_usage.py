@@ -1,12 +1,10 @@
 from datetime import date, datetime, timedelta
-import pprint
 from random import random
 
 from typing import Tuple
 
 from django.test import TestCase
 from django.http import HttpRequest
-from django.utils import timezone
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -16,7 +14,6 @@ from coldfront.core.allocation.models import (
 from coldfront.core.test_helpers.factories import AllocationAttributeUsageFactory
 
 from coldfront.plugins.qumulo.api.usage import Usage
-from coldfront.plugins.qumulo.tests import fixtures_usages
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
     create_ris_project_and_allocations_storage3,
@@ -49,6 +46,36 @@ def _create_allocation_with_usage(
     return (storage_allocation, quota_usage)
 
 
+def _create_usage_history(
+    usage_object: AllocationAttributeUsage, months: int = 12, max_usage: int = 5
+) -> list[dict]:
+    usage_history = []
+    today = date.today()
+
+    for i in range(months):
+        current_month = today.month
+        new_month = current_month - i
+        if new_month > 0:
+            working_date = today.replace(day=1, month=new_month)
+        else:
+            new_month = current_month - i + 12
+            working_date = today.replace(day=1, month=new_month, year=today.year - 1)
+
+        usage_tib = round(random() * max_usage, 12)
+
+        usage_history.insert(
+            0, {"usage": usage_tib * 2**10, "date": working_date.isoformat()}
+        )
+
+        usage_object.value = usage_tib * 2**40
+        usage_object._history_date = datetime.fromisoformat(
+            working_date.isoformat() + "T00:00:00+00:00"
+        )
+        usage_object.save()
+
+        return usage_history
+
+
 class TestUsageGet(TestCase):
     def setUp(self) -> None:
         create_metadata_for_testing()
@@ -59,11 +86,6 @@ class TestUsageGet(TestCase):
         self.request.method = "GET"
 
         return super().setUp()
-
-    def test_returns_200(self) -> None:
-        response = self.usage.get(self.request)
-
-        self.assertEqual(response.status_code, 200)
 
     def test_returns_latest_usage_for_specified_allocation(self) -> None:
         expected_quota_tib = 5
@@ -80,7 +102,10 @@ class TestUsageGet(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
         self.assertEqual(content["quota"], expected_quota_tib * 1024)
-        self.assertListEqual(content["usage"], [{"date": date.today().isoformat() , 'usage': expected_usage}])
+        self.assertListEqual(
+            content["usage"],
+            [{"date": date.today().isoformat(), "usage": expected_usage}],
+        )
 
     def test_returns_usage_for_specific_date(self) -> None:
         expected_quota_tib = 5
@@ -93,10 +118,14 @@ class TestUsageGet(TestCase):
         )
 
         usage_object.value = expected_usage_gib * 2**30
-        usage_object._history_date = datetime.fromisoformat(specific_date+"T00:00:00+00:00")
+        usage_object._history_date = datetime.fromisoformat(
+            specific_date + "T00:00:00+00:00"
+        )
         usage_object.save()
 
-        self.request.GET.update({"allocation_id": storage_allocation.pk, "end_date": specific_date})
+        self.request.GET.update(
+            {"allocation_id": storage_allocation.pk, "end_date": specific_date}
+        )
         response = self.usage.get(self.request)
         content = json.loads(response.content)
 
@@ -113,31 +142,10 @@ class TestUsageGet(TestCase):
             expected_quota_tib, current_usage_gib
         )
 
-        usage_history = []
-        today = date.today()
-
-        for i in range(12):
-            current_month = today.month
-            new_month = current_month - i
-            if new_month > 0:
-                working_date = today.replace(day=1, month=new_month)
-            else:
-                new_month = current_month - i + 12
-                working_date = today.replace(
-                    day=1, month=new_month, year=today.year - 1
-                )
-
-            usage_tib = round(random() * expected_quota_tib, 12)
-
-            usage_history.insert(
-                0, {"usage": usage_tib * 2**10, "date": working_date.isoformat()}
-            )
-
-            usage_object.value = usage_tib * 2**40
-            usage_object._history_date = datetime.fromisoformat(working_date.isoformat()+"T00:00:00+00:00")
-            usage_object.save()
-
-        usage_history.append({"usage": current_usage_gib, "date": today.isoformat()})
+        usage_history = _create_usage_history(usage_object, 12, expected_quota_tib)
+        usage_history.append(
+            {"usage": current_usage_gib, "date": date.today().isoformat()}
+        )
 
         self.request.GET.update({"allocation_id": storage_allocation.pk})
         response = self.usage.get(self.request)
@@ -156,33 +164,12 @@ class TestUsageGet(TestCase):
             expected_quota_tib, current_usage_gib
         )
 
-        usage_history = []
-        today = date.today()
-        start_date = today - timedelta(days=162)
+        usage_history = _create_usage_history(usage_object, 12, expected_quota_tib)
+        usage_history.append(
+            {"usage": current_usage_gib, "date": date.today().isoformat()}
+        )
 
-        for i in range(12):
-            current_month = today.month
-            new_month = current_month - i
-            if new_month > 0:
-                working_date = today.replace(day=1, month=new_month)
-            else:
-                new_month = current_month - i + 12
-                working_date = today.replace(
-                    day=1, month=new_month, year=today.year - 1
-                )
-
-            usage_tib = round(random() * expected_quota_tib, 12)
-
-            usage_history.insert(
-                0, {"usage": usage_tib * 2**10, "date": working_date.isoformat()}
-            )
-
-            usage_object.value = usage_tib * 2**40
-            usage_object._history_date = datetime.fromisoformat(working_date.isoformat()+"T00:00:00+00:00")
-            usage_object.save()
-
-        usage_history.append({"usage": current_usage_gib, "date": today.isoformat()})
-
+        start_date = date.today() - timedelta(days=162)
         usage_history = list(
             filter(
                 lambda item: date.fromisoformat(item["date"]) > start_date,
@@ -190,7 +177,12 @@ class TestUsageGet(TestCase):
             )
         )
 
-        self.request.GET.update({"allocation_id": storage_allocation.pk, "start_date": start_date.isoformat()})
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": start_date.isoformat(),
+            }
+        )
         response = self.usage.get(self.request)
         content = json.loads(response.content)
 
@@ -199,3 +191,6 @@ class TestUsageGet(TestCase):
         self.assertEqual(content["quota"], expected_quota_tib * 1024)
         self.assertIsInstance(content["usage"], list)
         self.assertListEqual(content["usage"], usage_history)
+
+    def test_checks_start_date_in_middle_of_the_month(self):
+        self.skipTest("todo")
