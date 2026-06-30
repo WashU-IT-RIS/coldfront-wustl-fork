@@ -44,7 +44,7 @@ class Usage(LoginRequiredMixin, View):
             working_datetime = _minus_months(end_datetime, i)
 
             if isinstance(start_datetime, date) and start_datetime > working_datetime:
-                break
+                working_datetime = start_datetime
 
             working_usage: AllocationAttributeUsage = (
                 AllocationAttributeUsage.history.as_of(working_datetime)
@@ -64,6 +64,9 @@ class Usage(LoginRequiredMixin, View):
                     },
                 )
             else:
+                break
+
+            if working_datetime == start_datetime:
                 break
 
         return JsonResponse(
