@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 
 from django.http import JsonResponse, HttpRequest
 from django.views import View
@@ -7,27 +7,28 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from coldfront.core.allocation.models import Allocation, AllocationAttributeUsage
 
 EOD = "T23:59:59+00:00"
-HISTORY_LENGTH_MONTHS = 12
 
 
 class Usage(LoginRequiredMixin, View):
+
+    # queryparams: allocation_id, startdate, end_date
     def get(self, request: HttpRequest, *args, **kwargs):
         allocation_id_str = request.GET.get("allocation_id", "")
-
         start_date_str = request.GET.get("start_date", "")
-        start_datetime = (
-            datetime.fromisoformat(start_date_str + EOD)
-            if start_date_str != ""
-            else None
-        )
-
         end_date_str = request.GET.get("end_date", date.today().isoformat())
+
         end_datetime = datetime.fromisoformat(end_date_str + EOD)
+
+        if start_date_str != "":
+            start_datetime = datetime.fromisoformat(start_date_str + EOD)
+        else:
+            start_datetime = end_datetime - timedelta(days=365)
+            start_datetime.replace(day=1)
 
         allocation_id = int(allocation_id_str)
 
         allocation = Allocation.objects.get(pk=allocation_id)
-        quota: int = allocation.get_attribute("storage_quota") * 2**10
+        quota_gib: int = allocation.get_attribute("storage_quota") * 2**10
 
         usage_gib = []
         end_date_usage: AllocationAttributeUsage = (
@@ -40,8 +41,14 @@ class Usage(LoginRequiredMixin, View):
         )
         usage_gib.append({"date": end_date_str, "usage": end_date_usage.value / 2**30})
 
-        for i in range(HISTORY_LENGTH_MONTHS):
+        i = 0
+        working_datetime = end_datetime
+        while working_datetime > start_datetime:
             working_datetime = _minus_months(end_datetime, i)
+
+            if working_datetime == end_datetime:
+                i = i + 1
+                continue  # avoids issues when run on 1st of month
 
             if isinstance(start_datetime, date) and start_datetime > working_datetime:
                 working_datetime = start_datetime
@@ -66,13 +73,12 @@ class Usage(LoginRequiredMixin, View):
             else:
                 break
 
-            if working_datetime == start_datetime:
-                break
+            i = i + 1
 
         return JsonResponse(
             {
                 "allocation_id": allocation.pk,
-                "quota": quota,
+                "quota": quota_gib,
                 "usage": usage_gib,
             }
         )

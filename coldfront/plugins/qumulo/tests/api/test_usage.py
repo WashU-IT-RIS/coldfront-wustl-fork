@@ -1,7 +1,6 @@
 from datetime import date, datetime, timedelta
 from random import random
 
-from pprint import pprint
 from typing import Tuple
 
 from django.test import TestCase
@@ -56,11 +55,15 @@ def _create_usage_history(
     for i in range(months):
         current_month = today.month
         new_month = current_month - i
-        if new_month > 0:
-            working_date = today.replace(day=1, month=new_month)
-        else:
-            new_month = current_month - i + 12
-            working_date = today.replace(day=1, month=new_month, year=today.year - 1)
+
+        working_date = today.replace(day=1)
+        while new_month <= 0:
+            new_month = new_month + 12
+            working_date = working_date.replace(year=working_date.year - 1)
+        working_date = working_date.replace(month=new_month)
+
+        if working_date == today:
+            continue  # avoids issues when run on 1st of month
 
         usage_tib = round(random() * max_usage, 12)
 
@@ -242,6 +245,49 @@ class TestUsageGet(TestCase):
             {
                 "allocation_id": storage_allocation.pk,
                 "start_date": expected_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertEqual(content["quota"], expected_quota_tib * 1024)
+        self.assertIsInstance(content["usage"], list)
+        self.assertListEqual(content["usage"], usage_history)
+
+    def test_returns_start_time_older_than_one_year(self):
+        expected_quota_tib = 5
+        current_usage_gib = 4 * 1024
+        (storage_allocation, usage_object) = _create_allocation_with_usage(
+            expected_quota_tib, current_usage_gib
+        )
+
+        usage_history = _create_usage_history(usage_object, 36, expected_quota_tib)
+        usage_history.append(
+            {"usage": current_usage_gib, "date": date.today().isoformat()}
+        )
+
+        start_date = date.today() - timedelta(days=400)
+        working_history = []
+        has_succeeded = False
+        for index, history in enumerate(usage_history):
+            if date.fromisoformat(history["date"]) > start_date:
+                if not has_succeeded:
+                    working_history.append(
+                        {
+                            "date": start_date.isoformat(),
+                            "usage": usage_history[index - 1]["usage"],
+                        }
+                    )
+                    has_succeeded = True
+                working_history.append(history)
+        usage_history = working_history
+
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": start_date.isoformat(),
             }
         )
         response = self.usage.get(self.request)
