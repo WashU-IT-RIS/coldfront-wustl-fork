@@ -89,14 +89,14 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
     def _process_group_members(self, members):
         group_members = set()
         if type(members) == type(list()):
-            for member_dn in members:
+            for member_dn in set(members):
                 if not member_dn:
                     continue
                 member_data = None
                 try:
                     member_data = self.get_user_by_dn(member_dn)
                 except ValueError:
-                    pass
+                    member_data = None
                 if member_data is None:
                     continue
                 member_wustlkey = member_data.get('attributes', {}) \
