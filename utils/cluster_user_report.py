@@ -40,17 +40,23 @@ ap.add_argument(
 args = ap.parse_args()
 if args.service == 'all':
     for service_name, group_name in service_group_map.items():
-        group_members = subprocess.check_output([
+        group_members = subprocess.run(
+            [
+                'getent',
+                'group',
+                group_name
+            ],
+            capture_output=True
+        )
+else:
+    group_members = subprocess.run(
+        [
             'getent',
             'group',
-            group_name
-        ])
-else:
-    group_members = subprocess.check_output([
-        'getent',
-        'group',
-        service_group_map.get(args.service)
-    ])
+            service_group_map.get(args.service)
+        ],
+        capture_output=True
+    )
 # example "getent group storage" output:
 # storage:*:7151593:bmulligan,gunnar,ris-svc-sys-tester...
 group_list = str(group_members).rstrip('\n').split(':')[3].split(',')
@@ -63,7 +69,7 @@ if args.department is not False:
         dept = dept_user.get('attributes', {}).get('wustlEduHRPrimeDeptName')
         if uid:
             department_users.add(uid)
-for member in sorted(set(group_list)):
+for member in sorted(group_list):
     if args.department is False:
         print(member)
     elif member in department_users:
