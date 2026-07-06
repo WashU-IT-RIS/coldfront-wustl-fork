@@ -1,11 +1,22 @@
 #!/usr/bin/env python3
 
 import ldap3
+import smtplib
 import subprocess
 import sys
 
 from argparse import ArgumentParser
+from email.message import EmailMessage
 from utils.coldfront_ad_utils import ColdfrontAdUtils
+
+def generate_list(group_list, department, department_users):
+    output_list = []
+    for member in sorted(group_list):
+        if department is False:
+            output_list.append(f'{member}\n')
+        elif member in department_users:
+            output_list.append(f'{member}\n')
+    return output_list
 
 service_group_map = {
     'Compute1': 'compute',
@@ -69,6 +80,17 @@ if args.department is not False:
         dept = dept_user.get('attributes', {}).get('wustlEduHRPrimeDeptName')
         if uid:
             department_users.add(uid)
+msg = EmailMessage()
+msg['Subject'] = 'RIS User Report'
+msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
+msg['From'] = 'ris-svc-builder@wustl.edu'
+msg.preamble = msg.content = 'Here is the report you requested...'
+msg.add_attachment(
+    generate_list(group_list, args.department, department_users),
+    maintype='text',
+    subtype='plain',
+    filename='RIS-User-Report.csv'
+)
 for member in sorted(group_list):
     if args.department is False:
         print(member)
