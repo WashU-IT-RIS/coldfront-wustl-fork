@@ -7,24 +7,53 @@ from django.http import (
     HttpResponseNotFound,
 )
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.context_processors import auth
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from coldfront.core.allocation.models import Allocation, AllocationAttributeUsage
+from coldfront.core.user.models import User
 
-from pprint import pprint
 
 EOD = "T23:59:59+00:00"
 
 
-class AccessMixin(LoginRequiredMixin):
-    def dispatch(self, request, *args, **kwargs):
-        pprint(request.user)
-        pprint(auth(request))
-        return super().dispatch(request, *args, **kwargs)
+class AccessMixin(LoginRequiredMixin, UserPassesTestMixin):
+    # def dispatch(self, request, *args, **kwargs):
+    #     return super().dispatch(request, *args, **kwargs)
+
+    def test_func(self):
+        return self.request.user.is_superuser or self.request.user.is_staff
 
 
-class Usage(AccessMixin, View):
+class Usage(LoginRequiredMixin, UserPassesTestMixin, View):
+    def test_func(self):
+        user = self.request.user
+        if user.is_superuser or user.is_staff:
+            return True
+
+        allocation_pk = int(self.request.GET.get("allocation_id"))
+        allocation = Allocation.objects.get(pk=allocation_pk)
+        pi_pk = allocation.project.pi.pk
+
+        try:
+            billing_contact_pk = User.objects.get(
+                username=allocation.get_attribute("billing_contact")
+            ).pk
+        except User.DoesNotExist:
+            billing_contact_pk = None
+
+        try:
+            technical_contact_pk = User.objects.get(
+                username=allocation.get_attribute("technical_contact")
+            ).pk
+        except User.DoesNotExist:
+            technical_contact_pk = None
+
+        return (
+            user.pk == pi_pk
+            or user.pk == billing_contact_pk
+            or user.pk == technical_contact_pk
+        )
+
     # queryparams: allocation_id, startdate, end_date
     def get(self, request: HttpRequest, *args, **kwargs):
         allocation_id_str = request.GET.get("allocation_id", "")
