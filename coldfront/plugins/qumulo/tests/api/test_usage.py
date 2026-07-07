@@ -80,6 +80,35 @@ def _create_usage_history(
     return usage_history
 
 
+def _get_history_span(
+    usage_history: list[dict], start_day_delta: int, end_day_delta: int = 0
+):
+    start_date = date.today() - timedelta(days=start_day_delta)
+    end_date = date.today() - timedelta(days=end_day_delta)
+
+    working_history = []
+    has_succeeded = False
+    for index, history in enumerate(usage_history):
+        history_date = date.fromisoformat(history["date"])
+        if history_date >= start_date and history_date <= end_date:
+            if not has_succeeded:
+                working_history.append(
+                    {
+                        "date": start_date.isoformat(),
+                        "usage": usage_history[index - 1]["usage"],
+                    }
+                )
+                has_succeeded = True
+            working_history.append(history)
+
+    if working_history[-1]["date"] != end_date.isoformat():
+        working_history.append(
+            {"date": end_date.isoformat(), "usage": working_history[-1]["usage"]}
+        )
+
+    return (working_history, start_date, end_date)
+
+
 class TestUsageGet(TestCase):
     def setUp(self) -> None:
         create_metadata_for_testing()
@@ -173,21 +202,7 @@ class TestUsageGet(TestCase):
             {"usage": current_usage_gib, "date": date.today().isoformat()}
         )
 
-        start_date = date.today() - timedelta(days=162)
-        working_history = []
-        has_succeeded = False
-        for index, history in enumerate(usage_history):
-            if date.fromisoformat(history["date"]) > start_date:
-                if not has_succeeded:
-                    working_history.append(
-                        {
-                            "date": start_date.isoformat(),
-                            "usage": usage_history[index - 1]["usage"],
-                        }
-                    )
-                    has_succeeded = True
-                working_history.append(history)
-        usage_history = working_history
+        (expected_history, start_date, _) = _get_history_span(usage_history, 162)
 
         self.request.GET.update(
             {
@@ -202,7 +217,7 @@ class TestUsageGet(TestCase):
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
         self.assertEqual(content["quota"], expected_quota_tib * 1024)
         self.assertIsInstance(content["usage"], list)
-        self.assertListEqual(content["usage"], usage_history)
+        self.assertListEqual(content["usage"], expected_history)
 
     def test_checks_start_date_in_middle_of_the_month(self):
         expected_quota_tib = 5
@@ -234,7 +249,7 @@ class TestUsageGet(TestCase):
         usage_object.save()
 
         start_date = expected_date
-        usage_history = list(
+        expected_history = list(
             filter(
                 lambda item: date.fromisoformat(item["date"]) >= start_date,
                 usage_history,
@@ -254,7 +269,7 @@ class TestUsageGet(TestCase):
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
         self.assertEqual(content["quota"], expected_quota_tib * 1024)
         self.assertIsInstance(content["usage"], list)
-        self.assertListEqual(content["usage"], usage_history)
+        self.assertListEqual(content["usage"], expected_history)
 
     def test_returns_start_time_older_than_one_year(self):
         expected_quota_tib = 5
@@ -268,21 +283,7 @@ class TestUsageGet(TestCase):
             {"usage": current_usage_gib, "date": date.today().isoformat()}
         )
 
-        start_date = date.today() - timedelta(days=400)
-        working_history = []
-        has_succeeded = False
-        for index, history in enumerate(usage_history):
-            if date.fromisoformat(history["date"]) > start_date:
-                if not has_succeeded:
-                    working_history.append(
-                        {
-                            "date": start_date.isoformat(),
-                            "usage": usage_history[index - 1]["usage"],
-                        }
-                    )
-                    has_succeeded = True
-                working_history.append(history)
-        usage_history = working_history
+        (expected_history, start_date, _) = _get_history_span(usage_history, 400)
 
         self.request.GET.update(
             {
@@ -297,4 +298,68 @@ class TestUsageGet(TestCase):
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
         self.assertEqual(content["quota"], expected_quota_tib * 1024)
         self.assertIsInstance(content["usage"], list)
-        self.assertListEqual(content["usage"], usage_history)
+        self.assertListEqual(content["usage"], expected_history)
+
+    def test_does_not_provide_data_that_exceeds_history(self):
+        expected_quota_tib = 5
+        current_usage_gib = 4 * 1024
+        (storage_allocation, usage_object) = _create_allocation_with_usage(
+            expected_quota_tib, current_usage_gib
+        )
+
+        usage_history = _create_usage_history(usage_object, 6, expected_quota_tib)
+        usage_history.append(
+            {"usage": current_usage_gib, "date": date.today().isoformat()}
+        )
+
+        expected_history = usage_history
+        start_date = date.fromisoformat(expected_history[0]["date"]) - timedelta(
+            days=365
+        )
+
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": start_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertEqual(content["quota"], expected_quota_tib * 1024)
+        self.assertIsInstance(content["usage"], list)
+        self.assertListEqual(content["usage"], expected_history)
+
+    def test_returns_expected_with_start_and_end(self):
+        expected_quota_tib = 5
+        current_usage_gib = 4 * 1024
+        (storage_allocation, usage_object) = _create_allocation_with_usage(
+            expected_quota_tib, current_usage_gib
+        )
+
+        usage_history = _create_usage_history(usage_object, 36, expected_quota_tib)
+        usage_history.append(
+            {"usage": current_usage_gib, "date": date.today().isoformat()}
+        )
+
+        (expected_history, start_date, end_date) = _get_history_span(
+            usage_history, 365, 180
+        )
+
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertEqual(content["quota"], expected_quota_tib * 1024)
+        self.assertIsInstance(content["usage"], list)
+        self.assertListEqual(content["usage"], expected_history)
