@@ -300,6 +300,38 @@ class TestUsageGet(TestCase):
         self.assertIsInstance(content["usage"], list)
         self.assertListEqual(content["usage"], expected_history)
 
+    def test_returns_expected_with_start_and_end(self):
+        expected_quota_tib = 5
+        current_usage_gib = 4 * 1024
+        (storage_allocation, usage_object) = _create_allocation_with_usage(
+            expected_quota_tib, current_usage_gib
+        )
+
+        usage_history = _create_usage_history(usage_object, 36, expected_quota_tib)
+        usage_history.append(
+            {"usage": current_usage_gib, "date": date.today().isoformat()}
+        )
+
+        (expected_history, start_date, end_date) = _get_history_span(
+            usage_history, 365, 180
+        )
+
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertEqual(content["quota"], expected_quota_tib * 1024)
+        self.assertIsInstance(content["usage"], list)
+        self.assertListEqual(content["usage"], expected_history)
+
     def test_does_not_provide_data_that_exceeds_history(self):
         expected_quota_tib = 5
         current_usage_gib = 4 * 1024
@@ -332,7 +364,7 @@ class TestUsageGet(TestCase):
         self.assertIsInstance(content["usage"], list)
         self.assertListEqual(content["usage"], expected_history)
 
-    def test_returns_expected_with_start_and_end(self):
+    def test_returns_error_when_start_date_is_after_end_date(self):
         expected_quota_tib = 5
         current_usage_gib = 4 * 1024
         (storage_allocation, usage_object) = _create_allocation_with_usage(
@@ -351,15 +383,24 @@ class TestUsageGet(TestCase):
         self.request.GET.update(
             {
                 "allocation_id": storage_allocation.pk,
-                "start_date": start_date.isoformat(),
-                "end_date": end_date.isoformat(),
+                "start_date": end_date.isoformat(),
+                "end_date": start_date.isoformat(),
             }
         )
         response = self.usage.get(self.request)
-        content = json.loads(response.content)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertEqual(content["quota"], expected_quota_tib * 1024)
-        self.assertIsInstance(content["usage"], list)
-        self.assertListEqual(content["usage"], expected_history)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.content.decode(), "end_date must be later than start_date"
+        )
+
+    def test_returns_404_with_bad_allocation(self):
+        self.request.GET.update(
+            {
+                "allocation_id": 100,
+            }
+        )
+        response = self.usage.get(self.request)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.content.decode(), "allocation not found")

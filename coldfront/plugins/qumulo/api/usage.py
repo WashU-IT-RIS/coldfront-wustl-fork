@@ -1,6 +1,11 @@
 from datetime import date, datetime, timedelta
 
-from django.http import JsonResponse, HttpRequest
+from django.http import (
+    JsonResponse,
+    HttpRequest,
+    HttpResponseBadRequest,
+    HttpResponseNotFound,
+)
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -25,9 +30,17 @@ class Usage(LoginRequiredMixin, View):
             start_datetime = end_datetime - timedelta(days=365)
             start_datetime.replace(day=1)
 
+        if start_datetime > end_datetime:
+            return HttpResponseBadRequest(
+                content="end_date must be later than start_date"
+            )
+
         allocation_id = int(allocation_id_str)
 
-        allocation = Allocation.objects.get(pk=allocation_id)
+        try:
+            allocation = Allocation.objects.get(pk=allocation_id)
+        except Allocation.DoesNotExist:
+            return HttpResponseNotFound("allocation not found")
         quota_gib: int = allocation.get_attribute("storage_quota") * 2**10
 
         usage_gib = []
