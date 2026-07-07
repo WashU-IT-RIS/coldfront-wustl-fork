@@ -353,7 +353,7 @@ Allocation Detail
   <div class="card-body">
     {% if user_changes %}
       <div class="table-responsive">
-        <table id="allocation_change_table" class="table table-bordered table-sm">
+        <table id="user_change_table" class="table table-bordered table-sm">
           <thead>
             <tr>
               <th scope="col">Date Requested</th>
@@ -449,6 +449,15 @@ Allocation Detail
       }]
     });
     $('#allocationuser_table').DataTable({
+      'aoColumnDefs': [{
+        'bSortable': false,
+        'aTargets': ['nosort']
+      }]
+    });
+    $('#user_change_table').DataTable({
+      lengthMenu: [5, 10, 20, 50, 100],
+      "pageLength": 5,
+      "ordering": false,
       'aoColumnDefs': [{
         'bSortable': false,
         'aTargets': ['nosort']
