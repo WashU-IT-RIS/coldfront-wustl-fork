@@ -8,14 +8,23 @@ from django.http import (
 )
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.context_processors import auth
 
 from coldfront.core.allocation.models import Allocation, AllocationAttributeUsage
+
+from pprint import pprint
 
 EOD = "T23:59:59+00:00"
 
 
-class Usage(LoginRequiredMixin, View):
+class AccessMixin(LoginRequiredMixin):
+    def dispatch(self, request, *args, **kwargs):
+        pprint(request.user)
+        pprint(auth(request))
+        return super().dispatch(request, *args, **kwargs)
 
+
+class Usage(AccessMixin, View):
     # queryparams: allocation_id, startdate, end_date
     def get(self, request: HttpRequest, *args, **kwargs):
         allocation_id_str = request.GET.get("allocation_id", "")
