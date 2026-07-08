@@ -124,6 +124,9 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             return False
         return status_obj.name not in ['Removed', 'Error']
 
+    #Temporal order is guarenteed by the history_date and history_id ordering in the queryset, 
+    # so we can just iterate through the history and add/remove users from a set to get the current state of 
+    # users at any point in time.
     def _get_usernames_from_history(self, history_records):
         users = set()
 
