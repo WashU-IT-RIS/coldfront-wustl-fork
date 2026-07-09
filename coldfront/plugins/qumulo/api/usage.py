@@ -15,15 +15,6 @@ from coldfront.core.user.models import User
 
 EOD = "T23:59:59+00:00"
 
-
-class AccessMixin(LoginRequiredMixin, UserPassesTestMixin):
-    # def dispatch(self, request, *args, **kwargs):
-    #     return super().dispatch(request, *args, **kwargs)
-
-    def test_func(self):
-        return self.request.user.is_superuser or self.request.user.is_staff
-
-
 class Usage(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         user = self.request.user
