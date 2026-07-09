@@ -124,43 +124,36 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             return False
         return status_obj.name not in ['Removed', 'Error']
 
-    #Temporal order is guarenteed by the history_date and history_id ordering in the queryset, 
-    # so we can just iterate through the history and add/remove users from a set to get the current state of 
-    # users at any point in time.
-    def _get_usernames_from_history(self, history_records):
-        users = set()
-
-        for record in history_records:
-            record_user = getattr(record, 'user', None)
-            username = record_user.username
-            if not username:
-                continue
-
-            if record.history_type == '-':
-                users.discard(username)
-            elif self._is_active_allocation_user_status(record.status):
-                users.add(username)
-            else:
-                users.discard(username)
-
-        return sorted(users)
-
-    def get_previous_users_for_change(self, record, acl_allocation: Allocation):
-        record_date = record.history_date
-        previous_history = AllocationUser.history.filter(allocation=acl_allocation,history_date__lt=record_date).order_by('history_date', 'history_id')
-        return self._get_usernames_from_history(previous_history)
-
-    def _get_current_users_for_change(self, record, acl_allocation: Allocation):
-        record_date = record.history_date
-        history_at_time_of_change = AllocationUser.history.filter(allocation=acl_allocation,history_date__lte=record_date).order_by('history_date', 'history_id')
-        return self._get_usernames_from_history(history_at_time_of_change)
-    
     def _construct_user_change_history(self, acl_allocation: Allocation):
         user_changes = []
         user_type = acl_allocation.resources.get(resource_type__name="ACL").name
-        history = AllocationUser.history.filter(allocation=acl_allocation).order_by('-history_date')
+        history = AllocationUser.history.filter(allocation=acl_allocation).order_by('history_date', 'history_id')
+        
+        user_state_at_each_record = []
+        current_users = set()
+        
         for record in history:
-            if record.status and record.status.name in ['Removed', 'Error']:
+            previous_users = sorted(current_users.copy())
+            record_user = getattr(record, 'user', None)
+            username = record_user.username if record_user else None
+            
+            if username:
+                if record.history_type == '-':
+                    current_users.discard(username)
+                elif self._is_active_allocation_user_status(record.status):
+                    current_users.add(username)
+                else:
+                    current_users.discard(username)
+            
+            user_state_at_each_record.append({
+                'record': record,
+                'previous_users': previous_users,
+                'current_users': sorted(current_users.copy()),
+            })
+        
+        for state in reversed(user_state_at_each_record):
+            record = state['record']
+            if record.status and record.status.name == 'Error':
                 continue
             action = self._get_user_change_type(record)
             user_changes.append({
@@ -169,8 +162,8 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
                 'operation': action,
                 'user': record.user,
                 'user_type': user_type,
-                'previous_users': self.get_previous_users_for_change(record, acl_allocation),
-                'current_users': self._get_current_users_for_change(record,acl_allocation),
+                'previous_users': state['previous_users'],
+                'current_users': state['current_users'],
             })
         
         return user_changes
