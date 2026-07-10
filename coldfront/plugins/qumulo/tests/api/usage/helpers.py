@@ -14,6 +14,8 @@ from coldfront.plugins.qumulo.tests.fixtures import (
     create_ris_project_and_allocations_storage3,
 )
 
+from freezegun import freeze_time
+
 
 def create_allocation_with_usage(
     quota_tib: int = 5, usage_gib: float = 3.25
@@ -58,11 +60,9 @@ def create_usage_history(
             0, {"usage": usage_tib * 2**10, "date": working_date.isoformat()}
         )
 
-        usage_object.value = usage_tib * 2**40
-        usage_object._history_date = datetime.fromisoformat(
-            working_date.isoformat() + "T00:00:00+00:00"
-        )
-        usage_object.save()
+        with freeze_time(working_date):
+            usage_object.value = usage_tib * 2**40
+            usage_object.save()
 
     return usage_history
 
