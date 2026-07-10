@@ -15,6 +15,7 @@ from coldfront.core.user.models import User
 
 EOD = "T23:59:59+00:00"
 
+
 class Usage(LoginRequiredMixin, UserPassesTestMixin, View):
     def test_func(self):
         user = self.request.user

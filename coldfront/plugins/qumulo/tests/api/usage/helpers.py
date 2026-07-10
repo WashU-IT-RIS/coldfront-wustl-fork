@@ -42,18 +42,12 @@ def create_allocation_with_usage(
 def create_usage_history(
     usage_object: AllocationAttributeUsage, months: int = 12, max_usage: int = 5
 ) -> list[dict]:
+
     usage_history = []
     today = date.today()
 
-    for i in range(months):
-        current_month = today.month
-        new_month = current_month - i
-
-        working_date = today.replace(day=1)
-        while new_month <= 0:
-            new_month = new_month + 12
-            working_date = working_date.replace(year=working_date.year - 1)
-        working_date = working_date.replace(month=new_month)
+    for month_offset in range(months):
+        working_date = _adjust_month(today, month_offset)
 
         if working_date == today:
             continue  # avoids issues when run on 1st of month
@@ -71,6 +65,19 @@ def create_usage_history(
         usage_object.save()
 
     return usage_history
+
+
+def _adjust_month(in_date: date, month_offset: int) -> date:
+    current_month = in_date.month
+    new_month = current_month - month_offset
+
+    working_date = in_date.replace(day=1)
+    while new_month <= 0:
+        new_month = new_month + 12
+        working_date = working_date.replace(year=working_date.year - 1)
+    working_date = working_date.replace(month=new_month)
+
+    return working_date
 
 
 def get_history_span(
