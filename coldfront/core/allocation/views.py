@@ -156,15 +156,17 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             if record.status and record.status.name == 'Error':
                 continue
             action = self._get_user_change_type(record)
-            user_changes.append({
-                'created': record.created,
-                'changed_by': record.history_user,
-                'operation': action,
-                'user': record.user,
-                'user_type': user_type,
-                'previous_users': state['previous_users'],
-                'current_users': state['current_users'],
-            })
+            # Include all records with a user (history preserves user even for deletions)
+            if record.user:
+                user_changes.append({
+                    'created': record.created,
+                    'changed_by': record.history_user,
+                    'operation': action,
+                    'user': record.user,
+                    'user_type': user_type,
+                    'previous_users': state['previous_users'],
+                    'current_users': state['current_users'],
+                })
         
         return user_changes
 
