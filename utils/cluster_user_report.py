@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import ldap3
+import os
 import smtplib
 import subprocess
 import sys
