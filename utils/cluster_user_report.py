@@ -17,7 +17,7 @@ def generate_list(group_list, department, department_users):
             output_list += f'{member}\n'
         elif member in department_users:
             output_list += f'{member}\n'
-    return output_list
+    return bytes(output_list)
 
 service_group_map = {
     'Compute1': 'compute',
@@ -94,9 +94,9 @@ msg.add_attachment(
 )
 with smtplib.SMTP('smtp.ris.wustl.edu') as smtp:
     smtp.send(msg)
+sys.exit(0)
 # for member in sorted(group_list):
 #     if args.department is False:
 #         print(member)
 #     elif member in department_users:
 #         print(member)
-sys.exit(0)
