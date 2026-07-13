@@ -17,7 +17,7 @@ def generate_list(group_list, department, department_users):
             output_list += f'{member}\n'
         elif member in department_users:
             output_list += f'{member}\n'
-    return bytes(output_list)
+    return bytes(output_list, encoding='utf-8')
 
 service_group_map = {
     'Compute1': 'compute',
