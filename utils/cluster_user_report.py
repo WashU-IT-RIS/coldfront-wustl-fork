@@ -93,7 +93,7 @@ msg.add_attachment(
     filename='RIS-User-Report.csv'
 )
 with smtplib.SMTP('smtp.ris.wustl.edu') as smtp:
-    smtp.send(msg)
+    smtp.send_message(msg)
 sys.exit(0)
 # for member in sorted(group_list):
 #     if args.department is False:
