@@ -11,12 +11,12 @@ from email.message import EmailMessage
 from utils.coldfront_ad_utils import ColdfrontAdUtils
 
 def generate_list(group_list, department, department_users):
-    output_list = []
+    output_list = ''
     for member in sorted(group_list):
         if department is False:
-            output_list.append(f'{member}\n')
+            output_list += f'{member}\n'
         elif member in department_users:
-            output_list.append(f'{member}\n')
+            output_list += f'{member}\n'
     return output_list
 
 service_group_map = {
