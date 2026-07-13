@@ -91,9 +91,11 @@ msg.add_attachment(
     subtype='plain',
     filename='RIS-User-Report.csv'
 )
-for member in sorted(group_list):
-    if args.department is False:
-        print(member)
-    elif member in department_users:
-        print(member)
+with smtplib.SMTP('smtp.ris.wustl.edu') as smtp:
+    smtp.send(msg)
+# for member in sorted(group_list):
+#     if args.department is False:
+#         print(member)
+#     elif member in department_users:
+#         print(member)
 sys.exit(0)
