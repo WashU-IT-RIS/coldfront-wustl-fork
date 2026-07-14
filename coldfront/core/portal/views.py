@@ -4,7 +4,8 @@ from collections import Counter
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Count, Q, Sum
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views.decorators.cache import cache_page
 
 from coldfront.core.allocation.models import Allocation, AllocationUser
@@ -21,6 +22,9 @@ from coldfront.core.research_output.models import ResearchOutput
 def home(request):
 
     context = {}
+
+    context['EXTRA_APPS'] = settings.INSTALLED_APPS
+
     if request.user.is_authenticated:
         template_name = 'portal/authorized_home.html'
         project_list = Project.objects.filter(
@@ -44,10 +48,8 @@ def home(request):
             context['ondemand_url'] = settings.ONDEMAND_URL
         except AttributeError:
             pass
-    else:
-        template_name = 'portal/nonauthorized_home.html'
-
-    context['EXTRA_APPS'] = settings.INSTALLED_APPS
+    else:  
+        return redirect('user:login')
 
     if 'coldfront.plugins.system_monitor' in settings.INSTALLED_APPS:
         from coldfront.plugins.system_monitor.utils import get_system_monitor_context
