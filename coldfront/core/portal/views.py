@@ -23,6 +23,8 @@ def home(request):
 
     context = {}
 
+    context['EXTRA_APPS'] = settings.INSTALLED_APPS
+
     if request.user.is_authenticated:
         template_name = 'portal/authorized_home.html'
         project_list = Project.objects.filter(
@@ -48,9 +50,6 @@ def home(request):
             pass
     else:  
         return redirect('user:login')
-
-
-    context['EXTRA_APPS'] = settings.INSTALLED_APPS
 
     if 'coldfront.plugins.system_monitor' in settings.INSTALLED_APPS:
         from coldfront.plugins.system_monitor.utils import get_system_monitor_context
