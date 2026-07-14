@@ -7,5 +7,6 @@ export default defineConfig({
   publicDir: `${import.meta.dirname}/public/`,
   build: {
     emptyOutDir: true,
+    sourcemap: true,
   },
 });
