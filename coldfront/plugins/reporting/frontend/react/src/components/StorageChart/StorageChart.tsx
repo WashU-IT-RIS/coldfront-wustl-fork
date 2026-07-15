@@ -29,7 +29,7 @@ ChartJS.register(
 interface StorageChartProps {
   data: {
     usage: { x: string; y: number }[];
-    quota: { x: string; y: number }[];
+    quota: number;
   };
 }
 
@@ -53,6 +53,9 @@ function StorageChart({ data }: StorageChartProps) {
           date: chartjsAdapter,
         },
       },
+      y: {
+        min: 0,
+      },
     },
   };
 
@@ -64,12 +67,12 @@ function StorageChart({ data }: StorageChartProps) {
         borderColor: "rgb(88, 88, 255)",
         backgroundColor: "rgba(0, 0, 255, 0.5)",
       },
-      {
-        label: "Quota",
-        data: data.quota,
-        borderColor: "rgb(255, 99, 132)",
-        backgroundColor: "rgba(255, 99, 132, 0.5)",
-      },
+      // {
+      //   label: "Quota",
+      //   data: data.quota,
+      //   borderColor: "rgb(255, 99, 132)",
+      //   backgroundColor: "rgba(255, 99, 132, 0.5)",
+      // },
     ],
   };
 

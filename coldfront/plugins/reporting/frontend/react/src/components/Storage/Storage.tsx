@@ -1,39 +1,50 @@
-import { faker } from "@faker-js/faker";
+import { useEffect, useState } from "react";
+
 import StorageChart from "../StorageChart/StorageChart";
+import AllocationDropdown from "../AllocationDropdown/AllocationDropdown";
+
+import axios from "axios";
+
+type usageData = { date: string; usage: number }[];
 
 function Storage() {
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const [usage, setUsage] = useState([] as usageData);
+  const [quota, setQuota] = useState(0);
 
-  const data = {
-    usage: months.map((_, index) => ({
-      x: `2025-${index + 1}-${faker.number.int({ min: 1, max: 28 })}`,
-      y: faker.number.int({ min: 0, max: 1000 }),
-    })),
-    quota: months.map((_, index) => ({
-      x: `2025-${index + 1}-01`,
-      y: 1000,
-    })),
-  };
+  useEffect(() => {
+    getAllocationUsage().then(({ quota, usage }) => {
+      setQuota(quota);
+      setUsage(usage);
+    });
+  }, []);
 
   return (
     <>
       <h3>Storage Usage</h3>
-      <StorageChart data={data} />
+      <AllocationDropdown />
+      <StorageChart
+        data={{
+          usage: usage.map((element) => ({
+            x: element.date,
+            y: element.usage,
+          })),
+          quota,
+        }}
+      />
     </>
   );
+}
+
+async function getAllocationUsage() {
+  const response = await axios.get("/qumulo/api/usage", {
+    params: { allocation_id: 1 },
+  });
+
+  const { quota, usage } = response.data;
+  return { quota, usage } as {
+    quota: number;
+    usage: usageData;
+  };
 }
 
 export default Storage;
