@@ -10,7 +10,8 @@ from coldfront.plugins.qumulo.views import (
 )
 from coldfront.plugins.qumulo.api.allocations import Allocations
 from coldfront.plugins.qumulo.api.active_directory_members import ActiveDirectoryMembers
-from coldfront.plugins.qumulo.api.usage import Usage
+from coldfront.plugins.qumulo.api.usage.usage import Usage
+from coldfront.plugins.qumulo.api.usage.usage_allocations import UsageAllocations
 
 
 app_name = "qumulo"
@@ -48,4 +49,5 @@ urlpatterns = [
         name="getActiveDirectoryMembers",
     ),
     path("api/usage", Usage.as_view(), name="usage"),
+    path("api/usage/allocations", UsageAllocations.as_view(), name="usageAllocations")
 ]

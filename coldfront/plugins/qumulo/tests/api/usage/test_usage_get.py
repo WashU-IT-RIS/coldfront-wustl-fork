@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 from django.test import TestCase
 from django.http import HttpRequest
 
-from coldfront.plugins.qumulo.api.usage import Usage
+from coldfront.plugins.qumulo.api.usage.usage import Usage
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
 )
