@@ -47,6 +47,12 @@ function StorageChart({ data }: StorageChartProps) {
       tooltip: {
         filter: (toolTipItem) => toolTipItem.dataset.label === "Usage",
         callbacks: {
+          title: (tooltipItems) => {
+            return tooltipItems.map((tooltipItem) => {
+              const rawData = tooltipItem.raw as { x: string; y: number };
+              return new Date(rawData.x).toDateString();
+            });
+          },
           afterBody: (tooltipItems) => {
             return tooltipItems.map((tooltipItem) => {
               const rawData = tooltipItem.raw as { x: string; y: number };
