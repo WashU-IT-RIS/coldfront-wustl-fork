@@ -49,5 +49,5 @@ urlpatterns = [
         name="getActiveDirectoryMembers",
     ),
     path("api/usage", Usage.as_view(), name="usage"),
-    path("api/usage/allocations", UsageAllocations.as_view(), name="usageAllocations")
+    path("api/usage/allocations", UsageAllocations.as_view(), name="usageAllocations"),
 ]
