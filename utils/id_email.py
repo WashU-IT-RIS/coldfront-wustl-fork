@@ -13,5 +13,6 @@ from utils.coldfront_ad_utils import ColdfrontAdUtils
 cau = ColdfrontAdUtils()
 for line in sorted(set(sys.stdin.readlines())):
     for uid in line.split(':')[-1].split(','):
-        print(cau.get_user(uid))
+        uid_resp = cau.get_user(uid)
+        print(uid_resp.get('attributes', {}).get('mail', 'N/A'))
 exit(0)
