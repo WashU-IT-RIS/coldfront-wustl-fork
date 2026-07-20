@@ -12,6 +12,6 @@ from utils.coldfront_ad_utils import ColdfrontAdUtils
 
 cau = ColdfrontAdUtils()
 for line in sorted(set(sys.stdin.readlines())):
-    for uid in line.split(','):
+    for uid in line.split(':')[-1].split(','):
         print(cau.get_user(uid))
 exit(0)
