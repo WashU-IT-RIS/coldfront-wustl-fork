@@ -159,7 +159,7 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             # Include all records with a user (history preserves user even for deletions)
             if record.user:
                 user_changes.append({
-                    'created': record.created,
+                    'created': record.history_date,
                     'changed_by': record.history_user,
                     'operation': action,
                     'user': record.user,
