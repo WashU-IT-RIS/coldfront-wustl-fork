@@ -65,6 +65,28 @@ class TestUsageAllocationsGet(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()["allocations"]), expected_allocation_count)
 
+    def test_response_includes_path_and_id(self):
+        user = UserFactory.create(is_superuser=True)
+
+        end_path = fake.last_name()
+        [_, allocations] = create_ris_project_and_allocations_storage3(
+            f"/storage3/fs1/{end_path}"
+        )
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["allocations"]), 1)
+
+        saved_allocation = allocations["storage_allocation"]
+        returned_allocation = response.json()["allocations"][0]
+        self.assertEqual(returned_allocation["id"], saved_allocation.pk)
+        self.assertEqual(
+            returned_allocation["path"],
+            saved_allocation.get_attribute("storage_filesystem_path"),
+        )
+
     def test_gets_only_active_allocations(self):
         expected_allocation_count = 5
         user = UserFactory.create(is_superuser=True)

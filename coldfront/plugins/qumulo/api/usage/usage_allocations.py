@@ -31,7 +31,10 @@ class UsageAllocations(LoginRequiredMixin, View):
             ).distinct()
 
         allocation_path_map = map(
-            lambda allocation: allocation.get_attribute("storage_filesystem_path"),
+            lambda allocation: {
+                "id": allocation.pk,
+                "path": allocation.get_attribute("storage_filesystem_path"),
+            },
             allocations,
         )
 
