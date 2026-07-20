@@ -11,6 +11,7 @@ from email.message import EmailMessage
 from utils.coldfront_ad_utils import ColdfrontAdUtils
 
 cau = ColdfrontAdUtils()
-for uid in sorted(set(sys.stdin.readlines())):
-    print(cau.get_user(uid))
+for line in sorted(set(sys.stdin.readlines())):
+    for uid in line.split(','):
+        print(cau.get_user(uid))
 exit(0)
