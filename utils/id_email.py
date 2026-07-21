@@ -1,13 +1,8 @@
 #!/usr/bin/env python3
 
 import ldap3
-import os
-import smtplib
-import subprocess
 import sys
 
-from argparse import ArgumentParser
-from email.message import EmailMessage
 from utils.coldfront_ad_utils import ColdfrontAdUtils
 
 no_email = set()
@@ -25,4 +20,4 @@ print("################################")
 print("UserIDs Without E-mail Addresses")
 for uid in sorted(no_email):
     print(uid)
-exit(0)
+sys.exit(0)
