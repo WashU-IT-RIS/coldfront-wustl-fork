@@ -37,7 +37,10 @@ class AclAllocations:
 
     @staticmethod
     def add_user_to_access_allocation(
-        username: str, allocation: Allocation, is_group: bool = False
+        username: str,
+        allocation: Allocation,
+        is_group: bool = False,
+        history_user_id: int = None,
     ):
         # NOTE - just need to provide the proper username
         # post_save handler will retrieve email, given/surname, etc.
@@ -47,11 +50,16 @@ class AclAllocations:
         user_profile.is_group = is_group
         user_profile.save()
 
-        AllocationUser.objects.create(
+        allocation_user = AllocationUser(
             allocation=allocation,
             user=user_tuple[0],
             status=AllocationUserStatusChoice.objects.get(name="Active"),
         )
+        if history_user_id is not None:
+            history_user = User.objects.filter(pk=history_user_id).first()
+            if history_user is not None:
+                allocation_user._history_user = history_user
+        allocation_user.save()
 
     @staticmethod
     def get_access_allocation(storage_allocation: Allocation, resource_name: str):

@@ -871,6 +871,7 @@ class ProjectRemoveUsersView(LoginRequiredMixin, UserPassesTestMixin, TemplateVi
                     for allocation in allocations_to_remove_user_from:
                         for allocation_user_obj in allocation.allocationuser_set.filter(user=user_obj, status__name__in=['Active', ]):
                             allocation_user_obj.status = allocation_user_removed_status_choice
+                            allocation_user_obj._history_user = self.request.user
                             allocation_user_obj.save()
 
                             allocation_remove_user.send(sender=self.__class__,
