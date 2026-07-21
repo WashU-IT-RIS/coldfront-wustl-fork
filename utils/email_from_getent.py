@@ -5,6 +5,12 @@ import sys
 
 from utils.coldfront_ad_utils import ColdfrontAdUtils
 
+# Generate a list of e-mail addresses by reading  output from the
+# "getent group <group name>" command from standard input.  Example "getent"
+# output is shown here for the "compute-ris" group (getent group compute-ris):
+#
+# compute-ris:*:1208827:cspohl,mweil,sleong,a.santiago,tz-kai.lin...
+
 no_email = set()
 cau = ColdfrontAdUtils()
 print("E-mail Addresses")
