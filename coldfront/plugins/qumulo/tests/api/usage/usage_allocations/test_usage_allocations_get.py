@@ -14,6 +14,7 @@ from coldfront.plugins.qumulo.api.usage.usage_allocations import UsageAllocation
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
     create_ris_project_and_allocations_storage3,
+    create_allocation_linkage,
 )
 from faker import Faker
 from faker.providers import person
@@ -243,3 +244,40 @@ class TestUsageAllocationsGet(TestCase):
         self.assertEqual(
             len(response.json()["allocations"]), expected_allocation_count * 3
         )
+
+    def test_only_returns_parent_allocations(self):
+        expected_allocation_count = 5
+        expected_allocation_ids = []
+        user = UserFactory.create(is_superuser=True)
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            [_, parent_allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}"
+            )
+            expected_allocation_ids.append(parent_allocations["storage_allocation"].pk)
+
+            [_, child_allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}/Active/foo"
+            )
+            create_allocation_linkage(
+                parent_allocations["storage_allocation"],
+                [child_allocations["storage_allocation"]],
+            )
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["allocations"]), expected_allocation_count)
+
+        for allocation_id in expected_allocation_ids:
+            self.assertIn(
+                allocation_id,
+                list(
+                    map(
+                        lambda allocation_data: allocation_data["id"],
+                        response.json()["allocations"],
+                    )
+                ),
+            )
