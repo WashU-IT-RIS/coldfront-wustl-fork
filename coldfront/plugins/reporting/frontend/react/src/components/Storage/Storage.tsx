@@ -128,7 +128,7 @@ async function getAllocationUsage(
   endDate: string,
   allocation: AllocationOption,
 ) {
-  const response = await axios.get("/qumulo/api/usage", {
+  const response = await axios.get("/qumulo/api/usages", {
     params: {
       allocation_id: allocation.id,
       start_date: startDate,
