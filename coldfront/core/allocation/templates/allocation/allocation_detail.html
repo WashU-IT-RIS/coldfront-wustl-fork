@@ -237,7 +237,7 @@ Allocation Detail
 <!-- Start Allocation Change Requests -->
 <div class="card mb-3">
   <div class="card-header">
-    <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> Allocation Change Requests</h3> <span class="badge badge-secondary">{{allocation_changes.count}}</span>
+    <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> Allocation Change Requests</h3> <span class="badge badge-secondary">{{allocation_changes|length}}</span>
   </div>
   
   <div class="card-body">
@@ -247,7 +247,7 @@ Allocation Detail
           <thead>
             <tr>
               <th scope="col">Date Requested</th>
-              <th scope="col">User</th>
+              <th scope="col">Changed By</th>
               <th scope="col">Attribute</th>
               <th scope="col">Previous Value</th>
               <th scope="col">New Value</th>
@@ -344,6 +344,51 @@ Allocation Detail
   </div>
 </div>
 
+<!-- Start User Changes -->
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="d-inline"><i class="fas fa-info-circle" aria-hidden="true"></i> User Changes </h3> <span class="badge badge-secondary">{{user_changes|length}}</span>
+  </div>
+  
+  <div class="card-body">
+    {% if user_changes %}
+      <div class="table-responsive">
+        <table id="user_change_table" class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              <th scope="col">Date Requested</th>
+              <th scope="col">Changed By</th>
+              <th scope="col">Operation</th>
+              <th scope="col">User</th>
+              <th scope="col">User Type</th>
+              <th scope="col">Previous User List</th>
+              <th scope="col">Current User List</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in user_changes %}
+                <tr>
+                  <td>{{ user.created|date:"M. d, Y" }}</td>
+                  <td>{{ user.changed_by }}</td>
+                  <td>{{ user.operation }}</td>
+                  <td>{{ user.user }}</td>
+                  <td>{{ user.user_type }}</td>
+                  <td>{{ user.previous_users }}</td>
+                  <td>{{ user.current_users }}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle" aria-hidden="true"></i>
+         There are no allocation changes to display.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
 <!-- Start Admin Messages -->
 <div class="card mb-3">
   <div class="card-header">
@@ -404,6 +449,15 @@ Allocation Detail
       }]
     });
     $('#allocationuser_table').DataTable({
+      'aoColumnDefs': [{
+        'bSortable': false,
+        'aTargets': ['nosort']
+      }]
+    });
+    $('#user_change_table').DataTable({
+      lengthMenu: [5, 10, 20, 50, 100],
+      "pageLength": 5,
+      "ordering": false,
       'aoColumnDefs': [{
         'bSortable': false,
         'aTargets': ['nosort']
