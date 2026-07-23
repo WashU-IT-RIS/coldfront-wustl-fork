@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SyntheticEvent, useEffect, useState } from "react";
 
 import StorageChart from "../StorageChart/StorageChart";
 
@@ -13,21 +13,61 @@ function Storage() {
     new Date().toISOString().split("T")[0],
   );
   const [startDate, setStartDate] = useState(undefined as undefined | string);
+  const [selectedAllocation, setSelectedAllocation] = useState(
+    undefined as undefined | AllocationOption,
+  );
+  const [allocationOptions, setAllocationOptions] = useState(
+    [] as AllocationOption[],
+  );
 
   useEffect(() => {
-    getAllocationUsage(startDate, endDate).then(({ quota, usage }) => {
-      setQuota(quota);
-      setUsage(usage);
+    if (selectedAllocation) {
+      getAllocationUsage(startDate, endDate, selectedAllocation).then(
+        ({ quota, usage }) => {
+          setQuota(quota);
+          setUsage(usage);
+        },
+      );
+    }
+  }, [startDate, endDate, selectedAllocation]);
+
+  useEffect(() => {
+    getAllocationOptions().then((returnedOptions) => {
+      setAllocationOptions(returnedOptions);
+      if (returnedOptions.length) {
+        setSelectedAllocation(returnedOptions[0]);
+      }
     });
-  }, [startDate, endDate]);
+  }, []);
+
+  const onSelectChange = (event: SyntheticEvent) => {
+    const allocationId: number = parseInt(event.target.value);
+    const allocationOption = allocationOptions.find(
+      (option) => option.id === allocationId,
+    );
+
+    setSelectedAllocation(allocationOption);
+  };
+
+  const renderOptions = () => {
+    return allocationOptions.map((allocationOption) => {
+      return (
+        <option value={allocationOption.id}>{allocationOption.path}</option>
+      );
+    });
+  };
 
   return (
     <>
       <h3>Storage Usage</h3>
       <div>
         <label htmlFor="allocationSelector">Allocation</label>
-        <select id="allocationSelector">
-          <option value={245}>/storage1/fs1/foo</option>
+        <select
+          id="allocationSelector"
+          onChange={onSelectChange}
+          value={selectedAllocation?.id}
+        >
+          {renderOptions()}
         </select>
       </div>
       <div>
@@ -64,6 +104,11 @@ interface DateInputProps {
   setDate: Function;
 }
 
+interface AllocationOption {
+  id: number;
+  path: string;
+}
+
 function DateInput({ id, label, value, setDate }: DateInputProps) {
   return (
     <>
@@ -81,9 +126,14 @@ function DateInput({ id, label, value, setDate }: DateInputProps) {
 async function getAllocationUsage(
   startDate: string | undefined,
   endDate: string,
+  allocation: AllocationOption,
 ) {
-  const response = await axios.get("/qumulo/api/usage", {
-    params: { allocation_id: 245, start_date: startDate, end_date: endDate },
+  const response = await axios.get("/qumulo/api/usages", {
+    params: {
+      allocation_id: allocation.id,
+      start_date: startDate,
+      end_date: endDate,
+    },
   });
 
   const { quota, usage } = response.data;
@@ -91,6 +141,13 @@ async function getAllocationUsage(
     quota: number;
     usage: usageData;
   };
+}
+
+async function getAllocationOptions() {
+  const response = await axios.get("/qumulo/api/usage/allocations");
+
+  const { allocations } = response.data;
+  return allocations as AllocationOption[];
 }
 
 export default Storage;

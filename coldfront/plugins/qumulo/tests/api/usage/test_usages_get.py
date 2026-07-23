@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 from django.test import TestCase
 from django.http import HttpRequest
 
-from coldfront.plugins.qumulo.api.usage import Usage
+from coldfront.plugins.qumulo.api.usage.usages import Usages
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
 )
@@ -20,7 +20,7 @@ class TestUsageGet(TestCase):
     def setUp(self) -> None:
         create_metadata_for_testing()
 
-        self.usage = Usage()
+        self.usage = Usages()
 
         self.request = HttpRequest()
         self.request.method = "GET"
