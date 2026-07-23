@@ -34,7 +34,7 @@ class TestUsage(TestCase):
 
     def test_restricts_anonymous_users(self):
         response = self.client.get(
-            "/qumulo/api/usage", {"allocation_id": self.storage_allocation_pk}
+            "/qumulo/api/usages", {"allocation_id": self.storage_allocation_pk}
         )
 
         self.assertEqual(response.status_code, 302)
@@ -44,7 +44,7 @@ class TestUsage(TestCase):
 
         self.client.force_login(basic_user)
         response = self.client.get(
-            "/qumulo/api/usage", {"allocation_id": self.storage_allocation_pk}
+            "/qumulo/api/usages", {"allocation_id": self.storage_allocation_pk}
         )
 
         self.assertEqual(response.status_code, 403)
@@ -54,7 +54,7 @@ class TestUsage(TestCase):
 
         self.client.force_login(user)
         response = self.client.get(
-            "/qumulo/api/usage", {"allocation_id": self.storage_allocation_pk}
+            "/qumulo/api/usages", {"allocation_id": self.storage_allocation_pk}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -64,7 +64,7 @@ class TestUsage(TestCase):
 
         self.client.force_login(user)
         response = self.client.get(
-            "/qumulo/api/usage", {"allocation_id": self.storage_allocation_pk}
+            "/qumulo/api/usages", {"allocation_id": self.storage_allocation_pk}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -74,7 +74,7 @@ class TestUsage(TestCase):
 
         self.client.force_login(pi)
         response = self.client.get(
-            "/qumulo/api/usage", {"allocation_id": self.storage_allocation_pk}
+            "/qumulo/api/usages", {"allocation_id": self.storage_allocation_pk}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -91,7 +91,7 @@ class TestUsage(TestCase):
 
         self.client.force_login(billing_user)
         response = self.client.get(
-            "/qumulo/api/usage", {"allocation_id": self.storage_allocation_pk}
+            "/qumulo/api/usages", {"allocation_id": self.storage_allocation_pk}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -107,7 +107,7 @@ class TestUsage(TestCase):
 
         self.client.force_login(technical_user)
         response = self.client.get(
-            "/qumulo/api/usage", {"allocation_id": self.storage_allocation_pk}
+            "/qumulo/api/usages", {"allocation_id": self.storage_allocation_pk}
         )
 
         self.assertEqual(response.status_code, 200)
@@ -123,7 +123,7 @@ class TestUsage(TestCase):
 
         self.client.force_login(pi)
         response = self.client.get(
-            "/qumulo/api/usage", {"allocation_id": self.storage_allocation_pk}
+            "/qumulo/api/usages", {"allocation_id": self.storage_allocation_pk}
         )
 
         self.assertEqual(response.status_code, 200)
