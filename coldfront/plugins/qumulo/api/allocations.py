@@ -21,7 +21,7 @@ class Allocations(LoginRequiredMixin, View):
         stop_index = start_index + limit
         sort = request.GET.get("sort", "id")
 
-        allocations_queryset = Allocation.objects.filter(resources__name="Storage2")
+        allocations_queryset = Allocation.objects.filter(resources__resource_type__name="Storage")
         try:
             search = request.GET.getlist("search[]", [])
 
