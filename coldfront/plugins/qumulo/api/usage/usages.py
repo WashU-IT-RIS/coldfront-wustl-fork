@@ -9,9 +9,14 @@ from django.http import (
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from coldfront.core.allocation.models import Allocation, AllocationAttributeUsage
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttributeUsage,
+    AllocationAttribute,
+)
 from coldfront.core.user.models import User
 
+from pprint import pprint
 
 EOD = "T23:59:59+00:00"
 
@@ -71,18 +76,25 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
             allocation = Allocation.objects.get(pk=allocation_id)
         except Allocation.DoesNotExist:
             return HttpResponseNotFound("allocation not found")
-        quota_gib: int = allocation.get_attribute("storage_quota") * 2**10
 
         usage_gib = []
-        end_date_usage: AllocationAttributeUsage = (
-            AllocationAttributeUsage.history.as_of(end_datetime)
-            .filter(
-                allocation_attribute__allocation=allocation,
-                allocation_attribute__allocation_attribute_type__name="storage_quota",
-            )
-            .first()
+
+        end_date_usage: (
+            AllocationAttributeUsage
+        ) = AllocationAttributeUsage.history.as_of(end_datetime).get(
+            allocation_attribute__allocation=allocation,
+            allocation_attribute__allocation_attribute_type__name="storage_quota",
         )
-        usage_gib.append({"date": end_date_str, "usage": end_date_usage.value / 2**30})
+        end_date_quota: AllocationAttribute = (
+            end_date_usage.allocation_attribute.history.as_of(end_datetime)
+        )
+        usage_gib.append(
+            {
+                "date": end_date_str,
+                "usage": end_date_usage.value / 2**30,
+                "quota": int(end_date_quota.value) * 2**10,
+            }
+        )
 
         i = 0
         working_datetime = end_datetime
@@ -106,11 +118,16 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
             )
 
             if working_usage != None:
+                working_quota = working_usage.allocation_attribute.history.as_of(
+                    working_datetime
+                )
+
                 usage_gib.insert(
                     0,
                     {
                         "date": working_datetime.date().isoformat(),
                         "usage": working_usage.value / 2**30,
+                        "quota": int(working_quota.value) * 2**10,
                     },
                 )
             else:
@@ -121,8 +138,7 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
         return JsonResponse(
             {
                 "allocation_id": allocation.pk,
-                "quota": quota_gib,
-                "usage": usage_gib,
+                "usage_data": usage_gib,
             }
         )
 

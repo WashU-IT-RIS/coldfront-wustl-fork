@@ -91,6 +91,7 @@ function Storage() {
             y: element.usage,
           })),
           quota,
+          path: selectedAllocation?.path || "",
         }}
       />
     </>

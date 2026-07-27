@@ -42,7 +42,7 @@ def create_allocation_with_usage(
 
 
 def create_usage_history(
-    usage_object: AllocationAttributeUsage, months: int = 12, max_usage: int = 5
+    usage_object: AllocationAttributeUsage, months: int = 12, max_usage_tib: int = 10
 ) -> list[dict]:
 
     usage_history = []
@@ -54,13 +54,22 @@ def create_usage_history(
         if working_date == today:
             continue  # avoids issues when run on 1st of month
 
-        usage_tib = round(random() * max_usage, 12)
+        quota_tib = round(random() * max_usage_tib)
+        usage_tib = round(random() * quota_tib, 12)
 
         usage_history.insert(
-            0, {"usage": usage_tib * 2**10, "date": working_date.isoformat()}
+            0,
+            {
+                "usage": usage_tib * 2**10,
+                "date": working_date.isoformat(),
+                "quota": quota_tib * 2**10,
+            },
         )
 
         with freeze_time(working_date):
+            quota_attribute = usage_object.allocation_attribute
+            quota_attribute.value = quota_tib
+            quota_attribute.save()
             usage_object.value = usage_tib * 2**40
             usage_object.save()
 
@@ -96,6 +105,7 @@ def get_history_span(
                     {
                         "date": start_date.isoformat(),
                         "usage": usage_history[index - 1]["usage"],
+                        "quota": usage_history[index - 1]["quota"],
                     }
                 )
                 has_succeeded = True
@@ -103,7 +113,11 @@ def get_history_span(
 
     if working_history[-1]["date"] != end_date.isoformat():
         working_history.append(
-            {"date": end_date.isoformat(), "usage": working_history[-1]["usage"]}
+            {
+                "date": end_date.isoformat(),
+                "usage": working_history[-1]["usage"],
+                "quota": working_history[-1]["quota"],
+            }
         )
 
     return (working_history, start_date, end_date)

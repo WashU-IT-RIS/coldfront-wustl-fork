@@ -30,6 +30,7 @@ interface StorageChartProps {
   data: {
     usage: { x: string; y: number }[];
     quota: number;
+    path: string;
   };
 }
 
@@ -42,7 +43,7 @@ function StorageChart({ data }: StorageChartProps) {
       },
       title: {
         display: true,
-        text: "Storage Usage",
+        text: data.path,
       },
       tooltip: {
         filter: (toolTipItem) => toolTipItem.dataset.label === "Usage",
