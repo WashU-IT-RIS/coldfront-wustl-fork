@@ -5,10 +5,24 @@ import os
 import smtplib
 import subprocess
 import sys
+import time
 
 from argparse import ArgumentParser
 from email.message import EmailMessage
 from utils.coldfront_ad_utils import ColdfrontAdUtils
+
+def generate_file_name(service):
+    filename = None
+    tm = time.localtime(time.time())
+    filename_ts = (
+        f'{tm.tm_year:04d}{tm.tm_mon:02d}{tm.tm_day:02d}'
+        f'{tm.tm_hour:02d}{tm.tm_min:02d}'
+    )
+    if service == 'all':
+        filename = f'RIS-User-Report-{filename_ts}.csv'
+    else:
+        filename = f'RIS-{service}-User-Report-{filename_ts}.csv'
+    return filename
 
 def generate_list(group_list, department, department_users):
     output_list = ''
@@ -50,6 +64,8 @@ ap.add_argument(
     type=str
 )
 args = ap.parse_args()
+# example "getent group storage" output:
+# storage:*:7151593:bmulligan,gunnar,ris-svc-sys-tester...
 if args.service == 'all':
     group_list = []
     for service_name, group_name in service_group_map.items():
@@ -76,8 +92,6 @@ else:
     group_list = list(
         str(getent_cp.stdout).rstrip('\n').split(':')[3].split(',')
     )
-# example "getent group storage" output:
-# storage:*:7151593:bmulligan,gunnar,ris-svc-sys-tester...
 cau = ColdfrontAdUtils()
 department_users = set()
 if args.department is not False:
@@ -87,22 +101,21 @@ if args.department is not False:
         dept = dept_user.get('attributes', {}).get('wustlEduHRPrimeDeptName')
         if uid:
             department_users.add(uid)
-msg = EmailMessage()
-msg['Subject'] = 'RIS User Report'
-msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
-msg['From'] = 'ris-svc-builder@wustl.edu'
-msg.preamble = msg.content = 'Here is the report you requested...'
-msg.add_attachment(
-    generate_list(group_list, args.department, department_users),
-    maintype='text',
-    subtype='plain',
-    filename='RIS-User-Report.csv'
-)
-with smtplib.SMTP('smtp.ris.wustl.edu') as smtp:
-    smtp.send_message(msg)
+report_data = generate_list(group_list, args.department, department_users)
+if os.environ.get('JENKINS_HOME', False):
+    msg = EmailMessage()
+    msg['Subject'] = 'RIS User Report'
+    msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
+    msg['From'] = 'ris-svc-builder@wustl.edu'
+    msg.preamble = msg.content = 'Here is the report you requested...'
+    msg.add_attachment(
+        report_data,
+        maintype='text',
+        subtype='plain',
+        filename=generate_file_name(args.service)
+    )
+    with smtplib.SMTP('smtp.ris.wustl.edu') as smtp:
+        smtp.send_message(msg)
+else:
+    print(str(report_data, encoding='utf-8'))
 sys.exit(0)
-# for member in sorted(group_list):
-#     if args.department is False:
-#         print(member)
-#     elif member in department_users:
-#         print(member)
