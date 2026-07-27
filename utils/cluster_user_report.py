@@ -49,7 +49,10 @@ ap.add_argument(
     '--department',
     default=False,
     dest='department',
-    help='Filter results by department',
+    help=(
+        'Filter results by department--'
+        'can also be passed with REPORT_DEPARTMENT'
+    ),
     required=False,
     type=str
 )
@@ -64,6 +67,8 @@ ap.add_argument(
     type=str
 )
 args = ap.parse_args()
+if args.department is False:
+    args.department = os.environ.get('REPORT_DEPARTMENT', False)
 # example "getent group storage" output:
 # storage:*:7151593:bmulligan,gunnar,ris-svc-sys-tester...
 if args.service == 'all':
