@@ -1,6 +1,7 @@
-import { SyntheticEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import StorageChart from "../StorageChart/StorageChart";
+import Select, { SingleValue } from "react-select";
 
 import axios from "axios";
 
@@ -38,8 +39,13 @@ function Storage() {
     });
   }, []);
 
-  const onSelectChange = (event: SyntheticEvent) => {
-    const allocationId: number = parseInt(event.target.value);
+  const onSelectChange = (
+    newValue: SingleValue<{
+      value: number | undefined;
+      label: string | undefined;
+    }>,
+  ) => {
+    const allocationId = newValue?.value;
     const allocationOption = allocationOptions.find(
       (option) => option.id === allocationId,
     );
@@ -47,11 +53,9 @@ function Storage() {
     setSelectedAllocation(allocationOption);
   };
 
-  const renderOptions = () => {
+  const getOptions = () => {
     return allocationOptions.map((allocationOption) => {
-      return (
-        <option value={allocationOption.id}>{allocationOption.path}</option>
-      );
+      return { value: allocationOption.id, label: allocationOption.path };
     });
   };
 
@@ -60,13 +64,14 @@ function Storage() {
       <h3>Storage Usage</h3>
       <div>
         <label htmlFor="allocationSelector">Allocation</label>
-        <select
-          id="allocationSelector"
-          onChange={onSelectChange}
-          value={selectedAllocation?.id}
-        >
-          {renderOptions()}
-        </select>
+        <Select
+          options={getOptions()}
+          onChange={(newValue) => onSelectChange(newValue)}
+          defaultValue={{
+            value: selectedAllocation?.id,
+            label: selectedAllocation?.path,
+          }}
+        ></Select>
       </div>
       <div>
         <DateInput
