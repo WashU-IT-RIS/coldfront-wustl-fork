@@ -15,7 +15,7 @@ def generate_file_name(service):
     filename = None
     tm = time.localtime(time.time())
     filename_ts = (
-        f'{tm.tm_year:04d}{tm.tm_mon:02d}{tm.tm_day:02d}'
+        f'{tm.tm_year:04d}{tm.tm_mon:02d}{tm.tm_mday:02d}'
         f'{tm.tm_hour:02d}{tm.tm_min:02d}'
     )
     if service == 'all':
