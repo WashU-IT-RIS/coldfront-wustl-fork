@@ -1,9 +1,8 @@
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from django.test import TestCase
 from django.http import HttpRequest
 
-from coldfront.core.allocation.models import AllocationAttribute
 
 from coldfront.plugins.qumulo.api.usage.usages import Usages
 from coldfront.plugins.qumulo.tests.fixtures import (
@@ -18,9 +17,6 @@ from coldfront.plugins.qumulo.tests.api.usage.helpers import (
 import json
 
 from freezegun import freeze_time
-
-
-from pprint import pprint
 
 
 class TestUsageGet(TestCase):

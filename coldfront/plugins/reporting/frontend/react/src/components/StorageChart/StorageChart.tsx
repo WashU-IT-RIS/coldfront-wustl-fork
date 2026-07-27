@@ -29,12 +29,21 @@ ChartJS.register(
 interface StorageChartProps {
   data: {
     usage: { x: string; y: number }[];
-    quota: number;
+    quota: { x: string; y: number }[];
     path: string;
   };
 }
 
 function StorageChart({ data }: StorageChartProps) {
+  const getMaxQuota = () => {
+    let maxQuota = 0;
+    for (const element of data.quota) {
+      maxQuota = element.y > maxQuota ? element.y : maxQuota;
+    }
+
+    return maxQuota;
+  };
+
   const options: ChartOptions = {
     responsive: true,
     plugins: {
@@ -77,7 +86,7 @@ function StorageChart({ data }: StorageChartProps) {
           text: "Size (GiB)",
         },
         min: 0,
-        max: Math.floor((data.quota + 512) / 500) * 500,
+        max: Math.floor((getMaxQuota() + 512) / 500) * 500,
       },
     },
   };
@@ -92,10 +101,9 @@ function StorageChart({ data }: StorageChartProps) {
       },
       {
         label: "Quota",
-        data: data.usage.map(({ x }) => ({ x, y: data.quota })),
+        data: data.quota,
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
-        pointStyle: false,
         plugins: {
           tooltip: {
             enabled: false,

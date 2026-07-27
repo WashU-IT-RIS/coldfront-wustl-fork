@@ -4,11 +4,10 @@ import StorageChart from "../StorageChart/StorageChart";
 
 import axios from "axios";
 
-type usageData = { date: string; usage: number }[];
+type usageData = { date: string; usage: number; quota: number }[];
 
 function Storage() {
   const [usage, setUsage] = useState([] as usageData);
-  const [quota, setQuota] = useState(0);
   const [endDate, setEndDate] = useState(
     new Date().toISOString().split("T")[0],
   );
@@ -23,9 +22,8 @@ function Storage() {
   useEffect(() => {
     if (selectedAllocation) {
       getAllocationUsage(startDate, endDate, selectedAllocation).then(
-        ({ quota, usage }) => {
-          setQuota(quota);
-          setUsage(usage);
+        (usageData) => {
+          setUsage(usageData);
         },
       );
     }
@@ -90,7 +88,10 @@ function Storage() {
             x: element.date,
             y: element.usage,
           })),
-          quota,
+          quota: usage.map((element) => ({
+            x: element.date,
+            y: element.quota,
+          })),
           path: selectedAllocation?.path || "",
         }}
       />
@@ -137,11 +138,8 @@ async function getAllocationUsage(
     },
   });
 
-  const { quota, usage } = response.data;
-  return { quota, usage } as {
-    quota: number;
-    usage: usageData;
-  };
+  const { usage_data } = response.data;
+  return usage_data as usageData;
 }
 
 async function getAllocationOptions() {

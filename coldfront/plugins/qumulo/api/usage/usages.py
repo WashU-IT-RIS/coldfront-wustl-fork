@@ -16,8 +16,6 @@ from coldfront.core.allocation.models import (
 )
 from coldfront.core.user.models import User
 
-from pprint import pprint
-
 EOD = "T23:59:59+00:00"
 
 
