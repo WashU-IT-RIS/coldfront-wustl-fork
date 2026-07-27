@@ -117,5 +117,5 @@ if os.environ.get('JENKINS_HOME', False):
     with smtplib.SMTP('smtp.ris.wustl.edu') as smtp:
         smtp.send_message(msg)
 else:
-    print(str(report_data, encoding='utf-8'))
+    print(str(report_data, encoding='utf-8'), end='')
 sys.exit(0)
