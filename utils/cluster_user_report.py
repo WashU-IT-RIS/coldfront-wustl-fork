@@ -51,8 +51,9 @@ ap.add_argument(
 )
 args = ap.parse_args()
 if args.service == 'all':
+    group_list = []
     for service_name, group_name in service_group_map.items():
-        group_members = subprocess.run(
+        getent_cp = subprocess.run(
             [
                 'getent',
                 'group',
@@ -60,8 +61,11 @@ if args.service == 'all':
             ],
             capture_output=True
         )
+        group_list.extend(
+            str(getent_cp.stdout).rstrip('\n').split(':')[3].split(',')
+        )
 else:
-    group_members = subprocess.run(
+    getent_cp = subprocess.run(
         [
             'getent',
             'group',
@@ -69,9 +73,11 @@ else:
         ],
         capture_output=True
     )
+    group_list = list(
+        str(getent_cp.stdout).rstrip('\n').split(':')[3].split(',')
+    )
 # example "getent group storage" output:
 # storage:*:7151593:bmulligan,gunnar,ris-svc-sys-tester...
-group_list = str(group_members).rstrip('\n').split(':')[3].split(',')
 cau = ColdfrontAdUtils()
 department_users = set()
 if args.department is not False:
