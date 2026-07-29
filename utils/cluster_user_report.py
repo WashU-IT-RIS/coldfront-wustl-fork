@@ -24,19 +24,25 @@ def generate_file_name(service):
         filename = f'RIS-{service}-User-Report-{filename_ts}.csv'
     return filename
 
-def generate_message_content(service, filename):
-    return(
+def generate_message_content(service, filename, filter_string):
+    def filter_sentence():
+        if not filter_string:
+            return ''
+        return(
+            '\nThe list was filtered to include users associated with '
+            f'department(s) matching the following string: {filter_string}\n'
+        )
         """
 Hello-
 
 You are receiving this message because you or someone on your behalf requested
 a user report for {} provided by RIS.  Please see the attached file, {}, for the
 requested report.
-
+{}
 Thank you,
 
 RIS Application Engieering
-        """.format(service, filename)
+        """.format(service, filename, filter_sentence())
     )
 
 def generate_list(group_list, department, department_users, ad_object=None):
@@ -147,7 +153,11 @@ if os.environ.get('JENKINS_HOME', False):
     msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
     msg['From'] = 'ris-svc-builder@wustl.edu'
     msg.set_content(
-        generate_message_content(service_label, attachment_filename)
+        generate_message_content(
+            service_label,
+            attachment_filename,
+            args.department
+        )
     )
     msg.add_attachment(
         report_data,
