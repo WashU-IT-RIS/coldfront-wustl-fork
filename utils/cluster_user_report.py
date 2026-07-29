@@ -24,6 +24,21 @@ def generate_file_name(service):
         filename = f'RIS-{service}-User-Report-{filename_ts}.csv'
     return filename
 
+def generate_message_content(service, filename):
+    return(
+        """
+Hello,
+
+You are receiving this message because you or someone on your behalf requested
+a user report for {} provided by RIS.  Please see the attached file, {}, for the
+requested report.
+
+Thank you,
+
+RIS Application Engieering
+        """.format(service, filename)
+    )
+
 def generate_list(group_list, department, department_users):
     output_list = ''
     for member in sorted(group_list):
@@ -108,16 +123,23 @@ if args.department is not False:
             department_users.add(uid)
 report_data = generate_list(group_list, args.department, department_users)
 if os.environ.get('JENKINS_HOME', False):
+    if args.service.lower() == 'all':
+        service_label = 'All Services'
+    else:
+        service_label = f'the {args.service} Service'
+    attachment_filename = generate_file_name(args.service)
     msg = EmailMessage()
-    msg['Subject'] = 'RIS User Report'
+    msg['Subject'] = f'RIS User Report for {service_label}'
     msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
     msg['From'] = 'ris-svc-builder@wustl.edu'
-    msg.preamble = msg.content = 'Here is the report you requested...'
+    msg.set_content(
+        generate_message_content(service_label, attachment_filename)
+    )
     msg.add_attachment(
         report_data,
         maintype='text',
         subtype='plain',
-        filename=generate_file_name(args.service)
+        filename=attachment_filename
     )
     with smtplib.SMTP('smtp.ris.wustl.edu') as smtp:
         smtp.send_message(msg)
