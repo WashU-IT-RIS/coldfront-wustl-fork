@@ -55,6 +55,8 @@ def generate_list(group_list, department, department_users, ad_object=None):
             output_list += f'{member}'
         elif member in department_users:
             output_list += f'{member}'
+        else:
+            continue
         if department_name:
             output_list += f',{department_name}'
         output_list += '\n'
