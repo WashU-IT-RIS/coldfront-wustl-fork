@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
-from coldfront.core.billing.models import Allocation
-
+from coldfront.core.allocation.models import Allocation
 
 def is_eligible_for_subsidy(washu_key: str) -> bool:
     user = BillableUser.factory(washu_key)
