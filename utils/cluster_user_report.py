@@ -32,6 +32,7 @@ def generate_message_content(service, filename, filter_string):
             '\nThe list was filtered to include users associated with '
             f'department(s) matching the following string: {filter_string}\n'
         )
+    return(
         """
 Hello-
 
