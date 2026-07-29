@@ -54,11 +54,11 @@ class ServiceRateCategoryFactory(DjangoModelFactory):
         )
 
 
-class BillableUserFactory(factory.Factory):
-    class Meta:
-        model = BillableUser
+#class BillableUserFactory(factory.Factory):
+#    class Meta:
+#        model = BillableUser
 
-    user = factory.SubFactory("coldfront.core.factories.UserFactory")
+#    user = factory.SubFactory("coldfront.core.factories.UserFactory")
 
 
 # Example usage:
