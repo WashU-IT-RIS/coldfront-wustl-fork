@@ -41,7 +41,7 @@ RIS Application Engieering
 
 def generate_list(group_list, department, department_users):
     output_list = ''
-    for member in sorted(group_list):
+    for member in sorted(set(group_list)):
         if department is False:
             output_list += f'{member}\n'
         elif member in department_users:
