@@ -20,5 +20,8 @@
   "scripts": {
     "postinstall": "cd coldfront/plugins/qumulo/frontend/react && npm install",
     "develop": "NODE_ENV=development vite build -w --minify false coldfront/plugins/qumulo/frontend/react/src/views/UserAccessManagement/ --sourcemap inline"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.9.5"
   }
 }
