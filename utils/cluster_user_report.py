@@ -27,7 +27,7 @@ def generate_file_name(service):
 def generate_message_content(service, filename):
     return(
         """
-Hello,
+Hello-
 
 You are receiving this message because you or someone on your behalf requested
 a user report for {} provided by RIS.  Please see the attached file, {}, for the
@@ -39,13 +39,25 @@ RIS Application Engieering
         """.format(service, filename)
     )
 
-def generate_list(group_list, department, department_users):
+def generate_list(group_list, department, department_users, ad_object=None):
     output_list = ''
     for member in sorted(set(group_list)):
+        dept_resp = department_name = None
+        try:
+            dept_resp = ad_object.get_user_department(member)
+        except ValueError:
+            pass
+        if dept_resp:
+            department_name = dept_resp \
+                .get('attributes', {}) \
+                .get('wustlEduHRPrimeDeptName', False)
         if department is False:
-            output_list += f'{member}\n'
+            output_list += f'{member}'
         elif member in department_users:
-            output_list += f'{member}\n'
+            output_list += f'{member}'
+        if department_name:
+            output_list += f',{department_name}'
+        output_list += '\n'
     return bytes(output_list, encoding='utf-8')
 
 service_group_map = {
@@ -121,7 +133,7 @@ if args.department is not False:
         dept = dept_user.get('attributes', {}).get('wustlEduHRPrimeDeptName')
         if uid:
             department_users.add(uid)
-report_data = generate_list(group_list, args.department, department_users)
+report_data = generate_list(group_list, args.department, department_users, cau)
 if os.environ.get('JENKINS_HOME', False):
     if args.service.lower() == 'all':
         service_label = 'All Services'
