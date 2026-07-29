@@ -6,10 +6,10 @@ const dirname = import.meta.dirname;
 
 const components = ["UserAccessManagement"];
 
-for (const component of components) {
+for (let component of components) {
   console.log("Building", component);
-  const componentRoot = path.resolve(dirname, `./src/views/${component}`);
-  const outDir = path.resolve(dirname, `./dist/${component}`);
+  let componentRoot = path.resolve(dirname, `./src/views/${component}`);
+  let outDir = path.resolve(dirname, `./dist/${component}`);
 
   baseConfig.root = componentRoot;
   baseConfig.base = `/static/${component}`;
