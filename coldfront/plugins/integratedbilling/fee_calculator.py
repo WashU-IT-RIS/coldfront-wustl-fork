@@ -2,6 +2,7 @@ from datetime import date
 from decimal import Decimal
 from coldfront.core.billing.models import MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.models import ServiceRateCategory
+from coldfront.plugins.integratedbilling.subsidies import BillableUser
 
 # TODO: Move to config?
 SUBSIDIZED_AMOUNT_TB = Decimal(
@@ -22,12 +23,7 @@ def get_billing_objects(
             )
             continue
 
-        billing_object.billable_usage_tb = billing_object.usage_tb
-        if billing_object.subsidized:
-            billing_object.billable_usage_tb = max(
-                Decimal("0.0"), (billing_object.usage_tb - SUBSIDIZED_AMOUNT_TB)
-            )
-
+        billing_object.billable_usage_tb = calculate_billable_usage(billing_object)
         if billing_object.billable_usage_tb == Decimal("0.0"):
             continue
 
@@ -74,5 +70,17 @@ def get_billing_objects(
 
 def calculate_fee(
     billing_object: MonthlyStorageBilling, rate_category: ServiceRateCategory
-) -> float:
+) -> Decimal:
     return round(billing_object.billable_usage_tb * rate_category.rate, 2)
+
+def calculate_billable_usage(billing_object) -> Decimal:
+    billable_user = BillableUser.factory.get(billing_object.sponsor_pi)
+    if not billable_user.is_eligible_for_subsidy():
+        print(
+            f"User {billing_object.sponsor_pi} is not eligible for subsidy. Billable usage: {billing_object.usage_tb} TB"
+        )
+        return billing_object.usage_tb
+    
+    if billing_object.subsidized:
+        return max(Decimal("0.0"), (billing_object.usage_tb - SUBSIDIZED_AMOUNT_TB))
+    return billing_object.usage_tb
