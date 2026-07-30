@@ -169,14 +169,6 @@ class ActiveDirectoryAPI:
         groups_OU = os.environ.get("AD_GROUPS_OU")
         return f"cn={group_name},{groups_OU}"
 
-    def is_staff_member(self, wustlkey: str) -> bool:
-        user = self.get_user(wustlkey)
-        return "staff" in user["sAMAccountName"].lower()
-
-    def is_pi_member(self, wustlkey: str) -> bool:
-        user = self.get_user(wustlkey)
-        return "pi" in user["sAMAccountName"].lower()
-
     def is_faculty_member(self, wustlkey: str) -> bool:
         user = self.get_user(wustlkey)
         return "faculty" in user["wustlEduPrimaryRole"].lower()
