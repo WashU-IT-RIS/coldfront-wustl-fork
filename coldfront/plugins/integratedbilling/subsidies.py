@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from coldfront.core.allocation.models import Allocation
+from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
 def is_eligible_for_subsidy(washu_key: str) -> bool:
     user = BillableUser.factory(washu_key)
@@ -15,15 +16,13 @@ class BillableUser:
         return self.user.username
 
     def is_eligible_for_subsidy(self) -> bool:
-        is_eligble: bool = False
-        # TODO: add additional eligibility criteria here, such as checking if the user has a certain role or is part of a specific group
-        # if user.is_staff:
-        #    is_eligible = False
-        #    return is_eligible
-        # if user.is_pi:
-        #     is_eligble = True
-        return is_eligble
-        # placeholder for inspecting the user's allocations and determining if they are eligible for a subsidy
+        is_eligible: bool = False
+        if self.__is_faculty():
+            is_eligible = True
+        return is_eligible
+
+    def __is_faculty(self) -> bool:
+        return ActiveDirectoryAPI().is_faculty_member(self.washu_key)
 
     def get_user(self) -> User:
         return self.user
@@ -36,12 +35,7 @@ class BillableUser:
     def factory_by_allocation(cls, allocation: Allocation) -> "BillableUser":
         # Factory method to create a BillableUser instance based on an Allocation
         return cls(allocation.pi.username)
-    
-    def __is_staff(self) -> bool:
-        # check with AD for staff status, for now we will just check the is_staff field on the user model
-        is_staff = False # self.user.is_staff
-        return is_staff
-    
+
     def __str__(self):
         return f"BillableUser(washu_key={self.washu_key})"
 

@@ -36,7 +36,7 @@ class ActiveDirectoryAPI:
         self.conn.search(
             search_base,
             f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
-            attributes=["sAMAccountName", "mail", "givenName", "sn"],
+            attributes=["sAMAccountName", "mail", "givenName", "sn", "wustlEduPrimaryRole"],
         )
 
         if not self.conn.response:
@@ -176,3 +176,7 @@ class ActiveDirectoryAPI:
     def is_pi_member(self, wustlkey: str) -> bool:
         user = self.get_user(wustlkey)
         return "pi" in user["sAMAccountName"].lower()
+
+    def is_faculty_member(self, wustlkey: str) -> bool:
+        user = self.get_user(wustlkey)
+        return "faculty" in user["wustlEduPrimaryRole"].lower()
