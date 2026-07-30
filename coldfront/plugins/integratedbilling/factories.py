@@ -2,7 +2,6 @@ from datetime import date
 import factory
 from factory.django import DjangoModelFactory
 from coldfront.plugins.integratedbilling.models import ServiceRateCategory
-from coldfront.plugins.integratedbilling.subsidies import BillableUser
 
 
 class ServiceRateCategoryFactory(DjangoModelFactory):
@@ -52,13 +51,6 @@ class ServiceRateCategoryFactory(DjangoModelFactory):
             start_date=factory.LazyFunction(lambda: date(2023, 7, 1)),
             end_date=factory.LazyFunction(lambda: date(2024, 6, 30)),
         )
-
-
-#class BillableUserFactory(factory.Factory):
-#    class Meta:
-#        model = BillableUser
-
-#    user = factory.SubFactory("coldfront.core.factories.UserFactory")
 
 
 # Example usage:
