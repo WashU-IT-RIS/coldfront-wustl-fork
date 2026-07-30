@@ -1,7 +1,7 @@
 from django.test import TestCase  
 
 from coldfront.plugins.integratedbilling.subsidies import BillableUser
-from coldfront.plugins.qumulo.tests.fixtures import create_ris_project_and_allocations_storage3
+from coldfront.plugins.qumulo.tests.helper_classes.factories import RisAllocationFactory
 
 
 class TestBillableUser(TestCase):
@@ -24,10 +24,7 @@ class TestBillableUser(TestCase):
     
     def test_factory_by_allocation(self):
         # This test would require creating an Allocation instance and then using it to create a BillableUser
-        _, allocations = create_ris_project_and_allocations_storage3(
-            storage_filesystem_path="/storage3/fs1/testuser",
-        )
-        allocation = allocations["storage_allocation"]
+        allocation = RisAllocationFactory(storage=True)
         billable_user = BillableUser.factory_by_allocation(allocation)
         self.assertIsInstance(billable_user, BillableUser)
 
