@@ -40,7 +40,7 @@ class TestActiveDirectoryAPI(TestCase):
         self.mock_connection.search.assert_called_once_with(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
             expected_filter,
-            attributes=["sAMAccountName", "mail", "givenName", "sn", "wustlEduPrimaryRole"],
+            attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
 
     def test_get_user_by_email_returns_user(self):

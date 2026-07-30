@@ -34,7 +34,7 @@ class BillableUser:
 
     def factory_by_allocation(cls, allocation: Allocation) -> "BillableUser":
         # Factory method to create a BillableUser instance based on an Allocation
-        return cls(allocation.pi.username)
+        return cls(allocation.project.pi.username)
 
     def __str__(self):
         return f"BillableUser(washu_key={self.washu_key})"

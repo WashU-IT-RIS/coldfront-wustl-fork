@@ -26,17 +26,20 @@ class ActiveDirectoryAPI:
         if not self.conn.bind():
             raise self.conn.result
 
-    def get_user(self, wustlkey: str, search_base: Optional[str] = None):
+    def get_user(self, wustlkey: str, search_base: Optional[str] = None, attributes: Optional[list[str]] = None):
         if not wustlkey:
             raise ValueError(("wustlkey must be defined"))
         
         if search_base is None:
             search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
+        if attributes is None:
+            attributes = ["sAMAccountName", "mail", "givenName", "sn"]
+
         self.conn.search(
             search_base,
             f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
-            attributes=["sAMAccountName", "mail", "givenName", "sn", "wustlEduPrimaryRole"],
+            attributes=attributes,
         )
 
         if not self.conn.response:
@@ -99,17 +102,20 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
-    def get_user_by_email(self, email: str, search_base: Optional[str] = None):
+    def get_user_by_email(self, email: str, search_base: Optional[str] = None, attributes: Optional[list[str]] = None):
         if not email:
             raise ValueError(("email must be defined"))
 
         if search_base is None:
             search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
+        if attributes is None:
+            attributes = ["sAMAccountName", "mail", "givenName", "sn"]
+
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(objectClass=person)(mail={email}))",
-            attributes=["sAMAccountName", "mail", "givenName", "sn"],
+            attributes=attributes,
         )
 
         if not self.conn.response:
@@ -170,5 +176,6 @@ class ActiveDirectoryAPI:
         return f"cn={group_name},{groups_OU}"
 
     def is_faculty_member(self, wustlkey: str) -> bool:
-        user = self.get_user(wustlkey)
-        return "faculty" in user["wustlEduPrimaryRole"].lower()
+        attribute = "wustlEduPrimaryRole"
+        user = self.get_user(wustlkey, attributes=[attribute])
+        return "faculty" in user["attributes"][attribute].lower()
