@@ -16,12 +16,6 @@ class BillableUser:
         return self.user.username
 
     def is_eligible_for_subsidy(self) -> bool:
-        is_eligible: bool = False
-        if self.__is_faculty():
-            is_eligible = True
-        return is_eligible
-
-    def __is_faculty(self) -> bool:
         return ActiveDirectoryAPI().is_faculty_member(self.washu_key)
 
     def get_user(self) -> User:
@@ -29,12 +23,17 @@ class BillableUser:
 
     def factory(cls, washu_key: str) -> "BillableUser":
         # Factory method to create a BillableUser instance based on a WashU key
-        user = User.objects.get(username=washu_key)
+        user = User.objects.filter(username=washu_key).first()
+        if not user:
+            raise ValueError(f"No user found with WashU key: {washu_key}")
         return cls(user)
 
     def factory_by_allocation(cls, allocation: Allocation) -> "BillableUser":
         # Factory method to create a BillableUser instance based on an Allocation
-        return cls(allocation.project.pi.username)
+        user = allocation.project.pi
+        if not user:
+            raise ValueError("No PI found for the given allocation")
+        return cls(user)
 
     def __str__(self):
         return f"BillableUser(washu_key={self.washu_key})"

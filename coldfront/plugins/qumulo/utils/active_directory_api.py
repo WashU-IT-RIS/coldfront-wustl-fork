@@ -170,12 +170,13 @@ class ActiveDirectoryAPI:
 
         self.conn.modify(group_dn, {"member": [(MODIFY_DELETE, [member_dn])]})
 
+    def is_faculty_member(self, wustlkey: str) -> bool:
+        attribute = "wustlEduPrimaryRole"
+        breakpoint()
+        user = self.get_user(wustlkey, attributes=[attribute])
+        return "faculty" in user["attributes"][attribute].lower()
+
     @staticmethod
     def generate_group_dn(group_name: str) -> str:
         groups_OU = os.environ.get("AD_GROUPS_OU")
         return f"cn={group_name},{groups_OU}"
-
-    def is_faculty_member(self, wustlkey: str) -> bool:
-        attribute = "wustlEduPrimaryRole"
-        user = self.get_user(wustlkey, attributes=[attribute])
-        return "faculty" in user["attributes"][attribute].lower()
