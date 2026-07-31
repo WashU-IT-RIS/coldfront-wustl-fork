@@ -4,7 +4,7 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 
 
 def is_eligible_for_subsidy(washu_key: str) -> bool:
-    user = BillableUser.factory(washu_key)
+    user = BillableUser(washu_key)
     return user.is_eligible_for_subsidy()
 
 
@@ -25,21 +25,13 @@ class BillableUser:
     def get_user(self) -> User:
         return self.user
 
-    def factory(cls, washu_key: str) -> "BillableUser":
-        # Factory method to create a BillableUser instance based on a WashU key
-        if not washu_key:
-            raise ValueError("WashU key is required to create a BillableUser")
-        return cls(washu_key)
-
+    def __str__(self):
+        return f"BillableUser(washu_key={self.washu_key})"
+    
+    @classmethod
     def factory_by_allocation(cls, allocation: Allocation) -> "BillableUser":
         # Factory method to create a BillableUser instance based on an Allocation
         user = allocation.project.pi
         if not user:
             raise ValueError("No PI found for the given allocation")
         return cls(user.username)
-
-    def __str__(self):
-        return f"BillableUser(washu_key={self.washu_key})"
-
-    factory = classmethod(factory)
-    factory_by_allocation = classmethod(factory_by_allocation)
