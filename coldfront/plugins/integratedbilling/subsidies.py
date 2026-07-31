@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from coldfront.core.allocation.models import Allocation
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 
+
 def is_eligible_for_subsidy(washu_key: str) -> bool:
     user = BillableUser.factory(washu_key)
     return user.is_eligible_for_subsidy()
@@ -16,6 +17,12 @@ class BillableUser:
         return self.user.username
 
     def is_eligible_for_subsidy(self) -> bool:
+        try:
+            return self.__is_faculty_member()
+        except Exception as e:
+            raise ValueError(f"Cannot determine the user's eligibility for subsidy.")
+
+    def __is_faculty_member(self) -> bool:
         return ActiveDirectoryAPI().is_faculty_member(self.washu_key)
 
     def get_user(self) -> User:
