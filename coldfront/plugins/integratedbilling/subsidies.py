@@ -10,9 +10,9 @@ def is_eligible_for_subsidy(washu_key: str) -> bool:
 
 class BillableUser:
     def __init__(self, washu_key: str):
-        print(f"Creating BillableUser for washu_key: {washu_key}")
         self.washu_key = washu_key
         self.user = User.objects.filter(username=washu_key).first()
+        print(f"Creating BillableUser for washu_key: {washu_key}")
 
     def is_eligible_for_subsidy(self) -> bool:
         try:
@@ -21,6 +21,7 @@ class BillableUser:
             raise ValueError(f"Cannot determine the user's eligibility for subsidy")
 
     def __is_faculty_member(self) -> bool:
+        print(f"Checking if user {self.washu_key} is a faculty member.")
         return ActiveDirectoryAPI().is_faculty_member(self.washu_key)
 
     def get_user(self) -> User:

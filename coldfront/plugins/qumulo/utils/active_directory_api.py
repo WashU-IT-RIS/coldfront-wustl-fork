@@ -36,6 +36,7 @@ class ActiveDirectoryAPI:
         if attributes is None:
             attributes = ["sAMAccountName", "mail", "givenName", "sn"]
 
+        print(f"Searching for user with wustlkey: {wustlkey} in search base: {search_base}, with attributes: {attributes}")
         self.conn.search(
             search_base,
             f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
