@@ -10,6 +10,7 @@ def is_eligible_for_subsidy(washu_key: str) -> bool:
 
 class BillableUser:
     def __init__(self, washu_key: str):
+        print(f"Creating BillableUser for washu_key: {washu_key}")
         self.washu_key = washu_key
         self.user = User.objects.filter(username=washu_key).first()
 
