@@ -3,8 +3,6 @@ from unittest.mock import patch, call, MagicMock
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from ldap3 import MODIFY_DELETE
 
-import os
-
 
 os_environ = {
     "AD_SERVER_NAME": "test_server",
@@ -252,28 +250,27 @@ class TestActiveDirectoryAPI(TestCase):
 
     def test_is_faculty_member_returns_true_for_faculty(self):
 
-            # when the user is a faculty member, the method should return True
-            wustlkey = "faculty_user"
+        # when the user is a faculty member, the method should return True
+        wustlkey = "faculty_user"
+        self.mock_connection.response = [
+            {
+                "dn": "user_dn",
+                "attributes": {"wustlEduPrimaryRole": "Faculty"},
+            }
+        ]
+        result = self.ad_api.is_faculty_member(wustlkey)
+        self.assertTrue(result)
+
+    def test_is_faculty_member_returns_false_for_non_faculty(self):
+
+        # when the user is a friend or alumni member, the method should return False
+        non_faculty_users = {"friend_user": "Friend", "alumni_user": "Alumni"}
+        for wustlkey, role in non_faculty_users.items():
             self.mock_connection.response = [
                 {
                     "dn": "user_dn",
-                    "attributes": {"wustlEduPrimaryRole": "Faculty"},
+                    "attributes": {"wustlEduPrimaryRole": role},
                 }
             ]
-    
             result = self.ad_api.is_faculty_member(wustlkey)
-    
-            self.assertTrue(result)
-
-            # when the user is a friend or alumni member, the method should return False
-            for wustlkey in ["friend_user", "alumni_user"]:
-                self.mock_connection.response = [
-                    {
-                        "dn": "user_dn",
-                        "attributes": {"wustlEduPrimaryRole": "Friend" if wustlkey == "friend_user" else "Alumni"},
-                    }
-                ]
-
-                result = self.ad_api.is_faculty_member(wustlkey)
-
-                self.assertFalse(result)
+            self.assertFalse(result)
