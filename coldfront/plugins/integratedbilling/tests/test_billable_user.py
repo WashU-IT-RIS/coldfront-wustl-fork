@@ -51,8 +51,7 @@ class TestBillableUser(TestCase):
 
     def test_factory(self):
         # Create a BillableUser instance using the factory
-        user = self.pi  # Use the PI from the allocation as the test user
-        billable_user = BillableUser.factory(user.username)
+        billable_user = BillableUser.factory_by_allocation(self.storage_allocation)
         self.assertIsInstance(billable_user, BillableUser)
         self.assertIsNotNone(billable_user.get_user())
 
@@ -77,7 +76,7 @@ class TestBillableUser(TestCase):
 
     def test_str_representation(self):
         user = self.pi  # Use the PI from the allocation as the test user
-        billable_user = BillableUser.factory(user.username)
+        billable_user = BillableUser(user.username)
         str_representation = str(billable_user)
         self.assertTrue(
             str_representation.startswith(f"BillableUser(washu_key={user.username})")
@@ -85,7 +84,7 @@ class TestBillableUser(TestCase):
 
     def test_get_user(self):
         user = self.pi  # Use the PI from the allocation as the test user
-        billable_user = BillableUser.factory(user.username)
+        billable_user = BillableUser(user.username)
         retrieved_user = billable_user.get_user()
         self.assertEqual(retrieved_user, user)
 
