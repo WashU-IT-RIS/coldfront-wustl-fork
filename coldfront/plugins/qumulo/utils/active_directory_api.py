@@ -43,6 +43,7 @@ class ActiveDirectoryAPI:
         )
 
         if not self.conn.response:
+            print(f"No user found for wustlkey: {wustlkey}")
             raise ValueError("Invalid wustlkey")
 
         return self.conn.response[0]
