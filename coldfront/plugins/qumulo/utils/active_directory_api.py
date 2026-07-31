@@ -172,7 +172,6 @@ class ActiveDirectoryAPI:
 
     def is_faculty_member(self, wustlkey: str) -> bool:
         attribute = "wustlEduPrimaryRole"
-        breakpoint()
         user = self.get_user(wustlkey, attributes=[attribute])
         return "faculty" in user["attributes"][attribute].lower()
 

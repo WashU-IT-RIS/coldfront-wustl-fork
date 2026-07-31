@@ -249,3 +249,31 @@ class TestActiveDirectoryAPI(TestCase):
                 self.mock_connection.modify.assert_called_once_with(
                     group_dn, {"member": [(MODIFY_DELETE, [user_dn])]}
                 )
+
+    def test_is_faculty_member_returns_true_for_faculty(self):
+
+            # when the user is a faculty member, the method should return True
+            wustlkey = "faculty_user"
+            self.mock_connection.response = [
+                {
+                    "dn": "user_dn",
+                    "attributes": {"wustlEduPrimaryRole": "Faculty"},
+                }
+            ]
+    
+            result = self.ad_api.is_faculty_member(wustlkey)
+    
+            self.assertTrue(result)
+
+            # when the user is a friend or alumni member, the method should return False
+            for wustlkey in ["friend_user", "alumni_user"]:
+                self.mock_connection.response = [
+                    {
+                        "dn": "user_dn",
+                        "attributes": {"wustlEduPrimaryRole": "Friend" if wustlkey == "friend_user" else "Alumni"},
+                    }
+                ]
+
+                result = self.ad_api.is_faculty_member(wustlkey)
+
+                self.assertFalse(result)
