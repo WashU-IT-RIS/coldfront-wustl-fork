@@ -10,6 +10,9 @@ from django.test import TestCase
 from coldfront.plugins.integratedbilling.factories import ServiceRateCategoryFactory
 from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
 
+from coldfront.plugins.integratedbilling.tests.test_billable_user import (
+    is_faculty_member_side_effect,
+)
 from coldfront.plugins.qumulo.tests.fixtures_usages import (
     create_coldfront_allocations_with_usages,
 )
@@ -17,11 +20,37 @@ from coldfront.plugins.qumulo.tests.fixtures_usages import (
 
 class TestReportGenerator(TestCase):
 
+    @mock.patch(
+        "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
+    )
+    def setUp(self, mock_itsm_client_handler: mock.MagicMock) -> None:
+        self.usage_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
+        ServiceRateCategoryFactory(current_service_rate=True, archive_service=True)
+        ServiceRateCategoryFactory(current_service_rate=True, active_service=True)
+
+        # source data setup Coldfront allocations with usages recorded on the first day of the month
+        with freeze_time(self.usage_date):
+            create_coldfront_allocations_with_usages()
+
+        # source data setup ITSM mock data
+        with open(
+            "coldfront/plugins/integratedbilling/static/mock_monthly_billing_data_current_month.json",
+            "r",
+        ) as file:
+            report_generator = ReportGenerator(self.usage_date)
+            mock_data = json.load(file)
+            report_generator.client.handler.get_data.return_value = mock_data
+            self.mock_report_generator = report_generator
+
     def test_log_failed_subsidized_entries(self):
         # Create two allocations for the same PI, both subsidized, which should trigger the log
         pi_name = "Test PI"
-        alloc1 = AllocationUsageFactory(sponsor_pi=pi_name, subsidized=True, tier="Active")
-        alloc2 = AllocationUsageFactory(sponsor_pi=pi_name, subsidized=True, tier="Active")
+        alloc1 = AllocationUsageFactory(
+            sponsor_pi=pi_name, subsidized=True, tier="Active"
+        )
+        alloc2 = AllocationUsageFactory(
+            sponsor_pi=pi_name, subsidized=True, tier="Active"
+        )
         # Add a non-failing allocation for another PI
         AllocationUsageFactory(sponsor_pi="Other PI", subsidized=True, tier="Active")
 
@@ -46,28 +75,12 @@ class TestReportGenerator(TestCase):
         self.assertNotIn("Other PI", output)
 
     @mock.patch(
-        "coldfront.plugins.integratedbilling.billing_itsm_client.ItsmClientHandler"
+        "coldfront.plugins.integratedbilling.fee_calculator.is_eligible_for_subsidy",
+        return_value=True,
     )
-    def setUp(self, mock_report_generator: mock.MagicMock) -> None:
-        self.usage_date = datetime(2025, 10, 1, 18, 0, 0, tzinfo=timezone.utc)
-        ServiceRateCategoryFactory(current_service_rate=True, archive_service=True)
-        ServiceRateCategoryFactory(current_service_rate=True, active_service=True)
-
-        # source data setup Coldfront allocations with usages recorded on the first day of the month
-        with freeze_time(self.usage_date):
-            create_coldfront_allocations_with_usages()
-
-        # source data setup ITSM mock data
-        with open(
-            "coldfront/plugins/integratedbilling/static/mock_monthly_billing_data_current_month.json",
-            "r",
-        ) as file:
-            report_generator = ReportGenerator(self.usage_date)
-            mock_data = json.load(file)
-            report_generator.client.handler.get_data.return_value = mock_data
-            self.mock_report_generator = report_generator
-
-    def test_generate_report_for_current_month_default(self):
+    def test_generate_report_for_current_month_default(
+        self, mock_is_eligible_for_subsidy
+    ):
         self.mock_report_generator.generate()
         # check that report file is created
         with open(
