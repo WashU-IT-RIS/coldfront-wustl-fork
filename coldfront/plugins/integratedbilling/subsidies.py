@@ -27,9 +27,8 @@ class BillableUser:
 
     def factory(cls, washu_key: str) -> "BillableUser":
         # Factory method to create a BillableUser instance based on a WashU key
-        user = User.objects.filter(username=washu_key).first()
-        if not user:
-            raise ValueError(f"No user found with WashU key: {washu_key}")
+        if not washu_key:
+            raise ValueError("WashU key is required to create a BillableUser")
         return cls(washu_key)
 
     def factory_by_allocation(cls, allocation: Allocation) -> "BillableUser":
