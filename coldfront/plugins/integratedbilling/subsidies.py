@@ -9,12 +9,9 @@ def is_eligible_for_subsidy(washu_key: str) -> bool:
 
 
 class BillableUser:
-    def __init__(self, user: User):
-        self.user = user
-        self.washu_key = self.__get_washu_key()
-
-    def __get_washu_key(self) -> str:
-        return self.user.username
+    def __init__(self, washu_key: str):
+        self.washu_key = washu_key
+        self.user = User.objects.filter(username=washu_key).first()
 
     def is_eligible_for_subsidy(self) -> bool:
         try:
@@ -33,14 +30,14 @@ class BillableUser:
         user = User.objects.filter(username=washu_key).first()
         if not user:
             raise ValueError(f"No user found with WashU key: {washu_key}")
-        return cls(user)
+        return cls(washu_key)
 
     def factory_by_allocation(cls, allocation: Allocation) -> "BillableUser":
         # Factory method to create a BillableUser instance based on an Allocation
         user = allocation.project.pi
         if not user:
             raise ValueError("No PI found for the given allocation")
-        return cls(user)
+        return cls(user.username)
 
     def __str__(self):
         return f"BillableUser(washu_key={self.washu_key})"
