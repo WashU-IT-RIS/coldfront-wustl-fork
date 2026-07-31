@@ -2,7 +2,10 @@ from datetime import date
 from decimal import Decimal
 from coldfront.core.billing.models import MonthlyStorageBilling
 from coldfront.plugins.integratedbilling.models import ServiceRateCategory
-from coldfront.plugins.integratedbilling.subsidies import BillableUser, is_eligible_for_subsidy
+from coldfront.plugins.integratedbilling.subsidies import (
+    BillableUser,
+    is_eligible_for_subsidy,
+)
 
 # TODO: Move to config?
 SUBSIDIZED_AMOUNT_TB = Decimal(
@@ -23,7 +26,17 @@ def get_billing_objects(
             )
             continue
 
-        billing_object.billable_usage_tb = calculate_billable_usage(billing_object)
+        try:
+            eligible_for_subsidy = is_eligible_for_subsidy(billing_object.sponsor_pi)
+            billing_object.billable_usage_tb = calculate_billable_usage(
+                billing_object, eligible_for_subsidy
+            )
+        except ValueError as e:
+            print(
+                f"Error creating BillableUser for AllocationUsage ID {billing_object.id} (fileset {billing_object.fileset_name}): {e}. Skipping."
+            )
+            continue
+
         if billing_object.billable_usage_tb == Decimal("0.0"):
             continue
 
@@ -73,13 +86,15 @@ def calculate_fee(
 ) -> Decimal:
     return round(billing_object.billable_usage_tb * rate_category.rate, 2)
 
-def calculate_billable_usage(billing_object) -> Decimal:
-    if not is_eligible_for_subsidy(billing_object.sponsor_pi):
+
+def calculate_billable_usage(billing_object, eligible_for_subsidy: bool) -> Decimal:
+    if not eligible_for_subsidy:
         print(
             f"User {billing_object.sponsor_pi} is not eligible for subsidy. Billable usage: {billing_object.usage_tb} TB"
         )
         return billing_object.usage_tb
-    
+
     if billing_object.subsidized:
         return max(Decimal("0.0"), (billing_object.usage_tb - SUBSIDIZED_AMOUNT_TB))
+
     return billing_object.usage_tb
