@@ -43,6 +43,8 @@ class ActiveDirectoryAPI:
             attributes=attributes,
         )
 
+        print(f"Search response for wustlkey {wustlkey}: {self.conn.result}")
+
         if not self.conn.response:
             print(f"No user found for wustlkey: {wustlkey}")
             raise ValueError("Invalid wustlkey")
