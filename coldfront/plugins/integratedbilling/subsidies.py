@@ -17,7 +17,7 @@ class BillableUser:
         try:
             return self.__is_faculty_member()
         except Exception as e:
-            raise ValueError(f"Cannot determine the user's eligibility for subsidy.")
+            raise ValueError(f"Cannot determine the user's eligibility for subsidy")
 
     def __is_faculty_member(self) -> bool:
         return ActiveDirectoryAPI().is_faculty_member(self.washu_key)

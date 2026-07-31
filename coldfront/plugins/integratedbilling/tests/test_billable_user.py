@@ -27,7 +27,7 @@ def is_faculty_member_side_effect(washu_key: str) -> bool:
         return False
 
     if washu_key == UNKNOWN_USER:
-        raise ValueError("Cannot determine the user's eligibility for subsidy.")
+        raise ValueError("Cannot determine the user's eligibility for subsidy")
 
     return True
 
@@ -93,7 +93,7 @@ class TestBillableUser(TestCase):
     def test_unknown_user_raises_value_error(self):
         with self.assertRaises(ValueError) as context:
             is_eligible_for_subsidy(UNKNOWN_USER)
-        self.assertIn("Cannot determine the user's eligibility for subsidy.", str(context.exception))
+        self.assertIn("Cannot determine the user's eligibility for subsidy", str(context.exception))
 
 
 # def ad_lookup_get_user_side_effect(washu_key: str, search_base: Optional[str] = None, attributes: Optional[list[str]] = ["wustlEduPrimaryRole"]) -> dict:
