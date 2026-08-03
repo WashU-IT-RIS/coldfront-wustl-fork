@@ -191,6 +191,7 @@ class ActiveDirectoryAPI:
             "CN=Faculty,OU=WU,OU=IdM Groups,DC=accounts,DC=ad,DC=wustl,DC=edu"
         )
         try:
+            print(f"Checking if user {wustlkey} is a faculty member.")
             user = self.get_user(wustlkey, faculty_group_dn=faculty_group_dn)
             return bool(user)
         except ValueError:

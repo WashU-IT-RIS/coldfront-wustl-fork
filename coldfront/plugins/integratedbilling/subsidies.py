@@ -15,12 +15,6 @@ class BillableUser:
         print(f"Creating BillableUser for washu_key: {washu_key}")
 
     def is_eligible_for_subsidy(self) -> bool:
-        try:
-            return self.__is_faculty_member()
-        except Exception as e:
-            raise ValueError(f"Cannot determine the user's eligibility for subsidy")
-
-    def __is_faculty_member(self) -> bool:
         print(f"Checking if user {self.washu_key} is a faculty member.")
         return ActiveDirectoryAPI().is_faculty_member(self.washu_key)
 

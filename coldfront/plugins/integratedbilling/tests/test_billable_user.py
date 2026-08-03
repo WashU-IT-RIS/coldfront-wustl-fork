@@ -17,17 +17,12 @@ from coldfront.plugins.qumulo.tests.helper_classes.factories import (
 I_AM_A_FRIEND = "i-am-a-friend"
 I_AM_AN_ALUMNI = "i-am-an-alumni"
 UNKNOWN_USER = "unknown-user"
+non_faculty_users = [I_AM_A_FRIEND, I_AM_AN_ALUMNI, UNKNOWN_USER]
 
 
 def is_faculty_member_side_effect(washu_key: str) -> bool:
-    if washu_key == I_AM_A_FRIEND:
+    if washu_key in non_faculty_users:
         return False
-
-    if washu_key == I_AM_AN_ALUMNI:
-        return False
-
-    if washu_key == UNKNOWN_USER:
-        raise ValueError("Cannot determine the user's eligibility for subsidy")
 
     return True
 
@@ -88,11 +83,11 @@ class TestBillableUser(TestCase):
         retrieved_user = billable_user.get_user()
         self.assertEqual(retrieved_user, user)
 
-    @mock.patch(
-        "coldfront.plugins.integratedbilling.subsidies.ActiveDirectoryAPI.is_faculty_member",
-        return_value=False,
-    )
+    @mock.patch("coldfront.plugins.integratedbilling.subsidies.ActiveDirectoryAPI")
     def test_is_eligible_for_subsidy_unknown_user(self, mock_active_directory_api):
+        mock_active_directory_api.return_value.is_faculty_member.side_effect = (
+            is_faculty_member_side_effect
+        )
         self.assertFalse(is_eligible_for_subsidy(UNKNOWN_USER))
 
 
