@@ -10,9 +10,6 @@ from django.test import TestCase
 from coldfront.plugins.integratedbilling.factories import ServiceRateCategoryFactory
 from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
 
-from coldfront.plugins.integratedbilling.tests.test_billable_user import (
-    is_faculty_member_side_effect,
-)
 from coldfront.plugins.qumulo.tests.fixtures_usages import (
     create_coldfront_allocations_with_usages,
 )

@@ -262,15 +262,10 @@ class TestActiveDirectoryAPI(TestCase):
         self.assertTrue(result)
 
     def test_is_faculty_member_returns_false_for_non_faculty(self):
-
         # when the user is a friend or alumni member, the method should return False
         non_faculty_users = {"friend_user": "Friend", "alumni_user": "Alumni"}
+        not_in_faculty_group_response = []
         for wustlkey, role in non_faculty_users.items():
-            self.mock_connection.response = [
-                {
-                    "dn": "user_dn",
-                    "attributes": {"wustlEduPrimaryRole": role},
-                }
-            ]
+            self.mock_connection.response = not_in_faculty_group_response
             result = self.ad_api.is_faculty_member(wustlkey)
             self.assertFalse(result)

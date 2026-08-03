@@ -89,10 +89,8 @@ class TestBillableUser(TestCase):
         self.assertEqual(retrieved_user, user)
 
 
-    def test_unknown_user_raises_value_error(self):
-        with self.assertRaises(ValueError) as context:
-            is_eligible_for_subsidy(UNKNOWN_USER)
-        self.assertIn("Cannot determine the user's eligibility for subsidy", str(context.exception))
+    def test_is_eligible_for_subsidy_unknown_user(self):
+        self.assertFalse(is_eligible_for_subsidy(UNKNOWN_USER))
 
 
 # def ad_lookup_get_user_side_effect(washu_key: str, search_base: Optional[str] = None, attributes: Optional[list[str]] = ["wustlEduPrimaryRole"]) -> dict:

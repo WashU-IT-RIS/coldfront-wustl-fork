@@ -26,20 +26,27 @@ class ActiveDirectoryAPI:
         if not self.conn.bind():
             raise self.conn.result
 
-    def get_user(self, wustlkey: str, search_base: Optional[str] = None, attributes: Optional[list[str]] = None):
+    def get_user(
+        self,
+        wustlkey: str,
+        search_base: Optional[str] = None,
+        attributes: Optional[list[str]] = None,
+        faculty_group_dn: str = None,
+    ):
         if not wustlkey:
             raise ValueError(("wustlkey must be defined"))
-        
+
         if search_base is None:
             search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         if attributes is None:
             attributes = ["sAMAccountName", "mail", "givenName", "sn"]
 
-        print(f"Searching for user with wustlkey: {wustlkey} in search base: {search_base}, with attributes: {attributes}")
+        member_of_clause = f"(memberOf={faculty_group_dn})" if faculty_group_dn else ""
+
         self.conn.search(
             search_base,
-            f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
+            f"(&(objectClass=person)(sAMAccountName={wustlkey}){member_of_clause})",
             attributes=attributes,
         )
 
@@ -106,7 +113,12 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
-    def get_user_by_email(self, email: str, search_base: Optional[str] = None, attributes: Optional[list[str]] = None):
+    def get_user_by_email(
+        self,
+        email: str,
+        search_base: Optional[str] = None,
+        attributes: Optional[list[str]] = None,
+    ):
         if not email:
             raise ValueError(("email must be defined"))
 
@@ -175,10 +187,17 @@ class ActiveDirectoryAPI:
         self.conn.modify(group_dn, {"member": [(MODIFY_DELETE, [member_dn])]})
 
     def is_faculty_member(self, wustlkey: str) -> bool:
-        attribute = "wustlEduPrimaryRole"
-        user = self.get_user(wustlkey, attributes=[attribute])
-        print(f"User attributes for {wustlkey}: {user['attributes']}")
-        return "faculty" in user["attributes"][attribute].lower()
+        faculty_group_dn = (
+            "CN=Faculty,OU=WU,OU=IdM Groups,DC=accounts,DC=ad,DC=wustl,DC=edu"
+        )
+        try:
+            user = self.get_user(wustlkey, faculty_group_dn=faculty_group_dn)
+            return bool(user)
+        except ValueError:
+            print(
+                f"User with wustlkey {wustlkey} is not a faculty member or does not exist."
+            )
+            return False
 
     @staticmethod
     def generate_group_dn(group_name: str) -> str:
