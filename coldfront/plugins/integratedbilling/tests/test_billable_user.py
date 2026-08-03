@@ -88,8 +88,11 @@ class TestBillableUser(TestCase):
         retrieved_user = billable_user.get_user()
         self.assertEqual(retrieved_user, user)
 
-
-    def test_is_eligible_for_subsidy_unknown_user(self):
+    @mock.patch(
+        "coldfront.plugins.integratedbilling.subsidies.ActiveDirectoryAPI.is_faculty_member",
+        return_value=False,
+    )
+    def test_is_eligible_for_subsidy_unknown_user(self, mock_active_directory_api):
         self.assertFalse(is_eligible_for_subsidy(UNKNOWN_USER))
 
 
