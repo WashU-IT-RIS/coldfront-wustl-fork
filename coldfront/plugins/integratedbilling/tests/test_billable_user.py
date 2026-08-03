@@ -89,13 +89,3 @@ class TestBillableUser(TestCase):
             is_faculty_member_side_effect
         )
         self.assertFalse(is_eligible_for_subsidy(UNKNOWN_USER))
-
-
-# def ad_lookup_get_user_side_effect(washu_key: str, search_base: Optional[str] = None, attributes: Optional[list[str]] = ["wustlEduPrimaryRole"]) -> dict:
-#     if washu_key == I_AM_A_FRIEND:
-#         return {"sAMAccountName": I_AM_A_FRIEND, "attributes": {attributes[0]: "FRIEND"}}
-
-#     if washu_key == I_AM_AN_ALUMNI:
-#         return {"sAMAccountName": I_AM_AN_ALUMNI, "attributes": {attributes[0]: "ALUMNI"}}
-
-#     return {"sAMAccountName": washu_key, "attributes": {attributes[0]: "FACULTY"}}
