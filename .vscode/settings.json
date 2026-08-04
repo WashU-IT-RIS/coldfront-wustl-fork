@@ -11,8 +11,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
-  "black-formatter.cwd": "${workspaceFolder}",
-  "python-envs.defaultEnvManager": "ms-python.python:venv"
+  "black-formatter.cwd": "${workspaceFolder}"
   // "black-formatter.args": [
   //     "['--exclude','coldfront/.*']",
   //     "['--include','coldfront/.*/plugins/qumulo/.*']"
