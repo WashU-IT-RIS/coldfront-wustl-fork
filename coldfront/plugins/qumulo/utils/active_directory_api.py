@@ -29,15 +29,13 @@ class ActiveDirectoryAPI:
     def get_user(
         self,
         wustlkey: str,
-        search_base: Optional[str] = None,
         attributes: Optional[list[str]] = None,
-        faculty_group_dn: str = None,
+        faculty_group_dn: Optional[str] = None,
     ):
         if not wustlkey:
             raise ValueError(("wustlkey must be defined"))
 
-        if search_base is None:
-            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         if attributes is None:
             attributes = ["sAMAccountName", "mail", "givenName", "sn"]
@@ -51,14 +49,12 @@ class ActiveDirectoryAPI:
         )
 
         if not self.conn.response:
-            print(f"No user found for wustlkey: {wustlkey}")
             raise ValueError("Invalid wustlkey")
 
         return self.conn.response[0]
 
-    def get_users(self, wustlkeys: list[str], search_base: Optional[str] = None):
-        if search_base is None:
-            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+    def get_users(self, wustlkeys: list[str]):
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         user_filter_base = lambda user: f"(sAMAccountName={user})"
 
@@ -75,9 +71,8 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
-    def get_member(self, account_name: str, search_base: Optional[str] = None):
-        if search_base is None:
-            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+    def get_member(self, account_name: str):
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         self.conn.search(
             search_base,
@@ -90,12 +85,11 @@ class ActiveDirectoryAPI:
 
         return self.conn.response[0]
 
-    def get_members(self, account_names: list[str], search_base: Optional[str] = None):
+    def get_members(self, account_names: list[str]):
         if not account_names:
             return []
 
-        if search_base is None:
-            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         member_filter_base = lambda member: f"(sAMAccountName={member})"
         member_filters = f"(|{''.join(map(member_filter_base, account_names))})"
@@ -114,17 +108,15 @@ class ActiveDirectoryAPI:
     def get_user_by_email(
         self,
         email: str,
-        search_base: Optional[str] = None,
         attributes: Optional[list[str]] = None,
     ):
         if not email:
             raise ValueError(("email must be defined"))
 
-        if search_base is None:
-            search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
-
         if attributes is None:
             attributes = ["sAMAccountName", "mail", "givenName", "sn"]
+
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
         self.conn.search(
             search_base,
