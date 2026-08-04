@@ -47,11 +47,6 @@ class AllocationUsageQuerySet(models.QuerySet):
     def by_pi(self, sponsor_pi):
         return self.filter(sponsor_pi=sponsor_pi)
 
-    # TODO this has no references in the codebase, consider if we want to keep this or remove this.
-    # if it needs to stay, consider renaming this to be more specific to the context of its usage, for example, has_usage or has_positive_usage
-    def only_positive_usage(self):
-        return self.filter(usage_tb__gt=0)
-
     # From the queryset of monthly_billable consumption allocations
     def _count_subsidized_by_pi(self, sponsor_pi) -> int:
         return self.filter(
