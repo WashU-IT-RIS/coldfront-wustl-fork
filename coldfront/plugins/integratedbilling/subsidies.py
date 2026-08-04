@@ -12,7 +12,6 @@ class BillableUser:
     def __init__(self, washu_key: str):
         self.washu_key = washu_key
         self.user = User.objects.filter(username=washu_key).first()
-        print(f"Creating BillableUser for washu_key: {washu_key}")
 
     def is_eligible_for_subsidy(self) -> bool:
         return ActiveDirectoryAPI().is_faculty_member(self.washu_key)
@@ -22,7 +21,7 @@ class BillableUser:
 
     def __str__(self):
         return f"BillableUser(washu_key={self.washu_key})"
-    
+
     @classmethod
     def factory_by_allocation(cls, allocation: Allocation) -> "BillableUser":
         # Factory method to create a BillableUser instance based on an Allocation

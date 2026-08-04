@@ -33,10 +33,9 @@ def get_billing_objects(
             )
         except ValueError as e:
             print(
-                f"Error creating BillableUser for AllocationUsage ID {billing_object.id} (fileset {billing_object.fileset_name}): {e}. Skipping."
+                f"Error determining eligibility for AllocationUsage ID {billing_object.id} (fileset {billing_object.fileset_name}): {e}. Skipping."
             )
-            raise
-            # continue
+            continue
 
         if billing_object.billable_usage_tb == Decimal("0.0"):
             continue
