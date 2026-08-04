@@ -42,15 +42,13 @@ class ActiveDirectoryAPI:
         if attributes is None:
             attributes = ["sAMAccountName", "mail", "givenName", "sn"]
 
-        member_of_clause = f"(memberOf={faculty_group_dn})" if faculty_group_dn else ""
+        memberof_clause = f"(memberOf={faculty_group_dn})" if faculty_group_dn else ""
 
         self.conn.search(
             search_base,
-            f"(&(objectClass=person)(sAMAccountName={wustlkey}){member_of_clause})",
+            f"(&(objectClass=person)(sAMAccountName={wustlkey}){memberof_clause})",
             attributes=attributes,
         )
-
-        print(f"Search response for wustlkey {wustlkey}: {self.conn.result}")
 
         if not self.conn.response:
             print(f"No user found for wustlkey: {wustlkey}")
@@ -191,7 +189,6 @@ class ActiveDirectoryAPI:
             "CN=Faculty,OU=WU,OU=IdM Groups,DC=accounts,DC=ad,DC=wustl,DC=edu"
         )
         try:
-            print(f"Checking if user {wustlkey} is a faculty member.")
             user = self.get_user(wustlkey, faculty_group_dn=faculty_group_dn)
             return bool(user)
         except ValueError:
