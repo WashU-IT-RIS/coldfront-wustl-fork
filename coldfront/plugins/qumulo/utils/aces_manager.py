@@ -231,6 +231,21 @@ class AcesManager(object):
         ]
 
     @staticmethod
+    def get_allocation_symlink_aces():
+        return [
+            {
+                "flags": [],
+                "type": "ALLOWED",
+                "trustee": {"name": "Everyone"},
+                "rights": [
+                    "READ_EA",
+                    "WRITE_EA",
+                    "WRITE_ATTR",
+                    "EXECUTE",
+                ],
+            },
+        ]
+    @staticmethod
     def get_traverse_aces(
         rw_groupname: str, ro_groupname: str, is_base_allocation: bool
     ):
