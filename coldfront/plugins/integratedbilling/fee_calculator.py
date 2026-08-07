@@ -26,16 +26,7 @@ def get_billing_objects(
             )
             continue
 
-        try:
-            eligible_for_subsidy = is_eligible_for_subsidy(billing_object.sponsor_pi)
-            billing_object.billable_usage_tb = calculate_billable_usage(
-                billing_object, eligible_for_subsidy
-            )
-        except ValueError as e:
-            print(
-                f"Error determining eligibility for AllocationUsage ID {billing_object.id} (fileset {billing_object.fileset_name}): {e}. Skipping."
-            )
-            continue
+        billing_object.billable_usage_tb = calculate_billable_usage(billing_object)
 
         if billing_object.billable_usage_tb == Decimal("0.0"):
             continue
@@ -87,7 +78,8 @@ def calculate_fee(
     return round(billing_object.billable_usage_tb * rate_category.rate, 2)
 
 
-def calculate_billable_usage(billing_object, eligible_for_subsidy: bool) -> Decimal:
+def calculate_billable_usage(billing_object: MonthlyStorageBilling) -> Decimal:
+    eligible_for_subsidy = is_eligible_for_subsidy(billing_object.sponsor_pi)
     if not eligible_for_subsidy:
         print(
             f"User {billing_object.sponsor_pi} is not eligible for subsidy. Billable usage: {billing_object.usage_tb} TB"

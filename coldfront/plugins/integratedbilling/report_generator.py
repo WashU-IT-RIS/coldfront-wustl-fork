@@ -27,7 +27,7 @@ class ReportGenerator:
         self.delivery_date = delivery_date or self.__get_delivery_date()
         self.delivery_month = self.delivery_date.strftime("%B")
 
-    def generate(self, ingest_usages=True, dry_run=False) -> bool:
+    def generate(self, ingest_usages: bool = True, dry_run: bool = False) -> bool:
         if ingest_usages:
             success = self.itsm_usage_ingestion.process_usages()
             if not success:
@@ -75,16 +75,25 @@ class ReportGenerator:
     def __log_report_generation(self, status: str, details: dict) -> None:
         print(f"Report Generation Status: {status}, Details: {details}")
 
-    def __generate_summary(self, usages) -> dict:
+    def __generate_summary(
+        self, filtered_allocation_usages: list[MonthlyStorageBilling]
+    ) -> dict[str, float | int]:
         summary = {
-            "total_usages": usages.count(),
-            "total_amount_tb": sum(usage.usage_tb for usage in usages),
-            "total_subsidized": sum(1 for usage in usages if usage.subsidized),
+            "total_usages": len(filtered_allocation_usages),
+            "total_amount_tb": sum(
+                usage.usage_tb for usage in filtered_allocation_usages
+            ),
+            "total_billable_amount_tb": sum(
+                usage.billable_usage_tb for usage in filtered_allocation_usages
+            ),
+            "total_subsidized": sum(
+                1 for usage in filtered_allocation_usages if usage.subsidized
+            ),
         }
         return summary
 
     def __send_report(self, report_data):
-        print("Report not sent since the implementation is pending.")
+        print("Report not sent by email since the implementation is pending.")
 
     def __get_delivery_date(self) -> date:
         first_of_previous_month = (
@@ -109,12 +118,20 @@ class ReportGenerator:
     # This function logs details of subsidized validation failures, including the PI and allocation details for each failed entry.
     def __log_failed_subsidized_entries(self, billable_alloc_usages):
         # Find PIs and allocations when the PI has more than one subsidized allocation
-        pis = billable_alloc_usages.values_list('sponsor_pi', flat=True).order_by().distinct()
+        pis = (
+            billable_alloc_usages.values_list("sponsor_pi", flat=True)
+            .order_by()
+            .distinct()
+        )
         for pi in pis:
             if not billable_alloc_usages._is_subsidized_valid_by_pi(pi):
-                print(f"[Subsidized Validation Failure] PI {pi} has multiple subsidized allocations.")
+                print(
+                    f"[Subsidized Validation Failure] PI {pi} has multiple subsidized allocations."
+                )
                 for usage in billable_alloc_usages.filter(sponsor_pi=pi):
-                    print(f"    Allocation: source={usage.source}, external_key={usage.external_key}, filesystem_path={usage.filesystem_path}, exempt={usage.exempt}, subsidized={usage.subsidized}")
+                    print(
+                        f"    Allocation: source={usage.source}, external_key={usage.external_key}, filesystem_path={usage.filesystem_path}, exempt={usage.exempt}, subsidized={usage.subsidized}"
+                    )
 
 
 # helper function to get the default billing date (first day of the current month)
