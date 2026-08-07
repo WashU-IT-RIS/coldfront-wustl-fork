@@ -4,6 +4,8 @@ from factory.django import DjangoModelFactory
 
 from coldfront.core.allocation.models import Allocation
 from coldfront.core.test_helpers.factories import (
+    AllocationAttributeFactory,
+    AllocationAttributeTypeFactory,
     AllocationStatusChoiceFactory,
     FieldOfScienceFactory,
     ProjectFactory,
@@ -12,7 +14,6 @@ from coldfront.core.test_helpers.factories import (
     ResourceTypeFactory,
     UserFactory,
 )
-
 
 class RisProjectFactory(ProjectFactory):
     pi = factory.SubFactory(UserFactory)
@@ -71,7 +72,6 @@ class Storage2Factory(RisAllocationFactory):
             ),
         )
         self.resources.add(*resources)
-
 
 class Storage3Factory(RisAllocationFactory):
     storage = True

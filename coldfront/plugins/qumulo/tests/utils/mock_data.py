@@ -33,8 +33,6 @@ from typing import Optional
 
 from datetime import date
 
-import os
-
 default_form_data = {
     "storage_filesystem_path": "foo",
     "storage_export_path": "bar",
