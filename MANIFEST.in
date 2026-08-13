@@ -18,3 +18,4 @@ recursive-include coldfront/plugins/qumulo/static *
 recursive-include coldfront/plugins/qumulo/frontend/react *
 recursive-include coldfront/plugins/reporting/frontend/react *
 recursive-include coldfront/plugins/reporting/static *
+recursive-include coldfront/plugins/reporting/templates *
