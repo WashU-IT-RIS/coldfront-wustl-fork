@@ -134,7 +134,7 @@ def __create_ris_project_and_allocations(
     storage_allocation = storage_factory(project=project, **kwargs)
 
     kwargs_allocation_attributes = {
-        "billing_contact": project.pi.email,
+        "billing_contact": project.pi.username,
         "storage_name": project.pi.username,
         **kwargs,
     }

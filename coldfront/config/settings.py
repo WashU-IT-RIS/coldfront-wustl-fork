@@ -24,6 +24,7 @@ plugin_configs = {
     "PLUGIN_LDAP_USER_SEARCH": "plugins/ldap_user_search.py",
     "PLUGIN_QUMULO": "plugins/qumulo.py",
     "PLUGIN_INTEGRATEDBILLING": "plugins/integratedbilling.py",
+    "PLUGIN_REPORTING": "plugins/reporting.py"
 }
 
 # This allows plugins to be enabled via environment variables. Can alternatively
