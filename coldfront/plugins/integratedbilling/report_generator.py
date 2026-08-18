@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta, timezone
+from typing import Union
 
 from coldfront.plugins.integratedbilling.constants import ServiceTiers
 from coldfront.core.billing.models import AllocationUsage, MonthlyStorageBilling
@@ -77,7 +78,7 @@ class ReportGenerator:
 
     def __generate_summary(
         self, filtered_allocation_usages: list[MonthlyStorageBilling]
-    ) -> dict[str, float | int]:
+    ) -> dict[str, Union[float, int]]:
         summary = {
             "total_usages": len(filtered_allocation_usages),
             "total_amount_tb": sum(
