@@ -226,14 +226,22 @@ class UpdateAllocationView(AllocationView):
         access_keys = ["rw", "ro"]
         for key in access_keys:
             access_users = form_data[key + "_users"]
-            self.set_access_users(key, access_users, allocation)
+            self.set_access_users(
+                key,
+                access_users,
+                allocation,
+                actor_user_id=self.request.user.id,
+            )
 
         # needed for redirect logic to work
         self.success_id = str(allocation.id)
 
     @staticmethod
     def set_access_users(
-        access_key: str, access_users: list[str], storage_allocation: Allocation
+        access_key: str,
+        access_users: list[str],
+        storage_allocation: Allocation,
+        actor_user_id: Optional[int] = None,
     ):
         active_directory_api = ActiveDirectoryAPI()
 
@@ -250,7 +258,11 @@ class UpdateAllocationView(AllocationView):
         create_group_time = datetime.now()
 
         async_task(
-            addMembersToADGroup, users_to_add, access_allocation, create_group_time
+            addMembersToADGroup,
+            users_to_add,
+            access_allocation,
+            create_group_time,
+            actor_user_id,
         )
 
         users_to_remove = set(allocation_usernames) - set(access_users)

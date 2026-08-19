@@ -19,6 +19,8 @@ from coldfront.core.allocation.models import (
 )
 from coldfront.core.project.models import Project
 
+from django.test import RequestFactory
+
 from ldap3.core.exceptions import LDAPInvalidDnError
 
 import datetime
@@ -51,6 +53,9 @@ class TestAddMembersToADGroup(TestCase):
         self.client.force_login(self.user)
 
         self.create_allocation = AllocationService.create_new_allocation
+
+        self.request = RequestFactory().post("/")
+        self.request.user = self.user
 
         return super().setUp()
 
@@ -107,7 +112,7 @@ class TestAddMembersToADGroup(TestCase):
         with patch(
             "coldfront.plugins.qumulo.tasks.__add_members_and_handle_errors"
         ) as mock_add_members_and_handle_errors:
-            addMembersToADGroup(wustlkeys, acl_allocation, datetime_now)
+            addMembersToADGroup(wustlkeys, acl_allocation, datetime_now, self.request.user.id)
 
             mock_add_members_and_handle_errors.assert_called_once_with(
                 wustlkeys,
@@ -115,6 +120,7 @@ class TestAddMembersToADGroup(TestCase):
                 datetime_now,
                 [],
                 ["foo", "bar"],
+                self.request.user.id,
             )
 
     def test_appends_good_user_list_on_valid_user(
@@ -151,7 +157,7 @@ class TestAddMembersToADGroup(TestCase):
         with patch(
             "coldfront.plugins.qumulo.tasks.__add_members_and_handle_errors"
         ) as mock_add_members_and_handle_errors:
-            addMembersToADGroup(wustlkeys, acl_allocation, datetime_now)
+            addMembersToADGroup(wustlkeys, acl_allocation, datetime_now, self.request.user.id)
 
             mock_add_members_and_handle_errors.assert_called_once_with(
                 ["foo", "bar"],
@@ -165,6 +171,7 @@ class TestAddMembersToADGroup(TestCase):
                     }
                 ],
                 ["bar"],
+                self.request.user.id,
             )
 
     def test_appends_good_group_with_is_group(
@@ -201,7 +208,7 @@ class TestAddMembersToADGroup(TestCase):
         with patch(
             "coldfront.plugins.qumulo.tasks.__add_members_and_handle_errors"
         ) as mock_add_members_and_handle_errors:
-            addMembersToADGroup(wustlkeys, acl_allocation, datetime_now)
+            addMembersToADGroup(wustlkeys, acl_allocation, datetime_now, self.request.user.id)
 
             mock_add_members_and_handle_errors.assert_called_once_with(
                 wustlkeys,
@@ -215,6 +222,7 @@ class TestAddMembersToADGroup(TestCase):
                     }
                 ],
                 [],
+                self.request.user.id,
             ),
 
     @patch("coldfront.plugins.qumulo.tasks.send_email_template")
@@ -236,7 +244,7 @@ class TestAddMembersToADGroup(TestCase):
         )
 
         mock_active_directory_api.return_value.get_members.return_value = []
-        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now())
+        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now(), self.request.user.id)
 
         mock_send_email_template.assert_called_once()
 
@@ -277,7 +285,7 @@ class TestAddMembersToADGroup(TestCase):
             storage_allocation=allocation, resource_name="rw"
         )
 
-        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now())
+        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now(), self.request.user.id)
 
         active_directory_instance.add_members_to_ad_group.assert_not_called()
 
@@ -307,7 +315,7 @@ class TestAddMembersToADGroup(TestCase):
             storage_allocation=base_allocation, resource_name="rw"
         )
 
-        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now())
+        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now(), self.request.user.id)
         allocation_users = list(
             map(
                 lambda allocation_user: allocation_user.user.username,
@@ -349,7 +357,7 @@ class TestAddMembersToADGroup(TestCase):
             storage_allocation=base_allocation, resource_name="rw"
         )
 
-        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now())
+        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now(), self.request.user.id)
         allocation_users = list(
             map(
                 lambda allocation_user: allocation_user.user.username,
@@ -401,6 +409,7 @@ class TestAddMembersToADGroup(TestCase):
             wustlkeys,
             acl_allocation,
             datetime.datetime.now(),
+            self.request.user.id,
         )
 
         active_directory_instance.add_members_to_ad_group.assert_called_once_with(
@@ -448,6 +457,7 @@ class TestAddMembersToADGroup(TestCase):
             wustlkeys,
             acl_allocation,
             datetime.datetime.now(),
+            self.request.user.id,
         )
 
         mock_send_email_template.assert_called_once_with(
@@ -481,7 +491,7 @@ class TestAddMembersToADGroup(TestCase):
         self.user.save()
 
         mock_active_directory_api.return_value.get_members.return_value = []
-        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now())
+        addMembersToADGroup(wustlkeys, acl_allocation, datetime.datetime.now(), self.request.user.id)
 
         mock_send_email_template.assert_called_once_with(
             subject="Users not found in Storage Allocation",

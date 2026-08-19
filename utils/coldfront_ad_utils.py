@@ -70,4 +70,3 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
             raise ValueError("Invalid department")
 
         return self.conn.response
-
