@@ -30,9 +30,8 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
             f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
-            # attributes=["sAMAccountName", "mail", "givenName", "sn"],
-            attributes=ALL_ATTRIBUTES,
-            # attributes=["wustlEduHRPrimeDeptName","wustlEduOLSDisplayName"]
+            attributes=["wustlEduHRPrimeDeptName","wustlEduOLSDisplayName"]
+            # attributes=ALL_ATTRIBUTES,
         )
 
         if not self.conn.response:
@@ -47,9 +46,8 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
             f"(&(objectClass=person)(wustlEduHRPrimeDeptName={department}))",
-            # attributes=["sAMAccountName", "mail", "givenName", "sn"],
             attributes=ALL_ATTRIBUTES,
-            # attributes=["wustlEduHRPrimeDeptName","wustlEduOLSDisplayName"]
+            # attributes=["sAMAccountName", "mail", "givenName", "sn"],
             # attributes=["sAMAccountName"],
         )
 
@@ -65,10 +63,6 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
             f"(&(objectClass=group)(samAccountName={group_name}))",
-            # attributes=["sAMAccountName", "mail", "givenName", "sn"],
-            # attributes=ALL_ATTRIBUTES,
-            # attributes=["wustlEduHRPrimeDeptName","wustlEduOLSDisplayName"]
-            # attributes=["sAMAccountName"],
             attributes=['member'],
         )
 
