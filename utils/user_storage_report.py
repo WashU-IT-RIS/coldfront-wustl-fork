@@ -28,8 +28,8 @@ users = list()
 for service in ['Storage1', 'Storage2', 'Storage3']:
     path = f'{args.root}/{service}-UserList.csv'
     if os.path.isfile(path):
-        with open(path) as sul:
-            users.extend([x.rstrip() for x in sul.readlines()])
+        with open(path) as path_file:
+            users.extend([x.rstrip() for x in path_file.readlines()])
     else:
         print(f'Warning: no input found for {service}; skipping.')
 if len(users):

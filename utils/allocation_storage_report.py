@@ -28,8 +28,10 @@ allocations = list()
 for user_file in ['Storage1', 'Storage2', 'Storage3']:
     path = f'./{user_file}-AllocationPIs.csv'
     if os.path.isfile(path):
-        with open(path) as sul:
-            allocations.extend([x.rstrip() for x in sul.readlines()])
+        with open(path) as path_file:
+            allocations.extend(
+                [line.rstrip() for line in path_file.readlines()]
+            )
     else:
         print(f'Warning: no input found for {service}; skipping.')
 if len(allocations):
