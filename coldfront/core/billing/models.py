@@ -257,7 +257,7 @@ class MonthlyStorageBilling(AllocationUsage):
                     .monthrange(delivery_date.year, delivery_date.month)[-1]
         return(
             f'{delivery_date.month:02d}/'
-            f'{last_day_month()}/'
+            f'{last_day_month():02d}/'
             f'{delivery_date.year:04d}'
         )
 
