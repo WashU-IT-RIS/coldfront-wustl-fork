@@ -284,6 +284,7 @@ class MonthlyStorageBilling(AllocationUsage):
         """
         return cls._get_fiscal_year(delivery_date)
 
+    # bmulligan 20260826: this function appears to be unused
     @classmethod
     def _get_fiscal_year_by_document_date(cls, document_date):
         """
