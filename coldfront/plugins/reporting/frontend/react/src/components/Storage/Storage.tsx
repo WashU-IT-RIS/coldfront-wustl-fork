@@ -91,11 +91,11 @@ function Storage() {
         data={{
           usage: usage.map((element) => ({
             x: element.date,
-            y: element.usage,
+            y: GiBtoTiB(element.usage),
           })),
           quota: usage.map((element) => ({
             x: element.date,
-            y: element.quota,
+            y: GiBtoTiB(element.quota),
           })),
           path: selectedAllocation?.path || "",
         }}
@@ -152,6 +152,10 @@ async function getAllocationOptions() {
 
   const { allocations } = response.data;
   return allocations as AllocationOption[];
+}
+
+function GiBtoTiB(GiB: number) {
+  return GiB / 1024;
 }
 
 export default Storage;

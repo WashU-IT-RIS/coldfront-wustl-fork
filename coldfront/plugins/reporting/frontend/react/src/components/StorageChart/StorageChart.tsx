@@ -66,7 +66,7 @@ function StorageChart({ data }: StorageChartProps) {
           afterBody: (tooltipItems) => {
             return tooltipItems.map((tooltipItem) => {
               const rawData = tooltipItem.raw as { x: string; y: number };
-              return formatBytes((rawData.y * 2) ^ 30);
+              return formatBytes(rawData.y * 2 ** 40);
             });
           },
         },
@@ -83,10 +83,10 @@ function StorageChart({ data }: StorageChartProps) {
       y: {
         title: {
           display: true,
-          text: "Size (GiB)",
+          text: "Size (TiB)",
         },
         min: 0,
-        max: Math.floor((getMaxQuota() + 512) / 500) * 500,
+        max: Math.floor((getMaxQuota() + 0.25) / 0.25) * 0.25,
       },
     },
   };
