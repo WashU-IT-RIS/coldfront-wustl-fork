@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
-from typing import Any, Callable, Tuple, Union
+from typing import Any, Callable, Tuple, Type, Union
 
 import factory
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.core.project.models import Project, ProjectAttributeType
 from coldfront.core.test_helpers.factories import (
     AAttributeTypeFactory,
@@ -35,6 +35,8 @@ from coldfront.plugins.qumulo.tests.helper_classes.factories import (
     Storage3Factory,
 )
 
+storage_factory_type = Callable[[], Union[Storage2Factory, Storage3Factory]]
+
 
 def create_metadata_for_testing() -> None:
     create_attribute_types_for_ris_allocations()
@@ -47,7 +49,7 @@ def create_ris_project_and_allocations_storage2(
     storage_filesystem_path: str,
     pi_username: str = None,
     **kwargs: dict[str, Any],
-) -> Tuple[Project, dict[str, Allocation]]:
+) -> dict[Project, dict[str, Allocation]]:
     return __create_ris_project_and_allocations(
         Storage2Factory, storage_filesystem_path, pi_username=pi_username, **kwargs
     )
@@ -57,10 +59,62 @@ def create_ris_project_and_allocations_storage3(
     storage_filesystem_path: str,
     pi_username: str = None,
     **kwargs: dict[str, Any],
-) -> Tuple[Project, dict[str, Allocation]]:
+) -> dict[Project, dict[str, Allocation]]:
     return __create_ris_project_and_allocations(
         Storage3Factory, storage_filesystem_path, pi_username=pi_username, **kwargs
     )
+
+
+def create_ris_project(pi_username: str = None) -> Project:
+    return __create_ris_project(pi_username=pi_username)
+
+
+def create_allocation_with_allocation_attributes(
+    storage_factory: storage_factory_type,
+    storage_filesystem_path: str,
+    project: Project = None,
+    **kwargs: dict[str, Any],
+) -> None:
+    if not project:
+        project = __create_ris_project()
+
+    storage_allocation = storage_factory(project=project, **kwargs)
+
+    kwargs_allocation_attributes = {
+        "billing_contact": project.pi.email,
+        "storage_name": project.pi.username,
+        **kwargs,
+    }
+    create_allocations_attribute_for_storage_allocation(
+        storage_allocation, storage_filesystem_path, **kwargs_allocation_attributes
+    )
+
+    AllocationUserFactory(
+        allocation=storage_allocation,
+        user=project.pi,
+        status=AllocationUserStatusChoiceFactory(name="Active"),
+    )
+
+    rw_group = ReadWriteGroupFactory(project=project)
+    AllocationUserFactory.create_batch(
+        2,
+        allocation=rw_group,
+        status=AllocationUserStatusChoiceFactory(name="Active"),
+    )
+
+    ro_group = ReadOnlyGroupFactory(project=project)
+    AllocationUserFactory(
+        allocation=ro_group,
+        status=AllocationUserStatusChoiceFactory(name="Active"),
+    )
+
+    return {
+        "allocations": {
+            "storage_allocation": storage_allocation,
+            "rw_group": rw_group,
+            "ro_group": ro_group,
+        }
+    }
 
 
 def create_project_choices() -> None:
@@ -106,14 +160,9 @@ def create_attribute_types_for_ris_allocations() -> None:
     _create_project_attribute_types()
 
 
-def __create_ris_project_and_allocations(
-    storage_factory: Callable[[], Union[Storage2Factory, Storage3Factory]],
-    storage_filesystem_path: str,
-    pi_username: str = None,
-    **kwargs: dict[str, Any],
-) -> Tuple[Project, dict[str, Allocation]]:
+def __create_ris_project(pi_username: str = None, **kwargs: dict[str, Any]) -> Project:
     pi = UserFactory(username=pi_username) if pi_username else UserFactory()
-    project = RisProjectFactory(pi=pi)
+    project = RisProjectFactory(pi=pi, **kwargs)
     ProjectUserFactory(
         project=project,
         user=project.pi,
@@ -130,45 +179,25 @@ def __create_ris_project_and_allocations(
         project=project,
         proj_attr_type=sponsor_department_number,
     )
+    return project
 
-    storage_allocation = storage_factory(project=project, **kwargs)
 
-    kwargs_allocation_attributes = {
-        "billing_contact": project.pi.email,
-        "storage_name": project.pi.username,
+def __create_ris_project_and_allocations(
+    storage_factory: storage_factory_type,
+    storage_filesystem_path: str,
+    pi_username: str = None,
+    **kwargs: dict[str, Any],
+) -> dict[str, Union[Project, dict[str, Allocation]]]:
+    project: Project = __create_ris_project(pi_username=pi_username)
+
+    allocations: dict[str, Allocation] = create_allocation_with_allocation_attributes(
+        storage_factory=storage_factory,
+        storage_filesystem_path=storage_filesystem_path,
+        project=project,
         **kwargs,
-    }
-    _create_allocations_attribute_for_storage_allocation(
-        storage_allocation, storage_filesystem_path, **kwargs_allocation_attributes
     )
 
-    AllocationUserFactory(
-        allocation=storage_allocation,
-        user=project.pi,
-        status=AllocationUserStatusChoiceFactory(name="Active"),
-    )
-
-    rw_group = ReadWriteGroupFactory(project=project)
-    AllocationUserFactory.create_batch(
-        2,
-        allocation=rw_group,
-        status=AllocationUserStatusChoiceFactory(name="Active"),
-    )
-
-    ro_group = ReadOnlyGroupFactory(project=project)
-    AllocationUserFactory(
-        allocation=ro_group,
-        status=AllocationUserStatusChoiceFactory(name="Active"),
-    )
-    # Comment from John change the return to return a dict of allocations and not a tuple.
-    return (
-        project,
-        {
-            "storage_allocation": storage_allocation,
-            "rw_allocation": rw_group,
-            "ro_allocation": ro_group,
-        },
-    )
+    return {"project": project} | allocations
 
 
 def _create_storage_allocation_attribute_types() -> None:
@@ -243,7 +272,7 @@ def _create_allocation_attribute_types(attribute_types: list[Tuple[str, str]]) -
         )
 
 
-def _create_allocations_attribute_for_storage_allocation(
+def create_allocations_attribute_for_storage_allocation(
     storage_allocation: Allocation,
     storage_filesystem_path: str,
     **kwargs: dict[str, Any],
@@ -296,9 +325,10 @@ def create_allocation_attribute(
     allocation: Allocation,
     attribute_name: str,
     value: Any,
-) -> None:
+) -> AllocationAttribute:
     allocation_attribute_type = AllocationAttributeTypeFactory(name=attribute_name)
-    AllocationAttributeFactory(
+
+    return AllocationAttributeFactory(
         allocation=allocation,
         allocation_attribute_type=allocation_attribute_type,
         value=value,
@@ -312,3 +342,25 @@ def create_allocation_linkage(
     linkage = AllocationLinkageFactory(parent=parent, children=children)
     return linkage
 
+
+def create_sub_allocation(
+    parent: Allocation,
+    **kwargs: dict[str, Any],
+) -> Allocation:
+    project: Project = parent.project
+    status = parent.status
+    storage_resource = parent.resources.get(resource_type__name="Storage")
+    if storage_resource.name == "Storage2":
+        sub_allocation: Allocation = Storage2Factory(
+            project=project, status=status, **kwargs
+        )
+    elif storage_resource.name == "Storage3":
+        sub_allocation: Allocation = Storage3Factory(
+            project=project, status=status, **kwargs
+        )
+    else:
+        raise ValueError(
+            f"Unsupported resource type for parent allocation: {parent.resources}"
+        )
+    create_allocation_linkage(parent, [sub_allocation])
+    return sub_allocation

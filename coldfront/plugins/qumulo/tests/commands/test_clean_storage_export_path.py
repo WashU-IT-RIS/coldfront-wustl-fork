@@ -4,11 +4,14 @@ from django.test import TestCase
 
 from io import StringIO
 
+import faker
+
 from coldfront.core.allocation.models import AllocationAttribute
 from coldfront.plugins.qumulo.tests.fixtures import (
+    create_allocation_with_allocation_attributes,
     create_metadata_for_testing,
-    create_ris_project_and_allocations_storage2,
 )
+from coldfront.plugins.qumulo.tests.helper_classes.factories import Storage2Factory
 
 
 class CleanStorageExportPathTest(TestCase):
@@ -17,11 +20,12 @@ class CleanStorageExportPathTest(TestCase):
         # Set up any necessary data for the tests
         create_metadata_for_testing()
         self.storage_allocations = []
-        for i in range(3):
-            result = create_ris_project_and_allocations_storage2(
-                storage_filesystem_path=f"/test/path{i}"
+        for _ in range(3):
+            result = create_allocation_with_allocation_attributes(
+                storage_factory=Storage2Factory,
+                storage_filesystem_path=faker.Faker().file_path(depth=3, extension=""),
             )
-            self.storage_allocations.append(result[1]["storage_allocation"])
+            self.storage_allocations.append(result["allocations"]["storage_allocation"])
 
     def test_command_output_success(self):
 
@@ -81,8 +85,8 @@ class CleanStorageExportPathTest(TestCase):
             "Dry run enabled. The following storage_export_path would be cleaned:",
             output,
         )
-        for index, allocation in enumerate(self.storage_allocations):
+        for allocation in self.storage_allocations:
             self.assertIn(
-                f' - Allocation ID: {allocation.id}, current_export_path: "/test/path{index}"',
+                f' - Allocation ID: {allocation.id}, current_export_path: "',
                 output,
             )

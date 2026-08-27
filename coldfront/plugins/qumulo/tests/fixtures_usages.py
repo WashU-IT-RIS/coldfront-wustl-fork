@@ -1,9 +1,12 @@
 from coldfront.core.test_helpers.factories import AllocationAttributeUsageFactory
 
 from coldfront.plugins.qumulo.tests.fixtures import (
+    create_allocation_with_allocation_attributes,
     create_metadata_for_testing,
-    create_ris_project_and_allocations_storage2,
-    create_ris_project_and_allocations_storage3,
+)
+from coldfront.plugins.qumulo.tests.helper_classes.factories import (
+    Storage2Factory,
+    Storage3Factory,
 )
 
 
@@ -451,11 +454,12 @@ def create_coldfront_allocations_with_usages() -> None:
     for storage_filesystem_path, usage_bytes, pi_username in zip(
         COLDFRONT_PATH_FIXTURES, USAGES_IN_BYTES, USERNAME_FIXTURES
     ):
-        _, allocations = create_ris_project_and_allocations_storage2(
-            storage_filesystem_path=storage_filesystem_path, pi_username=pi_username
+        allocations = create_allocation_with_allocation_attributes(
+            storage_factory=Storage2Factory,
+            storage_filesystem_path=storage_filesystem_path,
         )
         AllocationAttributeUsageFactory(
-            allocation_attribute=allocations[
+            allocation_attribute=allocations["allocations"][
                 "storage_allocation"
             ].allocationattribute_set.get(
                 allocation_attribute_type__name="storage_quota"
@@ -464,33 +468,37 @@ def create_coldfront_allocations_with_usages() -> None:
         )
 
     # active storage3 allocation
-    _, allocations = create_ris_project_and_allocations_storage3(
-        storage_filesystem_path="/storage3/fs1/testuser",
+    allocations = create_allocation_with_allocation_attributes(
+        storage_factory=Storage3Factory, storage_filesystem_path=storage_filesystem_path
     )
     AllocationAttributeUsageFactory(
-        allocation_attribute=allocations[
+        allocation_attribute=allocations["allocations"][
             "storage_allocation"
         ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=36829437952,
     )
 
     # pending storage3 allocation
-    _, allocations = create_ris_project_and_allocations_storage3(
-        storage_filesystem_path="/storage3/fs1/inactiveuser", pending=True
+    create_allocation_with_allocation_attributes(
+        storage_factory=Storage3Factory,
+        storage_filesystem_path="/storage3/fs1/inactiveuser2",
+        pending=True,
     )
     AllocationAttributeUsageFactory(
-        allocation_attribute=allocations[
+        allocation_attribute=allocations["allocations"][
             "storage_allocation"
         ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=20480,
     )
 
     # pending storage2 allocation
-    _, allocations = create_ris_project_and_allocations_storage2(
-        "/storage2/fs1/inactiveuser2", pending=True
+    create_allocation_with_allocation_attributes(
+        storage_factory=Storage2Factory,
+        storage_filesystem_path="/storage2/fs1/inactiveuser2",
+        pending=True,
     )
     AllocationAttributeUsageFactory(
-        allocation_attribute=allocations[
+        allocation_attribute=allocations["allocations"][
             "storage_allocation"
         ].allocationattribute_set.get(allocation_attribute_type__name="storage_quota"),
         value=20480,
