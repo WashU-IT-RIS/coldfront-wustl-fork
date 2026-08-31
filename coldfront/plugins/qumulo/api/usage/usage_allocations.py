@@ -20,8 +20,8 @@ class UsageAllocations(LoginRequiredMixin, View):
 
         allocations = (
             Allocation.objects.parents()
+            .active_storage()
             .annotate(storage_filesystem_path=storage_filesystem_path_query)
-            .filter(resources__resource_type__name="Storage", status__name="Active")
         )
 
         if not request.user.is_superuser and not request.user.is_staff:
