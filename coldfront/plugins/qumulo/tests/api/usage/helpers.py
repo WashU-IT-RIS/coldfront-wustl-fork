@@ -119,10 +119,13 @@ def get_history_span(
                 "quota": working_history[-1]["quota"],
             }
         )
-        
+
     return_history = []
     for index, history in enumerate(working_history):
-        if index < len(working_history) - 1 and history['date'] == working_history[index+1]['date']:
+        if (
+            index < len(working_history) - 1
+            and history["date"] == working_history[index + 1]["date"]
+        ):
             continue
         else:
             return_history.append(history)
