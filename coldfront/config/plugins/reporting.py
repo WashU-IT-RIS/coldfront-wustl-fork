@@ -12,5 +12,3 @@ INSTALLED_APPS += [
 STATICFILES_DIRS += [
     PROJECT_ROOT("coldfront/plugins/reporting/frontend/react/dist"),
 ]
-
-TEMPLATES[0]["DIRS"] += [PROJECT_ROOT("coldfront/plugins/reporting/templates")]
