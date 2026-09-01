@@ -266,7 +266,7 @@ class TestUsageGet(TestCase):
         )
         response = self.usage.get(self.request)
         content = json.loads(response.content)
-
+        
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
         self.assertIsInstance(content["usage_data"], list)
