@@ -58,7 +58,7 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
 
     def get_group_members(self, group_name):
         if not group_name:
-            raise ValueError(("department must be defined"))
+            raise ValueError(("group name must be defined"))
 
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
@@ -67,7 +67,7 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
         )
 
         if not self.conn.response:
-            raise ValueError("Invalid department")
+            raise ValueError("Invalid group name")
 
         return self.conn.response
 
