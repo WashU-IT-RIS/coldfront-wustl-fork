@@ -258,11 +258,11 @@ class TestUsageAllocationsGet(TestCase):
             self.assertIn(id, response_ids)
 
     def test_multiple_cases_get_their_allocations(self):
-        allocatoion_iterator = 5
+        allocation_iterator = 5
         user: User = UserFactory.create()
         expected_allocation_ids = []
 
-        for _ in range(allocatoion_iterator):
+        for _ in range(allocation_iterator):
             # pi accounts
             end_path = fake.last_name()
             [_, allocations] = create_ris_project_and_allocations_storage3(
@@ -295,7 +295,7 @@ class TestUsageAllocationsGet(TestCase):
                 value=user.username,
             )
 
-        for _ in range(allocatoion_iterator):
+        for _ in range(allocation_iterator):
             end_path = fake.last_name()
             create_ris_project_and_allocations_storage3(f"/storage3/fs1/{end_path}")
 
