@@ -1,0 +1,40 @@
+{
+  "name": "react",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "Node --watch-path=./src build.js",
+    "build": "Node build.js",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^10.5.0",
+    "@popperjs/core": "^2.11.8",
+    "axios": "^1.8.1",
+    "bootstrap": "^5.3.8",
+    "chart.js": "^4.5.1",
+    "chartjs-adapter-dayjs-4": "^1.0.4",
+    "dayjs": "^1.11.21",
+    "react": "^19.0.0",
+    "react-chartjs-2": "^5.3.1",
+    "react-cookie": "^7.2.2",
+    "react-dom": "^19.0.0",
+    "react-select": "^5.10.2",
+    "universal-cookie": "^7.2.2",
+    "vite": "^6.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react": "^7.37.4",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "sass": "^1.101.0"
+  }
+}
