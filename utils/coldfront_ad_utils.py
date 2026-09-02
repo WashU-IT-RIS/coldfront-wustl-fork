@@ -90,3 +90,18 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
         # return self.conn.response[0]
         return email
 
+    def get_user_by_dn(self, dn):
+        if not dn:
+            raise ValueError(("dn must be defined"))
+
+        self.conn.search(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            f"(&(objectClass=person)(DistinguishedName={dn}))",
+            # attributes=["mail"]
+            attributes=ALL_ATTRIBUTES,
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid DN")
+
+        return self.conn.response[0]
