@@ -70,3 +70,23 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
             raise ValueError("Invalid department")
 
         return self.conn.response
+
+    def get_user_email(self, wustlkey: str):
+        if not wustlkey:
+            raise ValueError(("wustlkey must be defined"))
+
+        self.conn.search(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
+            attributes=["mail"]
+            # attributes=ALL_ATTRIBUTES,
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid wustlkey")
+
+        email =  self.conn.response[0].get('attributes', {}).get('mail')
+
+        # return self.conn.response[0]
+        return email
+
