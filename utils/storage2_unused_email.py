@@ -27,7 +27,7 @@ for line in sys.stdin.readlines()[1:]:
     columns = line.split(',')
     for contact in columns[2:5]:
         if len(contact) == 0:
-            print(f'SKIPPING contact user {contact} from {columns[2:5]}')
+            # print(f'SKIPPING contact user {contact} from {columns[2:5]}')
             continue
         email_from_contact_handler(contact, email_addresses, synth_addresses)
     for group in columns[5].split('|'):
@@ -51,7 +51,7 @@ for line in sys.stdin.readlines()[1:]:
             continue
         for user in group_users:
             if len(user) == 0:
-                print(f'SKIPPING group user {user} from {getent_result.stdout}')
+                # print(f'SKIPPING group user {user} from {getent_result.stdout}')
                 continue
             email_from_contact_handler(user, email_addresses, synth_addresses)
     print(
