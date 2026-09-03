@@ -73,7 +73,7 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
 
     def get_user_email(self, wustlkey: str):
         if not wustlkey:
-            raise ValueError(("wustlkey must be defined"))
+            raise ValueError((f"wustlkey must be defined (got {wustlkey})"))
 
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
