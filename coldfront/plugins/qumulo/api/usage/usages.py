@@ -70,72 +70,74 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
 
         allocation_id = int(allocation_id_str)
 
-        try:
-            allocation = Allocation.objects.get(pk=allocation_id)
-        except Allocation.DoesNotExist:
-            return HttpResponseNotFound("allocation not found")
-
         usage_gib = []
 
-        end_date_usage: (
-            AllocationAttributeUsage
-        ) = AllocationAttributeUsage.history.as_of(end_datetime).get(
-            allocation_attribute__allocation=allocation,
-            allocation_attribute__allocation_attribute_type__name="storage_quota",
-        )
-        end_date_quota: AllocationAttribute = (
-            end_date_usage.allocation_attribute.history.as_of(end_datetime)
-        )
-        usage_gib.append(
-            {
-                "date": end_date_str,
-                "usage": end_date_usage.value / 2**30,
-                "quota": int(end_date_quota.value) * 2**10,
-            }
-        )
-
-        i = 0
-        working_datetime = end_datetime
-        while working_datetime > start_datetime:
-            working_datetime = _minus_months(end_datetime, i)
-
-            if working_datetime == end_datetime:
-                i = i + 1
-                continue  # avoids issues when run on 1st of month
-
-            if isinstance(start_datetime, date) and start_datetime > working_datetime:
-                working_datetime = start_datetime
-
-            working_usage: AllocationAttributeUsage = (
-                AllocationAttributeUsage.history.as_of(working_datetime)
-                .filter(
-                    allocation_attribute__allocation=allocation,
-                    allocation_attribute__allocation_attribute_type__name="storage_quota",
-                )
-                .first()
+        history = list(
+            AllocationAttributeUsage.history.filter(
+                allocation_attribute__allocation__pk=allocation_id,
+                allocation_attribute__allocation_attribute_type__name="storage_quota",
             )
+        )
+        allocation_history = list(
+            AllocationAttribute.history.filter(
+                allocation__pk=allocation_id,
+                allocation_attribute_type__name="storage_quota",
+            )
+        )
 
-            if working_usage != None:
-                working_quota = working_usage.allocation_attribute.history.as_of(
-                    working_datetime
-                )
+        if len(history) <= 0 or len(allocation_history) <= 0:
+            return HttpResponseNotFound("allocation not found")
 
+        def find_allocation_moment(usage_moment):
+            for moment in allocation_history:
+                if usage_moment.history_date.date() >= moment.history_date.date():
+                    return moment
+
+            return None
+
+        mapped_history = map(
+            lambda moment: {
+                "datetime": moment.history_date,
+                "usage": moment.value,
+                "quota": int(find_allocation_moment(moment).value),
+            },
+            history,
+        )
+
+        working_datetime = end_datetime
+        i = 0
+        for moment in mapped_history:
+            while (
+                working_datetime >= moment["datetime"]
+                and working_datetime > start_datetime
+            ):
                 usage_gib.insert(
                     0,
                     {
                         "date": working_datetime.date().isoformat(),
-                        "usage": working_usage.value / 2**30,
-                        "quota": int(working_quota.value) * 2**10,
+                        "usage": moment["usage"] / 2**30,
+                        "quota": moment["quota"] * 2**10,
                     },
                 )
-            else:
-                break
+                working_datetime = _minus_months(end_datetime, i)
+                i = i + 1
+            if working_datetime <= start_datetime:
+                working_datetime = start_datetime
 
-            i = i + 1
+                if working_datetime >= moment["datetime"]:
+                    usage_gib.insert(
+                        0,
+                        {
+                            "date": working_datetime.date().isoformat(),
+                            "usage": moment["usage"] / 2**30,
+                            "quota": moment["quota"] * 2**10,
+                        },
+                    )
+                    break
 
         return JsonResponse(
             {
-                "allocation_id": allocation.pk,
+                "allocation_id": allocation_id,
                 "usage_data": usage_gib,
             }
         )
