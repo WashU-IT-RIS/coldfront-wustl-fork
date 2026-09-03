@@ -11,25 +11,25 @@ from coldfront_ad_utils import ColdfrontAdUtils
 # abrummett,/storage2/fs1/abrummett,abrummett,abrummett,abrummett,storage-abrummett-rw|storage-abrummett-ro
 # alexxai,/storage2/fs1/alexxai,alexxai,alexxai,alexxai,storage2-alexxai-rw|storage2-alexxai-ro
 
-def email_from_contact_handler(cau, key):
+cau = ColdfrontAdUtils()
+def email_from_contact_handler(key, email_set, synthetic_set):
+    global cau
     user_email = cau.get_user_email(key)
     if type(user_email) == type(list()):
-        user_email = f'{contact}@wustl.edu'
-    return user_email
+        synthetic_set.add(f'{key}@wustl.edu')
+    else:
+        email_set.add(user_email)
 
-cau = ColdfrontAdUtils()
+print(f'Storage Name,Filesystem Path,E-mail Addresses,WUSTL Key E-mail Addresses')
 for line in sys.stdin.readlines()[1:]:
     email_addresses = set()
+    synth_addresses = set()
     columns = line.split(',')
     for contact in columns[2:5]:
         if len(contact) == 0:
             print(f'SKIPPING contact user {contact} from {columns[2:5]}')
             continue
-        user_email = email_from_contact_handler(cau, contact)
-        try:
-            email_addresses.add(user_email)
-        except Exception as e:
-            print(f'(Contacts) Bad e-mail address for {user}: {user_email}')
+        email_from_contact_handler(contact, email_addresses, synth_addresses)
     for group in columns[5].split('|'):
         # Example getent output
         #                       0,1,      2,                3
@@ -53,10 +53,11 @@ for line in sys.stdin.readlines()[1:]:
             if len(user) == 0:
                 print(f'SKIPPING group user {user} from {getent_result.stdout}')
                 continue
-            user_email = email_from_contact_handler(cau, user)
-            try:
-                email_addresses.add(user_email)
-            except Exception as e:
-                print(f'(Groups) Bad e-mail address for {user}: {user_email}')
-    print(','.join(columns[:2]) + ',' + '|'.join(email_addresses))
+            email_from_contact_handler(user, email_addresses, synth_addresses)
+    print(
+        (
+            ','.join(columns[:2]) + ',' + '|'.join(email_addresses) + ',' +
+            '|'.join(synth_addresses)
+        )
+    )
 sys.exit(0)
