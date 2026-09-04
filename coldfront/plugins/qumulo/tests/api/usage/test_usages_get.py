@@ -109,6 +109,7 @@ class TestUsageGet(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
         self.assertIsInstance(content["usage_data"], list)
+        self.assertEqual(len(content["usage_data"]), len(usage_history))
         self.assertListEqual(content["usage_data"], usage_history)
 
     def test_takes_in_start_time(self) -> None:
