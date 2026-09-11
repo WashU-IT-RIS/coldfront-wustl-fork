@@ -266,7 +266,9 @@ class StorageUsageReport:
             else self.usage_date.year + 1
         )
         fiscal_year = f"FY{str(fiscal_year)[-2:]}"
-        report_month = (self.usage_date.replace(day=1) - timedelta(days=1)).strftime("%Y-%m")
+        report_month = (self.usage_date.replace(day=1) - timedelta(days=1)).strftime(
+            "%Y-%m"
+        )
         service = f"Storage {self.tier.name}"
         for entry in usage_data:
             formatted_entry = ",".join(

@@ -30,9 +30,8 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
             f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
-            # attributes=["sAMAccountName", "mail", "givenName", "sn"],
-            attributes=ALL_ATTRIBUTES,
-            # attributes=["wustlEduHRPrimeDeptName","wustlEduOLSDisplayName"]
+            attributes=["wustlEduHRPrimeDeptName","wustlEduOLSDisplayName"]
+            # attributes=ALL_ATTRIBUTES,
         )
 
         if not self.conn.response:
@@ -47,10 +46,24 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
             f"(&(objectClass=person)(wustlEduHRPrimeDeptName={department}))",
-            # attributes=["sAMAccountName", "mail", "givenName", "sn"],
             attributes=ALL_ATTRIBUTES,
-            # attributes=["wustlEduHRPrimeDeptName","wustlEduOLSDisplayName"]
+            # attributes=["sAMAccountName", "mail", "givenName", "sn"],
             # attributes=["sAMAccountName"],
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid department")
+
+        return self.conn.response
+
+    def get_group_members(self, group_name):
+        if not group_name:
+            raise ValueError(("department must be defined"))
+
+        self.conn.search(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            f"(&(objectClass=group)(samAccountName={group_name}))",
+            attributes=['member'],
         )
 
         if not self.conn.response:
