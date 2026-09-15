@@ -46,6 +46,8 @@ for usage in (
         .order_by('fileset_name')
     ):
     allocation = Allocation.objects.filter(pk=usage.external_key)[0]
+    if allocation.status.name != 'Active':
+        continue
     attributes = get_attributes(usage.external_key)
     storage_name = attributes.get("storage_name")
     if storage_name in storage_names or storage_name is None:
