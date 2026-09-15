@@ -257,7 +257,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                         )
                     )
 
-            logger.debug(
+            logger.warn(
                 "Allocation table grouping loop processed %d allocations in %.3f seconds",
                 len(all_allocations),
                 perf_counter() - loop_start,
