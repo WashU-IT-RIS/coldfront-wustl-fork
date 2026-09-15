@@ -1,3 +1,5 @@
+import logging
+from time import perf_counter
 from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -20,6 +22,9 @@ from coldfront.core.resource.models import Resource, ResourceType
 from django.db.models import OuterRef, Subquery
 
 from collections import defaultdict
+
+
+logger = logging.getLogger(__name__)
 
 
 class AllocationListItem:
@@ -185,6 +190,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 all_children.update(children)
                 parent_to_children_map[linkage.parent.id] = children
 
+            loop_start = perf_counter()
             for allocation in allocations:
                 if not data.get("no_grouping", False):
                     if str(allocation.pk) not in all_children:
@@ -250,6 +256,12 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                             is_child=(str(allocation.pk) in all_children),
                         )
                     )
+
+            logger.debug(
+                "Allocation table grouping loop processed %d allocations in %.3f seconds",
+                len(all_allocations),
+                perf_counter() - loop_start,
+            )
 
         return view_list
 
