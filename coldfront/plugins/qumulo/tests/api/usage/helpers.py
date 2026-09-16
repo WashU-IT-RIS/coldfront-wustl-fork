@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from random import random
+from random import random, randrange
 
 from typing import Tuple
 
@@ -131,3 +131,21 @@ def get_history_span(
             return_history.append(history)
 
     return (return_history, start_date, end_date)
+
+
+def write_quota_history(allocation_id: int, this_date: date, quota_tib: int):
+    with freeze_time(this_date):
+        quota_attribute = AllocationAttribute.objects.get(
+            allocation__pk=allocation_id,
+            allocation_attribute_type__name="storage_quota",
+        )
+        quota_attribute.value = quota_tib
+        quota_attribute.save()
+
+
+def random_date(start: date, end: date):
+    delta = end - start
+    int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
+    random_second = randrange(int_delta)
+
+    return start + timedelta(seconds=random_second)

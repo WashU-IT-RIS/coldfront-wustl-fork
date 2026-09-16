@@ -16,6 +16,8 @@ from coldfront.core.allocation.models import (
 )
 from coldfront.core.user.models import User
 
+from typing import Union
+
 EOD = "T23:59:59+00:00"
 
 
@@ -72,24 +74,24 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
 
         usage_gib = []
 
-        history = list(
+        usage_history = list(
             AllocationAttributeUsage.history.filter(
                 allocation_attribute__allocation__pk=allocation_id,
                 allocation_attribute__allocation_attribute_type__name="storage_quota",
             )
         )
-        allocation_history = list(
+        quota_history = list(
             AllocationAttribute.history.filter(
                 allocation__pk=allocation_id,
                 allocation_attribute_type__name="storage_quota",
             )
         )
 
-        if len(history) <= 0 or len(allocation_history) <= 0:
+        if len(usage_history) <= 0 or len(quota_history) <= 0:
             return HttpResponseNotFound("allocation not found")
 
         def find_allocation_moment(usage_moment):
-            for moment in allocation_history:
+            for moment in quota_history:
                 if usage_moment.history_date.date() >= moment.history_date.date():
                     return moment
 
@@ -101,7 +103,7 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
                 "usage": moment.value,
                 "quota": int(find_allocation_moment(moment).value),
             },
-            history,
+            usage_history,
         )
 
         working_datetime = end_datetime
@@ -156,3 +158,36 @@ def _minus_months(input_datetime: datetime, month_count: int) -> datetime:
         )
 
     return return_datetime
+
+
+def _get_quotas(
+    allocation_id: int,
+    start_date: Union[date, None] = None,
+    end_date: Union[date, None] = None,
+) -> list:
+    quota_attribute_history = AllocationAttribute.history.filter(
+        allocation__pk=allocation_id,
+        allocation_attribute_type__name="storage_quota",
+    )
+
+    if isinstance(start_date, date):
+        quota_attribute_history = quota_attribute_history.filter(
+            history_date__gte=start_date
+        )
+    if isinstance(end_date, date):
+        quota_attribute_history = quota_attribute_history.filter(
+            history_date__lte=end_date
+        )
+
+    history_iter = map(
+        lambda element: {
+            "quota": int(element.value),
+            "date": element.history_date.date(),
+        },
+        quota_attribute_history,
+    )
+    history_iter = list(history_iter)
+    if history_iter[0]["date"] == history_iter[1]["date"]:
+        history_iter.pop(0)
+
+    return history_iter
