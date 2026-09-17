@@ -23,7 +23,7 @@ class Oldest:
                 '%m/%d/%Y - %H:%M:%S GMT',
                 time.gmtime(self.modified)
             )
-        print(f'{self.path}, {time_conv()}')
+        print(f'{self.path},{time_conv()}')
 
 ap = ArgumentParser(
     description='Allocation "last used" tool'
