@@ -10,11 +10,13 @@ class Latest:
     path = None
     modified = 0.0
 
+    def __init__(self, path):
+        self.path = path
+
     def update(self, path, stat):
         max_stat = max([stat.st_atime, stat.st_mtime, stat.st_ctime])
         if max_stat <= self.modified:
             return
-        self.path = path
         self.modified = max_stat
 
     def dump(self):
