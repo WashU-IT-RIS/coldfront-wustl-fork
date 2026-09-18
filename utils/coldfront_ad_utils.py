@@ -58,7 +58,7 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
 
     def get_group_members(self, group_name):
         if not group_name:
-            raise ValueError(("department must be defined"))
+            raise ValueError(("group name must be defined"))
 
         self.conn.search(
             "dc=accounts,dc=ad,dc=wustl,dc=edu",
@@ -67,6 +67,41 @@ class ColdfrontAdUtils(ActiveDirectoryAPI):
         )
 
         if not self.conn.response:
-            raise ValueError("Invalid department")
+            raise ValueError("Invalid group name")
 
         return self.conn.response
+
+    def get_user_email(self, wustlkey: str):
+        if not wustlkey:
+            raise ValueError((f"wustlkey must be defined (got {wustlkey})"))
+
+        self.conn.search(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
+            attributes=["mail"]
+            # attributes=ALL_ATTRIBUTES,
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid wustlkey")
+
+        email =  self.conn.response[0].get('attributes', {}).get('mail')
+
+        # return self.conn.response[0]
+        return email
+
+    def get_user_by_dn(self, dn):
+        if not dn:
+            raise ValueError(("dn must be defined"))
+
+        self.conn.search(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            f"(&(objectClass=person)(DistinguishedName={dn}))",
+            # attributes=["mail"]
+            attributes=ALL_ATTRIBUTES,
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid DN")
+
+        return self.conn.response[0]
