@@ -38,7 +38,7 @@ ap.add_argument(
     required=True
 )
 args = ap.parse_args()
-latest = Latest()
+latest = Latest(args.path)
 for item in os.walk(args.path):
     latest.update(item[0], os.stat(item[0]))
     for dir_file in item[2]:
