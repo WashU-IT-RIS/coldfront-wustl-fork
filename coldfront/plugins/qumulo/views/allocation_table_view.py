@@ -275,8 +275,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
         return next_page
 
     def get_context_data(self, **kwargs):
+        self.kwargs = kwargs
+        self.object_list = self.get_queryset()
         context = super().get_context_data(**kwargs)
-        allocation_list = self.get_queryset()
+        allocation_list = context.get("object_list", self.object_list)
         context["allocation_list"] = allocation_list
         allocations_count = len(allocation_list)
         context["allocations_count"] = allocations_count
