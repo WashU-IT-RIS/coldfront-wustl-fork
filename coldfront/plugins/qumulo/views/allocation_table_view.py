@@ -1,4 +1,3 @@
-import logging
 from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -21,9 +20,6 @@ from coldfront.core.resource.models import Resource, ResourceType
 from django.db.models import OuterRef, Subquery
 
 from collections import defaultdict
-
-
-logger = logging.getLogger(__name__)
 
 
 class AllocationListItem:
