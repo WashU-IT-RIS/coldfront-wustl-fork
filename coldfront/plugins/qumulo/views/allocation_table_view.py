@@ -1,5 +1,4 @@
 import logging
-from time import perf_counter
 from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -197,7 +196,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 all_children.update(children)
                 parent_to_children_map[linkage.parent.id] = children
 
-            loop_start = perf_counter()
             for allocation in allocations:
                 project = allocation.project
                 pi = project.pi
@@ -265,12 +263,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                             is_child=(str(allocation.pk) in all_children),
                         )
                     )
-
-            logger.warning(
-                "Allocation table grouping loop processed %d allocations in %.3f seconds",
-                len(all_allocations),
-                perf_counter() - loop_start,
-            )
 
         return view_list
 
