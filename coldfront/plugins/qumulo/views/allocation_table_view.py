@@ -120,7 +120,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 file_path=Subquery(file_path_sub_q),
                 service_rate_category=Subquery(service_rate_category_sub_q),
                 name=Subquery(storage_name_sub_q),
-            )
+            ).select_related(
+                "project__pi",
+                "status",
+            ).prefetch_related("resources")
 
             # add filters
             if data.get("project_name"):
@@ -167,6 +170,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
             allocation_linkages = AllocationLinkage.objects.filter(
                 parent__in=allocations
+            ).prefetch_related(
+                "children__project__pi",
+                "children__status",
+                "children__resources",
             )
 
             parent_to_children_map = defaultdict(list)
@@ -192,23 +199,31 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
             loop_start = perf_counter()
             for allocation in allocations:
+                project = allocation.project
+                pi = project.pi
+                resource_name = ", ".join(
+                    resource.name for resource in allocation.resources.all()
+                )
+                allocation_info = {
+                    "id": allocation.pk,
+                    "pi_last_name": pi.last_name,
+                    "pi_first_name": pi.first_name,
+                    "pi_user_name": pi.username,
+                    "project_id": project.pk,
+                    "project_name": project.title,
+                    "resource_name": resource_name,
+                    "allocation_status": allocation.status.name,
+                    "department_number": allocation.department_number,
+                    "itsd_ticket": allocation.itsd_ticket,
+                    "file_path": allocation.file_path,
+                    "service_rate_category": allocation.service_rate_category,
+                }
+
                 if not data.get("no_grouping", False):
                     if str(allocation.pk) not in all_children:
-                        # append a new item, plus any children
                         view_list.append(
                             AllocationListItem(
-                                id=allocation.pk,
-                                pi_last_name=allocation.project.pi.last_name,
-                                pi_first_name=allocation.project.pi.first_name,
-                                pi_user_name=allocation.project.pi.username,
-                                project_id=allocation.project.pk,
-                                project_name=allocation.project.title,
-                                resource_name=allocation.get_resources_as_string,
-                                allocation_status=allocation.status.name,
-                                department_number=allocation.department_number,
-                                itsd_ticket=allocation.itsd_ticket,
-                                file_path=allocation.file_path,
-                                service_rate_category=allocation.service_rate_category,
+                                **allocation_info,
                                 child_allocation_ids=parent_to_children_map[
                                     allocation.id
                                 ],
@@ -217,17 +232,22 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                         )
                         for child_id in parent_to_children_map[allocation.id]:
                             child_allocation = all_allocations.get(child_id, None)
-                            # if child doesn't match filter, then we won't have retrieved it
                             if child_allocation:
+                                child_project = child_allocation.project
+                                child_pi = child_project.pi
+                                child_resource_name = ", ".join(
+                                    resource.name
+                                    for resource in child_allocation.resources.all()
+                                )
                                 view_list.append(
                                     AllocationListItem(
                                         id=child_allocation.pk,
-                                        pi_last_name=child_allocation.project.pi.last_name,
-                                        pi_first_name=child_allocation.project.pi.first_name,
-                                        pi_user_name=child_allocation.project.pi.username,
-                                        project_id=child_allocation.project.pk,
-                                        project_name=child_allocation.project.title,
-                                        resource_name=child_allocation.get_resources_as_string,
+                                        pi_last_name=child_pi.last_name,
+                                        pi_first_name=child_pi.first_name,
+                                        pi_user_name=child_pi.username,
+                                        project_id=child_project.pk,
+                                        project_name=child_project.title,
+                                        resource_name=child_resource_name,
                                         allocation_status=child_allocation.status.name,
                                         department_number=child_allocation.department_number,
                                         itsd_ticket=child_allocation.itsd_ticket,
@@ -240,24 +260,13 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 else:
                     view_list.append(
                         AllocationListItem(
-                            id=allocation.pk,
-                            pi_last_name=allocation.project.pi.last_name,
-                            pi_first_name=allocation.project.pi.first_name,
-                            pi_user_name=allocation.project.pi.username,
-                            project_id=allocation.project.pk,
-                            project_name=allocation.project.title,
-                            resource_name=allocation.get_resources_as_string,
-                            allocation_status=allocation.status.name,
-                            department_number=allocation.department_number,
-                            itsd_ticket=allocation.itsd_ticket,
-                            file_path=allocation.file_path,
-                            service_rate_category=allocation.service_rate_category,
+                            **allocation_info,
                             child_allocation_ids=parent_to_children_map[allocation.id],
                             is_child=(str(allocation.pk) in all_children),
                         )
                     )
 
-            logger.warn(
+            logger.warning(
                 "Allocation table grouping loop processed %d allocations in %.3f seconds",
                 len(all_allocations),
                 perf_counter() - loop_start,
@@ -279,8 +288,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context["allocation_list"] = self.get_queryset()
-        allocations_count = len(self.get_queryset())
+        allocation_list = self.get_queryset()
+        context["allocation_list"] = allocation_list
+        allocations_count = len(allocation_list)
         context["allocations_count"] = allocations_count
 
         allocation_search_form = AllocationTableSearchForm(self.request.GET)
@@ -316,8 +326,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             context["expand_accordion"] = "show"
         context["filter_parameters"] = filter_parameters
         context["filter_parameters_with_order_by"] = filter_parameters_with_order_by
-
-        allocation_list = context.get("allocation_list")
 
         page_num = self.request.GET.get("page")
         if page_num is None or type(page_num) is not int:
