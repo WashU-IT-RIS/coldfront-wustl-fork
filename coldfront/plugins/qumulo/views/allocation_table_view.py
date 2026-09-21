@@ -23,6 +23,7 @@ from django.db.models import OuterRef, Subquery
 
 from collections import defaultdict
 
+logger = logging.getLogger(__name__)
 
 class AllocationListItem:
     id: int
