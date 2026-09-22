@@ -1,5 +1,3 @@
-import logging
-from time import perf_counter
 from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -22,8 +20,6 @@ from coldfront.core.resource.models import Resource, ResourceType
 from django.db.models import OuterRef, Subquery
 
 from collections import defaultdict
-
-logger = logging.getLogger(__name__)
 
 class AllocationListItem:
     id: int
@@ -214,7 +210,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 all_children.update(children)
                 parent_to_children_map[linkage.parent.id] = children
 
-            loop_start = perf_counter()
             for allocation in allocations:
                 allocation_info = allocation_metadata.get(allocation.pk, {})
 
@@ -251,35 +246,21 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                         )
                     )
 
-            logger.warning(
-                "Allocation table grouping loop processed %d allocations in %.3f seconds",
-                len(all_allocations),
-                perf_counter() - loop_start,
-            )
-
         return view_list
 
     def _handle_pagination(
         self, allocation_list: List[AllocationListItem], page_num, page_size
     ):
-        paginator_start = perf_counter()
         paginator = Paginator(allocation_list, page_size)
 
         try:
             next_page = paginator.page(page_num)
         except EmptyPage:
             next_page = paginator.page(paginator.num_pages)
-        logger.warning(
-            "Pagination processed page %d with page size %d in %.3f seconds",
-            page_num,
-            page_size,
-            perf_counter() - paginator_start,
-        )
 
         return next_page
 
     def get_context_data(self, **kwargs):
-        page_start = perf_counter()
         self.kwargs = kwargs
         self.object_list = self.get_queryset()
         context = super().get_context_data(**kwargs)
@@ -328,10 +309,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
         allocation_list = self._handle_pagination(
             allocation_list, page_num, self.paginate_by
-        )
-        logger.warning(
-            "Context data processed in %.3f seconds",
-            perf_counter() - page_start,
         )
 
         return context
