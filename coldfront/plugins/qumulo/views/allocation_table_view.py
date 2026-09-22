@@ -177,9 +177,28 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             parent_to_children_map = defaultdict(list)
 
             all_allocations = dict()
+            allocation_metadata = {}
 
             for allocation in allocations:
                 all_allocations[str(allocation.pk)] = allocation
+                project = allocation.project
+                pi = project.pi
+                allocation_metadata[allocation.pk] = {
+                    "id": allocation.pk,
+                    "pi_last_name": pi.last_name,
+                    "pi_first_name": pi.first_name,
+                    "pi_user_name": pi.username,
+                    "project_id": project.pk,
+                    "project_name": project.title,
+                    "resource_name": ", ".join(
+                        resource.name for resource in allocation.resources.all()
+                    ),
+                    "allocation_status": allocation.status.name,
+                    "department_number": allocation.department_number,
+                    "itsd_ticket": allocation.itsd_ticket,
+                    "file_path": allocation.file_path,
+                    "service_rate_category": allocation.service_rate_category,
+                }
 
             all_children = set()
 
@@ -197,25 +216,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
             loop_start = perf_counter()
             for allocation in allocations:
-                project = allocation.project
-                pi = project.pi
-                resource_name = ", ".join(
-                    resource.name for resource in allocation.resources.all()
-                )
-                allocation_info = {
-                    "id": allocation.pk,
-                    "pi_last_name": pi.last_name,
-                    "pi_first_name": pi.first_name,
-                    "pi_user_name": pi.username,
-                    "project_id": project.pk,
-                    "project_name": project.title,
-                    "resource_name": resource_name,
-                    "allocation_status": allocation.status.name,
-                    "department_number": allocation.department_number,
-                    "itsd_ticket": allocation.itsd_ticket,
-                    "file_path": allocation.file_path,
-                    "service_rate_category": allocation.service_rate_category,
-                }
+                allocation_info = allocation_metadata.get(allocation.pk, {})
 
                 if not data.get("no_grouping", False):
                     if str(allocation.pk) not in all_children:
@@ -229,28 +230,14 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                             )
                         )
                         for child_id in parent_to_children_map[allocation.id]:
-                            child_allocation = all_allocations.get(child_id, None)
+                            child_allocation = all_allocations.get(str(child_id), None)
                             if child_allocation:
-                                child_project = child_allocation.project
-                                child_pi = child_project.pi
-                                child_resource_name = ", ".join(
-                                    resource.name
-                                    for resource in child_allocation.resources.all()
+                                child_info = allocation_metadata.get(
+                                    child_allocation.pk, {}
                                 )
                                 view_list.append(
                                     AllocationListItem(
-                                        id=child_allocation.pk,
-                                        pi_last_name=child_pi.last_name,
-                                        pi_first_name=child_pi.first_name,
-                                        pi_user_name=child_pi.username,
-                                        project_id=child_project.pk,
-                                        project_name=child_project.title,
-                                        resource_name=child_resource_name,
-                                        allocation_status=child_allocation.status.name,
-                                        department_number=child_allocation.department_number,
-                                        itsd_ticket=child_allocation.itsd_ticket,
-                                        file_path=child_allocation.file_path,
-                                        service_rate_category=child_allocation.service_rate_category,
+                                        **child_info,
                                         child_allocation_ids=[],
                                         is_child=True,
                                     )
