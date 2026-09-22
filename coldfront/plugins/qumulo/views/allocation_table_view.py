@@ -2,6 +2,7 @@ from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, Paginator
+from django.db.models import Prefetch
 from django.db.models.query import QuerySet
 from django.views.generic import ListView
 
@@ -10,6 +11,7 @@ from coldfront.plugins.qumulo.forms.AllocationTableSearchForm import (
 )
 
 from coldfront.core.allocation.models import (
+    ALLOCATION_RESOURCE_ORDERING,
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
@@ -117,7 +119,12 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             ).select_related(
                 "project__pi",
                 "status",
-            ).prefetch_related("resources")
+            ).prefetch_related(
+                Prefetch(
+                    "resources",
+                    queryset=Resource.objects.order_by(*ALLOCATION_RESOURCE_ORDERING),
+                )
+            )
 
             # add filters
             if data.get("project_name"):
@@ -162,12 +169,21 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             # of pushing this into the query
             allocations = allocations.distinct().order_by(order_by)
 
+            annotated_children = Allocation.objects.annotate(
+                department_number=Subquery(department_sub_q),
+                itsd_ticket=Subquery(itsd_ticket_sub_q),
+                file_path=Subquery(file_path_sub_q),
+                service_rate_category=Subquery(service_rate_category_sub_q),
+            ).order_by(order_by)
+
             allocation_linkages = AllocationLinkage.objects.filter(
                 parent__in=allocations
             ).prefetch_related(
-                "children__project__pi",
-                "children__status",
-                "children__resources",
+                Prefetch(
+                    "children",
+                    queryset=annotated_children,
+                    to_attr="annotated_children",
+                )
             )
 
             parent_to_children_map = defaultdict(list)
@@ -199,14 +215,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             all_children = set()
 
             for linkage in allocation_linkages:
-                linkage_children = linkage.children.all().annotate(
-                    department_number=Subquery(department_sub_q),
-                    itsd_ticket=Subquery(itsd_ticket_sub_q),
-                    file_path=Subquery(file_path_sub_q),
-                    service_rate_category=Subquery(service_rate_category_sub_q),
-                )
-                linkage_children = linkage_children.order_by(order_by)
-                children = [str(child.id) for child in linkage_children]
+                children = [str(child.id) for child in linkage.annotated_children]
                 all_children.update(children)
                 parent_to_children_map[linkage.parent.id] = children
 
@@ -262,7 +271,8 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         self.kwargs = kwargs
-        self.object_list = self.get_queryset()
+        if not hasattr(self, "object_list"):
+            self.object_list = self.get_queryset()
         context = super().get_context_data(**kwargs)
         allocation_list = context.get("object_list", self.object_list)
         context["allocation_list"] = allocation_list
