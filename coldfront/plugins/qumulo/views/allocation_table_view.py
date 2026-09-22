@@ -279,6 +279,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
         return next_page
 
     def get_context_data(self, **kwargs):
+        page_start = perf_counter()
         self.kwargs = kwargs
         self.object_list = self.get_queryset()
         context = super().get_context_data(**kwargs)
@@ -327,6 +328,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
 
         allocation_list = self._handle_pagination(
             allocation_list, page_num, self.paginate_by
+        )
+        logger.warning(
+            "Context data processed in %.3f seconds",
+            perf_counter() - page_start,
         )
 
         return context
