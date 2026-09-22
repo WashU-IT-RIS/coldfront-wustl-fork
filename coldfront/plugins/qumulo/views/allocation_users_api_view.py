@@ -9,7 +9,14 @@ from django.views.decorators.csrf import csrf_exempt
 from coldfront.core.allocation.models import Allocation, AllocationUser
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.plugins.qumulo.utils.attestation import (
+    attestation_gate_enabled,
+    find_overdue_attestation,
+    pre_onboard_group_name,
+    record_pending_attestation_event,
+)
 from coldfront.plugins.qumulo.utils.oauth2 import SessionOrOAuth2RequiredMixin
+from coldfront.plugins.qumulo.utils.workday_api import WorkdayAPI
 
 
 # Mutates AD group membership; not an HTML form, so CSRF is exempted here
@@ -86,7 +93,15 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
         storage_allocation = get_object_or_404(Allocation, pk=allocation_id)
         active_directory_api = ActiveDirectoryAPI()
 
+        # See utils/attestation.py: while disabled (the default), this is a
+        # no-op and grants behave exactly as before. Fetched once per
+        # request, not once per user, since it's the same Workday query
+        # regardless of which user is being checked.
+        gate_enabled = attestation_gate_enabled()
+        overdue_records = WorkdayAPI().get_overdue_attestations() if gate_enabled else []
+
         added_users = {"rw": [], "ro": []}
+        pending_users = {"rw": [], "ro": []}
         storage_acl_name = {"rw": None, "ro": None}
 
         for access_key in ["rw", "ro"]:
@@ -120,6 +135,26 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
                 continue
 
             for username in new_usernames:
+                overdue = (
+                    find_overdue_attestation(username, active_directory_api, overdue_records)
+                    if gate_enabled
+                    else None
+                )
+
+                if overdue is not None:
+                    record_pending_attestation_event(
+                        access_allocation,
+                        username,
+                        access_key,
+                        overdue.get("attestation_cycle_id"),
+                    )
+                    active_directory_api.add_user_to_ad_group(
+                        wustlkey=username,
+                        group_name=pre_onboard_group_name(),
+                    )
+                    pending_users[access_key].append(username)
+                    continue
+
                 AclAllocations.add_user_to_access_allocation(
                     username, access_allocation
                 )
@@ -127,13 +162,13 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
                     wustlkey=username,
                     group_name=access_storage_acl_name,
                 )
-
-            added_users[access_key] = new_usernames
+                added_users[access_key].append(username)
 
         return JsonResponse(
             {
                 "allocation_id": storage_allocation.pk,
                 "added_users": added_users,
+                "pending_users": pending_users,
                 "storage_acl_name": storage_acl_name,
             },
             status=200,

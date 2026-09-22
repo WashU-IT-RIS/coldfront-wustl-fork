@@ -86,9 +86,13 @@ doesn't include a non-empty `rw_users`/`ro_users` array:
 {
   "allocation_id": 42,
   "added_users": {"rw": ["wustlkey1"], "ro": ["wustlkey2"]},
+  "pending_users": {"rw": [], "ro": []},
   "storage_acl_name": {"rw": "storage-foo-rw", "ro": "storage-foo-ro"}
 }
 ```
+
+`pending_users` is only ever non-empty when the [attestation gate](#attestation-gated-access-provisioning)
+is enabled and withheld a grant pending attestation — see below.
 
 **`DELETE /qumulo/allocation/<allocation_id>/access-users/`** — scope: `write`
 
@@ -129,6 +133,47 @@ to. Returns `404` if the username doesn't exist.
   ]
 }
 ```
+
+### Attestation-gated access provisioning
+
+`AllocationUsersApiView`'s `POST` (grant) can optionally check a user's
+Workday access-attestation status before granting them `rw`/`ro` access,
+instead of granting unconditionally. This is off by default — set
+`ATTESTATION_GATE_ENABLED=true` to turn it on.
+
+While enabled, for each newly-granted username:
+
+- **Attestation current:** granted immediately, exactly as before —
+  included in the response's `added_users`.
+- **Attestation overdue:** the grant is withheld. The user is added to a
+  holding AD group instead (`AD_PRE_ONBOARD_GROUP`, default
+  `ris-pre-onboard`), and a `pending_attestation_event` is recorded (as a
+  private `AllocationAttribute` on the `rw`/`ro` access allocation) —
+  included in the response's `pending_users` instead of `added_users`. The
+  event's shape matches the schema `ris-user-management-tmp/python/README.md`
+  documents (`event_id`/`timestamp`/`action`/`user_id`/`revoked_entitlements`/
+  `attestation_cycle_id`/`restoration_token`/`source_event_id`), with
+  `action: "ACCESS_REVOKED_PENDING_ATTESTATION"` and a single `coldfront`
+  entitlement in `revoked_entitlements` — the two systems don't share code,
+  but a logged event reads the same way in both.
+
+**Closing the loop:** `python manage.py restore_pending_attestation_access`
+re-checks Workday for every pending event; a user who has since attested is
+granted the withheld access, removed from the pre-onboard group, and has
+their pending event cleared. `--dry-run` reports what would happen without
+changing anything. `add_scheduled_restore_pending_attestation_access` wires
+this up to run hourly via `django-q`.
+
+This depends on a live Workday connection through the IntegrationHub-managed
+`shared_lib` package (not a pip dependency of this project — see
+`coldfront/plugins/qumulo/utils/workday_api.py`), plus
+`WORKDAY_URL`/`WORKDAY_TENANT`/`WORKDAY_OAUTH_CLIENT_ID`/
+`WORKDAY_OAUTH_CLIENT_SECRET`/`WORKDAY_OAUTH_REFRESH_TOKEN`. Confirm those
+are reachable from wherever ColdFront actually runs before enabling the
+gate — if the Workday call itself fails (network, missing `shared_lib`, bad
+credentials) while the gate is enabled, that failure propagates as an
+unhandled error on the grant request rather than silently granting or
+silently withholding access.
 
 ### API Setup
 
