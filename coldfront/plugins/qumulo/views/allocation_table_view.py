@@ -275,12 +275,19 @@ class AllocationTableView(LoginRequiredMixin, ListView):
     def _handle_pagination(
         self, allocation_list: List[AllocationListItem], page_num, page_size
     ):
+        paginator_start = perf_counter()
         paginator = Paginator(allocation_list, page_size)
 
         try:
             next_page = paginator.page(page_num)
         except EmptyPage:
             next_page = paginator.page(paginator.num_pages)
+        logger.warning(
+            "Pagination processed page %d with page size %d in %.3f seconds",
+            page_num,
+            page_size,
+            perf_counter() - paginator_start,
+        )
 
         return next_page
 
