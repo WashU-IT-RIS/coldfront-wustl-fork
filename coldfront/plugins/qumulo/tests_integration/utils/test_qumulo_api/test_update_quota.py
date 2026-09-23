@@ -26,4 +26,4 @@ class TestDeleteQuota(TestCase):
         export_id = qumulo_api.get_id(protocol="nfs", export_path=export_fs_path)
         qumulo_api.delete_nfs_export(export_id)
 
-        self.assertEquals(quota["limit"], str(new_limit_in_bytes))
+        self.assertEqual(quota["limit"], str(new_limit_in_bytes))
