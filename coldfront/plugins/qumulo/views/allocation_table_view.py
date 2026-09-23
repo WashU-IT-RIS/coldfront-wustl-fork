@@ -2,6 +2,7 @@ from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, Paginator
+from django.db.models import Prefetch
 from django.db.models.query import QuerySet
 from django.views.generic import ListView
 
@@ -10,6 +11,7 @@ from coldfront.plugins.qumulo.forms.AllocationTableSearchForm import (
 )
 
 from coldfront.core.allocation.models import (
+    ALLOCATION_RESOURCE_ORDERING,
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
@@ -20,7 +22,6 @@ from coldfront.core.resource.models import Resource, ResourceType
 from django.db.models import OuterRef, Subquery
 
 from collections import defaultdict
-
 
 class AllocationListItem:
     id: int
@@ -115,6 +116,14 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 file_path=Subquery(file_path_sub_q),
                 service_rate_category=Subquery(service_rate_category_sub_q),
                 name=Subquery(storage_name_sub_q),
+            ).select_related(
+                "project__pi",
+                "status",
+            ).prefetch_related(
+                Prefetch(
+                    "resources",
+                    queryset=Resource.objects.order_by(*ALLOCATION_RESOURCE_ORDERING),
+                )
             )
 
             # add filters
@@ -160,49 +169,64 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             # of pushing this into the query
             allocations = allocations.distinct().order_by(order_by)
 
+            annotated_children = Allocation.objects.annotate(
+                department_number=Subquery(department_sub_q),
+                itsd_ticket=Subquery(itsd_ticket_sub_q),
+                file_path=Subquery(file_path_sub_q),
+                service_rate_category=Subquery(service_rate_category_sub_q),
+            ).order_by(order_by)
+
             allocation_linkages = AllocationLinkage.objects.filter(
                 parent__in=allocations
+            ).prefetch_related(
+                Prefetch(
+                    "children",
+                    queryset=annotated_children,
+                    to_attr="annotated_children",
+                )
             )
 
             parent_to_children_map = defaultdict(list)
 
             all_allocations = dict()
+            allocation_metadata = {}
 
             for allocation in allocations:
                 all_allocations[str(allocation.pk)] = allocation
+                project = allocation.project
+                pi = project.pi
+                allocation_metadata[allocation.pk] = {
+                    "id": allocation.pk,
+                    "pi_last_name": pi.last_name,
+                    "pi_first_name": pi.first_name,
+                    "pi_user_name": pi.username,
+                    "project_id": project.pk,
+                    "project_name": project.title,
+                    "resource_name": ", ".join(
+                        resource.name for resource in allocation.resources.all()
+                    ),
+                    "allocation_status": allocation.status.name,
+                    "department_number": allocation.department_number,
+                    "itsd_ticket": allocation.itsd_ticket,
+                    "file_path": allocation.file_path,
+                    "service_rate_category": allocation.service_rate_category,
+                }
 
             all_children = set()
 
             for linkage in allocation_linkages:
-                linkage_children = linkage.children.all().annotate(
-                    department_number=Subquery(department_sub_q),
-                    itsd_ticket=Subquery(itsd_ticket_sub_q),
-                    file_path=Subquery(file_path_sub_q),
-                    service_rate_category=Subquery(service_rate_category_sub_q),
-                )
-                linkage_children = linkage_children.order_by(order_by)
-                children = [str(child.id) for child in linkage_children]
+                children = [str(child.id) for child in linkage.annotated_children]
                 all_children.update(children)
                 parent_to_children_map[linkage.parent.id] = children
 
             for allocation in allocations:
+                allocation_info = allocation_metadata.get(allocation.pk, {})
+
                 if not data.get("no_grouping", False):
                     if str(allocation.pk) not in all_children:
-                        # append a new item, plus any children
                         view_list.append(
                             AllocationListItem(
-                                id=allocation.pk,
-                                pi_last_name=allocation.project.pi.last_name,
-                                pi_first_name=allocation.project.pi.first_name,
-                                pi_user_name=allocation.project.pi.username,
-                                project_id=allocation.project.pk,
-                                project_name=allocation.project.title,
-                                resource_name=allocation.get_resources_as_string,
-                                allocation_status=allocation.status.name,
-                                department_number=allocation.department_number,
-                                itsd_ticket=allocation.itsd_ticket,
-                                file_path=allocation.file_path,
-                                service_rate_category=allocation.service_rate_category,
+                                **allocation_info,
                                 child_allocation_ids=parent_to_children_map[
                                     allocation.id
                                 ],
@@ -210,23 +234,14 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                             )
                         )
                         for child_id in parent_to_children_map[allocation.id]:
-                            child_allocation = all_allocations.get(child_id, None)
-                            # if child doesn't match filter, then we won't have retrieved it
+                            child_allocation = all_allocations.get(str(child_id), None)
                             if child_allocation:
+                                child_info = allocation_metadata.get(
+                                    child_allocation.pk, {}
+                                )
                                 view_list.append(
                                     AllocationListItem(
-                                        id=child_allocation.pk,
-                                        pi_last_name=child_allocation.project.pi.last_name,
-                                        pi_first_name=child_allocation.project.pi.first_name,
-                                        pi_user_name=child_allocation.project.pi.username,
-                                        project_id=child_allocation.project.pk,
-                                        project_name=child_allocation.project.title,
-                                        resource_name=child_allocation.get_resources_as_string,
-                                        allocation_status=child_allocation.status.name,
-                                        department_number=child_allocation.department_number,
-                                        itsd_ticket=child_allocation.itsd_ticket,
-                                        file_path=child_allocation.file_path,
-                                        service_rate_category=child_allocation.service_rate_category,
+                                        **child_info,
                                         child_allocation_ids=[],
                                         is_child=True,
                                     )
@@ -234,18 +249,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 else:
                     view_list.append(
                         AllocationListItem(
-                            id=allocation.pk,
-                            pi_last_name=allocation.project.pi.last_name,
-                            pi_first_name=allocation.project.pi.first_name,
-                            pi_user_name=allocation.project.pi.username,
-                            project_id=allocation.project.pk,
-                            project_name=allocation.project.title,
-                            resource_name=allocation.get_resources_as_string,
-                            allocation_status=allocation.status.name,
-                            department_number=allocation.department_number,
-                            itsd_ticket=allocation.itsd_ticket,
-                            file_path=allocation.file_path,
-                            service_rate_category=allocation.service_rate_category,
+                            **allocation_info,
                             child_allocation_ids=parent_to_children_map[allocation.id],
                             is_child=(str(allocation.pk) in all_children),
                         )
@@ -266,9 +270,13 @@ class AllocationTableView(LoginRequiredMixin, ListView):
         return next_page
 
     def get_context_data(self, **kwargs):
+        self.kwargs = kwargs
+        if not hasattr(self, "object_list"):
+            self.object_list = self.get_queryset()
         context = super().get_context_data(**kwargs)
-        # context["allocation_list"] = self.get_queryset()
-        allocations_count = len(self.get_queryset())
+        allocation_list = context.get("object_list", self.object_list)
+        context["allocation_list"] = allocation_list
+        allocations_count = len(allocation_list)
         context["allocations_count"] = allocations_count
 
         allocation_search_form = AllocationTableSearchForm(self.request.GET)
@@ -304,8 +312,6 @@ class AllocationTableView(LoginRequiredMixin, ListView):
             context["expand_accordion"] = "show"
         context["filter_parameters"] = filter_parameters
         context["filter_parameters_with_order_by"] = filter_parameters_with_order_by
-
-        allocation_list = context.get("allocation_list")
 
         page_num = self.request.GET.get("page")
         if page_num is None or type(page_num) is not int:

@@ -1,3 +1,5 @@
+import calendar
+
 from datetime import datetime
 
 from django.db import models
@@ -248,6 +250,18 @@ class MonthlyStorageBilling(AllocationUsage):
             return None
 
     @classmethod
+    def _get_document_date(cls, delivery_date):
+        # *delivery_date (str): beginning date of the service (ex. 2024-05-01)
+        def last_day_month():
+            return calendar \
+                    .monthrange(delivery_date.year, delivery_date.month)[-1]
+        return(
+            f'{delivery_date.month:02d}/'
+            f'{last_day_month():02d}/'
+            f'{delivery_date.year:04d}'
+        )
+
+    @classmethod
     def _get_fiscal_year(cls, a_date):
         """
         Given a date, return the fiscal year as a combined string of
@@ -270,6 +284,7 @@ class MonthlyStorageBilling(AllocationUsage):
         """
         return cls._get_fiscal_year(delivery_date)
 
+    # bmulligan 20260826: this function appears to be unused
     @classmethod
     def _get_fiscal_year_by_document_date(cls, document_date):
         """
@@ -320,7 +335,7 @@ class MonthlyStorageBilling(AllocationUsage):
             ISP_code = cls.ISP_ARCHIVE
 
         spreadsheet_key = 1
-        document_date = datetime.now().date().strftime("%m/%d/%Y")
+        document_date = cls._get_document_date(a_delivery_date)
         fiscal_year = cls._get_fiscal_year_by_delivery_date(a_delivery_date)
         billing_month = a_delivery_date.strftime("%B")
         with open(output_path, "a") as output_file:
