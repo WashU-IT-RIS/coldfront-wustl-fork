@@ -478,5 +478,7 @@ class TestGetUsagesByMonth(TestCase):
         self.assertIsInstance(usages, list)
         self.assertEqual(expected_usage, usages[0]["usage"])
         self.assertEqual(date.today(), usages[0]["date"])
-        
+    
+    def test_returns_quotas_for_firsts_of_month(self) -> None:
+           
     
