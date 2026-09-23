@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.http import HttpRequest
 
 
-from coldfront.plugins.qumulo.api.usage.usages import Usages, _get_quotas
+from coldfront.plugins.qumulo.api.usage.usages import Usages, _get_quotas, _get_usages_by_month
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
 )
@@ -458,3 +458,25 @@ class TestGetQuotas(TestCase):
 
         self.assertIsInstance(quotas, list)
         self.assertListEqual(expected_quotas, quotas)
+
+class TestGetUsagesByMonth(TestCase):
+    def setUp(self) -> None:
+        create_metadata_for_testing()
+
+        return super().setUp()
+
+    def test_returns_latest_usage(self) -> None:
+        quota_tib = 5
+        expected_usage = 3.25 * 2**10
+
+        (storage_allocation, _) = create_allocation_with_usage(
+            quota_tib, expected_usage
+        )
+
+        usages = _get_usages_by_month(storage_allocation.pk)
+
+        self.assertIsInstance(usages, list)
+        self.assertEqual(expected_usage, usages[0]["usage"])
+        self.assertEqual(date.today(), usages[0]["date"])
+        
+    

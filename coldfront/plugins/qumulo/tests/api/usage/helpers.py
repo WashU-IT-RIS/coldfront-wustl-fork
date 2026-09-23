@@ -66,6 +66,7 @@ def create_usage_history(
             },
         )
 
+        # write_quota_history(usage_o)
         with freeze_time(working_date):
             quota_attribute = usage_object.allocation_attribute
             quota_attribute.value = quota_tib
@@ -141,6 +142,9 @@ def write_quota_history(allocation_id: int, this_date: date, quota_tib: int):
         )
         quota_attribute.value = quota_tib
         quota_attribute.save()
+        
+def write_usage_history(allocation_id: int, this_date: date, quota_tib: int):
+    
 
 
 def random_date(start: date, end: date):
