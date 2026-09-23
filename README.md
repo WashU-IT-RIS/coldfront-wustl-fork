@@ -141,12 +141,14 @@ Workday access-attestation status before granting them `rw`/`ro` access,
 instead of granting unconditionally. This is off by default — set
 `ATTESTATION_GATE_ENABLED=true` to turn it on.
 
-While enabled, for each newly-granted username:
+Access is only granted once Workday shows the attestation as **completed**
+(`assignmentStatus1 = 'Completed'`) — being merely absent from an overdue
+list is not treated as clearance. For each newly-granted username:
 
-- **Attestation current:** granted immediately, exactly as before —
+- **Attestation completed:** granted immediately, exactly as before —
   included in the response's `added_users`.
-- **Attestation overdue:** the grant is withheld. The user is added to a
-  holding AD group instead (`AD_PRE_ONBOARD_GROUP`, default
+- **Attestation not (yet) completed:** the grant is withheld. The user is
+  added to a holding AD group instead (`AD_PRE_ONBOARD_GROUP`, default
   `ris-pre-onboard`), and a `pending_attestation_event` is recorded (as a
   private `AllocationAttribute` on the `rw`/`ro` access allocation) —
   included in the response's `pending_users` instead of `added_users`. The
@@ -158,11 +160,11 @@ While enabled, for each newly-granted username:
   but a logged event reads the same way in both.
 
 **Closing the loop:** `python manage.py restore_pending_attestation_access`
-re-checks Workday for every pending event; a user who has since attested is
-granted the withheld access, removed from the pre-onboard group, and has
-their pending event cleared. `--dry-run` reports what would happen without
-changing anything. `add_scheduled_restore_pending_attestation_access` wires
-this up to run hourly via `django-q`.
+re-checks Workday for every pending event; a user who now shows up as
+completed is granted the withheld access, removed from the pre-onboard
+group, and has their pending event cleared. `--dry-run` reports what would
+happen without changing anything. `add_scheduled_restore_pending_attestation_access`
+wires this up to run hourly via `django-q`.
 
 This depends on a live Workday connection through the IntegrationHub-managed
 `shared_lib` package (not a pip dependency of this project — see

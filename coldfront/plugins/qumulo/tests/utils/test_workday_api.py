@@ -100,19 +100,19 @@ class TestWorkdayAPI(TestCase):
             with self.assertRaises(WorkdayApiError):
                 self.workday_api.run_wql("SELECT foo")
 
-    def test_get_overdue_attestations_parses_rows_and_skips_missing_universal_id(self):
+    def test_get_completed_attestations_parses_rows_and_skips_missing_universal_id(self):
         rows = [
             {"universal_id": 12345, "learningContent2": "att_2026_q3", "dueDate1": "2026-09-01"},
             {"learningContent2": "att_2026_q3", "dueDate1": "2026-09-02"},
         ]
         with patch.object(self.workday_api, "run_wql", return_value={"data": rows}):
-            overdue = self.workday_api.get_overdue_attestations()
+            completed = self.workday_api.get_completed_attestations()
 
         self.assertEqual(
-            overdue,
+            completed,
             [{"universal_id": 12345, "attestation_cycle_id": "att_2026_q3", "due_date": "2026-09-01"}],
         )
 
-    def test_get_overdue_attestations_handles_empty_response(self):
+    def test_get_completed_attestations_handles_empty_response(self):
         with patch.object(self.workday_api, "run_wql", return_value={}):
-            self.assertEqual(self.workday_api.get_overdue_attestations(), [])
+            self.assertEqual(self.workday_api.get_completed_attestations(), [])

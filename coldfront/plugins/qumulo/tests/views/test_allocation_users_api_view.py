@@ -8,6 +8,7 @@ from coldfront.core.allocation.models import AllocationAttribute, AllocationUser
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import build_models, create_allocation
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
+from coldfront.plugins.qumulo.utils.workday_api import CURRENT_ATTESTATION_CYCLE_ID
 
 
 @patch("coldfront.plugins.qumulo.views.allocation_users_api_view.ActiveDirectoryAPI")
@@ -247,8 +248,8 @@ class AllocationUsersApiViewTests(TestCase):
         self, mock_workday_api_cls: MagicMock, mock_active_directory_api_cls: MagicMock
     ):
         mock_active_directory_api = mock_active_directory_api_cls.return_value
-        mock_active_directory_api.find_wustlkey_by_universal_id.return_value = "someone-else"
-        mock_workday_api_cls.return_value.get_overdue_attestations.return_value = [
+        mock_active_directory_api.find_wustlkey_by_universal_id.return_value = "new-rw-user"
+        mock_workday_api_cls.return_value.get_completed_attestations.return_value = [
             {"universal_id": 12345, "attestation_cycle_id": "att_2026_q3", "due_date": "2026-09-01"}
         ]
 
@@ -273,12 +274,12 @@ class AllocationUsersApiViewTests(TestCase):
         )
 
     @patch("coldfront.plugins.qumulo.views.allocation_users_api_view.WorkdayAPI")
-    def test_post_holds_user_pending_attestation_when_gate_enabled_and_overdue(
+    def test_post_holds_user_pending_attestation_when_gate_enabled_and_not_completed(
         self, mock_workday_api_cls: MagicMock, mock_active_directory_api_cls: MagicMock
     ):
         mock_active_directory_api = mock_active_directory_api_cls.return_value
-        mock_active_directory_api.find_wustlkey_by_universal_id.return_value = "new-rw-user"
-        mock_workday_api_cls.return_value.get_overdue_attestations.return_value = [
+        mock_active_directory_api.find_wustlkey_by_universal_id.return_value = "someone-else"
+        mock_workday_api_cls.return_value.get_completed_attestations.return_value = [
             {"universal_id": 12345, "attestation_cycle_id": "att_2026_q3", "due_date": "2026-09-01"}
         ]
 
@@ -307,7 +308,7 @@ class AllocationUsersApiViewTests(TestCase):
         )
         event = json.loads(pending_attribute.value)
         self.assertEqual(event["user_id"], "new-rw-user")
-        self.assertEqual(event["attestation_cycle_id"], "att_2026_q3")
+        self.assertEqual(event["attestation_cycle_id"], CURRENT_ATTESTATION_CYCLE_ID)
         self.assertEqual(
             event["revoked_entitlements"],
             [{"system": "coldfront", "allocation_id": self.storage_allocation.pk, "scope": "rw"}],

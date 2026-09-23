@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.attestation import (
-    find_overdue_attestation,
+    find_completed_attestation,
     get_pending_attestation_events,
     pre_onboard_group_name,
 )
@@ -37,14 +37,14 @@ class Command(BaseCommand):
             return None
 
         active_directory_api = ActiveDirectoryAPI()
-        overdue_records = WorkdayAPI().get_overdue_attestations()
+        completed_records = WorkdayAPI().get_completed_attestations()
 
         for attribute, event in pending_events:
             username = event["user_id"]
             access_allocation = attribute.allocation
 
-            if find_overdue_attestation(username, active_directory_api, overdue_records) is not None:
-                self.stdout.write(f" - {username}: still overdue, leaving held (event {event['event_id']})")
+            if find_completed_attestation(username, active_directory_api, completed_records) is None:
+                self.stdout.write(f" - {username}: not yet completed, leaving held (event {event['event_id']})")
                 continue
 
             if dry_run:

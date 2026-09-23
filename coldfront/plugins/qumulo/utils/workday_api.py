@@ -22,31 +22,35 @@ class WorkdayApiError(Exception):
 # NOT a real wustlkey (AD's sAMAccountName). See
 # ActiveDirectoryAPI.find_wustlkey_by_universal_id, which resolves the two.
 #
-# This query has no dedicated attestation-cycle field. learningContent2 (the
-# specific attestation/training content's WID, pinned to one value in the
-# WHERE clause below) is used as the closest available "which cycle"
-# identifier; confirm with the Workday team whether a better field exists.
-OVERDUE_ATTESTATIONS_WQL = (
+# learningContent2 (the specific attestation/training content's WID, pinned
+# to one value below) is used as the "which cycle" identifier; confirm with
+# the Workday team whether a better dedicated cycle field exists.
+CURRENT_ATTESTATION_CYCLE_ID = "a5c5126c1b5a10020807b9a582640000"
+
+# assignmentStatus1 = 'Completed' is the confirmed signal that a user has
+# finished this attestation -- access is only granted once a user shows up
+# here, rather than granted by default and revoked once they show up as
+# overdue (see utils/attestation.py). Absence from this list (never
+# assigned, in progress, or overdue) is NOT treated as complete.
+COMPLETED_ATTESTATIONS_WQL = (
     "SELECT learningParticipant, learningContent2, required1, assignmentStatus1, "
     "assignmentMechanism1, dueDate1, "
-    "cf_ZCF_EE_OverdueConsidersIfLearningEnrollmentsAreComplete as Overdue, "
     "cf_ZCF_EE_UniversalID as universal_id, "
     "worker1{employeeID, cf_ZCF_EEB_WorkerStatusEvaluated_Updated, email_PrimaryWork, "
     "manager_Level01, cf_ZCF_LRV_Level1ManagerEmail, jobTitle} as Worker "
     "FROM indexedLearningAssignmentRecords "
-    "WHERE learningContent2 in (a5c5126c1b5a10020807b9a582640000) "
-    "AND cf_ZCF_EE_OverdueConsidersIfLearningEnrollmentsAreComplete = 'Yes' "
+    f"WHERE learningContent2 in ({CURRENT_ATTESTATION_CYCLE_ID}) "
+    "AND assignmentStatus1 = 'Completed' "
     "AND assignmentMechanism1 in ('1880266fd7ec10001501ed8dffd81498') "
     "ORDER BY dueDate1 ASC"
 )
 
 
 class WorkdayAPI:
-    """Queries Workday for overdue access attestations, used to gate storage
-    allocation access provisioning (see utils/attestation.py). Mirrors
-    ../../../ris-user-management-tmp/python/clients/workday_client.py's
-    OVERDUE_ATTESTATIONS_WQL/get_overdue_attestations so the two independent
-    callers agree on what "overdue" means, without sharing code or a process.
+    """Queries Workday for completed access attestations, used to gate
+    storage allocation access provisioning (see utils/attestation.py):
+    access is granted only once a user's attestation shows up as complete,
+    not merely absent from an overdue list.
     """
 
     def __init__(self) -> None:
@@ -109,29 +113,31 @@ class WorkdayAPI:
                 response.status_code,
             ) from error
 
-    def get_overdue_attestations(self) -> list[dict[str, Any]]:
+    def get_completed_attestations(self) -> list[dict[str, Any]]:
         """Returns [{"universal_id", "attestation_cycle_id", "due_date"}, ...]
-        for every user whose access attestation is currently overdue.
+        for every user whose access attestation is currently complete
+        (assignmentStatus1 = 'Completed').
 
         universal_id is Workday's cf_ZCF_EE_UniversalID (an integer), i.e.
         AD's wustlEduId -- not a wustlkey. Callers must resolve it to a
         wustlkey via ActiveDirectoryAPI.find_wustlkey_by_universal_id before
         using it against ColdFront/AD. attestation_cycle_id is populated
-        from learningContent2 (see the caveat on OVERDUE_ATTESTATIONS_WQL
-        above).
+        from learningContent2, which today is pinned to the single value
+        CURRENT_ATTESTATION_CYCLE_ID (see the caveat on
+        COMPLETED_ATTESTATIONS_WQL above), so it's the same for every row.
         """
-        data = self.run_wql(OVERDUE_ATTESTATIONS_WQL)
+        data = self.run_wql(COMPLETED_ATTESTATIONS_WQL)
         rows = data.get("data", []) if isinstance(data, dict) else []
-        overdue = []
+        completed = []
         for row in rows:
             universal_id = row.get("universal_id")
             if universal_id is None:
                 continue
-            overdue.append(
+            completed.append(
                 {
                     "universal_id": universal_id,
                     "attestation_cycle_id": row.get("learningContent2"),
                     "due_date": row.get("dueDate1"),
                 }
             )
-        return overdue
+        return completed
