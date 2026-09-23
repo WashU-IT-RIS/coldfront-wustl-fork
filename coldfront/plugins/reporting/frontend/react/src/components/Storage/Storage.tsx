@@ -19,12 +19,15 @@ function Storage() {
   const [allocationOptions, setAllocationOptions] = useState(
     [] as AllocationOption[],
   );
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (selectedAllocation) {
+      setIsLoading(true);
       getAllocationUsage(startDate, endDate, selectedAllocation).then(
         (usageData) => {
           setUsage(usageData);
+          setIsLoading(false);
         },
       );
     }
@@ -67,7 +70,7 @@ function Storage() {
         <Select
           options={getOptions()}
           onChange={(newValue) => onSelectChange(newValue)}
-          defaultValue={{
+          value={{
             value: selectedAllocation?.id,
             label: selectedAllocation?.path,
           }}
@@ -99,6 +102,7 @@ function Storage() {
           })),
           path: selectedAllocation?.path || "",
         }}
+        isLoading={isLoading}
       />
     </>
   );

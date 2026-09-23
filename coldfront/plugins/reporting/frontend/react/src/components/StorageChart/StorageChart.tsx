@@ -14,6 +14,7 @@ import {
 import { Line } from "react-chartjs-2";
 
 import * as chartjsAdapter from "chartjs-adapter-dayjs-4";
+import "./StorageChart.css";
 
 ChartJS.register(
   CategoryScale,
@@ -32,9 +33,10 @@ interface StorageChartProps {
     quota: { x: string; y: number }[];
     path: string;
   };
+  isLoading: Boolean;
 }
 
-function StorageChart({ data }: StorageChartProps) {
+function StorageChart({ data, isLoading }: StorageChartProps) {
   const getMaxQuota = () => {
     let maxQuota = 0;
     for (const element of data.quota) {
@@ -114,11 +116,20 @@ function StorageChart({ data }: StorageChartProps) {
   };
 
   return (
-    <>
+    <div className="storage-chart">
       {/* 
 // @ts-ignore */}
-      <Line options={options as LineOptions} data={chartData} />
-    </>
+      <Line
+        className="storage-chart-child"
+        options={options as LineOptions}
+        data={chartData}
+      />
+      {isLoading && (
+        <div className="storage-chart-child storage-chart-spinner d-flex justify-content-center align-items-center">
+          <div className="spinner-border" role="status" />
+        </div>
+      )}
+    </div>
   );
 }
 
