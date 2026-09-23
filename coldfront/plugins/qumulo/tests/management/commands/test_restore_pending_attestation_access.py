@@ -15,7 +15,7 @@ COMMAND = "restore_pending_attestation_access"
 MODULE = "coldfront.plugins.qumulo.management.commands.restore_pending_attestation_access"
 
 
-def _overdue_record(**overrides):
+def _completed_record(**overrides):
     record = {"universal_id": 12345, "attestation_cycle_id": "att_2026_q3", "due_date": "2026-09-01"}
     record.update(overrides)
     return record
@@ -48,8 +48,8 @@ class TestRestorePendingAttestationAccess(TestCase):
 
     def test_restores_access_when_now_attested(self, mock_ad_api_cls, mock_workday_api_cls):
         mock_ad_api = mock_ad_api_cls.return_value
-        mock_ad_api.find_wustlkey_by_universal_id.return_value = "someone-else"
-        mock_workday_api_cls.return_value.get_overdue_attestations.return_value = [_overdue_record()]
+        mock_ad_api.find_wustlkey_by_universal_id.return_value = "held-user"
+        mock_workday_api_cls.return_value.get_completed_attestations.return_value = [_completed_record()]
 
         out = StringIO()
         call_command(COMMAND, stdout=out)
@@ -69,10 +69,10 @@ class TestRestorePendingAttestationAccess(TestCase):
         self.assertIn("held-user", out.getvalue())
         self.assertIn("restored access", out.getvalue())
 
-    def test_leaves_user_held_when_still_overdue(self, mock_ad_api_cls, mock_workday_api_cls):
+    def test_leaves_user_held_when_not_yet_completed(self, mock_ad_api_cls, mock_workday_api_cls):
         mock_ad_api = mock_ad_api_cls.return_value
-        mock_ad_api.find_wustlkey_by_universal_id.return_value = "held-user"
-        mock_workday_api_cls.return_value.get_overdue_attestations.return_value = [_overdue_record()]
+        mock_ad_api.find_wustlkey_by_universal_id.return_value = "someone-else"
+        mock_workday_api_cls.return_value.get_completed_attestations.return_value = [_completed_record()]
 
         out = StringIO()
         call_command(COMMAND, stdout=out)
@@ -87,12 +87,12 @@ class TestRestorePendingAttestationAccess(TestCase):
                 allocation=self.rw_allocation, allocation_attribute_type__name="pending_attestation_event"
             ).exists()
         )
-        self.assertIn("still overdue", out.getvalue())
+        self.assertIn("not yet completed", out.getvalue())
 
     def test_dry_run_does_not_mutate_anything(self, mock_ad_api_cls, mock_workday_api_cls):
         mock_ad_api = mock_ad_api_cls.return_value
-        mock_ad_api.find_wustlkey_by_universal_id.return_value = "someone-else"
-        mock_workday_api_cls.return_value.get_overdue_attestations.return_value = [_overdue_record()]
+        mock_ad_api.find_wustlkey_by_universal_id.return_value = "held-user"
+        mock_workday_api_cls.return_value.get_completed_attestations.return_value = [_completed_record()]
 
         out = StringIO()
         call_command(COMMAND, "--dry-run", stdout=out)
@@ -115,5 +115,5 @@ class TestRestorePendingAttestationAccess(TestCase):
         out = StringIO()
         call_command(COMMAND, stdout=out)
 
-        mock_workday_api_cls.return_value.get_overdue_attestations.assert_not_called()
+        mock_workday_api_cls.return_value.get_completed_attestations.assert_not_called()
         self.assertIn("No pending attestation events found.", out.getvalue())

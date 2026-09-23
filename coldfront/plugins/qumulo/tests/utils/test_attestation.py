@@ -11,14 +11,14 @@ from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.attestation import (
     attestation_gate_enabled,
     build_pending_attestation_event,
-    find_overdue_attestation,
+    find_completed_attestation,
     get_pending_attestation_events,
     pre_onboard_group_name,
     record_pending_attestation_event,
 )
 
 
-def _overdue_record(**overrides):
+def _completed_record(**overrides):
     record = {"universal_id": 12345, "attestation_cycle_id": "att_2026_q3", "due_date": "2026-09-01"}
     record.update(overrides)
     return record
@@ -49,28 +49,28 @@ class TestAttestationGateConfig(TestCase):
             self.assertFalse(attestation_gate_enabled())
 
 
-class TestFindOverdueAttestation(TestCase):
+class TestFindCompletedAttestation(TestCase):
     def test_matches_resolved_wustlkey(self):
         mock_ad_api = MagicMock()
         mock_ad_api.find_wustlkey_by_universal_id.return_value = "sleong"
 
-        record = find_overdue_attestation("sleong", mock_ad_api, [_overdue_record()])
+        record = find_completed_attestation("sleong", mock_ad_api, [_completed_record()])
 
         mock_ad_api.find_wustlkey_by_universal_id.assert_called_once_with(12345)
-        self.assertEqual(record, _overdue_record())
+        self.assertEqual(record, _completed_record())
 
-    def test_returns_none_when_user_not_in_overdue_list(self):
+    def test_returns_none_when_user_not_in_completed_list(self):
         mock_ad_api = MagicMock()
         mock_ad_api.find_wustlkey_by_universal_id.return_value = "someone-else"
 
-        self.assertIsNone(find_overdue_attestation("sleong", mock_ad_api, [_overdue_record()]))
+        self.assertIsNone(find_completed_attestation("sleong", mock_ad_api, [_completed_record()]))
 
-    def test_returns_none_for_empty_overdue_list(self):
+    def test_returns_none_for_empty_completed_list(self):
         mock_ad_api = MagicMock()
-        self.assertIsNone(find_overdue_attestation("sleong", mock_ad_api, []))
+        self.assertIsNone(find_completed_attestation("sleong", mock_ad_api, []))
 
     def test_skips_unresolvable_records(self):
-        records = [_overdue_record(universal_id=11111), _overdue_record(universal_id=22222)]
+        records = [_completed_record(universal_id=11111), _completed_record(universal_id=22222)]
 
         def fake_resolve(universal_id):
             if universal_id == 11111:
@@ -80,7 +80,7 @@ class TestFindOverdueAttestation(TestCase):
         mock_ad_api = MagicMock()
         mock_ad_api.find_wustlkey_by_universal_id.side_effect = fake_resolve
 
-        record = find_overdue_attestation("sleong", mock_ad_api, records)
+        record = find_completed_attestation("sleong", mock_ad_api, records)
 
         self.assertEqual(record, records[1])
 

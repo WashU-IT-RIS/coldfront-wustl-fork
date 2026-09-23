@@ -25,22 +25,24 @@ def attestation_gate_enabled() -> bool:
     return os.environ.get("ATTESTATION_GATE_ENABLED", "").strip().lower() in ("1", "true", "yes")
 
 
-def find_overdue_attestation(wustlkey, ad_api, overdue_records):
-    """Returns the Workday overdue-attestation record (see
-    utils/workday_api.WorkdayAPI.get_overdue_attestations) for wustlkey, or
-    None if they have no currently-overdue attestation -- i.e. they're clear
-    to provision new access.
+def find_completed_attestation(wustlkey, ad_api, completed_records):
+    """Returns the Workday completed-attestation record (see
+    utils/workday_api.WorkdayAPI.get_completed_attestations) for wustlkey,
+    or None if they have no record of a completed attestation for the
+    current cycle -- i.e. they are NOT yet clear to provision new access.
+    Access is only granted once a completed record is found; merely being
+    absent from an overdue list is not treated as clearance.
 
-    overdue_records is normally fetched once per request/run via
-    WorkdayAPI().get_overdue_attestations() and passed in by the caller, so
-    granting access to several users in the same allocation-users request
-    doesn't re-query Workday once per user. Workday's records are keyed by
-    universal_id (AD's wustlEduId), not wustlkey, so each is resolved via
-    ad_api.find_wustlkey_by_universal_id; a record that fails to resolve
-    can't be matched to any user, so it's skipped rather than treated as a
-    failure.
+    completed_records is normally fetched once per request/run via
+    WorkdayAPI().get_completed_attestations() and passed in by the caller,
+    so granting access to several users in the same allocation-users
+    request doesn't re-query Workday once per user. Workday's records are
+    keyed by universal_id (AD's wustlEduId), not wustlkey, so each is
+    resolved via ad_api.find_wustlkey_by_universal_id; a record that fails
+    to resolve can't be matched to any user, so it's skipped rather than
+    treated as a failure.
     """
-    for record in overdue_records:
+    for record in completed_records:
         try:
             resolved_wustlkey = ad_api.find_wustlkey_by_universal_id(record["universal_id"])
         except Exception:  # noqa: BLE001 - unresolvable record, not a match

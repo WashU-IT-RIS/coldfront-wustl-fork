@@ -11,12 +11,12 @@ from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.attestation import (
     attestation_gate_enabled,
-    find_overdue_attestation,
+    find_completed_attestation,
     pre_onboard_group_name,
     record_pending_attestation_event,
 )
 from coldfront.plugins.qumulo.utils.oauth2 import SessionOrOAuth2RequiredMixin
-from coldfront.plugins.qumulo.utils.workday_api import WorkdayAPI
+from coldfront.plugins.qumulo.utils.workday_api import CURRENT_ATTESTATION_CYCLE_ID, WorkdayAPI
 
 
 # Mutates AD group membership; not an HTML form, so CSRF is exempted here
@@ -98,7 +98,7 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
         # request, not once per user, since it's the same Workday query
         # regardless of which user is being checked.
         gate_enabled = attestation_gate_enabled()
-        overdue_records = WorkdayAPI().get_overdue_attestations() if gate_enabled else []
+        completed_records = WorkdayAPI().get_completed_attestations() if gate_enabled else []
 
         added_users = {"rw": [], "ro": []}
         pending_users = {"rw": [], "ro": []}
@@ -135,18 +135,18 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
                 continue
 
             for username in new_usernames:
-                overdue = (
-                    find_overdue_attestation(username, active_directory_api, overdue_records)
+                completed = (
+                    find_completed_attestation(username, active_directory_api, completed_records)
                     if gate_enabled
                     else None
                 )
 
-                if overdue is not None:
+                if gate_enabled and completed is None:
                     record_pending_attestation_event(
                         access_allocation,
                         username,
                         access_key,
-                        overdue.get("attestation_cycle_id"),
+                        CURRENT_ATTESTATION_CYCLE_ID,
                     )
                     active_directory_api.add_user_to_ad_group(
                         wustlkey=username,
