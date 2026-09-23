@@ -1,0 +1,354 @@
+from django.test import TestCase
+from django.http import HttpRequest
+
+from coldfront.core.test_helpers.factories import (
+    UserFactory,
+    AllocationAttributeFactory,
+    AllocationStatusChoiceFactory,
+)
+from coldfront.core.user.models import User
+from coldfront.core.allocation.models import AllocationAttribute
+
+
+from coldfront.plugins.qumulo.api.usage.usage_allocations import UsageAllocations
+from coldfront.plugins.qumulo.tests.fixtures import (
+    create_metadata_for_testing,
+    create_ris_project_and_allocations_storage3,
+    create_allocation_linkage,
+)
+from faker import Faker
+from faker.providers import person
+
+fake = Faker()
+fake.add_provider(person)
+
+
+class TestUsageAllocationsGet(TestCase):
+    def setUp(self) -> None:
+        create_metadata_for_testing()
+
+        self.usage_allocations = UsageAllocations()
+
+        self.request = HttpRequest()
+        self.request.method = "GET"
+
+        return super().setUp()
+
+    def test_restricts_anonymous_users(self):
+        response = self.client.get("/qumulo/api/usage/allocations")
+
+        self.assertEqual(response.status_code, 302)
+
+    def test_regular_user_gets_no_allocations(self):
+        user = UserFactory.create()
+
+        for _ in range(5):
+            end_path = fake.last_name()
+            create_ris_project_and_allocations_storage3(f"/storage3/fs1/{end_path}")
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["allocations"]), 0)
+
+    def test_admin_gets_all_allocations(self):
+        expected_allocation_count = 5
+        user = UserFactory.create(is_superuser=True)
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            create_ris_project_and_allocations_storage3(f"/storage3/fs1/{end_path}")
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["allocations"]), expected_allocation_count)
+
+    def test_response_includes_path_and_id(self):
+        user = UserFactory.create(is_superuser=True)
+
+        end_path = fake.last_name()
+        [_, allocations] = create_ris_project_and_allocations_storage3(
+            f"/storage3/fs1/{end_path}"
+        )
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["allocations"]), 1)
+
+        saved_allocation = allocations["storage_allocation"]
+        returned_allocation = response.json()["allocations"][0]
+        self.assertEqual(returned_allocation["id"], saved_allocation.pk)
+        self.assertEqual(
+            returned_allocation["path"],
+            saved_allocation.get_attribute("storage_filesystem_path"),
+        )
+
+    def test_gets_only_active_allocations(self):
+        expected_allocation_count = 5
+        user = UserFactory.create(is_superuser=True)
+        expected_allocation_ids = []
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            (_, allocations) = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}"
+            )
+            expected_allocation_ids.append(allocations["storage_allocation"].pk)
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            (_, allocations) = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}",
+                None,
+            )
+            allocations["storage_allocation"].status = AllocationStatusChoiceFactory(
+                name="Pending"
+            )
+            allocations["storage_allocation"].save()
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+        response_allocations = response.json()["allocations"]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_allocations), expected_allocation_count)
+
+        for response_allocation in response_allocations:
+            self.assertIn(response_allocation["id"], expected_allocation_ids)
+
+        for id in expected_allocation_ids:
+            response_ids = map(
+                lambda response_allocation: response_allocation["id"],
+                response_allocations,
+            )
+            self.assertIn(id, response_ids)
+
+    def test_staff_gets_all_allocations(self):
+        expected_allocation_count = 5
+        user = UserFactory.create(is_staff=True)
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            create_ris_project_and_allocations_storage3(f"/storage3/fs1/{end_path}")
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["allocations"]), expected_allocation_count)
+
+    def test_pis_get_their_alloctions(self):
+        expected_allocation_count = 5
+        user: User = UserFactory.create()
+        expected_allocation_ids = []
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            (_, allocations) = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}", user.username
+            )
+
+            expected_allocation_ids.append(allocations["storage_allocation"].pk)
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            create_ris_project_and_allocations_storage3(f"/storage3/fs1/{end_path}")
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+        response_allocations = response.json()["allocations"]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_allocations), expected_allocation_count)
+
+        for response_allocation in response_allocations:
+            self.assertIn(response_allocation["id"], expected_allocation_ids)
+
+        for id in expected_allocation_ids:
+            response_ids = map(
+                lambda response_allocation: response_allocation["id"],
+                response_allocations,
+            )
+            self.assertIn(id, response_ids)
+
+    def test_billing_contacts_get_their_allocations(self):
+        expected_allocation_count = 5
+        user: User = UserFactory.create()
+        expected_allocation_ids = []
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            [_, allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}"
+            )
+
+            expected_allocation_ids.append(allocations["storage_allocation"].pk)
+
+            billing_contact_attribute = AllocationAttribute.objects.get(
+                allocation__pk=allocations["storage_allocation"].pk,
+                allocation_attribute_type__name="billing_contact",
+            )
+            billing_contact_attribute.value = user.username
+            billing_contact_attribute.save()
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            create_ris_project_and_allocations_storage3(f"/storage3/fs1/{end_path}")
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+        response_allocations = response.json()["allocations"]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_allocations), expected_allocation_count)
+
+        for response_allocation in response_allocations:
+            self.assertIn(response_allocation["id"], expected_allocation_ids)
+
+        for id in expected_allocation_ids:
+            response_ids = map(
+                lambda response_allocation: response_allocation["id"],
+                response_allocations,
+            )
+            self.assertIn(id, response_ids)
+
+    def test_technical_contacts_get_their_allocations(self):
+        expected_allocation_count = 5
+        user: User = UserFactory.create()
+        expected_allocation_ids = []
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            [_, allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}"
+            )
+
+            expected_allocation_ids.append(allocations["storage_allocation"].pk)
+
+            AllocationAttributeFactory(
+                allocation=allocations["storage_allocation"],
+                allocation_attribute_type__name="technical_contact",
+                value=user.username,
+            )
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            create_ris_project_and_allocations_storage3(f"/storage3/fs1/{end_path}")
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+        response_allocations = response.json()["allocations"]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_allocations), expected_allocation_count)
+
+        for response_allocation in response_allocations:
+            self.assertIn(response_allocation["id"], expected_allocation_ids)
+
+        for id in expected_allocation_ids:
+            response_ids = map(
+                lambda response_allocation: response_allocation["id"],
+                response_allocations,
+            )
+            self.assertIn(id, response_ids)
+
+    def test_multiple_cases_get_their_allocations(self):
+        allocation_iterator = 5
+        user: User = UserFactory.create()
+        expected_allocation_ids = []
+
+        for _ in range(allocation_iterator):
+            # pi accounts
+            end_path = fake.last_name()
+            [_, allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}", user.username
+            )
+            expected_allocation_ids.append(allocations["storage_allocation"].pk)
+
+            # billing accounts
+            [_, allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}"
+            )
+            expected_allocation_ids.append(allocations["storage_allocation"].pk)
+
+            billing_contact_attribute = AllocationAttribute.objects.get(
+                allocation__pk=allocations["storage_allocation"].pk,
+                allocation_attribute_type__name="billing_contact",
+            )
+            billing_contact_attribute.value = user.username
+            billing_contact_attribute.save()
+
+            # technical accounts
+            [_, allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}"
+            )
+            expected_allocation_ids.append(allocations["storage_allocation"].pk)
+
+            AllocationAttributeFactory(
+                allocation=allocations["storage_allocation"],
+                allocation_attribute_type__name="technical_contact",
+                value=user.username,
+            )
+
+        for _ in range(allocation_iterator):
+            end_path = fake.last_name()
+            create_ris_project_and_allocations_storage3(f"/storage3/fs1/{end_path}")
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+        response_allocations = response.json()["allocations"]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_allocations), len(expected_allocation_ids))
+
+        for response_allocation in response_allocations:
+            self.assertIn(response_allocation["id"], expected_allocation_ids)
+
+        for id in expected_allocation_ids:
+            response_ids = map(
+                lambda response_allocation: response_allocation["id"],
+                response_allocations,
+            )
+            self.assertIn(id, response_ids)
+
+    def test_only_returns_parent_allocations(self):
+        expected_allocation_count = 5
+        expected_allocation_ids = []
+        user = UserFactory.create(is_superuser=True)
+
+        for _ in range(expected_allocation_count):
+            end_path = fake.last_name()
+            [_, parent_allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}"
+            )
+            expected_allocation_ids.append(parent_allocations["storage_allocation"].pk)
+
+            [_, child_allocations] = create_ris_project_and_allocations_storage3(
+                f"/storage3/fs1/{end_path}/Active/foo"
+            )
+            create_allocation_linkage(
+                parent_allocations["storage_allocation"],
+                [child_allocations["storage_allocation"]],
+            )
+
+        self.client.force_login(user)
+        response = self.client.get("/qumulo/api/usage/allocations")
+        response_allocations = response.json()["allocations"]
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response_allocations), len(expected_allocation_ids))
+
+        for response_allocation in response_allocations:
+            self.assertIn(response_allocation["id"], expected_allocation_ids)
+
+        for id in expected_allocation_ids:
+            response_ids = map(
+                lambda response_allocation: response_allocation["id"],
+                response_allocations,
+            )
+            self.assertIn(id, response_ids)

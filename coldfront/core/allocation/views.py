@@ -62,6 +62,7 @@ from coldfront.core.resource.models import Resource
 from coldfront.core.utils.common import get_domain_url, import_from_settings
 from coldfront.core.utils.mail import send_allocation_admin_email, send_allocation_customer_email, send_email_template, build_link
 from coldfront.plugins.qumulo.signals import AllocationActivationWarning
+from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 ALLOCATION_ENABLE_ALLOCATION_RENEWAL = import_from_settings(
     'ALLOCATION_ENABLE_ALLOCATION_RENEWAL', True)
 ALLOCATION_DEFAULT_ALLOCATION_LENGTH = import_from_settings(
@@ -106,12 +107,77 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
             return history.first().value
         return None
 
+    def _get_user_change_type(self, record):
+        if record.history_type == '+':
+            change_type = 'Added'
+        elif record.history_type == '~':
+            change_type = 'Updated'
+        elif record.history_type == '-':
+            change_type = 'Removed'
+        else:
+            change_type = 'Unknown'
+
+        return change_type
+    
+    def _is_active_allocation_user_status(self, status_obj):
+        if status_obj is None:
+            return False
+        return status_obj.name not in ['Removed', 'Error']
+
+    def _construct_user_change_history(self, acl_allocation: Allocation):
+        user_changes = []
+        user_type = acl_allocation.resources.get(resource_type__name="ACL").name
+        history = AllocationUser.history.filter(allocation=acl_allocation).order_by('history_date', 'history_id')
+        
+        user_state_at_each_record = []
+        current_users = set()
+        
+        for record in history:
+            previous_users = sorted(current_users.copy())
+            record_user = getattr(record, 'user', None)
+            username = record_user.username if record_user else None
+            
+            if username:
+                if record.history_type == '-':
+                    current_users.discard(username)
+                elif self._is_active_allocation_user_status(record.status):
+                    current_users.add(username)
+                else:
+                    current_users.discard(username)
+            
+            user_state_at_each_record.append({
+                'record': record,
+                'previous_users': previous_users,
+                'current_users': sorted(current_users.copy()),
+            })
+        
+        for state in reversed(user_state_at_each_record):
+            record = state['record']
+            if record.status and record.status.name == 'Error':
+                continue
+            action = self._get_user_change_type(record)
+            # Include all records with a user (history preserves user even for deletions)
+            if record.user:
+                user_changes.append({
+                    'created': record.history_date,
+                    'changed_by': record.history_user,
+                    'operation': action,
+                    'user': record.user,
+                    'user_type': user_type,
+                    'previous_users': state['previous_users'],
+                    'current_users': state['current_users'],
+                })
+        
+        return user_changes
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         pk = self.kwargs.get('pk')
         allocation_obj = get_object_or_404(Allocation, pk=pk)
+        acl_allocations = AclAllocations.get_access_allocations(allocation_obj)
         allocation_users = allocation_obj.allocationuser_set.exclude(
             status__name__in=['Removed']).order_by('user__username')
+        user_changes = []
 
         # set visible usage attributes
         alloc_attr_set = allocation_obj.get_attribute_set(self.request.user)
@@ -142,9 +208,21 @@ class AllocationDetailView(LoginRequiredMixin, UserPassesTestMixin, TemplateView
         context['attributes_with_usage'] = attributes_with_usage
         context['attributes'] = attributes
         
+        for acl_allocation in acl_allocations:
+            user_history = self._construct_user_change_history(acl_allocation)
+            user_changes.extend(user_history)
+
         for change_request in allocation_changes:
             change_request.previous_value = self._get_previous_value_for_change_request(change_request)
         context['allocation_changes'] = allocation_changes
+
+        user_changes = sorted(
+            user_changes,
+            key=lambda entry: entry.get('created') or datetime.datetime.min,
+            reverse=True,
+        )
+        
+        context['user_changes'] = user_changes
 
         # Can the user update the project?
         context['is_allowed_to_update_project'] = allocation_obj.project.has_perm(self.request.user, ProjectPermission.UPDATE)
@@ -1076,6 +1154,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
                         allocation_user_obj = allocation_obj.allocationuser_set.get(
                             user=user_obj)
                         allocation_user_obj.status = allocation_user_removed_status_choice
+                        allocation_user_obj._history_user = self.request.user
                         allocation_user_obj.save()
 
                         allocation_remove_user.send(
@@ -1089,6 +1168,7 @@ class AllocationRenewView(LoginRequiredMixin, UserPassesTestMixin, TemplateView)
                             allocation_user_obj = active_allocation.allocationuser_set.get(
                                 user=user_obj)
                             allocation_user_obj.status = allocation_user_removed_status_choice
+                            allocation_user_obj._history_user = self.request.user
                             allocation_user_obj.save()
                             allocation_remove_user.send(
                                 sender=self.__class__, allocation_user_pk=allocation_user_obj.pk)

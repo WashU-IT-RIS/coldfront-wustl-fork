@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ldap3 import Server, Connection, ALL, NTLM, MODIFY_DELETE
 from ldap3.extend.microsoft.addMembersToGroups import (
     ad_add_members_to_groups,
@@ -24,14 +26,26 @@ class ActiveDirectoryAPI:
         if not self.conn.bind():
             raise self.conn.result
 
-    def get_user(self, wustlkey: str):
+    def get_user(
+        self,
+        wustlkey: str,
+        attributes: Optional[list[str]] = None,
+        faculty_group_dn: Optional[str] = None,
+    ):
         if not wustlkey:
             raise ValueError(("wustlkey must be defined"))
 
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
+        if attributes is None:
+            attributes = ["sAMAccountName", "mail", "givenName", "sn"]
+
+        memberof_clause = f"(memberOf={faculty_group_dn})" if faculty_group_dn else ""
+
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
-            f"(&(objectClass=person)(sAMAccountName={wustlkey}))",
-            attributes=["sAMAccountName", "mail", "givenName", "sn"],
+            search_base,
+            f"(&(objectClass=person)(sAMAccountName={wustlkey}){memberof_clause})",
+            attributes=attributes,
         )
 
         if not self.conn.response:
@@ -40,12 +54,14 @@ class ActiveDirectoryAPI:
         return self.conn.response[0]
 
     def get_users(self, wustlkeys: list[str]):
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
         user_filter_base = lambda user: f"(sAMAccountName={user})"
 
         user_filters = f"(|{''.join(map(user_filter_base, wustlkeys))})"
 
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(objectClass=person){user_filters})",
             attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
@@ -56,8 +72,10 @@ class ActiveDirectoryAPI:
         return self.conn.response
 
     def get_member(self, account_name: str):
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(|(objectClass=group)(objectClass=person))(sAMAccountName={account_name}))",
             attributes=["sAMAccountName", "objectClass"],
         )
@@ -71,11 +89,13 @@ class ActiveDirectoryAPI:
         if not account_names:
             return []
 
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
         member_filter_base = lambda member: f"(sAMAccountName={member})"
         member_filters = f"(|{''.join(map(member_filter_base, account_names))})"
 
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(|(objectClass=group)(objectClass=person)){member_filters})",
             attributes=["sAMAccountName", "objectClass"],
         )
@@ -85,14 +105,23 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
-    def get_user_by_email(self, email: str):
+    def get_user_by_email(
+        self,
+        email: str,
+        attributes: Optional[list[str]] = None,
+    ):
         if not email:
             raise ValueError(("email must be defined"))
 
+        if attributes is None:
+            attributes = ["sAMAccountName", "mail", "givenName", "sn"]
+
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
         self.conn.search(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            search_base,
             f"(&(objectClass=person)(mail={email}))",
-            attributes=["sAMAccountName", "mail", "givenName", "sn"],
+            attributes=attributes,
         )
 
         if not self.conn.response:
@@ -146,6 +175,19 @@ class ActiveDirectoryAPI:
         group_dn = self.get_group_dn(group_name)
 
         self.conn.modify(group_dn, {"member": [(MODIFY_DELETE, [member_dn])]})
+
+    def is_faculty_member(self, wustlkey: str) -> bool:
+        faculty_group_dn = (
+            "CN=Faculty,OU=WU,OU=IdM Groups,DC=accounts,DC=ad,DC=wustl,DC=edu"
+        )
+        try:
+            user = self.get_user(wustlkey, faculty_group_dn=faculty_group_dn)
+            return bool(user)
+        except ValueError:
+            print(
+                f"User with wustlkey {wustlkey} is not a faculty member or does not exist."
+            )
+            return False
 
     @staticmethod
     def generate_group_dn(group_name: str) -> str:
