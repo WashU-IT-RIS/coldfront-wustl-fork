@@ -12,12 +12,12 @@ from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryA
 from coldfront.plugins.qumulo.utils.attestation import (
     attestation_gate_enabled,
     find_completed_attestation,
-    pre_onboard_group_name,
-    record_pending_attestation_event,
+    # pre_onboard_group_name,
+    # record_pending_attestation_event,
 )
 from coldfront.plugins.qumulo.utils.oauth2 import SessionOrOAuth2RequiredMixin
 from coldfront.plugins.qumulo.utils.workday_api import (
-    CURRENT_ATTESTATION_CYCLE_ID,
+    # CURRENT_ATTESTATION_CYCLE_ID,
     WorkdayAPI,
 )
 from typing import Union, cast
@@ -61,23 +61,23 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
         return users
 
     @classmethod
-    def _parse_access_users(cls, body: bytes):
+    def _parse_access_users(self, body: bytes) -> Union[dict[str, list], None]:
         try:
             payload = json.loads(body.decode("utf-8") or "{}")
         except (json.JSONDecodeError, UnicodeDecodeError):
             return None
 
-        access_users = {}
+        if not payload.get("rw_users", None) and not payload.get("ro_users", None):
+            return None
+
+        access_users = {"rw": [], "ro": []}
         for access_key in ["rw", "ro"]:
             raw_users = payload.get(f"{access_key}_users", [])
-            normalized_users = cls._normalize_usernames(raw_users)
+            normalized_users = self._normalize_usernames(raw_users)
             if normalized_users is None:
                 return None
 
             access_users[access_key] = normalized_users
-
-        if not access_users["rw"] and not access_users["ro"]:
-            return None
 
         return access_users
 
@@ -148,31 +148,24 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
                         username, active_directory_api, completed_records
                     )
                     if gate_enabled
-                    else None
+                    else True
                 )
 
-                if gate_enabled and completed is None:
-                    record_pending_attestation_event(
-                        access_allocation,
-                        username,
-                        access_key,
-                        CURRENT_ATTESTATION_CYCLE_ID,
-                    )
-                    active_directory_api.add_user_to_ad_group(
-                        wustlkey=username,
-                        group_name=pre_onboard_group_name(),
-                    )
-                    pending_users[access_key].append(username)
-                    continue
+                # if gate_enabled and completed is None:
+                #     record_pending_attestation_event(
+                #         access_allocation,
+                #         username,
+                #         access_key,
+                #         CURRENT_ATTESTATION_CYCLE_ID,
+                #     )
+                #     pending_users[access_key].append(username)
+                #     continue
 
-                AclAllocations.add_user_to_access_allocation(
-                    username, access_allocation
-                )
-                active_directory_api.add_user_to_ad_group(
-                    wustlkey=username,
-                    group_name=access_storage_acl_name,
-                )
-                added_users[access_key].append(username)
+                if completed:
+                    AclAllocations.add_user_to_access_allocation(
+                        username, access_allocation
+                    )
+                    added_users[access_key].append(username)
 
         return JsonResponse(
             {
@@ -210,7 +203,7 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
                 continue
 
             access_storage_acl_name = cast(
-                Union[str,None], access_allocation.get_attribute("storage_acl_name")
+                Union[str, None], access_allocation.get_attribute("storage_acl_name")
             )
             storage_acl_name[access_key] = access_storage_acl_name
 
@@ -219,7 +212,9 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
                 user__username__in=users,
             )
 
-            existing_usernames: list[str] = list(userQuery.values_list("user__username", flat=True))
+            existing_usernames: list[str] = list(
+                userQuery.values_list("user__username", flat=True)
+            )
 
             userQuery.delete()
 

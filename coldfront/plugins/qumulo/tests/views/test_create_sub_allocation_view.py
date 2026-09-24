@@ -158,7 +158,9 @@ class AllocationViewTests(TestCase):
 
         # create a sub-allocation with no protocols
         sub_result = AllocationService.create_new_allocation(
-            self.sub_form_data_no_protocols, self.user, parent_allocation=parent_result["allocation"]
+            self.sub_form_data_no_protocols,
+            self.user,
+            parent_allocation=parent_result["allocation"],
         )
 
         # verifying that a new sub-Allocation object was created

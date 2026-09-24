@@ -1,7 +1,10 @@
 from django.contrib.auth.models import User
 from django.test import Client, TestCase
 
-from coldfront.plugins.qumulo.tests.utils.mock_data import build_models, create_allocation
+from coldfront.plugins.qumulo.tests.utils.mock_data import (
+    build_models,
+    create_allocation,
+)
 
 
 class UserAllocationsApiViewTests(TestCase):
@@ -42,7 +45,9 @@ class UserAllocationsApiViewTests(TestCase):
         self.assertEqual(len(response_payload["allocations"]), 1)
 
         allocation_payload = response_payload["allocations"][0]
-        self.assertEqual(allocation_payload["allocation_id"], self.storage_allocation.pk)
+        self.assertEqual(
+            allocation_payload["allocation_id"], self.storage_allocation.pk
+        )
         self.assertEqual(allocation_payload["project_id"], self.project.pk)
         self.assertEqual(allocation_payload["project_name"], self.project.title)
         self.assertEqual(allocation_payload["storage_name"], "baz")
