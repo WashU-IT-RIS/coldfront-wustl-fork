@@ -171,6 +171,23 @@ class ActiveDirectoryAPI:
 
         ad_add_members_to_groups(self.conn, user_dn, group_dn)
 
+    def add_group_to_parent_group(self, child_group_name: str, parent_group_name: str) -> None:
+        """Nests child_group_name under parent_group_name (e.g. a per-allocation
+        access group like "storage2-foo-rw" under the storage-type-wide
+        "storage2" group). The parent group must already exist in AD -- it
+        is not created here.
+        """
+        try:
+            self.get_group_dn(parent_group_name)
+        except ValueError:
+            raise ValueError(
+                f"Parent AD group '{parent_group_name}' does not exist. It must be "
+                "created manually before allocation access groups can be nested under it."
+            )
+
+        child_group_dn = self.generate_group_dn(child_group_name)
+        self.add_members_to_ad_group([child_group_dn], parent_group_name)
+
     def get_group(self, group_name: str) -> str:
         groups_OU = os.environ.get("AD_GROUPS_OU")
         self.conn.search(
