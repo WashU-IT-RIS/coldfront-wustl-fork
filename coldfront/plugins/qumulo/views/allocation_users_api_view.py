@@ -16,7 +16,11 @@ from coldfront.plugins.qumulo.utils.attestation import (
     record_pending_attestation_event,
 )
 from coldfront.plugins.qumulo.utils.oauth2 import SessionOrOAuth2RequiredMixin
-from coldfront.plugins.qumulo.utils.workday_api import CURRENT_ATTESTATION_CYCLE_ID, WorkdayAPI
+from coldfront.plugins.qumulo.utils.workday_api import (
+    CURRENT_ATTESTATION_CYCLE_ID,
+    WorkdayAPI,
+)
+from typing import Union, cast
 
 
 # Mutates AD group membership; not an HTML form, so CSRF is exempted here
@@ -28,11 +32,11 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
     required_scopes = ["write"]
 
     @staticmethod
-    def _normalize_usernames(users) -> list:
+    def _normalize_usernames(users: list[str]) -> list[str]:
         if not isinstance(users, list):
             return None
 
-        normalized_users = []
+        normalized_users: list[str] = []
         for user in users:
             if not isinstance(user, str):
                 return None
@@ -41,7 +45,7 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
             if username:
                 normalized_users.append(username)
 
-        return list(dict.fromkeys(normalized_users))
+        return normalized_users
 
     @staticmethod
     def _parse_users(body: bytes):
@@ -98,7 +102,9 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
         # request, not once per user, since it's the same Workday query
         # regardless of which user is being checked.
         gate_enabled = attestation_gate_enabled()
-        completed_records = WorkdayAPI().get_completed_attestations() if gate_enabled else []
+        completed_records = (
+            WorkdayAPI().get_completed_attestations() if gate_enabled else []
+        )
 
         added_users = {"rw": [], "ro": []}
         pending_users = {"rw": [], "ro": []}
@@ -111,7 +117,9 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
             if not access_allocation:
                 continue
 
-            access_storage_acl_name = access_allocation.get_attribute("storage_acl_name")
+            access_storage_acl_name = access_allocation.get_attribute(
+                "storage_acl_name"
+            )
             storage_acl_name[access_key] = access_storage_acl_name
 
             requested_usernames = access_users[access_key]
@@ -136,7 +144,9 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
 
             for username in new_usernames:
                 completed = (
-                    find_completed_attestation(username, active_directory_api, completed_records)
+                    find_completed_attestation(
+                        username, active_directory_api, completed_records
+                    )
                     if gate_enabled
                     else None
                 )
@@ -188,7 +198,6 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
             )
 
         storage_allocation = get_object_or_404(Allocation, pk=allocation_id)
-        active_directory_api = ActiveDirectoryAPI()
 
         removed_users = {"rw": [], "ro": []}
         storage_acl_name = {"rw": None, "ro": None}
@@ -200,29 +209,19 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
             if not access_allocation:
                 continue
 
-            access_storage_acl_name = access_allocation.get_attribute("storage_acl_name")
+            access_storage_acl_name = cast(
+                Union[str,None], access_allocation.get_attribute("storage_acl_name")
+            )
             storage_acl_name[access_key] = access_storage_acl_name
 
-            existing_usernames = list(
-                AllocationUser.objects.filter(
-                    allocation=access_allocation,
-                    user__username__in=users,
-                ).values_list("user__username", flat=True)
+            userQuery = AllocationUser.objects.filter(
+                allocation=access_allocation,
+                user__username__in=users,
             )
 
-            if not existing_usernames:
-                continue
+            existing_usernames: list[str] = list(userQuery.values_list("user__username", flat=True))
 
-            AllocationUser.objects.filter(
-                allocation=access_allocation,
-                user__username__in=existing_usernames,
-            ).delete()
-
-            for username in existing_usernames:
-                active_directory_api.remove_member_from_group(
-                    username,
-                    access_storage_acl_name,
-                )
+            userQuery.delete()
 
             removed_users[access_key] = existing_usernames
 

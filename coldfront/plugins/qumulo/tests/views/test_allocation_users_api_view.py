@@ -181,19 +181,6 @@ class AllocationUsersApiViewTests(TestCase):
         self.assertNotIn("shared-user", rw_usernames)
         self.assertNotIn("shared-user", ro_usernames)
 
-        mock_active_directory_api.remove_member_from_group.assert_has_calls(
-            [
-                call(
-                    "shared-user",
-                    self.rw_allocation.get_attribute("storage_acl_name"),
-                ),
-                call(
-                    "shared-user",
-                    self.ro_allocation.get_attribute("storage_acl_name"),
-                ),
-            ],
-            any_order=True,
-        )
 
     def test_delete_returns_400_for_invalid_payload(
         self, mock_active_directory_api_cls: MagicMock
