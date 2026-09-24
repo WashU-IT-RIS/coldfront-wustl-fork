@@ -95,6 +95,31 @@ class AllocationViewTests(TestCase):
             )
             self.assertEqual(num_attrs, 1)
 
+    def test_create_new_allocation_nests_access_groups_under_storage_type_group(
+        self,
+        mock_ActiveDirectoryValidator: MagicMock,
+        mock_async_task: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
+    ):
+        AllocationService.create_new_allocation(self.form_data, self.user)
+
+        acl_name_type = AllocationAttributeType.objects.get(name="storage_acl_name")
+        rw_group_name = AllocationAttribute.objects.get(
+            allocation_attribute_type=acl_name_type, allocation__justification="RW Users"
+        ).value
+        ro_group_name = AllocationAttribute.objects.get(
+            allocation_attribute_type=acl_name_type, allocation__justification="RO Users"
+        ).value
+
+        mock_active_directory_api = mock_ActiveDirectoryAPI.return_value
+        mock_active_directory_api.add_group_to_parent_group.assert_any_call(
+            child_group_name=ro_group_name, parent_group_name="storage2"
+        )
+        mock_active_directory_api.add_group_to_parent_group.assert_any_call(
+            child_group_name=rw_group_name, parent_group_name="storage2"
+        )
+        self.assertEqual(mock_active_directory_api.add_group_to_parent_group.call_count, 2)
+
     def test_create_new_allocation_create_allocation_no_protocols(
         self,
         mock_ActiveDirectoryValidator: MagicMock,
