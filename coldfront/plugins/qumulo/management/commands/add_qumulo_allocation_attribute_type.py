@@ -238,14 +238,14 @@ class Command(BaseCommand):
             is_unique=False,
             is_changeable=True,
         )
-        AllocationAttributeType.objects.get_or_create(
-            attribute_type=AttributeType.objects.get(name="Text"),
-            name="pending_attestation_event",
-            is_required=False,
-            is_private=True,
-            is_unique=False,
-            is_changeable=False,
-        )
+        # AllocationAttributeType.objects.get_or_create(
+        #     attribute_type=AttributeType.objects.get(name="Text"),
+        #     name="pending_attestation_event",
+        #     is_required=False,
+        #     is_private=True,
+        #     is_unique=False,
+        #     is_changeable=False,
+        # )
 
         AllocationAttributeType.objects.get_or_create(
             attribute_type=AttributeType.objects.get(name="Date"),
