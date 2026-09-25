@@ -57,28 +57,6 @@ class TestActiveDirectoryAPI(TestCase):
             attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
 
-    def test_find_wustlkey_by_universal_id_searches_by_wustl_edu_id(self):
-        self.mock_connection.response = [
-            {"dn": "user_dn", "attributes": {"sAMAccountName": "test_wustlkey"}}
-        ]
-
-        wustlkey = self.ad_api.find_wustlkey_by_universal_id(12345)
-
-        self.mock_connection.search.assert_called_once_with(
-            "dc=accounts,dc=ad,dc=wustl,dc=edu",
-            "(wustlEduId=12345)",
-            attributes=["sAMAccountName"],
-        )
-        self.assertEqual(wustlkey, "test_wustlkey")
-
-    def test_find_wustlkey_by_universal_id_raises_when_not_found(self):
-        self.mock_connection.response = []
-
-        with self.assertRaises(ValueError) as context:
-            self.ad_api.find_wustlkey_by_universal_id(12345)
-
-        self.assertEqual(str(context.exception), "No AD user found for wustlEduId 12345")
-
     def test_get_user_returns_value_error_on_empty_result(self):
         with self.assertRaises(ValueError) as context:
             self.ad_api.get_user(wustlkey=None)

@@ -8,18 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from coldfront.core.allocation.models import Allocation, AllocationUser
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
-from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
-from coldfront.plugins.qumulo.utils.attestation import (
-    attestation_gate_enabled,
-    find_completed_attestation,
-    # pre_onboard_group_name,
-    # record_pending_attestation_event,
-)
 from coldfront.plugins.qumulo.utils.oauth2 import SessionOrOAuth2RequiredMixin
-from coldfront.plugins.qumulo.utils.workday_api import (
-    # CURRENT_ATTESTATION_CYCLE_ID,
-    WorkdayAPI,
-)
 from typing import Union, cast
 
 
@@ -95,17 +84,6 @@ class AllocationUsersApi(SessionOrOAuth2RequiredMixin, View):
             )
 
         storage_allocation = get_object_or_404(Allocation, pk=allocation_id)
-        active_directory_api = ActiveDirectoryAPI()
-
-        # See utils/attestation.py: while disabled (the default), this is a
-        # no-op and grants behave exactly as before. Fetched once per
-        # request, not once per user, since it's the same Workday query
-        # regardless of which user is being checked.
-        gate_enabled = attestation_gate_enabled()
-        completed_records = (
-            WorkdayAPI().get_completed_attestations() if gate_enabled else []
-        )
-
         added_users = {"rw": [], "ro": []}
         pending_users = {"rw": [], "ro": []}
         storage_acl_name = {"rw": None, "ro": None}
@@ -143,29 +121,10 @@ class AllocationUsersApi(SessionOrOAuth2RequiredMixin, View):
                 continue
 
             for username in new_usernames:
-                completed = (
-                    find_completed_attestation(
-                        username, active_directory_api, completed_records
-                    )
-                    if gate_enabled
-                    else True
+                AclAllocations.add_user_to_access_allocation(
+                    username, access_allocation
                 )
-
-                # if gate_enabled and completed is None:
-                #     record_pending_attestation_event(
-                #         access_allocation,
-                #         username,
-                #         access_key,
-                #         CURRENT_ATTESTATION_CYCLE_ID,
-                #     )
-                #     pending_users[access_key].append(username)
-                #     continue
-
-                if completed:
-                    AclAllocations.add_user_to_access_allocation(
-                        username, access_allocation
-                    )
-                    added_users[access_key].append(username)
+                added_users[access_key].append(username)
 
         return JsonResponse(
             {

@@ -10,17 +10,6 @@ class UserAllocationsApi(SessionOrOAuth2RequiredMixin, View):
     http_method_names = ["get"]
     required_scopes = ["read"]
 
-    @staticmethod
-    def _get_storage_allocations(user) -> list:
-        storage_allocation_pks = set()
-
-        for allocation in Allocation.objects.filter(allocationuser__user=user):
-            storage_allocation_pk = allocation.get_attribute("storage_allocation_pk")
-            if storage_allocation_pk:
-                storage_allocation_pks.add(int(storage_allocation_pk))
-
-        return list(Allocation.objects.filter(pk__in=storage_allocation_pks))
-
     def get(self, request, username: str, *args, **kwargs):
         user = get_object_or_404(User, username=username)
 

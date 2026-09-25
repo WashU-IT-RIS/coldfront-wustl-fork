@@ -6,7 +6,6 @@ RUN apt-get update \
 
 WORKDIR /usr/src/app
 COPY requirements.txt ./
-COPY coldfront/plugins/qumulo/requirements.txt coldfront/plugins/qumulo/requirements.txt
 RUN pip3 install -r requirements.txt
 COPY . .
 

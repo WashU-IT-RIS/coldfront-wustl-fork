@@ -71,26 +71,6 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
-    def find_wustlkey_by_universal_id(self, universal_id) -> str:
-        """Resolves a WUSTL universal ID -- an integer, AD attribute
-        wustlEduId, what Workday's cf_ZCF_EE_UniversalID field refers to --
-        to the user's wustlkey (AD attribute sAMAccountName). These are two
-        different AD attributes on the same user; Workday only knows the
-        former. See utils/workday_api.py.
-        """
-        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
-
-        self.conn.search(
-            search_base,
-            f"(wustlEduId={int(universal_id)})",
-            attributes=["sAMAccountName"],
-        )
-
-        if not self.conn.response:
-            raise ValueError(f"No AD user found for wustlEduId {universal_id}")
-
-        return str(self.conn.response[0]["attributes"]["sAMAccountName"])
-
     def get_member(self, account_name: str):
         search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
