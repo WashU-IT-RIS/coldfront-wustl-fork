@@ -1,18 +1,14 @@
 import json
 
-from unittest import skip
-from unittest.mock import MagicMock, call, patch
-
 from django.test import Client, TestCase
 
-from coldfront.core.allocation.models import AllocationAttribute, AllocationUser
+from coldfront.core.allocation.models import  AllocationUser
 
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
 )
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
-from coldfront.plugins.qumulo.utils.workday_api import CURRENT_ATTESTATION_CYCLE_ID
 
 
 class AllocationUsersApiTests(TestCase):
