@@ -2,12 +2,11 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views import View
 
-from coldfront.core.allocation.models import Allocation, AllocationUser, User
-from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
+from coldfront.core.allocation.models import Allocation, User
 from coldfront.plugins.qumulo.utils.oauth2 import SessionOrOAuth2RequiredMixin
 
 
-class UserAllocationsApiView(SessionOrOAuth2RequiredMixin, View):
+class UserAllocationsApi(SessionOrOAuth2RequiredMixin, View):
     http_method_names = ["get"]
     required_scopes = ["read"]
 

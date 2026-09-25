@@ -27,7 +27,7 @@ from typing import Union, cast
 # and mutation is instead gated by session login or an OAuth2 access token
 # scoped to "write" (see SessionOrOAuth2RequiredMixin).
 @method_decorator(csrf_exempt, name="dispatch")
-class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
+class AllocationUsersApi(SessionOrOAuth2RequiredMixin, View):
     http_method_names = ["post", "delete"]
     required_scopes = ["write"]
 
@@ -54,7 +54,7 @@ class AllocationUsersApiView(SessionOrOAuth2RequiredMixin, View):
         except (json.JSONDecodeError, UnicodeDecodeError):
             return None
 
-        users = AllocationUsersApiView._normalize_usernames(payload.get("users"))
+        users = AllocationUsersApi._normalize_usernames(payload.get("users"))
         if not users:
             return None
 

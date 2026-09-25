@@ -7,7 +7,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 )
 
 
-class UserAllocationsApiViewTests(TestCase):
+class UserAllocationsApiTests(TestCase):
     def setUp(self):
         self.client = Client()
 
@@ -36,7 +36,7 @@ class UserAllocationsApiViewTests(TestCase):
         )
 
     def test_get_returns_allocation_with_both_rw_and_ro_access(self):
-        response = self.client.get("/qumulo/allocation/users/shared-user/")
+        response = self.client.get("/qumulo/api/allocation/users/shared-user/")
 
         self.assertEqual(response.status_code, 200)
         response_payload = response.json()
@@ -54,7 +54,7 @@ class UserAllocationsApiViewTests(TestCase):
         self.assertEqual(allocation_payload["access"], ["ro", "rw"])
 
     def test_get_returns_allocation_with_only_rw_access(self):
-        response = self.client.get("/qumulo/allocation/users/test/")
+        response = self.client.get("/qumulo/api/allocation/users/test/")
 
         self.assertEqual(response.status_code, 200)
         response_payload = response.json()
@@ -65,7 +65,7 @@ class UserAllocationsApiViewTests(TestCase):
     def test_get_returns_empty_allocations_for_user_with_no_access(self):
         User.objects.create(username="no-access-user")
 
-        response = self.client.get("/qumulo/allocation/users/no-access-user/")
+        response = self.client.get("/qumulo/api/allocation/users/no-access-user/")
 
         self.assertEqual(response.status_code, 200)
         response_payload = response.json()
@@ -74,6 +74,6 @@ class UserAllocationsApiViewTests(TestCase):
         self.assertEqual(response_payload["allocations"], [])
 
     def test_get_returns_404_for_unknown_username(self):
-        response = self.client.get("/qumulo/allocation/users/does-not-exist/")
+        response = self.client.get("/qumulo/api/allocation/users/does-not-exist/")
 
         self.assertEqual(response.status_code, 404)
