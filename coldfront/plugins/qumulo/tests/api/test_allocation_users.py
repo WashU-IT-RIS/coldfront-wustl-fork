@@ -51,9 +51,8 @@ class AllocationUsersApiTests(TestCase):
         )
 
     def test_post_adds_users_and_returns_storage_acl_name(
-        self, 
+        self,
     ):
-        
 
         response = self.client.post(
             f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
@@ -90,9 +89,8 @@ class AllocationUsersApiTests(TestCase):
         self.assertIn("new-ro-user", ro_usernames)
 
     def test_post_skips_users_already_on_allocation(
-        self, 
+        self,
     ):
-        
 
         response = self.client.post(
             f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
@@ -107,7 +105,7 @@ class AllocationUsersApiTests(TestCase):
         self.assertEqual(response_payload["added_users"]["ro"], [])
 
     def test_post_returns_400_for_invalid_payload(
-        self, 
+        self,
     ):
         response = self.client.post(
             f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
@@ -118,7 +116,7 @@ class AllocationUsersApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_post_returns_400_when_no_users_provided(
-        self, 
+        self,
     ):
         response = self.client.post(
             f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
@@ -129,9 +127,8 @@ class AllocationUsersApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_delete_removes_users_and_returns_storage_acl_name(
-        self, 
+        self,
     ):
-        
 
         response = self.client.delete(
             f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
@@ -168,7 +165,7 @@ class AllocationUsersApiTests(TestCase):
         self.assertNotIn("shared-user", ro_usernames)
 
     def test_delete_returns_400_for_invalid_payload(
-        self, 
+        self,
     ):
         response = self.client.delete(
             f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
@@ -179,9 +176,8 @@ class AllocationUsersApiTests(TestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_delete_returns_empty_removed_users_when_user_not_found(
-        self, 
+        self,
     ):
-        
 
         response = self.client.delete(
             f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
@@ -194,5 +190,3 @@ class AllocationUsersApiTests(TestCase):
 
         self.assertEqual(response_payload["removed_users"]["rw"], [])
         self.assertEqual(response_payload["removed_users"]["ro"], [])
-
-    
