@@ -57,7 +57,7 @@ class AllocationUsersApiTests(TestCase):
         mock_active_directory_api = mock_active_directory_api_cls.return_value
 
         response = self.client.post(
-            f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+            f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
             data=json.dumps({"rw_users": ["new-rw-user"], "ro_users": ["new-ro-user"]}),
             content_type="application/json",
         )
@@ -96,7 +96,7 @@ class AllocationUsersApiTests(TestCase):
         mock_active_directory_api = mock_active_directory_api_cls.return_value
 
         response = self.client.post(
-            f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+            f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
             data=json.dumps({"rw_users": ["test"]}),
             content_type="application/json",
         )
@@ -112,7 +112,7 @@ class AllocationUsersApiTests(TestCase):
         self, mock_active_directory_api_cls: MagicMock
     ):
         response = self.client.post(
-            f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+            f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
             data=json.dumps({"rw_users": "new-rw-user"}),
             content_type="application/json",
         )
@@ -123,7 +123,7 @@ class AllocationUsersApiTests(TestCase):
         self, mock_active_directory_api_cls: MagicMock
     ):
         response = self.client.post(
-            f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+            f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
             data=json.dumps({}),
             content_type="application/json",
         )
@@ -136,7 +136,7 @@ class AllocationUsersApiTests(TestCase):
         mock_active_directory_api = mock_active_directory_api_cls.return_value
 
         response = self.client.delete(
-            f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+            f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
             data=json.dumps({"users": ["shared-user"]}),
             content_type="application/json",
         )
@@ -173,7 +173,7 @@ class AllocationUsersApiTests(TestCase):
         self, mock_active_directory_api_cls: MagicMock
     ):
         response = self.client.delete(
-            f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+            f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
             data=json.dumps({"users": "shared-user"}),
             content_type="application/json",
         )
@@ -186,7 +186,7 @@ class AllocationUsersApiTests(TestCase):
         mock_active_directory_api = mock_active_directory_api_cls.return_value
 
         response = self.client.delete(
-            f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+            f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
             data=json.dumps({"users": ["does-not-exist"]}),
             content_type="application/json",
         )
@@ -207,7 +207,7 @@ class AllocationUsersApiTests(TestCase):
             "coldfront.plugins.qumulo.api.allocation_users.WorkdayAPI"
         ) as mock_workday_api_cls:
             response = self.client.post(
-                f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+                f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
                 data=json.dumps({"rw_users": ["new-rw-user"]}),
                 content_type="application/json",
             )
@@ -235,7 +235,7 @@ class AllocationUsersApiTests(TestCase):
 
         with patch.dict("os.environ", {"ATTESTATION_GATE_ENABLED": "true"}):
             response = self.client.post(
-                f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+                f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
                 data=json.dumps({"rw_users": ["new-rw-user"]}),
                 content_type="application/json",
             )
@@ -268,7 +268,7 @@ class AllocationUsersApiTests(TestCase):
 
         with patch.dict("os.environ", {"ATTESTATION_GATE_ENABLED": "true"}):
             response = self.client.post(
-                f"/qumulo/api/allocation/{self.storage_allocation.pk}/access-users/",
+                f"/qumulo/allocation/{self.storage_allocation.pk}/access-users/",
                 data=json.dumps({"rw_users": ["new-rw-user"]}),
                 content_type="application/json",
             )

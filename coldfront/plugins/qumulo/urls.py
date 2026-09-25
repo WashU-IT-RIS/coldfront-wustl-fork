@@ -52,12 +52,12 @@ urlpatterns = [
     path("api/usages", Usages.as_view(), name="usage"),
     path("api/usage/allocations", UsageAllocations.as_view(), name="usageAllocations"),
     path(
-        "api/allocation/<int:allocation_id>/access-users/",
+        "allocation/<int:allocation_id>/access-users/",
         allocation_users.AllocationUsersApi.as_view(),
         name="allocation-users-api",
     ),
     path(
-        "api/allocation/users/<str:username>/",
+        "allocation/users/<str:username>/",
         user_allocations.UserAllocationsApi.as_view(),
         name="user-allocations-api",
     ),
