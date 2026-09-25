@@ -20,31 +20,36 @@ class UserAllocationsApiView(SessionOrOAuth2RequiredMixin, View):
             if storage_allocation_pk:
                 storage_allocation_pks.add(int(storage_allocation_pk))
 
-        return list(
-            Allocation.objects.filter(pk__in=storage_allocation_pks)
-        )
+        return list(Allocation.objects.filter(pk__in=storage_allocation_pks))
 
     def get(self, request, username: str, *args, **kwargs):
         user = get_object_or_404(User, username=username)
 
-        allocations = []
+        return_allocations = []
+        access_allocations = Allocation.objects.filter(
+            resources__resource_type__name="ACL", allocationuser__user=user
+        )
+        storage_allocations = dict()
 
-        for storage_allocation in self._get_storage_allocations(user):
-            access = []
+        for access_allocation in access_allocations:
+            storage_allocation_pk = access_allocation.get_attribute(
+                "storage_allocation_pk"
+            )
 
-            for access_key in ["rw", "ro"]:
-                access_allocation = AclAllocations.get_access_allocation(
-                    storage_allocation, access_key
+            access_name = access_allocation.resources.first().name
+            if storage_allocation_pk in storage_allocations:
+                storage_allocations[storage_allocation_pk].get("access", []).append(
+                    access_name
                 )
-                if access_allocation and AllocationUser.objects.filter(
-                    allocation=access_allocation, user=user
-                ).exists():
-                    access.append(access_key)
+            else:
+                storage_allocations[storage_allocation_pk] = {"access": [access_name]}
 
-            if not access:
-                continue
+        storage_allocations_objects = Allocation.objects.filter(
+            pk__in=storage_allocations.keys()
+        )
 
-            allocations.append(
+        for storage_allocation in storage_allocations_objects:
+            return_allocations.append(
                 {
                     "allocation_id": storage_allocation.pk,
                     "project_id": storage_allocation.project.pk,
@@ -54,16 +59,18 @@ class UserAllocationsApiView(SessionOrOAuth2RequiredMixin, View):
                         "storage_filesystem_path"
                     ),
                     "status": storage_allocation.status.name,
-                    "access": sorted(access),
+                    "access": sorted(
+                        storage_allocations[storage_allocation.pk].get("access")
+                    ),
                 }
             )
 
-        allocations.sort(key=lambda allocation: allocation["allocation_id"])
+        return_allocations.sort(key=lambda allocation: allocation["allocation_id"])
 
         return JsonResponse(
             {
                 "username": user.username,
-                "allocations": allocations,
+                "allocations": return_allocations,
             },
             status=200,
         )

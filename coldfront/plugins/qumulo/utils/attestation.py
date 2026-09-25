@@ -5,10 +5,10 @@ import os
 # import uuid
 # from datetime import datetime, timezone
 
-from coldfront.core.allocation.models import (
-    AllocationAttribute,
-    AllocationAttributeType,
-)
+# from coldfront.core.allocation.models import (
+#     AllocationAttribute,
+#     AllocationAttributeType,
+# )
 
 PENDING_ATTESTATION_EVENT_ATTRIBUTE_NAME = "pending_attestation_event"
 
