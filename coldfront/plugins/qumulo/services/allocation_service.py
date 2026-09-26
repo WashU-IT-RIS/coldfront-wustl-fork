@@ -82,8 +82,11 @@ class AllocationService:
             access_users = form_data[form_key]
 
             create_group_time = datetime.now()
-            active_directory_api.create_ad_group(
-                group_name=access_allocation.get_attribute(name="storage_acl_name")
+            access_group_name = access_allocation.get_attribute(name="storage_acl_name")
+            active_directory_api.create_ad_group(group_name=access_group_name)
+            active_directory_api.add_group_to_parent_group(
+                child_group_name=access_group_name,
+                parent_group_name=resource_type.lower(),
             )
             async_task(
                 addMembersToADGroup, access_users, access_allocation, create_group_time

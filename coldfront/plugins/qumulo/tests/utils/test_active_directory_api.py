@@ -57,6 +57,28 @@ class TestActiveDirectoryAPI(TestCase):
             attributes=["sAMAccountName", "mail", "givenName", "sn"],
         )
 
+    def test_find_wustlkey_by_universal_id_searches_by_wustl_edu_id(self):
+        self.mock_connection.response = [
+            {"dn": "user_dn", "attributes": {"sAMAccountName": "test_wustlkey"}}
+        ]
+
+        wustlkey = self.ad_api.find_wustlkey_by_universal_id(12345)
+
+        self.mock_connection.search.assert_called_once_with(
+            "dc=accounts,dc=ad,dc=wustl,dc=edu",
+            "(wustlEduId=12345)",
+            attributes=["sAMAccountName"],
+        )
+        self.assertEqual(wustlkey, "test_wustlkey")
+
+    def test_find_wustlkey_by_universal_id_raises_when_not_found(self):
+        self.mock_connection.response = []
+
+        with self.assertRaises(ValueError) as context:
+            self.ad_api.find_wustlkey_by_universal_id(12345)
+
+        self.assertEqual(str(context.exception), "No AD user found for wustlEduId 12345")
+
     def test_get_user_returns_value_error_on_empty_result(self):
         with self.assertRaises(ValueError) as context:
             self.ad_api.get_user(wustlkey=None)
@@ -85,6 +107,56 @@ class TestActiveDirectoryAPI(TestCase):
         self.mock_connection.add.assert_called_once_with(
             expected_new_group_dn, "group", attributes={"sAMAccountName": group_name}
         )
+
+    @patch(
+        "coldfront.plugins.qumulo.utils.active_directory_api.ActiveDirectoryAPI.add_members_to_ad_group"
+    )
+    @patch(
+        "coldfront.plugins.qumulo.utils.active_directory_api.ActiveDirectoryAPI.create_ad_group"
+    )
+    @patch(
+        "coldfront.plugins.qumulo.utils.active_directory_api.ActiveDirectoryAPI.get_group_dn"
+    )
+    def test_add_group_to_parent_group_nests_child_under_existing_parent(
+        self, mock_get_group_dn, mock_create_ad_group, mock_add_members_to_ad_group
+    ):
+        expected_groups_ou = os_environ["AD_GROUPS_OU"]
+        expected_child_dn = f"cn=storage2-foo-rw,{expected_groups_ou}"
+        mock_get_group_dn.return_value = f"cn=storage2,{expected_groups_ou}"
+
+        self.ad_api.add_group_to_parent_group(
+            child_group_name="storage2-foo-rw", parent_group_name="storage2"
+        )
+
+        mock_get_group_dn.assert_called_once_with("storage2")
+        mock_create_ad_group.assert_not_called()
+        mock_add_members_to_ad_group.assert_called_once_with(
+            [expected_child_dn], "storage2"
+        )
+
+    @patch(
+        "coldfront.plugins.qumulo.utils.active_directory_api.ActiveDirectoryAPI.add_members_to_ad_group"
+    )
+    @patch(
+        "coldfront.plugins.qumulo.utils.active_directory_api.ActiveDirectoryAPI.create_ad_group"
+    )
+    @patch(
+        "coldfront.plugins.qumulo.utils.active_directory_api.ActiveDirectoryAPI.get_group_dn"
+    )
+    def test_add_group_to_parent_group_raises_when_parent_missing(
+        self, mock_get_group_dn, mock_create_ad_group, mock_add_members_to_ad_group
+    ):
+        mock_get_group_dn.side_effect = ValueError("Invalid group_name")
+
+        with self.assertRaises(ValueError) as context:
+            self.ad_api.add_group_to_parent_group(
+                child_group_name="storage2-foo-rw", parent_group_name="storage2"
+            )
+
+        self.assertIn("storage2", str(context.exception))
+        self.assertIn("does not exist", str(context.exception))
+        mock_create_ad_group.assert_not_called()
+        mock_add_members_to_ad_group.assert_not_called()
 
     @patch(
         "coldfront.plugins.qumulo.utils.active_directory_api.ActiveDirectoryAPI.get_group_dn"
