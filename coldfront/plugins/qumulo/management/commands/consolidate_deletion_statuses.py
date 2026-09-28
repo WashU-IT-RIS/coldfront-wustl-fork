@@ -9,7 +9,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         allocations = Allocation.objects.filter(status__name="Ready for Deletion")
         updated_count = 0
-
         for allocation in allocations:
             allocation.status.name = "Ready for deletion"
             allocation.status.save()
