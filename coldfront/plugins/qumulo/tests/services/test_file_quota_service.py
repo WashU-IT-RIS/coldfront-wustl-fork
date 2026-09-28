@@ -33,7 +33,8 @@ class TestFileQuotaService(TestCase):
 
     def setUp(self):
         create_metadata_for_testing()
-        storage_path = os.environ.get("STORAGE2_PATH").rstrip("/")
+        # storage_path = os.environ.get("STORAGE2_PATH").rstrip("/")
+        storage_path = '/storage2/path'
         self.mock_quota_allocations = [
             {
                 "path": f"{storage_path}/near_limit",
