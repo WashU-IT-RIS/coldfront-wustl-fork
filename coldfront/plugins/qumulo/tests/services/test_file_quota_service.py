@@ -72,13 +72,12 @@ class TestFileQuotaService(TestCase):
     @patch(
         "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
-    @patch("coldfront.plugins.qumulo.utils.qumulo_api.QumuloAPI.get_all_quotas_with_usage")
     def test_get_file_system_allocations_near_limit(
-        self, create_connection_mock: MagicMock, get_all_quotas_mock: MagicMock
+        self, create_connection_mock: MagicMock
     ) -> None:
         create_connection_mock.return_value = self.qumulo_api
-        # coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.get_all_quotas_with_usage = MagicMock()
-        get_all_quotas_mock.return_value = {
+        create_connection_mock.get_all_quotas_with_usage = MagicMock()
+        create_connection_mock.get_all_quotas_with_usage.return_value = {
             'quotas': [
                 (
                     x for x in self.mock_quota_allocations
