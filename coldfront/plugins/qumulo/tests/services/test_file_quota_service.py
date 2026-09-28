@@ -78,10 +78,7 @@ class TestFileQuotaService(TestCase):
         create_connection_mock.return_value = self.qumulo_api
         create_connection_mock.get_all_quotas_with_usage = MagicMock()
         test_comp = [
-            (
-                x for x in self.mock_quota_allocations
-                if x.path.endswith('under_limit')
-            )
+            x for x in self.mock_quota_allocations if x.path.endswith('under_limit')
         ]
         create_connection_mock.get_all_quotas_with_usage.return_value = {
             'quotas': test_comp
