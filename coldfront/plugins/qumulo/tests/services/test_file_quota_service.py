@@ -77,9 +77,14 @@ class TestFileQuotaService(TestCase):
     ) -> None:
         create_connection_mock.return_value = self.qumulo_api
         create_connection_mock.get_all_quotas_with_usage = MagicMock()
-        create_connection_mock.get_all_quotas_with_usage.return_value = (
-            self.mock_quota_allocations
-        )
+        create_connection_mock.get_all_quotas_with_usage.return_value = {
+            'quotas': [
+                (
+                    x for x in self.mock_quota_allocations
+                    if x.path.endswith('under_limit')
+                )
+            ]
+        }
         allocations_near_limit = get_file_system_allocations_near_limit()
 
         are_all_allocations_near_limit = all(
