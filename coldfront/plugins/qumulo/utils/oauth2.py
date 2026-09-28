@@ -18,9 +18,6 @@ class SessionOrOAuth2RequiredMixin(OAuthLibMixin):
         return self.required_scopes
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return super().dispatch(request, *args, **kwargs)
-
         valid, oauthlib_req = self.verify_request(request)
         if not valid:
             return JsonResponse(
