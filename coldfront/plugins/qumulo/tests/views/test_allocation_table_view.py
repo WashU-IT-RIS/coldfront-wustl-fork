@@ -54,6 +54,18 @@ class AllocationTableViewTests(TestCase):
         self.assertEqual(len(qs), 1)
         self.assertEqual(qs[0].id, self.allocation.id)
 
+    def test_get_context_data_only_calls_queryset_once(self):
+        request = RequestFactory().get(
+            "src/coldfront.plugins.qumulo/views/allocation_table_view.py"
+        )
+        view = AllocationTableView()
+        view.request = request
+
+        with patch.object(AllocationTableView, "get_queryset", wraps=view.get_queryset) as mocked:
+            view.get_context_data()
+
+        self.assertEqual(mocked.call_count, 1)
+
     def test_search_and_filtering(self):
 
         # call build_models again to get a different set of projects/users
