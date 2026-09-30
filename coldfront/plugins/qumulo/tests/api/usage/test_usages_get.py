@@ -7,7 +7,11 @@ from django.test import TestCase
 from django.http import HttpRequest
 
 
-from coldfront.plugins.qumulo.api.usage.usages import Usages, _get_quotas, _get_usages_by_month
+from coldfront.plugins.qumulo.api.usage.usages import (
+    Usages,
+    _get_quotas,
+    _get_usages_by_month,
+)
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
 )
@@ -39,7 +43,7 @@ class TestUsageGet(TestCase):
         expected_quota_tib = 5
         expected_usage = 3.25 * 1024
 
-        (storage_allocation, _) = create_allocation_with_usage(
+        storage_allocation, _ = create_allocation_with_usage(
             expected_quota_tib, expected_usage
         )
 
@@ -68,7 +72,7 @@ class TestUsageGet(TestCase):
         specific_date = "2025-01-01"
 
         with freeze_time(date.fromisoformat(specific_date)):
-            (storage_allocation, usage_object) = create_allocation_with_usage(
+            storage_allocation, usage_object = create_allocation_with_usage(
                 expected_quota_tib, expected_usage_gib
             )
 
@@ -369,9 +373,7 @@ class TestGetQuotas(TestCase):
         expected_quota_tib = 5
         usage = 3.25 * 1024
 
-        (storage_allocation, _) = create_allocation_with_usage(
-            expected_quota_tib, usage
-        )
+        storage_allocation, _ = create_allocation_with_usage(expected_quota_tib, usage)
 
         quotas = _get_quotas(storage_allocation.pk)
 
@@ -385,7 +387,7 @@ class TestGetQuotas(TestCase):
 
         usage = 3.25 * 1024
 
-        (storage_allocation, _) = create_allocation_with_usage(current_quota_tib, usage)
+        storage_allocation, _ = create_allocation_with_usage(current_quota_tib, usage)
         expected_quotas = [{"quota": current_quota_tib, "date": date.today()}]
 
         for quota_tib in past_quotas_tib:
@@ -410,7 +412,7 @@ class TestGetQuotas(TestCase):
 
         usage = 3.25 * 1024
 
-        (storage_allocation, _) = create_allocation_with_usage(current_quota_tib, usage)
+        storage_allocation, _ = create_allocation_with_usage(current_quota_tib, usage)
         expected_quotas = [{"quota": current_quota_tib, "date": date.today()}]
 
         for _ in range(past_quota_count):
@@ -438,7 +440,7 @@ class TestGetQuotas(TestCase):
 
         usage = 3.25 * 1024
 
-        (storage_allocation, _) = create_allocation_with_usage(current_quota_tib, usage)
+        storage_allocation, _ = create_allocation_with_usage(current_quota_tib, usage)
         expected_quotas = []
 
         for _ in range(past_quota_count):
@@ -459,6 +461,7 @@ class TestGetQuotas(TestCase):
         self.assertIsInstance(quotas, list)
         self.assertListEqual(expected_quotas, quotas)
 
+
 class TestGetUsagesByMonth(TestCase):
     def setUp(self) -> None:
         create_metadata_for_testing()
@@ -469,16 +472,12 @@ class TestGetUsagesByMonth(TestCase):
         quota_tib = 5
         expected_usage = 3.25 * 2**10
 
-        (storage_allocation, _) = create_allocation_with_usage(
-            quota_tib, expected_usage
-        )
+        storage_allocation, _ = create_allocation_with_usage(quota_tib, expected_usage)
 
         usages = _get_usages_by_month(storage_allocation.pk)
 
         self.assertIsInstance(usages, list)
         self.assertEqual(expected_usage, usages[0]["usage"])
         self.assertEqual(date.today(), usages[0]["date"])
-    
-    def test_returns_quotas_for_firsts_of_month(self) -> None:
-           
-    
+
+    # def test_returns_quotas_for_firsts_of_month(self) -> None:
