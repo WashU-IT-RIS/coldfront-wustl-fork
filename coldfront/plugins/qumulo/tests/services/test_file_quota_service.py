@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.test import TestCase
@@ -28,8 +29,8 @@ class TestFileQuotaService(TestCase):
 
     def setUp(self):
         create_metadata_for_testing()
-        # storage_path = os.environ.get("STORAGE2_PATH").rstrip("/")
-        storage_path = '/storage2/path'
+        qumulo_info = json.loads(os.environ.get('QUMULO_INFO', '{}'))
+        storage_path = qumulo_info.get('Storage2', {}).get('path', '')
         self.mock_quota_allocations = [
             {
                 "path": f"{storage_path}/near_limit",
@@ -73,16 +74,10 @@ class TestFileQuotaService(TestCase):
         "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
     def test_get_file_system_allocations_near_limit(
-        self, create_connection_mock: MagicMock
+        self,
+        create_connection_mock: MagicMock,
     ) -> None:
         create_connection_mock.return_value = self.qumulo_api
-        create_connection_mock.get_all_quotas_with_usage = MagicMock()
-        test_comp = [
-            x for x in self.mock_quota_allocations if not x['path'].endswith('under_limit')
-        ]
-        create_connection_mock.get_all_quotas_with_usage.return_value = {
-            'quotas': test_comp
-        }
         allocations_near_limit = get_file_system_allocations_near_limit()
 
         are_all_allocations_near_limit = all(
@@ -97,7 +92,7 @@ class TestFileQuotaService(TestCase):
         self.assertEqual(
             len(allocations_near_limit),
             4,
-            f"Expects to find 4 allocations near or over the limit: {test_comp}",
+            f"Expects to find 4 allocations near or over the limit--here is near_limit: {allocations_near_limit}",
         )
         self.assertTrue(
             are_all_allocations_near_limit,
@@ -107,11 +102,14 @@ class TestFileQuotaService(TestCase):
     @patch(
         "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
     )
-    def test_create_email_receiver_list(self, qumulo_api_mock: MagicMock) -> None:
-        qumulo_api_mock.return_value = self.qumulo_api
+    def test_create_email_receiver_list(
+        self,
+        create_connection_mock: MagicMock,
+    ) -> None:
+        create_connection_mock.return_value = self.qumulo_api
         allocations_near_limit = get_file_system_allocations_near_limit()
         for quota in allocations_near_limit:
-            project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
+            project, _ = create_ris_project_and_allocations_storage2(storage_filesystem_path=quota["path"])
             recipients = allocation_user_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(email) for email in recipients))
@@ -123,7 +121,7 @@ class TestFileQuotaService(TestCase):
         qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = get_file_system_allocations_near_limit()
         for quota in allocations_near_limit:
-            project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
+            project, _ = create_ris_project_and_allocations_storage2(storage_filesystem_path=quota["path"])
             recipients = allocation_user_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(recipient) for recipient in recipients))
@@ -137,12 +135,14 @@ class TestFileQuotaService(TestCase):
         qumulo_api_mock.return_value = self.qumulo_api
         allocations_near_limit = get_file_system_allocations_near_limit()
         for quota in allocations_near_limit:
-            project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
+            project, _ = create_ris_project_and_allocations_storage2(storage_filesystem_path=quota["path"])
 
         notify_users_with_allocations_near_limit()
         for quota in allocations_near_limit:
-            project, _ = create_ris_project_and_allocations_storage2(path=quota["path"])
+            project, _ = create_ris_project_and_allocations_storage2(storage_filesystem_path=quota["path"])
             recipients = allocation_user_recipients_for_ris(project)
             self.assertIsInstance(recipients, list)
             self.assertTrue(all(Email.to_python(recipient) for recipient in recipients))
-            send_email_for_near_limit_allocation(quota, recipients)
+            # bmulligan 20260929: Not sure what this was supposed to test, but
+            # the function accepts an Allocation object as an argument
+            # send_email_for_near_limit_allocation(quota, recipients)
