@@ -71,6 +71,26 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
+    def find_wustlkey_by_universal_id(self, universal_id) -> str:
+        """Resolves a WUSTL universal ID -- an integer, AD attribute
+        wustlEduId, what Workday's cf_ZCF_EE_UniversalID field refers to --
+        to the user's wustlkey (AD attribute sAMAccountName). These are two
+        different AD attributes on the same user; Workday only knows the
+        former. See utils/workday_api.py.
+        """
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
+        self.conn.search(
+            search_base,
+            f"(wustlEduId={int(universal_id)})",
+            attributes=["sAMAccountName"],
+        )
+
+        if not self.conn.response:
+            raise ValueError(f"No AD user found for wustlEduId {universal_id}")
+
+        return str(self.conn.response[0]["attributes"]["sAMAccountName"])
+
     def get_member(self, account_name: str):
         search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
@@ -150,6 +170,23 @@ class ActiveDirectoryAPI:
         user_dn = user["dn"]
 
         ad_add_members_to_groups(self.conn, user_dn, group_dn)
+
+    def add_group_to_parent_group(self, child_group_name: str, parent_group_name: str) -> None:
+        """Nests child_group_name under parent_group_name (e.g. a per-allocation
+        access group like "storage2-foo-rw" under the storage-type-wide
+        "storage2" group). The parent group must already exist in AD -- it
+        is not created here.
+        """
+        try:
+            self.get_group_dn(parent_group_name)
+        except ValueError:
+            raise ValueError(
+                f"Parent AD group '{parent_group_name}' does not exist. It must be "
+                "created manually before allocation access groups can be nested under it."
+            )
+
+        child_group_dn = self.generate_group_dn(child_group_name)
+        self.add_members_to_ad_group([child_group_dn], parent_group_name)
 
     def get_group(self, group_name: str) -> str:
         groups_OU = os.environ.get("AD_GROUPS_OU")

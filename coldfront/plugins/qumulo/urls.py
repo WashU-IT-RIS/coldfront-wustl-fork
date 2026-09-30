@@ -7,6 +7,8 @@ from coldfront.plugins.qumulo.views import (
     allocation_table_view,
     trigger_migrations_view,
     user_management_view,
+    allocation_users_api_view,
+    user_allocations_api_view,
 )
 from coldfront.plugins.qumulo.api.allocations import Allocations
 from coldfront.plugins.qumulo.api.active_directory_members import ActiveDirectoryMembers
@@ -50,4 +52,14 @@ urlpatterns = [
     ),
     path("api/usages", Usages.as_view(), name="usage"),
     path("api/usage/allocations", UsageAllocations.as_view(), name="usageAllocations"),
+    path(
+        "allocation/<int:allocation_id>/access-users/",
+        allocation_users_api_view.AllocationUsersApiView.as_view(),
+        name="allocation-users-api",
+    ),
+    path(
+        "allocation/users/<str:username>/",
+        user_allocations_api_view.UserAllocationsApiView.as_view(),
+        name="user-allocations-api",
+    ),
 ]
