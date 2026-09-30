@@ -192,12 +192,24 @@ def _get_quotas(
 
     return history_iter
 
-def _get_usages_by_month( allocation_id: int,
+
+def _get_usages_by_month(
+    allocation_id: int,
     start_date: Union[date, None] = None,
-    end_date: Union[date, None] = None,):
-    usage = AllocationAttributeUsage.objects.get(
-                allocation_attribute__allocation__pk=allocation_id,
-                allocation_attribute__allocation_attribute_type__name="storage_quota",
-            )
-    
-    return [{'usage': usage.value / 2**30, "date": date.today()}]
+    end_date: Union[date, None] = None,
+):
+    usage_history = AllocationAttributeUsage.history.filter(
+        allocation_attribute__allocation__pk=allocation_id,
+        allocation_attribute__allocation_attribute_type__name="storage_quota",
+    )
+
+    history_iter = map(
+        lambda element: {
+            "usage": int(element.value) / 2**30,
+            "date": element.history_date.date(),
+        },
+        usage_history,
+    )
+    history_iter = list(history_iter)
+
+    return history_iter

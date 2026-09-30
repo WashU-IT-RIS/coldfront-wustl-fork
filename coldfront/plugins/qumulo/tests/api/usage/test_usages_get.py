@@ -20,6 +20,7 @@ from coldfront.plugins.qumulo.tests.api.usage.helpers import (
     create_usage_history,
     get_history_span,
     write_quota_history,
+    write_usage_history,
     random_date,
 )
 
@@ -480,4 +481,20 @@ class TestGetUsagesByMonth(TestCase):
         self.assertEqual(expected_usage, usages[0]["usage"])
         self.assertEqual(date.today(), usages[0]["date"])
 
-    # def test_returns_quotas_for_firsts_of_month(self) -> None:
+    def test_returns_quotas_for_firsts_of_month(self) -> None:
+        quota_tib = 5
+        expected_usages = [{"date": date.today(), "usage": 3.25 * 2**10}]
+
+        storage_allocation, storage_usage_object = create_allocation_with_usage(
+            quota_tib, expected_usages[0].get("usage")
+        )
+        for i in range(12):
+            usage_tib = randint(0, 20)
+            this_date = date.today() - relativedelta(months=i)
+            write_usage_history(storage_usage_object, this_date, usage_tib)
+            expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+
+        usages = _get_usages_by_month(storage_allocation.pk)
+
+        self.assertIsInstance(usages, list)
+        self.assertListEqual(expected_usages, usages)
