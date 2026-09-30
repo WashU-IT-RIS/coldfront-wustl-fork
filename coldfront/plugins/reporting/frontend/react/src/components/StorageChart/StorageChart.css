@@ -1,0 +1,10 @@
+.storage-chart {
+  display: grid;
+}
+.storage-chart-child {
+  grid-column: 1;
+  grid-row: 1;
+}
+.storage-chart-spinner {
+  background: rgba(255, 255, 255, 0.5);
+}
