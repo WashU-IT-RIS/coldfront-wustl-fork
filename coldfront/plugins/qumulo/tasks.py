@@ -113,7 +113,7 @@ def conditionally_update_storage_allocation_statuses() -> None:
         conditionally_update_storage_allocation_status(allocation)
 
 
-def ingest_quotas_with_daily_usage() -> None:
+def ingest_quotas_with_daily_usage_log_wrapper() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
     ingest_quotas_with_daily_usage(logger)
 

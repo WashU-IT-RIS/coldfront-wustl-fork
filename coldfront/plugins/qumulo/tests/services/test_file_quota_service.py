@@ -21,18 +21,15 @@ from coldfront.plugins.qumulo.tests.fixtures import (
 from coldfront.plugins.qumulo.tests.utils.mock_data import get_mock_quota_response
 from coldfront.plugins.qumulo.utils.mail import allocation_user_recipients_for_ris
 
-from coldfront.plugins.qumulo.services.file_quota_service import (
-    get_file_system_allocations_near_limit,
-)
-
-
 @patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
 @patch.dict(os.environ, {"ALLOCATION_NEAR_LIMIT_THRESHOLD": "0.9"})
+@patch.dict(os.environ, {"STORAGE2_PATH": "/storage2/path"})
 class TestFileQuotaService(TestCase):
 
     def setUp(self):
         create_metadata_for_testing()
-        storage_path = os.environ.get("STORAGE2_PATH").rstrip("/")
+        # storage_path = os.environ.get("STORAGE2_PATH").rstrip("/")
+        storage_path = '/storage2/path'
         self.mock_quota_allocations = [
             {
                 "path": f"{storage_path}/near_limit",
@@ -79,6 +76,13 @@ class TestFileQuotaService(TestCase):
         self, create_connection_mock: MagicMock
     ) -> None:
         create_connection_mock.return_value = self.qumulo_api
+        create_connection_mock.get_all_quotas_with_usage = MagicMock()
+        test_comp = [
+            x for x in self.mock_quota_allocations if not x['path'].endswith('under_limit')
+        ]
+        create_connection_mock.get_all_quotas_with_usage.return_value = {
+            'quotas': test_comp
+        }
         allocations_near_limit = get_file_system_allocations_near_limit()
 
         are_all_allocations_near_limit = all(
@@ -93,7 +97,7 @@ class TestFileQuotaService(TestCase):
         self.assertEqual(
             len(allocations_near_limit),
             4,
-            "Expects to find 4 allocations near or over the limit",
+            f"Expects to find 4 allocations near or over the limit: {test_comp}",
         )
         self.assertTrue(
             are_all_allocations_near_limit,
