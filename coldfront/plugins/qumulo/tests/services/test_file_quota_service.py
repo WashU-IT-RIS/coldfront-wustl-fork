@@ -92,7 +92,7 @@ class TestFileQuotaService(TestCase):
         self.assertEqual(
             len(allocations_near_limit),
             4,
-            f"Expects to find 4 allocations near or over the limit--here is near_limit: {allocations_near_limit}",
+            f"Expects to find 4 allocations near or over the limit",
         )
         self.assertTrue(
             are_all_allocations_near_limit,
