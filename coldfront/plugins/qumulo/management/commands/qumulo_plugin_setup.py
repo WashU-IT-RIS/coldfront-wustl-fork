@@ -10,6 +10,7 @@ class Command(BaseCommand):
         call_base_commands()
         call_command("add_scheduled_ad_poller")
         call_command("add_scheduled_daily_allocation_usages")
+        call_command("add_scheduled_monthly_near_limit_report")
         print("Coldfront Plugin Qumulo setup script complete")
 
 
