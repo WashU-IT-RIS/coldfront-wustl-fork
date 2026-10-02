@@ -1,18 +1,26 @@
 from django.core.management.base import BaseCommand
+from django.db import transaction
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
 
 
 class Command(BaseCommand):
-    help = "Consolidates allocation deletion status labels by normalizing 'Ready for Deletion' to 'Ready for deletion'."
+    help = "Moves allocations from 'Ready for Deletion' to 'Ready for deletion' without removing either status choice."
 
     def handle(self, *args, **options):
-        allocations = Allocation.objects.filter(status__name="Ready for Deletion")
-        updated_count = 0
-        for allocation in allocations:
-            allocation.status.name = "Ready for deletion"
-            allocation.status.save()
-            updated_count += 1
+        with transaction.atomic():
+            legacy_status = AllocationStatusChoice.objects.filter(
+                name="Ready for Deletion"
+            ).first()
+            updated_count = 0
+
+            if legacy_status is not None:
+                canonical_status, _ = AllocationStatusChoice.objects.get_or_create(
+                    name="Ready for deletion"
+                )
+                updated_count = Allocation.objects.filter(
+                    status=legacy_status
+                ).update(status=canonical_status)
 
         self.stdout.write(
             self.style.SUCCESS(

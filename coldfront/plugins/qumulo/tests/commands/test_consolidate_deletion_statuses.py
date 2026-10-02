@@ -3,7 +3,7 @@ from io import StringIO
 from django.core.management import call_command
 from django.test import TestCase
 
-from coldfront.core.allocation.models import Allocation
+from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
 from coldfront.core.test_helpers.factories import AllocationStatusChoiceFactory
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
@@ -48,13 +48,24 @@ class ConsolidateDeletionStatusesCommandTest(TestCase):
         self.assertEqual(Allocation.objects.filter(status__name="Ready for Deletion").count(), 0)
         self.assertEqual(Allocation.objects.filter(status__name="Ready for deletion").count(), 3)
         self.assertEqual(Allocation.objects.filter(status__name="Deleted").count(), 1)
+        self.assertEqual(
+            AllocationStatusChoice.objects.get(name="Ready for Deletion").pk,
+            self.legacy_status.pk,
+        )
+        self.assertEqual(
+            AllocationStatusChoice.objects.filter(name="Ready for deletion").count(), 1
+        )
+        self.assertEqual(
+            AllocationStatusChoice.objects.get(name="Ready for deletion").pk,
+            self.correct_status.pk,
+        )
 
         self.assertIn(
             "Updated 2 allocation(s) from 'Ready for Deletion' to 'Ready for deletion'.",
             out.getvalue(),
         )
 
-    def test_do_nothing_when_no_legacy_status_exists(self):
+    def test_keeps_unused_legacy_status_choice(self):
         for allocation in self.legacy_allocations:
             allocation.status = self.correct_status
             allocation.save(update_fields=["status"])
@@ -65,6 +76,10 @@ class ConsolidateDeletionStatusesCommandTest(TestCase):
         self.assertEqual(Allocation.objects.filter(status__name="Ready for Deletion").count(), 0)
         self.assertEqual(Allocation.objects.filter(status__name="Ready for deletion").count(), 3)
         self.assertEqual(Allocation.objects.filter(status__name="Deleted").count(), 1)
+        self.assertEqual(
+            AllocationStatusChoice.objects.get(name="Ready for Deletion").pk,
+            self.legacy_status.pk,
+        )
         self.assertIn(
             "Updated 0 allocation(s) from 'Ready for Deletion' to 'Ready for deletion'.",
             out.getvalue(),
