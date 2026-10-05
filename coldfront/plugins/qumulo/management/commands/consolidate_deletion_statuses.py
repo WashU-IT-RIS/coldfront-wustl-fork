@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from coldfront.core.allocation.models import Allocation, AllocationStatusChoice
@@ -8,22 +8,25 @@ class Command(BaseCommand):
     help = "Moves allocations from 'Ready for Deletion' to 'Ready for deletion' without removing either status choice."
 
     def handle(self, *args, **options):
-        with transaction.atomic():
-            legacy_status = AllocationStatusChoice.objects.filter(
-                name="Ready for Deletion"
-            ).first()
-            updated_count = 0
+        
+        allocations = Allocation.objects.filter(
+            status__name="Ready for Deletion"
+        )
+        updated_count = 0
 
-            if legacy_status is not None:
-                canonical_status, _ = AllocationStatusChoice.objects.get_or_create(
-                    name="Ready for deletion"
+        if allocations.exists():
+            correct_status = AllocationStatusChoice.objects.filter(
+                name="Ready for deletion"
+            ).order_by("pk").first()
+            if correct_status is None:
+                raise CommandError(
+                    "Status choice 'Ready for deletion' does not exist. "
+                    "No allocations were updated."
                 )
-                updated_count = Allocation.objects.filter(
-                    status=legacy_status
-                ).update(status=canonical_status)
+            updated_count = allocations.update(status=correct_status)
 
         self.stdout.write(
             self.style.SUCCESS(
                 f"Updated {updated_count} allocation(s) from 'Ready for Deletion' to 'Ready for deletion'."
             )
-        )
+    )
