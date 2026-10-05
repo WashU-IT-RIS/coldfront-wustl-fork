@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = "Removes unused 'Ready for Deletion' status choices without changing allocations or 'Ready for deletion' choices."
 
     def handle(self, *args, **options):
-        status_choices = AllocationStatusChoice.objects.select_for_update().filter(
+        status_choices = AllocationStatusChoice.objects.filter(
             name="Ready for Deletion"
         )
         legacy_status_ids = [
