@@ -25,23 +25,6 @@ from coldfront.plugins.qumulo.utils.mail import allocation_user_recipients_for_r
 @patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
 @patch.dict(os.environ, {"ALLOCATION_NEAR_LIMIT_THRESHOLD": "0.9"})
 class TestFileQuotaService(TestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.original_qumulo_info = os.environ.get('QUMULO_INFO', '{}')
-        os.environ["QUMULO_INFO"] = (
-            '{'
-                '"Storage2": {'
-                    '"path": "/storage-test-path/fs1",'
-                    '"host": "storage-test-host.ris.wustl.edu",'
-                    '"port": "8000",'
-                    '"user": "storageUser",'
-                    '"pass": "storagePassword"'
-                '}'
-            '}'
-        )
-
-    def __del__(self):
-        os.environ["QUMULO_INFO"] = self.original_qumulo_info
 
     def setUp(self):
         create_metadata_for_testing()
@@ -85,6 +68,32 @@ class TestFileQuotaService(TestCase):
             "paging": {"next": ""},
         }
         return super().setUp()
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env_patcher = patch.dict(
+            os.environ,
+            {
+                "QUMULO_INFO": (
+                    '{'
+                        '"Storage2": {'
+                            '"path": "/storage-test-path/fs1",'
+                            '"host": "storage-test-host.ris.wustl.edu",'
+                            '"port": "8000",'
+                            '"user": "storageUser",'
+                            '"pass": "storagePassword"'
+                        '}'
+                    '}'
+                )
+            }
+        )
+        cls.env_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.env_patcher.stop()
+        super().tearDownClass()
 
     @patch(
         "coldfront.plugins.qumulo.utils.storage_controller.StorageControllerFactory.create_connection"
