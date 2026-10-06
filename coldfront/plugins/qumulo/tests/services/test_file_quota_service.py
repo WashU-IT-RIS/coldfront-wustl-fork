@@ -24,23 +24,41 @@ from coldfront.plugins.qumulo.utils.mail import allocation_user_recipients_for_r
 
 @patch.dict(os.environ, {"QUMULO_RESULT_SET_PAGE_LIMIT": "2000"})
 @patch.dict(os.environ, {"ALLOCATION_NEAR_LIMIT_THRESHOLD": "0.9"})
-@patch.dict(
-    os.environ,
-    {
-        "QUMULO_INFO": (
+# @patch.dict(
+#     os.environ,
+#     {
+#         "QUMULO_INFO": (
+#             '{'
+#                 '"Storage2": {'
+#                     '"path": "/storage-test-path/fs1",'
+#                     '"host": "storage-test-host.ris.wustl.edu",'
+#                     '"port": "8000",'
+#                     '"user": "storageUser",'
+#                     '"pass": "storagePassword"'
+#                 '}'
+#             '}'
+#         )
+#     }
+# )
+class TestFileQuotaService(TestCase):
+    def __init__(self, arg):
+        super().__init__()
+        self.original_qumulo_info = os.environ.get('QUMULO_INFO', {})
+        os.environ["QUMULO_INFO"] = (
             '{'
                 '"Storage2": {'
-                    '"path": "/storage2-dev/fs1",'
-                    '"host": "storage-test-host.riswustl.edu",'
+                    '"path": "/storage-test-path/fs1",'
+                    '"host": "storage-test-host.ris.wustl.edu",'
                     '"port": "8000",'
                     '"user": "storageUser",'
                     '"pass": "storagePassword"'
                 '}'
             '}'
         )
-    }
-)
-class TestFileQuotaService(TestCase):
+
+    def __del__(self):
+        # super().__del__()
+        os.environ["QUMULO_INFO"] = self.original_qumulo_info
 
     def setUp(self):
         create_metadata_for_testing()
