@@ -27,7 +27,7 @@ from coldfront.plugins.qumulo.utils.mail import allocation_user_recipients_for_r
 class TestFileQuotaService(TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.original_qumulo_info = os.environ.get('QUMULO_INFO', {})
+        self.original_qumulo_info = os.environ.get('QUMULO_INFO', '{}')
         os.environ["QUMULO_INFO"] = (
             '{'
                 '"Storage2": {'
