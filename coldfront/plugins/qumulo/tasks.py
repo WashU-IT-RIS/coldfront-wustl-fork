@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery
 from django.contrib.auth.models import User
 
 from typing import Optional
@@ -122,33 +122,29 @@ def notify_users_with_allocations_near_limit() -> None:
     qumulo_allocations = get_file_system_allocations_near_limit()
     as_it_paths = list(map(lambda quota: quota["path"], qumulo_allocations))
     paths_without_trailing_slash = list(map(lambda path: path.rstrip("/"), as_it_paths))
-    allocation_attributes = AllocationAttribute.objects.select_related(
-        "allocation"
-    ).filter(
-        value__in=as_it_paths + paths_without_trailing_slash,
-        allocation_attribute_type__name="storage_filesystem_path",
-        allocation__status__name="Active",
+    storage_names_subquery = Subquery(
+        AllocationAttribute.objects.filter(
+            allocation=OuterRef("pk"),
+            allocation_attribute_type__name="storage_name",
+        ).values("value")
     )
-    allocations = list(
-        map(lambda attribute: attribute.allocation, allocation_attributes)
-    )
-    connection_info = json.loads(os.environ.get("QUMULO_INFO", "{}"))
 
-    base_allocation_quota_usages = []
-    for storage_key in connection_info.keys():
-        qumulo_api = StorageControllerFactory().create_connection(storage_key)
-        quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
-        base_allocation_quota_usages += list(
-            filter(
-                lambda quota_usage: AclAllocations.is_base_allocation(
-                    quota_usage["path"], storage_key
-                ),
-                quota_usages,
-            )
+    alloction_values = (
+        Allocation.objects.annotate(storage_name=storage_names_subquery)
+        .parents()
+        .active_storage()
+        .filter(
+            allocationattribute__allocation_attribute_type__name="storage_filesystem_path",
+            allocationattribute__value__in=as_it_paths + paths_without_trailing_slash,
         )
+        .values("id", "project__pi__last_name", "project__pi__email", "storage_name", "allocationattribute__value")
+    )
+    # breakpoint()
 
-    for allocation in allocations:
-        send_email_for_near_limit_allocation(allocation)
+    for allocation in alloction_values:
+        usage = "4.5"  # Replace with actual usage value
+        limit = "5"  # Replace with actual limit value
+        send_email_for_near_limit_allocation(allocation, usage, limit)
 
 
 def addMembersToADGroup(
