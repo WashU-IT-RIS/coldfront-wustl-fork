@@ -89,6 +89,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 name="service_rate_category"
             )
 
+            storage_quota_type = AllocationAttributeType.objects.get(
+                name="storage_quota"
+            )
+
             # add sub-queries
             department_sub_q = AllocationAttribute.objects.filter(
                 allocation=OuterRef("pk"), allocation_attribute_type=department_type
@@ -110,12 +114,17 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocation=OuterRef("pk"), allocation_attribute_type=storage_name_type
             ).values("value")[:1]
 
+            storage_quota_sub_q = AllocationAttribute.objects.filter(
+                allocation=OuterRef("pk"), allocation_attribute_type=storage_quota_type
+            ).values("value")[:1]
+
             allocations = allocations.annotate(
                 department_number=Subquery(department_sub_q),
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
                 file_path=Subquery(file_path_sub_q),
                 service_rate_category=Subquery(service_rate_category_sub_q),
                 name=Subquery(storage_name_sub_q),
+                storage_quota=Subquery(storage_quota_sub_q),
             ).select_related(
                 "project__pi",
                 "status",
@@ -174,6 +183,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
                 file_path=Subquery(file_path_sub_q),
                 service_rate_category=Subquery(service_rate_category_sub_q),
+                storage_quota=Subquery(storage_quota_sub_q),
             ).order_by(order_by)
 
             allocation_linkages = AllocationLinkage.objects.filter(
@@ -210,6 +220,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                     "itsd_ticket": allocation.itsd_ticket,
                     "file_path": allocation.file_path,
                     "service_rate_category": allocation.service_rate_category,
+                    "storage_quota": allocation.storage_quota,
                 }
 
             all_children = set()
