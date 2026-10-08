@@ -211,6 +211,8 @@ def _get_usages_by_month(
 
     if isinstance(start_date, date):
         usage_history = usage_history.filter(history_date__gte=start_date)
+    if isinstance(end_date, date):
+        usage_history = usage_history.filter(history_date__lte=end_date)
 
     history_iter = map(
         lambda element: {
@@ -224,13 +226,13 @@ def _get_usages_by_month(
     )
     first_element = history_iter[0]
 
-    ealiest_date: date = cast(date, history_iter[-1].get("date"))
+    earliest_date: date = cast(date, history_iter[-1].get("date"))
     current_date: date = cast(date, first_element.get("date")).replace(day=1)
 
     working_list = []
     index = 0
     # go back month by month till we reach the beginning
-    while current_date >= ealiest_date:
+    while current_date >= earliest_date:
         # go back in time till we are at or before the desired month
         while history_iter[index].get("date") > current_date:
             index = index + 1
@@ -245,6 +247,8 @@ def _get_usages_by_month(
     history_iter = working_list
 
     history_iter = list(history_iter)
-    history_iter.insert(0, first_element)
+
+    if end_date == None:
+        history_iter.insert(0, first_element)
 
     return history_iter

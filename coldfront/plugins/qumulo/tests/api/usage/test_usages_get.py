@@ -566,3 +566,27 @@ class TestGetUsagesByMonth(TestCase):
 
         self.assertIsInstance(usages, list)
         self.assertListEqual(expected_usages, usages)
+
+    def test_limits_end_time(self):
+        quota_tib = 5
+        expected_usages = []
+        end_date = date.today() - relativedelta(years=1)
+        # end_date.replace(day=1)  # be sure to capture start date
+
+        storage_allocation, storage_usage_object = create_allocation_with_usage(
+            quota_tib, 3.25 * 2**10
+        )
+        for i in range(24):
+            usage_tib = randint(0, 20)
+            this_date = date.today() - relativedelta(months=i)
+            this_date = this_date.replace(day=1)
+
+            write_usage_history(storage_usage_object, this_date, usage_tib)
+
+            if this_date <= end_date:
+                expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+
+        usages = _get_usages_by_month(storage_allocation.pk, end_date=end_date)
+
+        self.assertIsInstance(usages, list)
+        self.assertListEqual(expected_usages, usages)
