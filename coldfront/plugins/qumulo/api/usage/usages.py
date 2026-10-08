@@ -178,7 +178,7 @@ def _get_quotas(
         next_date = start_date - relativedelta(days=1)
 
         quota_attribute_history = quota_attribute_history.filter(
-            history_date__gte=next_date
+            history_date__gt=next_date
         )
     if isinstance(end_date, date):
         quota_attribute_history = quota_attribute_history.filter(
@@ -208,6 +208,9 @@ def _get_usages_by_month(
         allocation_attribute__allocation__pk=allocation_id,
         allocation_attribute__allocation_attribute_type__name="storage_quota",
     )
+
+    if isinstance(start_date, date):
+        usage_history = usage_history.filter(history_date__gte=start_date)
 
     history_iter = map(
         lambda element: {

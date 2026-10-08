@@ -436,9 +436,12 @@ class TestGetQuotas(TestCase):
 
             write_quota_history(storage_allocation.pk, this_date, quota_tib)
 
-            if this_date >= start_date:
-
+            if this_date > start_date:
                 expected_quotas.append({"quota": quota_tib, "date": this_date})
+
+        quota_tib = randint(0, 20)
+        write_quota_history(storage_allocation.pk, start_date, quota_tib)
+        expected_quotas.append({"quota": quota_tib, "date": start_date})
 
         quotas = _get_quotas(storage_allocation.pk, start_date)
 
@@ -505,8 +508,11 @@ class TestGetUsagesByMonth(TestCase):
             usage_tib = randint(0, 20)
             this_date = date.today() - relativedelta(months=i)
             this_date = this_date.replace(day=1)
+
             write_usage_history(storage_usage_object, this_date, usage_tib)
+
             expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+
             this_date = this_date + relativedelta(
                 days=5
             )  # include additinal history that we don't want returned
@@ -524,10 +530,11 @@ class TestGetUsagesByMonth(TestCase):
         storage_allocation, storage_usage_object = create_allocation_with_usage(
             quota_tib, expected_usages[0].get("usage")
         )
-        for i in range(2):
+        for i in range(12):
             usage_tib = randint(0, 20)
             this_date = date.today() - relativedelta(months=(i + 1))
             this_date = this_date.replace(day=28)  # write to end of previous month
+
             write_usage_history(storage_usage_object, this_date, usage_tib)
             expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
 
@@ -536,27 +543,26 @@ class TestGetUsagesByMonth(TestCase):
         self.assertIsInstance(usages, list)
         self.assertListEqual(expected_usages, usages)
 
-    # def test_limits_start_time(self):
-    #     quota_tib = 5
-    #     expected_usages = [{"date": date.today(), "usage": 3.25 * 2**10}]
+    def test_limits_start_time(self):
+        quota_tib = 5
+        expected_usages = [{"date": date.today(), "usage": 3.25 * 2**10}]
+        start_date = date.today() - relativedelta(years=1)
+        start_date.replace(day=1)  # be sure to capture start date
 
-    #     storage_allocation, storage_usage_object = create_allocation_with_usage(
-    #         quota_tib, expected_usages[0].get("usage")
-    #     )
-    #     for i in range(12):
-    #         usage_tib = randint(0, 20)
-    #         this_date = date.today() - relativedelta(months=i)
-    #         this_date = this_date.replace(day=1)
-    #         write_usage_history(storage_usage_object, this_date, usage_tib)
-    #         if this_date >= start_date:
-    #             expected_quotas.append({"quota": quota_tib, "date": this_date})
-    #         expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
-    #         this_date = this_date + relativedelta(
-    #             days=5
-    #         )  # include additinal history that we don't want returned
-    #         write_usage_history(storage_usage_object, this_date, usage_tib)
+        storage_allocation, storage_usage_object = create_allocation_with_usage(
+            quota_tib, expected_usages[0].get("usage")
+        )
+        for i in range(24):
+            usage_tib = randint(0, 20)
+            this_date = date.today() - relativedelta(months=i)
+            this_date = this_date.replace(day=1)
 
-    #     usages = _get_usages_by_month(storage_allocation.pk)
+            write_usage_history(storage_usage_object, this_date, usage_tib)
 
-    #     self.assertIsInstance(usages, list)
-    #     self.assertListEqual(expected_usages, usages)
+            if this_date >= start_date:
+                expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+
+        usages = _get_usages_by_month(storage_allocation.pk, start_date=start_date)
+
+        self.assertIsInstance(usages, list)
+        self.assertListEqual(expected_usages, usages)
