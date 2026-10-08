@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 from django.http import (
     JsonResponse,
@@ -15,6 +16,8 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
 )
 from coldfront.core.user.models import User
+
+from typing import Union, cast
 
 EOD = "T23:59:59+00:00"
 
@@ -70,72 +73,77 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
 
         allocation_id = int(allocation_id_str)
 
-        try:
-            allocation = Allocation.objects.get(pk=allocation_id)
-        except Allocation.DoesNotExist:
-            return HttpResponseNotFound("allocation not found")
-
         usage_gib = []
 
-        end_date_usage: (
-            AllocationAttributeUsage
-        ) = AllocationAttributeUsage.history.as_of(end_datetime).get(
-            allocation_attribute__allocation=allocation,
-            allocation_attribute__allocation_attribute_type__name="storage_quota",
-        )
-        end_date_quota: AllocationAttribute = (
-            end_date_usage.allocation_attribute.history.as_of(end_datetime)
-        )
-        usage_gib.append(
-            {
-                "date": end_date_str,
-                "usage": end_date_usage.value / 2**30,
-                "quota": int(end_date_quota.value) * 2**10,
-            }
-        )
-
-        i = 0
-        working_datetime = end_datetime
-        while working_datetime > start_datetime:
-            working_datetime = _minus_months(end_datetime, i)
-
-            if working_datetime == end_datetime:
-                i = i + 1
-                continue  # avoids issues when run on 1st of month
-
-            if isinstance(start_datetime, date) and start_datetime > working_datetime:
-                working_datetime = start_datetime
-
-            working_usage: AllocationAttributeUsage = (
-                AllocationAttributeUsage.history.as_of(working_datetime)
-                .filter(
-                    allocation_attribute__allocation=allocation,
-                    allocation_attribute__allocation_attribute_type__name="storage_quota",
-                )
-                .first()
+        usage_history = list(
+            AllocationAttributeUsage.history.filter(
+                allocation_attribute__allocation__pk=allocation_id,
+                allocation_attribute__allocation_attribute_type__name="storage_quota",
             )
+        )
+        quota_history = list(
+            AllocationAttribute.history.filter(
+                allocation__pk=allocation_id,
+                allocation_attribute_type__name="storage_quota",
+            )
+        )
 
-            if working_usage != None:
-                working_quota = working_usage.allocation_attribute.history.as_of(
-                    working_datetime
-                )
+        if len(usage_history) <= 0 or len(quota_history) <= 0:
+            return HttpResponseNotFound("allocation not found")
 
+        def find_allocation_moment(usage_moment):
+            for moment in quota_history:
+                if usage_moment.history_date.date() >= moment.history_date.date():
+                    return moment
+
+            return None
+
+        mapped_history = map(
+            lambda moment: {
+                "datetime": moment.history_date,
+                "usage": moment.value,
+                "quota": int(find_allocation_moment(moment).value),
+            },
+            usage_history,
+        )
+
+        working_datetime = end_datetime
+        i = 0
+        for moment in mapped_history:
+            while (
+                working_datetime >= moment["datetime"]
+                and working_datetime > start_datetime
+            ):
                 usage_gib.insert(
                     0,
                     {
                         "date": working_datetime.date().isoformat(),
-                        "usage": working_usage.value / 2**30,
-                        "quota": int(working_quota.value) * 2**10,
+                        "usage": moment["usage"] / 2**30,
+                        "quota": moment["quota"] * 2**10,
                     },
                 )
-            else:
-                break
+                working_datetime = _minus_months(end_datetime, i)
+                i = i + 1
+            if working_datetime <= start_datetime:
+                working_datetime = start_datetime
 
-            i = i + 1
+                if working_datetime >= moment["datetime"]:
+                    usage_gib.insert(
+                        0,
+                        {
+                            "date": working_datetime.date().isoformat(),
+                            "usage": moment["usage"] / 2**30,
+                            "quota": moment["quota"] * 2**10,
+                        },
+                    )
+                    break
+
+        if len(usage_gib) > 1 and usage_gib[0] == usage_gib[1]:
+            usage_gib.pop(0)
 
         return JsonResponse(
             {
-                "allocation_id": allocation.pk,
+                "allocation_id": allocation_id,
                 "usage_data": usage_gib,
             }
         )
@@ -154,3 +162,93 @@ def _minus_months(input_datetime: datetime, month_count: int) -> datetime:
         )
 
     return return_datetime
+
+
+def _get_quotas(
+    allocation_id: int,
+    start_date: Union[date, None] = None,
+    end_date: Union[date, None] = None,
+) -> list:
+    quota_attribute_history = AllocationAttribute.history.filter(
+        allocation__pk=allocation_id,
+        allocation_attribute_type__name="storage_quota",
+    )
+
+    if isinstance(start_date, date):
+        next_date = start_date - relativedelta(days=1)
+
+        quota_attribute_history = quota_attribute_history.filter(
+            history_date__gt=next_date
+        )
+    if isinstance(end_date, date):
+        quota_attribute_history = quota_attribute_history.filter(
+            history_date__lte=end_date
+        )
+
+    history_iter = map(
+        lambda element: {
+            "quota": int(element.value),
+            "date": element.history_date.date(),
+        },
+        quota_attribute_history,
+    )
+    history_iter = list(history_iter)
+    if history_iter[0] == history_iter[1]:
+        history_iter.pop(0)
+
+    return history_iter
+
+
+def _get_usages_by_month(
+    allocation_id: int,
+    start_date: Union[date, None] = None,
+    end_date: Union[date, None] = None,
+):
+    usage_history = AllocationAttributeUsage.history.filter(
+        allocation_attribute__allocation__pk=allocation_id,
+        allocation_attribute__allocation_attribute_type__name="storage_quota",
+    )
+
+    if isinstance(start_date, date):
+        usage_history = usage_history.filter(history_date__gte=start_date)
+    if isinstance(end_date, date):
+        usage_history = usage_history.filter(history_date__lte=end_date)
+
+    history_iter = map(
+        lambda element: {
+            "usage": int(element.value) / 2**30,
+            "date": element.history_date.date(),
+        },
+        usage_history,
+    )
+    history_iter = sorted(
+        history_iter, key=lambda history: history.get("date"), reverse=True
+    )
+    first_element = history_iter[0]
+
+    earliest_date: date = cast(date, history_iter[-1].get("date"))
+    current_date: date = cast(date, first_element.get("date")).replace(day=1)
+
+    working_list = []
+    index = 0
+    # go back month by month till we reach the beginning
+    while current_date >= earliest_date:
+        # go back in time till we are at or before the desired month
+        while history_iter[index].get("date") > current_date:
+            index = index + 1
+            if index >= len(history_iter):
+                break
+
+        if index >= len(history_iter):
+            break
+        working_list.append(history_iter[index])
+        current_date = current_date - relativedelta(months=1)
+
+    history_iter = working_list
+
+    history_iter = list(history_iter)
+
+    if end_date == None:
+        history_iter.insert(0, first_element)
+
+    return history_iter
