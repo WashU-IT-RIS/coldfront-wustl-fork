@@ -16,7 +16,7 @@ from coldfront.core.allocation.models import (
 )
 from coldfront.core.user.models import User
 
-from typing import Union
+from typing import Union, cast
 
 EOD = "T23:59:59+00:00"
 
@@ -137,6 +137,9 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
                     )
                     break
 
+        if len(usage_gib) > 1 and usage_gib[0] == usage_gib[1]:
+            usage_gib.pop(0)
+
         return JsonResponse(
             {
                 "allocation_id": allocation_id,
@@ -210,6 +213,16 @@ def _get_usages_by_month(
         },
         usage_history,
     )
+    history_iter = sorted(
+        history_iter, key=lambda history: history.get("date"), reverse=True
+    )
+    first_element = history_iter[0]
+
+    history_iter = filter(
+        lambda history_element: cast(date, history_element.get("date")).day == 1,
+        history_iter,
+    )
     history_iter = list(history_iter)
+    history_iter.insert(0, first_element)
 
     return history_iter

@@ -491,10 +491,17 @@ class TestGetUsagesByMonth(TestCase):
         for i in range(12):
             usage_tib = randint(0, 20)
             this_date = date.today() - relativedelta(months=i)
+            this_date = this_date.replace(day=1)
             write_usage_history(storage_usage_object, this_date, usage_tib)
             expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+            this_date = this_date + relativedelta(
+                days=5
+            )  # include additinal history that we don't want returned
+            write_usage_history(storage_usage_object, this_date, usage_tib)
 
         usages = _get_usages_by_month(storage_allocation.pk)
+
+        from pprint import pprint
 
         self.assertIsInstance(usages, list)
         self.assertListEqual(expected_usages, usages)
