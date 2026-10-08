@@ -7,17 +7,18 @@ from coldfront.plugins.qumulo.utils.mail import (
     email_template_context_for_service_desk,
 )
 
-
-def send_email_for_near_limit_allocation(allocation: Allocation, usage: str, limit: str):
+def send_email_for_near_limit_allocation(allocation_data: dict):
+    allocation = Allocation.objects.filter(pk=allocation_data['id'])[0]
+    usage = allocation_data.get('usage', 0.0)
+    limit = allocation_data.get('limit', 0.0)
     user_receiver_list = allocation_user_recipients_for_ris(allocation.project)
-    # user_receiver_list = User.objects.filter(groups__name="RIS_UserSupport").values_list("email", "last_name")
 
     subject = "Directory is close to its quota"
     template_path = "email/notify_users_with_allocations_near_limit.html"
     template_context = email_template_context_for_service_desk()
     template_context["addressee"] = allocation.project.pi.last_name
-    template_context["usage"] = usage
-    template_context["limit"] = limit
+    template_context["usage"] = str(usage)
+    template_context["limit"] = str(limit)
     send_email_template(
         subject,
         template_path,

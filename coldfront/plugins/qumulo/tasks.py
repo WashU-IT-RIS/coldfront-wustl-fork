@@ -15,6 +15,7 @@ from coldfront.core.allocation.models import (
     AllocationAttribute,
     AllocationStatusChoice,
     AllocationLinkage,
+    AllocationQuerySet,
 )
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.mail import send_email_template, email_template_context
@@ -117,6 +118,23 @@ def ingest_quotas_with_daily_usage_log_wrapper() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
     ingest_quotas_with_daily_usage(logger)
 
+def _zip_function(
+    allocation_values: AllocationQuerySet,
+    qumulo_allocations: list[dict]
+):
+    zipped_list = []
+    if len(allocation_values) != len(qumulo_allocations):
+        # exception?
+        pass
+    for qumulo_allocation in qumulo_allocations:
+        for value in allocation_values:
+            if value['allocationattribute__value'] == qumulo_allocation['path']:
+                copied_value = dict(value)
+                copied_value['usage'] = qumulo_allocation['capacity_usage']
+                copied_value['quota'] = qumulo_allocation['limit']
+                zipped_list.append(copied_value)
+                break
+    return zipped_list
 
 def notify_users_with_allocations_near_limit() -> None:
     qumulo_allocations = get_file_system_allocations_near_limit()
@@ -129,7 +147,7 @@ def notify_users_with_allocations_near_limit() -> None:
         ).values("value")
     )
 
-    alloction_values = (
+    allocation_values = (
         Allocation.objects.annotate(storage_name=storage_names_subquery)
         .parents()
         .active_storage()
@@ -139,12 +157,9 @@ def notify_users_with_allocations_near_limit() -> None:
         )
         .values("id", "project__pi__last_name", "project__pi__email", "storage_name", "allocationattribute__value")
     )
-    # breakpoint()
 
-    for allocation in alloction_values:
-        usage = "4.5"  # Replace with actual usage value
-        limit = "5"  # Replace with actual limit value
-        send_email_for_near_limit_allocation(allocation, usage, limit)
+    for allocation_data in _zip_function(allocation_values, qumulo_allocations):
+        send_email_for_near_limit_allocation(allocation_data)
 
 
 def addMembersToADGroup(
