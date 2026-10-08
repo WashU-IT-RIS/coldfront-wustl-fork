@@ -48,7 +48,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
         self.status_active = AllocationStatusChoiceFactory(name="Active")
         self.status_ready_for_deletion = AllocationStatusChoiceFactory(
-            name="Ready for Deletion"
+            name="Ready for deletion"
         )
 
         for index, (path, value) in enumerate(
