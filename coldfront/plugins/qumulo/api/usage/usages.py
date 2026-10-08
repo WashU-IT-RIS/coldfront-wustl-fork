@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 from django.http import (
     JsonResponse,
@@ -174,8 +175,10 @@ def _get_quotas(
     )
 
     if isinstance(start_date, date):
+        next_date = start_date - relativedelta(days=1)
+
         quota_attribute_history = quota_attribute_history.filter(
-            history_date__gte=start_date
+            history_date__gte=next_date
         )
     if isinstance(end_date, date):
         quota_attribute_history = quota_attribute_history.filter(
@@ -190,7 +193,7 @@ def _get_quotas(
         quota_attribute_history,
     )
     history_iter = list(history_iter)
-    if history_iter[0]["date"] == history_iter[1]["date"]:
+    if history_iter[0] == history_iter[1]:
         history_iter.pop(0)
 
     return history_iter
@@ -218,10 +221,26 @@ def _get_usages_by_month(
     )
     first_element = history_iter[0]
 
-    history_iter = filter(
-        lambda history_element: cast(date, history_element.get("date")).day == 1,
-        history_iter,
-    )
+    ealiest_date: date = cast(date, history_iter[-1].get("date"))
+    current_date: date = cast(date, first_element.get("date")).replace(day=1)
+
+    working_list = []
+    index = 0
+    # go back month by month till we reach the beginning
+    while current_date >= ealiest_date:
+        # go back in time till we are at or before the desired month
+        while history_iter[index].get("date") > current_date:
+            index = index + 1
+            if index >= len(history_iter):
+                break
+
+        if index >= len(history_iter):
+            break
+        working_list.append(history_iter[index])
+        current_date = current_date - relativedelta(months=1)
+
+    history_iter = working_list
+
     history_iter = list(history_iter)
     history_iter.insert(0, first_element)
 
