@@ -15,6 +15,7 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
+    AllocationAttributeUsage,
     AllocationLinkage,
 )
 from coldfront.core.resource.models import Resource, ResourceType
@@ -118,6 +119,11 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocation=OuterRef("pk"), allocation_attribute_type=storage_quota_type
             ).values("value")[:1]
 
+            storage_usage_sub_q = AllocationAttributeUsage.objects.filter(
+                allocation_attribute__allocation=OuterRef("pk"),
+                allocation_attribute__allocation_attribute_type=storage_quota_type,
+            ).values("value")[:1]
+
             allocations = allocations.annotate(
                 department_number=Subquery(department_sub_q),
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
@@ -125,6 +131,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 service_rate_category=Subquery(service_rate_category_sub_q),
                 name=Subquery(storage_name_sub_q),
                 storage_quota=Subquery(storage_quota_sub_q),
+                storage_usage=Subquery(storage_usage_sub_q),
             ).select_related(
                 "project__pi",
                 "status",
@@ -220,7 +227,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                     "itsd_ticket": allocation.itsd_ticket,
                     "file_path": allocation.file_path,
                     "service_rate_category": allocation.service_rate_category,
-                    "storage_quota": allocation.storage_quota,
+                    "storage_quota": (
+                        f"{(allocation.storage_usage or 0) / 2**40:.2f} / "
+                        f"{allocation.storage_quota} TB"
+                    ),
                 }
 
             all_children = set()
