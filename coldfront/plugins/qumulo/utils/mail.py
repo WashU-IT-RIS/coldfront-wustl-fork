@@ -25,4 +25,15 @@ def allocation_user_recipients_for_ris(project: Project) -> list[User]:
             ).values_list("user__email", flat=True)
         )
 
-    return list(sorted(set(receiver_list)))
+    return list(
+        sorted(
+            set(
+                list(
+                    filter(
+                        lambda x: '@' in x,
+                        receiver_list
+                    )
+                )
+            )
+        )
+    )
