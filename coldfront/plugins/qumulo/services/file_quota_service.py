@@ -51,7 +51,7 @@ def get_file_system_allocations_near_limit() -> list:
 
 
 def get_storage_limit_threshold() -> float:
-    return float(os.environ.get("ALLOCATION_NEAR_LIMIT_THRESHOLD")) or 0.9
+    return float(os.environ.get("ALLOCATION_NEAR_LIMIT_THRESHOLD", 0.9))
 
 def _get_allocation_file_quota_usages(
     qumulo_api_conn: QumuloAPI, filtering_by: callable
