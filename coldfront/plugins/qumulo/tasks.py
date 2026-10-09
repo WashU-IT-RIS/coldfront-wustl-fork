@@ -158,6 +158,16 @@ def notify_users_with_allocations_near_limit() -> None:
         .values("id", "project__pi__last_name", "project__pi__email", "storage_name", "allocationattribute__value")
     )
 
+    with open('/tmp/near_limit_task.log', 'a') as nltl:
+        print(
+                (
+                    f'ready to loop/zip/send messages.  qumulo_allocations is '
+                    f'{qumulo_allocations}. allocation_values is '
+                    f'{allocation_values}.'
+                ),
+                file=nltl
+        )
+
     for allocation_data in _zip_function(allocation_values, qumulo_allocations):
         send_email_for_near_limit_allocation(allocation_data)
 
