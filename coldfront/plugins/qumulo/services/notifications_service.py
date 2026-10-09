@@ -19,6 +19,14 @@ def send_email_for_near_limit_allocation(allocation_data: dict):
     template_context["addressee"] = allocation.project.pi.last_name
     template_context["usage"] = str(usage)
     template_context["limit"] = str(limit)
+    with open('/tmp/near_limit.log', 'a') as nll:
+        print(
+            (
+                f'Sending message with subject [subject] to users: '
+                f'{user_receiver_list}.  Usage is {usage}, limit is {limit}.'
+            ),
+            file=nll
+        )
     send_email_template(
         subject,
         template_path,
