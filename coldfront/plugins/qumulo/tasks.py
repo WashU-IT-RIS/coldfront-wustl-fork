@@ -134,15 +134,6 @@ def _zip_function(
                 copied_value['quota'] = qumulo_allocation['limit']
                 zipped_list.append(copied_value)
                 break
-    with open('/tmp/zip_function.log', 'a') as zfl:
-        print(
-            (
-                '_zip_function() called with allocation_values: '
-                f'{allocation_values} and qumulo_allocations: '
-                f'{qumulo_allocations}.  returning zipped_list: {zipped_list}'
-            ),
-            file=zfl
-        )
     return zipped_list
 
 def notify_users_with_allocations_near_limit() -> None:
@@ -167,25 +158,7 @@ def notify_users_with_allocations_near_limit() -> None:
         .values("id", "project__pi__last_name", "project__pi__email", "storage_name", "allocationattribute__value")
     )
 
-    with open('/tmp/near_limit_task.log', 'a') as nltl:
-        print(
-                (
-                    f'ready to loop/zip/send messages.  qumulo_allocations is '
-                    f'{qumulo_allocations}. allocation_values is '
-                    f'{allocation_values}.'
-                ),
-                file=nltl
-        )
-
     for allocation_data in _zip_function(allocation_values, qumulo_allocations):
-        with open('/tmp/near_limit_task_inside_loop.log', 'a') as nltill:
-            print(
-                (
-                    'calling send_email_for_near_limit_allocation() with '
-                    f'allocation_data: {allocation_data}'
-                ),
-                file=nltill
-            )
         send_email_for_near_limit_allocation(allocation_data)
 
 
