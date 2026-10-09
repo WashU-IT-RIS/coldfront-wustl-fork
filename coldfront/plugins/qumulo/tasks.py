@@ -125,7 +125,10 @@ def _zip_function(
     zipped_list = []
     for qumulo_allocation in qumulo_allocations:
         for value in allocation_values:
-            if value['allocationattribute__value'] == qumulo_allocation['path']:
+            if (
+                value['allocationattribute__value'] == 
+                qumulo_allocation['path'].rstrip('/')
+            ):
                 copied_value = dict(value)
                 copied_value['usage'] = qumulo_allocation['capacity_usage']
                 copied_value['quota'] = qumulo_allocation['limit']
