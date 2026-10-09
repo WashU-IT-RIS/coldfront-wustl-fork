@@ -123,9 +123,6 @@ def _zip_function(
     qumulo_allocations: list[dict]
 ):
     zipped_list = []
-    if len(allocation_values) != len(qumulo_allocations):
-        # exception?
-        pass
     for qumulo_allocation in qumulo_allocations:
         for value in allocation_values:
             if value['allocationattribute__value'] == qumulo_allocation['path']:
@@ -134,6 +131,15 @@ def _zip_function(
                 copied_value['quota'] = qumulo_allocation['limit']
                 zipped_list.append(copied_value)
                 break
+    with open('/tmp/zip_function.log', 'a') as zfl:
+        print(
+            (
+                '_zip_function() called with allocation_values: 
+                f'{allocation_values} and qumulo_allocations: '
+                f{qumulo_allocations}.  returning zipped_list: {zipped_list}'
+            ),
+            file=zfl
+        )
     return zipped_list
 
 def notify_users_with_allocations_near_limit() -> None:
@@ -174,7 +180,8 @@ def notify_users_with_allocations_near_limit() -> None:
                 (
                     'calling send_email_for_near_limit_allocation() with '
                     f'allocation_data: {allocation_data}'
-                )
+                ),
+                file=nltill
             )
         send_email_for_near_limit_allocation(allocation_data)
 
