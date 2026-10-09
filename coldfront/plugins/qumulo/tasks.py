@@ -136,7 +136,7 @@ def _zip_function(
             (
                 '_zip_function() called with allocation_values: '
                 f'{allocation_values} and qumulo_allocations: '
-                f{qumulo_allocations}.  returning zipped_list: {zipped_list}'
+                f'{qumulo_allocations}.  returning zipped_list: {zipped_list}'
             ),
             file=zfl
         )
