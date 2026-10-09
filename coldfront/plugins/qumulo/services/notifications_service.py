@@ -37,4 +37,5 @@ def send_email_for_near_limit_allocation(allocation_data: dict):
 
 
 def get_email_sender() -> str:
-    return import_from_settings("DEFAULT_FROM_EMAIL")
+    # return import_from_settings("DEFAULT_FROM_EMAIL")
+    return 'ris@wustl.edu'
