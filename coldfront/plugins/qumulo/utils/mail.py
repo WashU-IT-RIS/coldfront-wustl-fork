@@ -25,6 +25,9 @@ def allocation_user_recipients_for_ris(project: Project) -> list[User]:
             ).values_list("user__email", flat=True)
         )
 
+    # bmulligan 20261009: this was "necessary" because QA testing was
+    # returning duplicate and bogus recipients in "receiver_list."  the
+    # bogus recipient address was a literal "[]".
     return list(
         sorted(
             set(
