@@ -134,7 +134,7 @@ def _zip_function(
     with open('/tmp/zip_function.log', 'a') as zfl:
         print(
             (
-                '_zip_function() called with allocation_values: 
+                '_zip_function() called with allocation_values: '
                 f'{allocation_values} and qumulo_allocations: '
                 f{qumulo_allocations}.  returning zipped_list: {zipped_list}'
             ),
