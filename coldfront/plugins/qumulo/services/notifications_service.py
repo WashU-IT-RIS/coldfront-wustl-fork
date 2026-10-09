@@ -10,7 +10,7 @@ from coldfront.plugins.qumulo.utils.mail import (
 def send_email_for_near_limit_allocation(allocation_data: dict):
     allocation = Allocation.objects.filter(pk=allocation_data['id'])[0]
     usage = allocation_data.get('usage', 0.0)
-    limit = allocation_data.get('limit', 0.0)
+    limit = allocation_data.get('quota', 0.0)
     user_receiver_list = allocation_user_recipients_for_ris(allocation.project)
 
     subject = "Directory is close to its quota"
@@ -22,7 +22,7 @@ def send_email_for_near_limit_allocation(allocation_data: dict):
     with open('/tmp/near_limit.log', 'a') as nll:
         print(
             (
-                f'Sending message with subject [subject] to users: '
+                f'Sending message with subject {subject} to users: '
                 f'{user_receiver_list}.  Usage is {usage}, limit is {limit}.'
             ),
             file=nll
