@@ -119,7 +119,7 @@ class TestAddMembersToADGroup(TestCase):
         mock_allocation_view_async_task: MagicMock,
     ):
         form_data = self.form_data.copy()
-        form_data["storage_filesystem_path"] = "/storage2-dev/fs1/allocation-name"
+        form_data["storage_filesystem_path"] = "/storage2/fs1/allocation-name"
         result = self.create_allocation(user=self.user, form_data=form_data)
 
         scheduled_calls = [
@@ -133,12 +133,12 @@ class TestAddMembersToADGroup(TestCase):
                 (
                     add_allocation_group_to_parent_ad_group,
                     result["access_allocations"][0].get_attribute("storage_acl_name"),
-                    "storage2-dev",
+                    "storage2",
                 ),
                 (
                     add_allocation_group_to_parent_ad_group,
                     result["access_allocations"][1].get_attribute("storage_acl_name"),
-                    "storage2-dev",
+                    "storage2",
                 ),
             ],
         )
