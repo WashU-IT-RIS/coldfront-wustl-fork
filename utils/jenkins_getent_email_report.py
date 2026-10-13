@@ -69,7 +69,7 @@ def generate_report(group):
     for line in completed_proc.stdout.decode('utf-8').split('\n'):
         for uid in list(sorted(set(line.split(':')[-1].split(',')))):
             if not uid:
-                print(f'Skipping bad uid: {uid}')
+                print(f'Skipping bad uid: {uid}.')
                 continue
             uid_resp = cau.get_user(uid)
             e_mail_address = uid_resp.get('attributes', {}).get('mail', 'N/A')
@@ -105,11 +105,11 @@ ap.add_argument(
     type=str,
 )
 args = ap.parse_args()
+msg = EmailMessage()
+msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
+msg['From'] = 'ris-svc-builder@wustl.edu'
 if not all_services_arg(args.service):
-    msg = EmailMessage()
-    msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
-    msg['From'] = 'ris-svc-builder@wustl.edu'
-    msg['Subject'] = f'RIS E-Mail Address Report for {args.service}'
+    msg['Subject'] = f'RIS User E-Mail Address Report for {args.service}'
     report_filename = generate_file_name(args.service)
     report_data = generate_report(service_group_map[args.service])
     msg.set_content(
@@ -125,28 +125,27 @@ if not all_services_arg(args.service):
         filename=report_filename
     )
 else:
-    msg = EmailMessage()
-    msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
-    msg['From'] = 'ris-svc-builder@wustl.edu'
-    msg['Subject'] = f'RIS E-Mail Address Report for All Services'
-    report_filenames = []
+    msg['Subject'] = f'RIS User E-Mail Address Report for All Services'
+    reports_dict = {}
     for service_name, group_name in service_group_map.items():
         if service_name == 'All':
             continue
         report_filename = generate_file_name(service_name)
-        report_filenames.append(report_filename)
-        msg.add_attachment(
-            generate_report(group_name),
-            maintype='text',
-            subtype='plain',
-            filename=report_filename
-        )
+        reports_dict[report_filename] = generate_report(group_name)
     msg.set_content(
         generate_message_content(
             'all Compute and Active Storage services',
-            report_filenames
+            list(reports_dict.keys())
         )
     )
+    for filename, report_data in reports_dict.items():
+        msg.add_attachment(
+            report_data,
+            maintype='text',
+            subtype='plain',
+            filename=filename
+        )
+
 with smtplib.SMTP('smtp.ris.wustl.edu') as smtp:
     smtp.send_message(msg)
 sys.exit(0)
