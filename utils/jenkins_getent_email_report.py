@@ -78,7 +78,7 @@ def generate_report(group):
     )
     for uid in sorted(no_email):
         report += f'{uid}\n'
-    return report
+    return bytes(report, encoding='utf-8')
 
 service_group_map = {
     'All': None,
