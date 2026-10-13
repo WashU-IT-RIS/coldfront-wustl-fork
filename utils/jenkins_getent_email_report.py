@@ -8,6 +8,9 @@ import sys
 
 from argparse import ArgumentParser
 from email.message import EmailMessage
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from datetime import date
 from utils.coldfront_ad_utils import ColdfrontAdUtils
 
@@ -16,6 +19,9 @@ from utils.coldfront_ad_utils import ColdfrontAdUtils
 # output is shown here for the "compute-ris" group (getent group compute-ris):
 #
 # compute-ris:*:1208827:cspohl,mweil,sleong,a.santiago,tz-kai.lin...
+
+def all_services_arg(arg):
+    return arg not in [None, 'all', 'All']:
 
 def generate_message_content(service: str, filenames: list):
     return(
@@ -99,10 +105,10 @@ ap.add_argument(
     type=str,
 )
 args = ap.parse_args()
-msg = EmailMessage()
-msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
-msg['From'] = 'ris-svc-builder@wustl.edu'
-if args.service not in [None, 'all', 'All']:
+if not all_services_arg(args.service):
+    msg = EmailMessage()
+    msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
+    msg['From'] = 'ris-svc-builder@wustl.edu'
     msg['Subject'] = f'RIS E-Mail Address Report for {args.service}'
     report_filename = generate_file_name(args.service)
     report_data = generate_report(service_group_map[args.service])
@@ -119,6 +125,9 @@ if args.service not in [None, 'all', 'All']:
         filename=report_filename
     )
 else:
+    msg = EmailMessage()
+    msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
+    msg['From'] = 'ris-svc-builder@wustl.edu'
     msg['Subject'] = f'RIS E-Mail Address Report for All Services'
     report_filenames = []
     for service_name, group_name in service_group_map.items():
@@ -126,7 +135,8 @@ else:
             continue
         report_filename = generate_file_name(service_name)
         report_filenames.append(report_filename)
-        report_data = generate_report(group_name)
+        attachment = MIMEBase('text', 'plain')
+        attachment.set_payload(generate_report(group_name))
         msg.add_attachment(
             report_data,
             maintype='text',
