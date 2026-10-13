@@ -1,10 +1,17 @@
-from datetime import date, timedelta
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from random import randint
+
 
 from django.test import TestCase
 from django.http import HttpRequest
 
 
-from coldfront.plugins.qumulo.api.usage.usages import Usages
+from coldfront.plugins.qumulo.api.usage.usages import (
+    Usages,
+    _get_quotas,
+    _get_usages_by_month,
+)
 from coldfront.plugins.qumulo.tests.fixtures import (
     create_metadata_for_testing,
 )
@@ -12,6 +19,9 @@ from coldfront.plugins.qumulo.tests.api.usage.helpers import (
     create_allocation_with_usage,
     create_usage_history,
     get_history_span,
+    write_quota_history,
+    write_usage_history,
+    random_date,
 )
 
 import json
@@ -34,7 +44,7 @@ class TestUsageGet(TestCase):
         expected_quota_tib = 5
         expected_usage = 3.25 * 1024
 
-        (storage_allocation, _) = create_allocation_with_usage(
+        storage_allocation, _ = create_allocation_with_usage(
             expected_quota_tib, expected_usage
         )
 
@@ -50,6 +60,14 @@ class TestUsageGet(TestCase):
                 {
                     "date": date.today().isoformat(),
                     "usage": expected_usage,
+                }
+            ],
+        )
+        self.assertListEqual(
+            content["quota_data"],
+            [
+                {
+                    "date": date.today().isoformat(),
                     "quota": expected_quota_tib * 1024,
                 }
             ],
@@ -63,7 +81,7 @@ class TestUsageGet(TestCase):
         specific_date = "2025-01-01"
 
         with freeze_time(date.fromisoformat(specific_date)):
-            (storage_allocation, usage_object) = create_allocation_with_usage(
+            storage_allocation, usage_object = create_allocation_with_usage(
                 expected_quota_tib, expected_usage_gib
             )
 
@@ -82,25 +100,29 @@ class TestUsageGet(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertEqual(content["usage_data"][0]["quota"], expected_quota_tib * 1024)
-        self.assertEqual(content["usage_data"][0]["usage"], expected_usage_gib)
+        self.assertEqual(
+            content["quota_data"][0].get("quota"), expected_quota_tib * 1024
+        )
+        self.assertAlmostEqual(
+            content["usage_data"][0].get("usage"), expected_usage_gib, 1
+        )
 
     def test_returns_monthly_list_by_year(self) -> None:
         current_quota_tib = 5
         current_usage_gib = 4.75 * 1024
 
-        (storage_allocation, usage_object) = create_allocation_with_usage(
+        storage_allocation, usage_object = create_allocation_with_usage(
             current_quota_tib, current_usage_gib
         )
 
-        usage_history = create_usage_history(usage_object, 12)
-        usage_history.append(
+        usage_data, _ = create_usage_history(usage_object, 12)
+        usage_data.append(
             {
                 "usage": current_usage_gib,
                 "date": date.today().isoformat(),
-                "quota": current_quota_tib * 2**10,
             }
         )
+        usage_data.sort(reverse=True, key=lambda element: element.get("date"))
 
         self.request.GET.update({"allocation_id": storage_allocation.pk})
         response = self.usage.get(self.request)
@@ -108,26 +130,45 @@ class TestUsageGet(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertIsInstance(content["usage_data"], list)
-        self.assertListEqual(content["usage_data"], usage_history)
+        self.assertListEqual(content["usage_data"], usage_data)
 
     def test_takes_in_start_time(self) -> None:
         current_quota_tib = 5
         current_usage_gib = 4 * 1024
-        (storage_allocation, usage_object) = create_allocation_with_usage(
+        storage_allocation, usage_object = create_allocation_with_usage(
             current_quota_tib, current_usage_gib
         )
 
-        usage_history = create_usage_history(usage_object, 12)
-        usage_history.append(
+        usage_data, quota_data = create_usage_history(usage_object, 12)
+        usage_data.append(
             {
                 "usage": current_usage_gib,
+                "date": date.today().isoformat(),
+            }
+        )
+        quota_data.append(
+            {
                 "date": date.today().isoformat(),
                 "quota": current_quota_tib * 2**10,
             }
         )
 
-        (expected_history, start_date, _) = get_history_span(usage_history, 162)
+        calculated_start_data = date.today() - relativedelta(days=162)
+        write_usage_history(usage_object, calculated_start_data, 0)
+        usage_data.insert(
+            0,
+            {"usage": 0, "date": calculated_start_data.isoformat()},
+        )
+        write_quota_history(storage_allocation.pk, calculated_start_data, 5)
+        quota_data.insert(
+            0, {"quota": 5 * 2**10, "date": calculated_start_data.isoformat()}
+        )
+
+        expected_history_data, start_date, _ = get_history_span(
+            {"usage_data": usage_data, "quota_data": quota_data}, 162
+        )
+        expected_quota_data = expected_history_data.get("quota_data")
+        expected_usage_data = expected_history_data.get("usage_data")
 
         self.request.GET.update(
             {
@@ -138,58 +179,73 @@ class TestUsageGet(TestCase):
         response = self.usage.get(self.request)
         content = json.loads(response.content)
 
+        usage_data_response = content["usage_data"]
+        quota_data_response = content["quota_data"]
+
+        expected_usage_data.reverse()
+        expected_quota_data.reverse()
+
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertIsInstance(content["usage_data"], list)
-        self.assertListEqual(content["usage_data"], expected_history)
+        self.assertListEqual(usage_data_response, expected_usage_data)
+        self.assertListEqual(quota_data_response, expected_quota_data)
 
     def test_checks_start_date_in_middle_of_the_month(self):
         expected_quota_tib = 4
-        expected_usage_gib = 3.3 * 1024
-        current_usage_gib = 4 * 1024
+        expected_usage_gib = 3 * 2**10
+        current_usage_gib = 4 * 2**10
         current_quota_tib = 5
 
-        (storage_allocation, usage_object) = create_allocation_with_usage(
+        storage_allocation, usage_object = create_allocation_with_usage(
             current_quota_tib, current_usage_gib
         )
 
-        usage_history = create_usage_history(usage_object, 12)
+        usage_history, quota_history = create_usage_history(usage_object, 12)
         usage_history.append(
-            {
-                "usage": current_usage_gib,
-                "date": date.today().isoformat(),
-                "quota": current_quota_tib * 2**10,
-            }
+            {"usage": current_usage_gib, "date": date.today().isoformat()}
+        )
+        quota_history.append(
+            {"quota": current_quota_tib * 2**10, "date": date.today().isoformat()}
         )
 
         insert_month = 4
 
         expected_date = date.fromisoformat(
             usage_history[insert_month].get("date")
-        ) + timedelta(days=15)
+        ) + relativedelta(days=15)
+
+        write_usage_history(usage_object, expected_date, expected_usage_gib / 2**10)
+        write_quota_history(storage_allocation.pk, expected_date, expected_quota_tib)
         usage_history.insert(
             insert_month + 1,
             {
                 "usage": expected_usage_gib,
                 "date": expected_date.isoformat(),
+            },
+        )
+        quota_history.insert(
+            insert_month + 1,
+            {
                 "quota": expected_quota_tib * 2**10,
+                "date": expected_date.isoformat(),
             },
         )
 
-        with freeze_time(expected_date):
-            quota_attribute = usage_object.allocation_attribute
-            quota_attribute.value = expected_quota_tib
-            quota_attribute.save()
-            usage_object.value = expected_usage_gib * 2**30
-            usage_object.save()
-
         start_date = expected_date
-        expected_history = list(
+        expected_usage = list(
             filter(
                 lambda item: date.fromisoformat(item["date"]) >= start_date,
                 usage_history,
             )
         )
+        expected_quota = list(
+            filter(
+                lambda item: date.fromisoformat(item["date"]) >= start_date,
+                quota_history,
+            )
+        )
+        expected_usage.reverse()
+        expected_quota.reverse()
 
         self.request.GET.update(
             {
@@ -202,26 +258,36 @@ class TestUsageGet(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertIsInstance(content["usage_data"], list)
-        self.assertListEqual(content["usage_data"], expected_history)
+        self.assertListEqual(content["usage_data"], expected_usage)
+        self.assertListEqual(content["quota_data"], expected_quota)
 
     def test_returns_start_time_older_than_one_year(self):
         current_quota_tib = 5
         current_usage_gib = 4 * 1024
-        (storage_allocation, usage_object) = create_allocation_with_usage(
+        storage_allocation, usage_object = create_allocation_with_usage(
             current_quota_tib, current_usage_gib
         )
 
-        usage_history = create_usage_history(usage_object, 36)
+        usage_history, quota_history = create_usage_history(usage_object, 36)
         usage_history.append(
             {
                 "usage": current_usage_gib,
                 "date": date.today().isoformat(),
+            }
+        )
+        quota_history.append(
+            {
+                "date": date.today().isoformat(),
                 "quota": current_quota_tib * 2**10,
             }
         )
+        history_data = {"usage_data": usage_history, "quota_data": quota_history}
 
-        (expected_history, start_date, _) = get_history_span(usage_history, 400)
+        expected_history, start_date, _ = get_history_span(history_data, 400)
+        expected_usage_data = expected_history["usage_data"]
+        expected_quota_data = expected_history["quota_data"]
+        expected_usage_data.reverse()
+        expected_quota_data.reverse()
 
         self.request.GET.update(
             {
@@ -234,28 +300,38 @@ class TestUsageGet(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertIsInstance(content["usage_data"], list)
-        self.assertListEqual(content["usage_data"], expected_history)
+        self.assertListEqual(content["usage_data"], expected_usage_data)
+        self.assertListEqual(content["quota_data"], expected_quota_data)
 
     def test_returns_expected_with_start_and_end(self):
         current_quota_tib = 5
         current_usage_gib = 4 * 1024
-        (storage_allocation, usage_object) = create_allocation_with_usage(
+        storage_allocation, usage_object = create_allocation_with_usage(
             current_quota_tib, current_usage_gib
         )
 
-        usage_history = create_usage_history(usage_object, 36)
+        usage_history, quota_history = create_usage_history(usage_object, 36)
         usage_history.append(
             {
                 "usage": current_usage_gib,
                 "date": date.today().isoformat(),
+            }
+        )
+        quota_history.append(
+            {
+                "date": date.today().isoformat(),
                 "quota": current_quota_tib * 2**10,
             }
         )
+        history_data = {"usage_data": usage_history, "quota_data": quota_history}
 
-        (expected_history, start_date, end_date) = get_history_span(
-            usage_history, 365, 180
+        expected_history, start_date, end_date = get_history_span(
+            history_data, 365, 180
         )
+        expected_usage_data = expected_history["usage_data"]
+        expected_quota_data = expected_history["quota_data"]
+        expected_usage_data.reverse()
+        expected_quota_data.reverse()
 
         self.request.GET.update(
             {
@@ -269,27 +345,35 @@ class TestUsageGet(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertIsInstance(content["usage_data"], list)
-        self.assertListEqual(content["usage_data"], expected_history)
+        self.assertListEqual(content["usage_data"], expected_usage_data)
+        self.assertListEqual(content["quota_data"], expected_quota_data)
 
     def test_does_not_provide_data_that_exceeds_history(self):
         current_quota_tib = 5
         current_usage_gib = 4 * 1024
-        (storage_allocation, usage_object) = create_allocation_with_usage(
+        storage_allocation, usage_object = create_allocation_with_usage(
             current_quota_tib, current_usage_gib
         )
 
-        usage_history = create_usage_history(usage_object, 6)
+        usage_history, quota_history = create_usage_history(usage_object, 6)
         usage_history.append(
             {
                 "usage": current_usage_gib,
                 "date": date.today().isoformat(),
+            }
+        )
+        quota_history.append(
+            {
+                "date": date.today().isoformat(),
                 "quota": current_quota_tib * 2**10,
             }
         )
+        expected_usage_data = usage_history
+        expected_quota_data = quota_history
+        expected_quota_data.reverse()
+        expected_usage_data.reverse()
 
-        expected_history = usage_history
-        start_date = date.fromisoformat(expected_history[0]["date"]) - timedelta(
+        start_date = date.fromisoformat(expected_usage_data[0]["date"]) - relativedelta(
             days=365
         )
 
@@ -304,28 +388,38 @@ class TestUsageGet(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertIsInstance(content["usage_data"], list)
-        self.assertListEqual(content["usage_data"], expected_history)
+        self.assertListEqual(content["usage_data"], expected_usage_data)
+        self.assertListEqual(content["quota_data"], expected_quota_data)
 
     def test_returns_error_when_start_date_is_after_end_date(self):
         current_quota_tib = 5
         current_usage_gib = 4 * 1024
-        (storage_allocation, usage_object) = create_allocation_with_usage(
+        storage_allocation, usage_object = create_allocation_with_usage(
             current_quota_tib, current_usage_gib
         )
 
-        usage_history = create_usage_history(usage_object, 36)
+        usage_history, quota_history = create_usage_history(usage_object, 36)
         usage_history.append(
             {
                 "usage": current_usage_gib,
                 "date": date.today().isoformat(),
+            }
+        )
+        quota_history.append(
+            {
+                "date": date.today().isoformat(),
                 "quota": current_quota_tib * 2**10,
             }
         )
+        history_data = {"usage_data": usage_history, "quota_data": quota_history}
 
-        (expected_history, start_date, end_date) = get_history_span(
-            usage_history, 365, 180
+        expected_history, start_date, end_date = get_history_span(
+            history_data, 365, 180
         )
+        expected_usage_data = expected_history["usage_data"]
+        expected_quota_data = expected_history["quota_data"]
+        expected_usage_data.reverse()
+        expected_quota_data.reverse()
 
         self.request.GET.update(
             {
@@ -351,3 +445,235 @@ class TestUsageGet(TestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.content.decode(), "allocation not found")
+
+
+class TestGetQuotas(TestCase):
+    def setUp(self) -> None:
+        create_metadata_for_testing()
+
+        return super().setUp()
+
+    def test_returns_latest_quota(self) -> None:
+        expected_quota_tib = 5
+        usage = 3.25 * 1024
+
+        storage_allocation, _ = create_allocation_with_usage(expected_quota_tib, usage)
+
+        quotas = _get_quotas(storage_allocation.pk)
+
+        self.assertIsInstance(quotas, list)
+        self.assertEqual(expected_quota_tib * 2**10, quotas[0]["quota"])
+        self.assertEqual(date.today(), quotas[0]["date"])
+
+    def test_returns_all_quotas(self) -> None:
+        current_quota_tib = 5
+        past_quotas_tib = [2, 3, 6]
+
+        usage = 3.25 * 1024
+
+        storage_allocation, _ = create_allocation_with_usage(current_quota_tib, usage)
+        expected_quotas = [{"quota": current_quota_tib * 2**10, "date": date.today()}]
+
+        for quota_tib in past_quotas_tib:
+            this_date = random_date(
+                date.today() - relativedelta(years=1),
+                date.today() - relativedelta(days=1),
+            )
+            while this_date in map(lambda quota: quota.get("date"), expected_quotas):
+                this_date = random_date(
+                    date.today() - relativedelta(years=2),
+                    date.today() - relativedelta(days=1),
+                )
+
+            write_quota_history(storage_allocation.pk, this_date, quota_tib)
+            expected_quotas.append({"quota": quota_tib * 2**10, "date": this_date})
+
+        quotas = _get_quotas(storage_allocation.pk)
+
+        expected_quotas.sort(reverse=True, key=lambda element: element["date"])
+
+        self.assertIsInstance(quotas, list)
+        self.assertListEqual(expected_quotas, quotas)
+
+    def test_limits_start_time(self) -> None:
+        current_quota_tib = 5
+        past_quota_count = 10
+        start_date = date.today() - relativedelta(years=1)
+
+        usage = 3.25 * 1024
+
+        storage_allocation, _ = create_allocation_with_usage(current_quota_tib, usage)
+        expected_quotas = [{"quota": current_quota_tib * 2**10, "date": date.today()}]
+
+        for _ in range(past_quota_count):
+            quota_tib = randint(0, 20)
+            this_date = random_date(
+                date.today() - relativedelta(years=2),
+                date.today() - relativedelta(days=1),
+            )
+            while this_date in map(lambda quota: quota.get("date"), expected_quotas):
+                this_date = random_date(
+                    date.today() - relativedelta(years=2),
+                    date.today() - relativedelta(days=1),
+                )
+
+            write_quota_history(storage_allocation.pk, this_date, quota_tib)
+
+            if this_date > start_date:
+                expected_quotas.append({"quota": quota_tib * 2**10, "date": this_date})
+
+        quota_tib = randint(0, 20)
+        write_quota_history(storage_allocation.pk, start_date, quota_tib)
+        expected_quotas.append({"quota": quota_tib * 2**10, "date": start_date})
+
+        quotas = _get_quotas(storage_allocation.pk, start_date)
+
+        expected_quotas.sort(reverse=True, key=lambda element: element["date"])
+
+        self.assertIsInstance(quotas, list)
+        self.assertListEqual(expected_quotas, quotas)
+
+    def test_limits_end_time(self) -> None:
+        current_quota_tib = 5
+        past_quota_count = 10
+        end_date = date.today() - relativedelta(years=1)
+
+        usage = 3.25 * 1024
+
+        storage_allocation, _ = create_allocation_with_usage(current_quota_tib, usage)
+        expected_quotas = []
+
+        for _ in range(past_quota_count):
+            quota_tib = randint(0, 20)
+            this_date = random_date(
+                date.today() - relativedelta(years=2),
+                date.today(),
+            )
+            write_quota_history(storage_allocation.pk, this_date, quota_tib)
+
+            if this_date <= end_date:
+                expected_quotas.append({"quota": quota_tib * 2**10, "date": this_date})
+
+        quotas = _get_quotas(storage_allocation.pk, end_date=end_date)
+
+        expected_quotas.sort(reverse=True, key=lambda element: element["date"])
+
+        self.assertIsInstance(quotas, list)
+        self.assertListEqual(expected_quotas, quotas)
+
+
+class TestGetUsagesByMonth(TestCase):
+    def setUp(self) -> None:
+        create_metadata_for_testing()
+
+        return super().setUp()
+
+    def test_returns_latest_usage(self) -> None:
+        quota_tib = 5
+        expected_usage = 3.25 * 2**10
+
+        storage_allocation, _ = create_allocation_with_usage(quota_tib, expected_usage)
+
+        usages = _get_usages_by_month(storage_allocation.pk)
+
+        self.assertIsInstance(usages, list)
+        self.assertEqual(expected_usage, usages[0]["usage"])
+        self.assertEqual(date.today(), usages[0]["date"])
+
+    def test_returns_quotas_for_firsts_of_month(self) -> None:
+        quota_tib = 5
+        expected_usages = [{"date": date.today(), "usage": 3.25 * 2**10}]
+
+        storage_allocation, storage_usage_object = create_allocation_with_usage(
+            quota_tib, expected_usages[0].get("usage")
+        )
+        for i in range(12):
+            usage_tib = randint(0, 20)
+            this_date = date.today() - relativedelta(months=i)
+            this_date = this_date.replace(day=1)
+
+            write_usage_history(storage_usage_object, this_date, usage_tib)
+
+            expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+
+            this_date = this_date + relativedelta(
+                days=5
+            )  # include additinal history that we don't want returned
+            write_usage_history(storage_usage_object, this_date, usage_tib)
+
+        usages = _get_usages_by_month(storage_allocation.pk)
+
+        self.assertIsInstance(usages, list)
+        self.assertListEqual(expected_usages, usages)
+
+    def test_shows_nearest_to_first_of_month(self) -> None:
+        quota_tib = 5
+        expected_usages = [{"date": date.today(), "usage": 3.25 * 2**10}]
+
+        storage_allocation, storage_usage_object = create_allocation_with_usage(
+            quota_tib, expected_usages[0].get("usage")
+        )
+        for i in range(12):
+            usage_tib = randint(0, 20)
+            this_date = date.today() - relativedelta(months=(i + 1))
+            this_date = this_date.replace(day=28)  # write to end of previous month
+
+            write_usage_history(storage_usage_object, this_date, usage_tib)
+            expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+
+        usages = _get_usages_by_month(storage_allocation.pk)
+
+        self.assertIsInstance(usages, list)
+        self.assertListEqual(expected_usages, usages)
+
+    def test_limits_start_time(self):
+        quota_tib = 5
+        expected_usages = [{"date": date.today(), "usage": 3.25 * 2**10}]
+        start_date = date.today() - relativedelta(years=1)
+        start_date.replace(day=15)  # be sure to capture start date
+
+        storage_allocation, storage_usage_object = create_allocation_with_usage(
+            quota_tib, expected_usages[0].get("usage")
+        )
+        for i in range(24):
+            usage_tib = randint(0, 20)
+            this_date = date.today() - relativedelta(months=i)
+            this_date = this_date.replace(day=1)
+
+            write_usage_history(storage_usage_object, this_date, usage_tib)
+
+            if this_date >= start_date:
+                expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+
+        start_usage_tib = randint(0, 20)
+        write_usage_history(storage_usage_object, start_date, start_usage_tib)
+        expected_usages.append({"date": start_date, "usage": start_usage_tib * 2**10})
+
+        usages = _get_usages_by_month(storage_allocation.pk, start_date=start_date)
+
+        self.assertIsInstance(usages, list)
+        self.assertListEqual(expected_usages, usages)
+
+    def test_limits_end_time(self):
+        quota_tib = 5
+        expected_usages = []
+        end_date = date.today() - relativedelta(years=1)
+        # end_date.replace(day=1)  # be sure to capture start date
+
+        storage_allocation, storage_usage_object = create_allocation_with_usage(
+            quota_tib, 3.25 * 2**10
+        )
+        for i in range(24):
+            usage_tib = randint(0, 20)
+            this_date = date.today() - relativedelta(months=i)
+            this_date = this_date.replace(day=1)
+
+            write_usage_history(storage_usage_object, this_date, usage_tib)
+
+            if this_date <= end_date:
+                expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
+
+        usages = _get_usages_by_month(storage_allocation.pk, end_date=end_date)
+
+        self.assertIsInstance(usages, list)
+        self.assertListEqual(expected_usages, usages)

@@ -1,5 +1,6 @@
-from datetime import date, timedelta
-from random import random
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from random import random, randrange
 
 from typing import Tuple
 
@@ -43,91 +44,103 @@ def create_allocation_with_usage(
 
 def create_usage_history(
     usage_object: AllocationAttributeUsage, months: int = 12, max_usage_tib: int = 10
-) -> list[dict]:
+) -> Tuple:
 
-    usage_history = []
+    usage_data = []
+    quota_data = []
     today = date.today()
 
     for month_offset in range(months):
-        working_date = _adjust_month(today, month_offset)
+        working_date = today - relativedelta(months=month_offset)
 
         if working_date == today:
             continue  # avoids issues when run on 1st of month
 
         quota_tib = round(random() * max_usage_tib)
-        usage_tib = round(random() * quota_tib, 12)
+        usage_kib = round(random() * quota_tib * 2**40)
+        usage_tib = usage_kib / 2**40
 
-        usage_history.insert(
+        usage_data.insert(
             0,
             {
                 "usage": usage_tib * 2**10,
                 "date": working_date.isoformat(),
+            },
+        )
+        quota_data.insert(
+            0,
+            {
                 "quota": quota_tib * 2**10,
+                "date": working_date.isoformat(),
             },
         )
 
-        with freeze_time(working_date):
-            quota_attribute = usage_object.allocation_attribute
-            quota_attribute.value = quota_tib
-            quota_attribute.save()
-            usage_object.value = usage_tib * 2**40
-            usage_object.save()
-
-    return usage_history
-
-
-def _adjust_month(in_date: date, month_offset: int) -> date:
-    current_month = in_date.month
-    new_month = current_month - month_offset
-
-    working_date = in_date.replace(day=1)
-    while new_month <= 0:
-        new_month = new_month + 12
-        working_date = working_date.replace(year=working_date.year - 1)
-    working_date = working_date.replace(month=new_month)
-
-    return working_date
-
-
-def get_history_span(
-    usage_history: list[dict], start_day_delta: int, end_day_delta: int = 0
-):
-    start_date = date.today() - timedelta(days=start_day_delta)
-    end_date = date.today() - timedelta(days=end_day_delta)
-
-    working_history = []
-    has_succeeded = False
-    for index, history in enumerate(usage_history):
-        history_date = date.fromisoformat(history["date"])
-        if history_date >= start_date and history_date <= end_date:
-            if not has_succeeded:
-                working_history.append(
-                    {
-                        "date": start_date.isoformat(),
-                        "usage": usage_history[index - 1]["usage"],
-                        "quota": usage_history[index - 1]["quota"],
-                    }
-                )
-                has_succeeded = True
-            working_history.append(history)
-
-    if working_history[-1]["date"] != end_date.isoformat():
-        working_history.append(
-            {
-                "date": end_date.isoformat(),
-                "usage": working_history[-1]["usage"],
-                "quota": working_history[-1]["quota"],
-            }
+        write_quota_history(
+            usage_object.allocation_attribute.allocation.pk, working_date, quota_tib
         )
+        write_usage_history(usage_object, working_date, usage_tib)
 
-    return_history = []
-    for index, history in enumerate(working_history):
-        if (
-            index < len(working_history) - 1
-            and history["date"] == working_history[index + 1]["date"]
-        ):
-            continue
-        else:
-            return_history.append(history)
+    return (usage_data, quota_data)
 
-    return (return_history, start_date, end_date)
+
+def get_history_span(history_data: dict, start_day_delta: int, end_day_delta: int = 0):
+    start_date = date.today() - relativedelta(days=start_day_delta)
+    end_date = date.today() - relativedelta(days=end_day_delta)
+
+    working_history_data = {"usage_data": [], "quota_data": []}
+    return_history_data = {"usage_data": [], "quota_data": []}
+
+    for key in ["usage", "quota"]:
+        data = history_data.get(f"{key}_data")
+        working_data = working_history_data.get(f"{key}_data")
+
+        for index, history in enumerate(data):
+            history_date = date.fromisoformat(history["date"])
+            if history_date >= start_date and history_date <= end_date:
+                working_data.append(history)
+
+        return_data = []
+        for index, history in enumerate(working_data):
+            if (
+                index < len(working_data) - 1
+                and history["date"] == working_data[index + 1]["date"]
+            ):
+                continue
+            else:
+                return_data.append(history)
+
+        return_history_data[f"{key}_data"] = return_data
+
+    return (
+        {
+            "usage_data": return_history_data["usage_data"],
+            "quota_data": return_history_data["quota_data"],
+        },
+        start_date,
+        end_date,
+    )
+
+
+def write_quota_history(allocation_id: int, this_date: date, quota_tib: int):
+    with freeze_time(this_date):
+        quota_attribute = AllocationAttribute.objects.get(
+            allocation__pk=allocation_id,
+            allocation_attribute_type__name="storage_quota",
+        )
+        quota_attribute.value = quota_tib
+        quota_attribute.save()
+
+
+def write_usage_history(
+    usage_object: AllocationAttributeUsage, this_date: date, usage_tib: int
+):
+    with freeze_time(this_date):
+        usage_object.value = usage_tib * 2**40
+        usage_object.save()
+
+
+def random_date(start: date, end: date):
+    delta = end - start
+    random_day = randrange(delta.days)
+
+    return start + relativedelta(days=random_day)
