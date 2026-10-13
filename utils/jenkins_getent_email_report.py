@@ -21,7 +21,7 @@ from utils.coldfront_ad_utils import ColdfrontAdUtils
 # compute-ris:*:1208827:cspohl,mweil,sleong,a.santiago,tz-kai.lin...
 
 def all_services_arg(arg):
-    return arg not in [None, 'all', 'All']:
+    return arg not in [None, 'all', 'All']
 
 def generate_message_content(service: str, filenames: list):
     return(
