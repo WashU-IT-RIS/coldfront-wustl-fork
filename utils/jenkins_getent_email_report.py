@@ -94,8 +94,9 @@ ap.add_argument(
     '-s',
     '--service',
     choices=list(service_group_map.keys()),
-    default='all',
+    default='All',
     dest='service',
+    required=False,
 )
 args = ap.parse_args()
 msg = EmailMessage()
