@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 from dateutil.relativedelta import relativedelta
 from random import randint
 
@@ -192,169 +192,206 @@ class TestUsageGet(TestCase):
         self.assertListEqual(usage_data_response, expected_usage_data)
         self.assertListEqual(quota_data_response, expected_quota_data)
 
-    # def test_checks_start_date_in_middle_of_the_month(self):
-    #     expected_quota_tib = 4
-    #     expected_usage_gib = 3.3 * 1024
-    #     current_usage_gib = 4 * 1024
-    #     current_quota_tib = 5
+    def test_checks_start_date_in_middle_of_the_month(self):
+        expected_quota_tib = 4
+        expected_usage_gib = 3 * 2**10
+        current_usage_gib = 4 * 2**10
+        current_quota_tib = 5
 
-    #     (storage_allocation, usage_object) = create_allocation_with_usage(
-    #         current_quota_tib, current_usage_gib
-    #     )
+        storage_allocation, usage_object = create_allocation_with_usage(
+            current_quota_tib, current_usage_gib
+        )
 
-    #     usage_history = create_usage_history(usage_object, 12)
-    #     usage_history.append(
-    #         {
-    #             "usage": current_usage_gib,
-    #             "date": date.today().isoformat(),
-    #             "quota": current_quota_tib * 2**10,
-    #         }
-    #     )
+        usage_history, quota_history = create_usage_history(usage_object, 12)
+        usage_history.append(
+            {"usage": current_usage_gib, "date": date.today().isoformat()}
+        )
+        quota_history.append(
+            {"quota": current_quota_tib * 2**10, "date": date.today().isoformat()}
+        )
 
-    #     insert_month = 4
+        insert_month = 4
 
-    #     expected_date = date.fromisoformat(
-    #         usage_history[insert_month].get("date")
-    #     ) + timedelta(days=15)
-    #     usage_history.insert(
-    #         insert_month + 1,
-    #         {
-    #             "usage": expected_usage_gib,
-    #             "date": expected_date.isoformat(),
-    #             "quota": expected_quota_tib * 2**10,
-    #         },
-    #     )
+        expected_date = date.fromisoformat(
+            usage_history[insert_month].get("date")
+        ) + relativedelta(days=15)
 
-    #     with freeze_time(expected_date):
-    #         quota_attribute = usage_object.allocation_attribute
-    #         quota_attribute.value = expected_quota_tib
-    #         quota_attribute.save()
-    #         usage_object.value = expected_usage_gib * 2**30
-    #         usage_object.save()
+        write_usage_history(usage_object, expected_date, expected_usage_gib / 2**10)
+        write_quota_history(storage_allocation.pk, expected_date, expected_quota_tib)
+        usage_history.insert(
+            insert_month + 1,
+            {
+                "usage": expected_usage_gib,
+                "date": expected_date.isoformat(),
+            },
+        )
+        quota_history.insert(
+            insert_month + 1,
+            {
+                "quota": expected_quota_tib * 2**10,
+                "date": expected_date.isoformat(),
+            },
+        )
 
-    #     start_date = expected_date
-    #     expected_history = list(
-    #         filter(
-    #             lambda item: date.fromisoformat(item["date"]) >= start_date,
-    #             usage_history,
-    #         )
-    #     )
+        start_date = expected_date
+        expected_usage = list(
+            filter(
+                lambda item: date.fromisoformat(item["date"]) >= start_date,
+                usage_history,
+            )
+        )
+        expected_quota = list(
+            filter(
+                lambda item: date.fromisoformat(item["date"]) >= start_date,
+                quota_history,
+            )
+        )
+        expected_usage.reverse()
+        expected_quota.reverse()
 
-    #     self.request.GET.update(
-    #         {
-    #             "allocation_id": storage_allocation.pk,
-    #             "start_date": expected_date.isoformat(),
-    #         }
-    #     )
-    #     response = self.usage.get(self.request)
-    #     content = json.loads(response.content)
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": expected_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
 
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(content["allocation_id"], storage_allocation.pk)
-    #     self.assertIsInstance(content["usage_data"], list)
-    #     self.assertListEqual(content["usage_data"], expected_history)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertListEqual(content["usage_data"], expected_usage)
+        self.assertListEqual(content["quota_data"], expected_quota)
 
-    # def test_returns_start_time_older_than_one_year(self):
-    #     current_quota_tib = 5
-    #     current_usage_gib = 4 * 1024
-    #     (storage_allocation, usage_object) = create_allocation_with_usage(
-    #         current_quota_tib, current_usage_gib
-    #     )
+    def test_returns_start_time_older_than_one_year(self):
+        current_quota_tib = 5
+        current_usage_gib = 4 * 1024
+        storage_allocation, usage_object = create_allocation_with_usage(
+            current_quota_tib, current_usage_gib
+        )
 
-    #     usage_history = create_usage_history(usage_object, 36)
-    #     usage_history.append(
-    #         {
-    #             "usage": current_usage_gib,
-    #             "date": date.today().isoformat(),
-    #             "quota": current_quota_tib * 2**10,
-    #         }
-    #     )
+        usage_history, quota_history = create_usage_history(usage_object, 36)
+        usage_history.append(
+            {
+                "usage": current_usage_gib,
+                "date": date.today().isoformat(),
+            }
+        )
+        quota_history.append(
+            {
+                "date": date.today().isoformat(),
+                "quota": current_quota_tib * 2**10,
+            }
+        )
+        history_data = {"usage_data": usage_history, "quota_data": quota_history}
 
-    #     (expected_history, start_date, _) = get_history_span(usage_history, 400)
+        expected_history, start_date, _ = get_history_span(history_data, 400)
+        expected_usage_data = expected_history["usage_data"]
+        expected_quota_data = expected_history["quota_data"]
+        expected_usage_data.reverse()
+        expected_quota_data.reverse()
 
-    #     self.request.GET.update(
-    #         {
-    #             "allocation_id": storage_allocation.pk,
-    #             "start_date": start_date.isoformat(),
-    #         }
-    #     )
-    #     response = self.usage.get(self.request)
-    #     content = json.loads(response.content)
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": start_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
 
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(content["allocation_id"], storage_allocation.pk)
-    #     self.assertIsInstance(content["usage_data"], list)
-    #     self.assertListEqual(content["usage_data"], expected_history)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertListEqual(content["usage_data"], expected_usage_data)
+        self.assertListEqual(content["quota_data"], expected_quota_data)
 
-    # def test_returns_expected_with_start_and_end(self):
-    #     current_quota_tib = 5
-    #     current_usage_gib = 4 * 1024
-    #     (storage_allocation, usage_object) = create_allocation_with_usage(
-    #         current_quota_tib, current_usage_gib
-    #     )
+    def test_returns_expected_with_start_and_end(self):
+        current_quota_tib = 5
+        current_usage_gib = 4 * 1024
+        storage_allocation, usage_object = create_allocation_with_usage(
+            current_quota_tib, current_usage_gib
+        )
 
-    #     usage_history = create_usage_history(usage_object, 36)
-    #     usage_history.append(
-    #         {
-    #             "usage": current_usage_gib,
-    #             "date": date.today().isoformat(),
-    #             "quota": current_quota_tib * 2**10,
-    #         }
-    #     )
+        usage_history, quota_history = create_usage_history(usage_object, 36)
+        usage_history.append(
+            {
+                "usage": current_usage_gib,
+                "date": date.today().isoformat(),
+            }
+        )
+        quota_history.append(
+            {
+                "date": date.today().isoformat(),
+                "quota": current_quota_tib * 2**10,
+            }
+        )
+        history_data = {"usage_data": usage_history, "quota_data": quota_history}
 
-    #     (expected_history, start_date, end_date) = get_history_span(
-    #         usage_history, 365, 180
-    #     )
+        expected_history, start_date, end_date = get_history_span(
+            history_data, 365, 180
+        )
+        expected_usage_data = expected_history["usage_data"]
+        expected_quota_data = expected_history["quota_data"]
+        expected_usage_data.reverse()
+        expected_quota_data.reverse()
 
-    #     self.request.GET.update(
-    #         {
-    #             "allocation_id": storage_allocation.pk,
-    #             "start_date": start_date.isoformat(),
-    #             "end_date": end_date.isoformat(),
-    #         }
-    #     )
-    #     response = self.usage.get(self.request)
-    #     content = json.loads(response.content)
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
 
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(content["allocation_id"], storage_allocation.pk)
-    #     self.assertIsInstance(content["usage_data"], list)
-    #     self.assertListEqual(content["usage_data"], expected_history)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertListEqual(content["usage_data"], expected_usage_data)
+        self.assertListEqual(content["quota_data"], expected_quota_data)
 
-    # def test_does_not_provide_data_that_exceeds_history(self):
-    #     current_quota_tib = 5
-    #     current_usage_gib = 4 * 1024
-    #     (storage_allocation, usage_object) = create_allocation_with_usage(
-    #         current_quota_tib, current_usage_gib
-    #     )
+    def test_does_not_provide_data_that_exceeds_history(self):
+        current_quota_tib = 5
+        current_usage_gib = 4 * 1024
+        storage_allocation, usage_object = create_allocation_with_usage(
+            current_quota_tib, current_usage_gib
+        )
 
-    #     usage_history = create_usage_history(usage_object, 6)
-    #     usage_history.append(
-    #         {
-    #             "usage": current_usage_gib,
-    #             "date": date.today().isoformat(),
-    #             "quota": current_quota_tib * 2**10,
-    #         }
-    #     )
+        usage_history, quota_history = create_usage_history(usage_object, 6)
+        usage_history.append(
+            {
+                "usage": current_usage_gib,
+                "date": date.today().isoformat(),
+            }
+        )
+        quota_history.append(
+            {
+                "date": date.today().isoformat(),
+                "quota": current_quota_tib * 2**10,
+            }
+        )
+        expected_usage_data = usage_history
+        expected_quota_data = quota_history
+        expected_quota_data.reverse()
+        expected_usage_data.reverse()
 
-    #     expected_history = usage_history
-    #     start_date = date.fromisoformat(expected_history[0]["date"]) - timedelta(
-    #         days=365
-    #     )
+        start_date = date.fromisoformat(expected_usage_data[0]["date"]) - relativedelta(
+            days=365
+        )
 
-    #     self.request.GET.update(
-    #         {
-    #             "allocation_id": storage_allocation.pk,
-    #             "start_date": start_date.isoformat(),
-    #         }
-    #     )
-    #     response = self.usage.get(self.request)
-    #     content = json.loads(response.content)
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": start_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
+        content = json.loads(response.content)
 
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertEqual(content["allocation_id"], storage_allocation.pk)
-    #     self.assertIsInstance(content["usage_data"], list)
-    #     self.assertListEqual(content["usage_data"], expected_history)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content["allocation_id"], storage_allocation.pk)
+        self.assertListEqual(content["usage_data"], expected_quota_data)
+        self.assertListEqual(content["quota_data"], expected_quota_data)
 
     # def test_returns_error_when_start_date_is_after_end_date(self):
     #     current_quota_tib = 5
@@ -390,16 +427,16 @@ class TestUsageGet(TestCase):
     #         response.content.decode(), "end_date must be later than start_date"
     #     )
 
-    # def test_returns_404_with_bad_allocation(self):
-    #     self.request.GET.update(
-    #         {
-    #             "allocation_id": 100,
-    #         }
-    #     )
-    #     response = self.usage.get(self.request)
+    def test_returns_404_with_bad_allocation(self):
+        self.request.GET.update(
+            {
+                "allocation_id": 100,
+            }
+        )
+        response = self.usage.get(self.request)
 
-    #     self.assertEqual(response.status_code, 404)
-    #     self.assertEqual(response.content.decode(), "allocation not found")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.content.decode(), "allocation not found")
 
 
 class TestGetQuotas(TestCase):

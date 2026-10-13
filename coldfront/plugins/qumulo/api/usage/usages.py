@@ -75,8 +75,6 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
 
         allocation_id = int(allocation_id_str)
 
-        usage_gib = []
-
         start_date = date.fromisoformat(start_date_str) if start_date_str else None
         end_date = date.fromisoformat(end_date_str) if end_date_str else None
 
@@ -90,79 +88,6 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
                 "quota_data": quota_data,
             }
         )
-
-        # usage_history = list(
-        #     AllocationAttributeUsage.history.filter(
-        #         allocation_attribute__allocation__pk=allocation_id,
-        #         allocation_attribute__allocation_attribute_type__name="storage_quota",
-        #     )
-        # )
-        # quota_history = list(
-        #     AllocationAttribute.history.filter(
-        #         allocation__pk=allocation_id,
-        #         allocation_attribute_type__name="storage_quota",
-        #     )
-        # )
-
-        # if len(usage_history) <= 0 or len(quota_history) <= 0:
-        #     return HttpResponseNotFound("allocation not found")
-
-        # def find_allocation_moment(usage_moment):
-        #     for moment in quota_history:
-        #         if usage_moment.history_date.date() >= moment.history_date.date():
-        #             return moment
-
-        #     return None
-
-        # mapped_history = map(
-        #     lambda moment: {
-        #         "datetime": moment.history_date,
-        #         "usage": moment.value,
-        #         "quota": int(find_allocation_moment(moment).value),
-        #     },
-        #     usage_history,
-        # )
-
-        # working_datetime = end_datetime
-        # i = 0
-        # for moment in mapped_history:
-        #     while (
-        #         working_datetime >= moment["datetime"]
-        #         and working_datetime > start_datetime
-        #     ):
-        #         usage_gib.insert(
-        #             0,
-        #             {
-        #                 "date": working_datetime.date().isoformat(),
-        #                 "usage": moment["usage"] / 2**30,
-        #                 "quota": moment["quota"] * 2**10,
-        #             },
-        #         )
-        #         working_datetime = _minus_months(end_datetime, i)
-        #         i = i + 1
-        #     if working_datetime <= start_datetime:
-        #         working_datetime = start_datetime
-
-        #         if working_datetime >= moment["datetime"]:
-        #             usage_gib.insert(
-        #                 0,
-        #                 {
-        #                     "date": working_datetime.date().isoformat(),
-        #                     "usage": moment["usage"] / 2**30,
-        #                     "quota": moment["quota"] * 2**10,
-        #                 },
-        #             )
-        #             break
-
-        # if len(usage_gib) > 1 and usage_gib[0] == usage_gib[1]:
-        #     usage_gib.pop(0)
-
-        # return JsonResponse(
-        #     {
-        #         "allocation_id": allocation_id,
-        #         "usage_data": usage_gib,
-        #     }
-        # )
 
 
 def _minus_months(input_datetime: datetime, month_count: int) -> datetime:
@@ -270,7 +195,7 @@ def _get_usages_by_month(
 
     history_iter = working_list
 
-    if end_date == None:
+    if len(history_iter) == 0 or history_iter[0] != first_element:
         history_iter.insert(0, first_element)
 
     return history_iter

@@ -96,27 +96,27 @@ def get_history_span(history_data: dict, start_day_delta: int, end_day_delta: in
         data = history_data.get(f"{key}_data")
         working_data = working_history_data.get(f"{key}_data")
 
-        has_succeeded = False
+        # has_succeeded = False
         for index, history in enumerate(data):
             history_date = date.fromisoformat(history["date"])
             if history_date >= start_date and history_date <= end_date:
-                if not has_succeeded:
-                    working_data.append(
-                        {
-                            "date": start_date.isoformat(),
-                            key: data[index - 1].get(key),
-                        }
-                    )
-                    has_succeeded = True
+                # if not has_succeeded:
+                #     working_data.append(
+                #         {
+                #             "date": start_date.isoformat(),
+                #             key: data[index - 1].get(key),
+                #         }
+                #     )
+                #     has_succeeded = True
                 working_data.append(history)
 
-        if working_data[-1].get("date") != end_date.isoformat():
-            working_data.append(
-                {
-                    "date": end_date.isoformat(),
-                    key: working_data[-1].get(key),
-                }
-            )
+        # if working_data[-1].get("date") != end_date.isoformat():
+        #     working_data.append(
+        #         {
+        #             "date": end_date.isoformat(),
+        #             key: working_data[-1].get(key),
+        #         }
+        #     )
 
         return_data = []
         for index, history in enumerate(working_data):
