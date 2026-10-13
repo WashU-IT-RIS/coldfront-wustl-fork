@@ -93,6 +93,24 @@ function StorageChart({ data, isLoading }: StorageChartProps) {
     },
   };
 
+  if (data.usage.length && data.quota.length) {
+    if (data.usage[0].x > data.quota[0].x) {
+      data.quota = [{ x: data.usage[0].x, y: data.quota[0].y }, ...data.quota];
+    }
+    if (data.quota[0].x > data.usage[0].x) {
+      data.usage = [{ x: data.quota[0].x, y: data.usage[0].y }, ...data.usage];
+    }
+
+    const lastUsage = data.usage[data.usage.length - 1];
+    const lastQuota = data.quota[data.quota.length - 1];
+    if (lastUsage.x < lastQuota.x) {
+      data.quota = [{ x: lastUsage.x, y: lastQuota.y }, ...data.quota];
+    }
+    if (lastQuota.x < lastUsage.x) {
+      data.usage = [{ x: lastQuota.x, y: lastUsage.y }, ...data.usage];
+    }
+  }
+
   const chartData = {
     datasets: [
       {
