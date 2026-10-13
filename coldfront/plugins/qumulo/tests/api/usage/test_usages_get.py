@@ -28,8 +28,6 @@ import json
 
 from freezegun import freeze_time
 
-from pprint import pprint
-
 
 class TestUsageGet(TestCase):
     def setUp(self) -> None:
@@ -390,42 +388,52 @@ class TestUsageGet(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(content["allocation_id"], storage_allocation.pk)
-        self.assertListEqual(content["usage_data"], expected_quota_data)
+        self.assertListEqual(content["usage_data"], expected_usage_data)
         self.assertListEqual(content["quota_data"], expected_quota_data)
 
-    # def test_returns_error_when_start_date_is_after_end_date(self):
-    #     current_quota_tib = 5
-    #     current_usage_gib = 4 * 1024
-    #     (storage_allocation, usage_object) = create_allocation_with_usage(
-    #         current_quota_tib, current_usage_gib
-    #     )
+    def test_returns_error_when_start_date_is_after_end_date(self):
+        current_quota_tib = 5
+        current_usage_gib = 4 * 1024
+        storage_allocation, usage_object = create_allocation_with_usage(
+            current_quota_tib, current_usage_gib
+        )
 
-    #     usage_history = create_usage_history(usage_object, 36)
-    #     usage_history.append(
-    #         {
-    #             "usage": current_usage_gib,
-    #             "date": date.today().isoformat(),
-    #             "quota": current_quota_tib * 2**10,
-    #         }
-    #     )
+        usage_history, quota_history = create_usage_history(usage_object, 36)
+        usage_history.append(
+            {
+                "usage": current_usage_gib,
+                "date": date.today().isoformat(),
+            }
+        )
+        quota_history.append(
+            {
+                "date": date.today().isoformat(),
+                "quota": current_quota_tib * 2**10,
+            }
+        )
+        history_data = {"usage_data": usage_history, "quota_data": quota_history}
 
-    #     (expected_history, start_date, end_date) = get_history_span(
-    #         usage_history, 365, 180
-    #     )
+        expected_history, start_date, end_date = get_history_span(
+            history_data, 365, 180
+        )
+        expected_usage_data = expected_history["usage_data"]
+        expected_quota_data = expected_history["quota_data"]
+        expected_usage_data.reverse()
+        expected_quota_data.reverse()
 
-    #     self.request.GET.update(
-    #         {
-    #             "allocation_id": storage_allocation.pk,
-    #             "start_date": end_date.isoformat(),
-    #             "end_date": start_date.isoformat(),
-    #         }
-    #     )
-    #     response = self.usage.get(self.request)
+        self.request.GET.update(
+            {
+                "allocation_id": storage_allocation.pk,
+                "start_date": end_date.isoformat(),
+                "end_date": start_date.isoformat(),
+            }
+        )
+        response = self.usage.get(self.request)
 
-    #     self.assertEqual(response.status_code, 400)
-    #     self.assertEqual(
-    #         response.content.decode(), "end_date must be later than start_date"
-    #     )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.content.decode(), "end_date must be later than start_date"
+        )
 
     def test_returns_404_with_bad_allocation(self):
         self.request.GET.update(

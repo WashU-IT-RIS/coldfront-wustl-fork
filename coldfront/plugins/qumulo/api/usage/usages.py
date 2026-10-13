@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
 from django.http import (
@@ -20,8 +20,6 @@ from coldfront.core.user.models import User
 from typing import Union, cast
 
 EOD = "T23:59:59+00:00"
-
-from pprint import pprint
 
 
 class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -60,23 +58,23 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
         start_date_str = request.GET.get("start_date", "")
         end_date_str = request.GET.get("end_date", "")
 
-        # end_datetime = datetime.fromisoformat(end_date_str + EOD)
-
-        # if start_date_str != "":
-        #     start_datetime = datetime.fromisoformat(start_date_str + EOD)
-        # else:
-        #     start_datetime = end_datetime - timedelta(days=365)
-        #     start_datetime.replace(day=1)
-
-        # if start_datetime > end_datetime:
-        #     return HttpResponseBadRequest(
-        #         content="end_date must be later than start_date"
-        #     )
-
-        allocation_id = int(allocation_id_str)
-
         start_date = date.fromisoformat(start_date_str) if start_date_str else None
         end_date = date.fromisoformat(end_date_str) if end_date_str else None
+
+        if (
+            isinstance(start_date, date)
+            and isinstance(end_date, date)
+            and start_date > end_date
+        ):
+            return HttpResponseBadRequest(
+                content="end_date must be later than start_date"
+            )
+
+        allocation_id = int(allocation_id_str)
+        try:
+            Allocation.objects.get(pk=allocation_id)
+        except:
+            return HttpResponseNotFound("allocation not found")
 
         quota_data = _get_quotas(allocation_id, start_date, end_date)
         usage_data = _get_usages_by_month(allocation_id, start_date, end_date)
