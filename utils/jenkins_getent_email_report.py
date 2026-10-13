@@ -32,7 +32,7 @@ You are receiving this message because you or someone on your behalf requested
 an e-mail address report for users of {} provided by RIS.
 Please see the attached {} for the requested {}:
 
-  {}
+\t{}
 
 Please note that not all user IDs configured to use the service may be
 associated with valid e-mail addresses.  The user IDs without e-mail addresses
