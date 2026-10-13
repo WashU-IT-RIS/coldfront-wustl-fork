@@ -99,7 +99,7 @@ ap = ArgumentParser()
 ap.add_argument(
     '-s',
     '--service',
-    choices=list(service_group_map.keys()),
+    choices=list(service_group_map.keys()).append(None),
     dest='service',
     required=False,
     type=str,
@@ -135,10 +135,8 @@ else:
             continue
         report_filename = generate_file_name(service_name)
         report_filenames.append(report_filename)
-        attachment = MIMEBase('text', 'plain')
-        attachment.set_payload(generate_report(group_name))
         msg.add_attachment(
-            report_data,
+            generate_report(group_name),
             maintype='text',
             subtype='plain',
             filename=report_filename
