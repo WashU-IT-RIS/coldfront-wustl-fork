@@ -20,8 +20,8 @@ from utils.coldfront_ad_utils import ColdfrontAdUtils
 #
 # compute-ris:*:1208827:cspohl,mweil,sleong,a.santiago,tz-kai.lin...
 
-def all_services_arg(arg):
-    return arg not in [None, 'all', 'All']
+def not_all_services_arg(arg):
+    return arg in [None, 'all', 'All']
 
 def generate_message_content(service: str, filenames: list):
     return(
@@ -105,7 +105,7 @@ ap.add_argument(
     type=str,
 )
 args = ap.parse_args()
-if not all_services_arg(args.service):
+if not_all_services_arg(args.service):
     msg = EmailMessage()
     msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
     msg['From'] = 'ris-svc-builder@wustl.edu'
