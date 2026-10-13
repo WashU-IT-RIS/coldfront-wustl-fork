@@ -62,6 +62,9 @@ def generate_report(group):
     )
     for line in completed_proc.stdout.decode('utf-8').split('\n'):
         for uid in list(sorted(set(line.split(':')[-1].split(',')))):
+            if not uid:
+                print(f'Skipping bad uid: {uid}')
+                continue
             uid_resp = cau.get_user(uid)
             e_mail_address = uid_resp.get('attributes', {}).get('mail', 'N/A')
             if len(e_mail_address) == 0:
