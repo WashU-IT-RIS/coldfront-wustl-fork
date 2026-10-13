@@ -94,15 +94,15 @@ ap.add_argument(
     '-s',
     '--service',
     choices=list(service_group_map.keys()),
-    default='All',
     dest='service',
     required=False,
+    type=str,
 )
 args = ap.parse_args()
 msg = EmailMessage()
 msg['To'] = os.environ.get('REPORT_RECIPIENT', 'bmulligan@wustl.edu')
 msg['From'] = 'ris-svc-builder@wustl.edu'
-if args.service.lower() != 'all':
+if args.service in [None, 'all', 'All']:
     msg['Subject'] = f'RIS E-Mail Address Report for {args.service}'
     report_filename = generate_file_name(args.service)
     report_data = generate_report(service_group_map[args.service])
