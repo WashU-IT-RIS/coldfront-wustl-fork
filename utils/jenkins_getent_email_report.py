@@ -124,7 +124,7 @@ else:
     for service_name, group_name in service_group_map.items():
         if service_name == 'All':
             continue
-        report_filename = generate_file_name()
+        report_filename = generate_file_name(service_name)
         report_filenames.append(report_filename)
         report_data = generate_report(group_name)
         msg.add_attachment(
