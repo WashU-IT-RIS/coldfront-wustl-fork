@@ -57,7 +57,7 @@ def generate_file_name(service):
         f'{today.year:04d}{today.month:02d}{today.day:02d}.csv'
     )
 
-def generate_report(group):
+def generate_report(group, debug=False):
     report = ''
     no_email = set()
     cau = ColdfrontAdUtils()
@@ -69,7 +69,8 @@ def generate_report(group):
     for line in completed_proc.stdout.decode('utf-8').split('\n'):
         for uid in list(sorted(set(line.split(':')[-1].split(',')))):
             if not uid:
-                print(f'Skipping bad uid: {uid}.')
+                if debug:
+                    print(f'DEBUG Skipping bad uid: {uid}.')
                 continue
             uid_resp = cau.get_user(uid)
             e_mail_address = uid_resp.get('attributes', {}).get('mail', 'N/A')
@@ -97,6 +98,13 @@ service_group_map = {
 }
 ap = ArgumentParser()
 ap.add_argument(
+    '-d',
+    '--debug',
+    action='store_true',
+    default=False,
+    required=False
+)
+ap.add_argument(
     '-s',
     '--service',
     choices=list(service_group_map.keys()).append(None),
@@ -111,7 +119,7 @@ msg['From'] = 'ris-svc-builder@wustl.edu'
 if not all_services_arg(args.service):
     msg['Subject'] = f'RIS User E-Mail Address Report for {args.service}'
     report_filename = generate_file_name(args.service)
-    report_data = generate_report(service_group_map[args.service])
+    report_data = generate_report(service_group_map[args.service], args.debug)
     msg.set_content(
         generate_message_content(
             f'the {args.service} service',
@@ -131,7 +139,7 @@ else:
         if service_name == 'All':
             continue
         report_filename = generate_file_name(service_name)
-        reports_dict[report_filename] = generate_report(group_name)
+        reports_dict[report_filename] = generate_report(group_name, args.debug)
     msg.set_content(
         generate_message_content(
             'all Compute and Active Storage services',
