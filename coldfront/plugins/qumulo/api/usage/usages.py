@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date
 from dateutil.relativedelta import relativedelta
 
 from django.http import (
@@ -18,8 +18,6 @@ from coldfront.core.allocation.models import (
 from coldfront.core.user.models import User
 
 from typing import Union, cast
-
-EOD = "T23:59:59+00:00"
 
 
 class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
@@ -86,21 +84,6 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
                 "quota_data": quota_data,
             }
         )
-
-
-def _minus_months(input_datetime: datetime, month_count: int) -> datetime:
-    current_month = input_datetime.month
-    new_month = current_month - month_count
-
-    if new_month > 0:
-        return_datetime = input_datetime.replace(day=1, month=new_month)
-    else:
-        new_month = current_month - month_count + 12
-        return_datetime = input_datetime.replace(
-            day=1, month=new_month, year=input_datetime.year - 1
-        )
-
-    return return_datetime
 
 
 def _get_quotas(
