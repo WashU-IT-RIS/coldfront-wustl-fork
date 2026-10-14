@@ -65,10 +65,10 @@ class MigrateToColdfront:
         self,
         fileset_name: str,
         resource_name: str,
-        allocation_attributes_list: list[dict[str, Any]],
+        allocation_attributes_dict: dict[str, Any],
     ) -> None:
         result = self.__create_by(
-            fileset_name, allocation_attributes_list, resource_name
+            fileset_name, [allocation_attributes_dict], resource_name
         )
         return result
 
