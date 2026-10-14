@@ -50,7 +50,9 @@ allocation_attributes_class_ris = [
 ]
 
 migrator = MigrateToColdfront()
-migrator.set_override("storage_quota", "2")
+# migrator.set_override("storage_quota", "2")
+# if the quota is set above, the override is not necessary.
+# "quota": "0.5T",
 migrator.batch_create_allocations_and_sub_allocations(
     "class_ris", "storage3", allocation_attributes_class_ris
 )
