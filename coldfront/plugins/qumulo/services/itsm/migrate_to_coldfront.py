@@ -70,7 +70,7 @@ class MigrateToColdfront:
         for allocation_attributes in allocation_attributes_list:
             self.__create_by(
                 fileset_name,
-                [allocation_attributes],
+                allocation_attributes,
                 resource_name,
             )
 

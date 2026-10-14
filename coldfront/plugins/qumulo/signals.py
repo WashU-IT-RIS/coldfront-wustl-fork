@@ -119,6 +119,11 @@ def on_allocation_change_approved(sender, **kwargs):
     except AllocationLinkage.DoesNotExist:
         return
 
+    # quota update for course allocations
+    if course_name:
+        # Skip quota update for course allocations
+        return
+    
     children = allocation_link.children.all()
     for child in children:
         child_fs_path = child.get_attribute(name="storage_filesystem_path")

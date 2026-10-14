@@ -5,10 +5,13 @@ from coldfront.plugins.qumulo.services.itsm.migrate_to_coldfront import (
 
 storage3_path = "/storage3/fs1"
 
+# washu_keys must be passed as arguments
+
 class_members_washu_keys = [f"class_member_washu_key{i}" for i in range(5)]
 acl_permissions = {"ro": "class_permissions_ro", "rw": "class_permissions_rw"}
 dir_projects = {washu_key: acl_permissions for washu_key in class_members_washu_keys}
 
+# adjust data below accordingly
 allocation_attributes_class_ris = [
     {
         "id": 10000,
