@@ -61,7 +61,7 @@ class MigrateToColdfront:
         result = self.__create_by(storage_provision_name, itsm_result, resource_name)
         return result
 
-    def batch_create_sub_allocations(
+    def batch_create_allocations_and_sub_allocations(
         self,
         fileset_name: str,
         resource_name: str,
