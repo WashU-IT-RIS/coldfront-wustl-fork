@@ -38,5 +38,5 @@ if not isinstance(allocation_attributes_class_ris, list) or not all(
 
 migrator = MigrateToColdfront()
 migrator.batch_create_allocations_and_sub_allocations(
-    "class_ris", "storage3", allocation_attributes_class_ris
+    "di2-cap", "Storage3", allocation_attributes_class_ris
 )
