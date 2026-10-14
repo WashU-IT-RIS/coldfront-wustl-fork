@@ -67,12 +67,10 @@ class MigrateToColdfront:
         resource_name: str,
         allocation_attributes_list: list[dict[str, Any]],
     ) -> None:
-        for allocation_attributes in allocation_attributes_list:
-            self.__create_by(
-                fileset_name,
-                allocation_attributes,
-                resource_name,
-            )
+        result = self.__create_by(
+            fileset_name, allocation_attributes_list, resource_name
+        )
+        return result
 
     def set_override(self, itsm_field_name: str, value: any) -> None:
         overridable_fields = ItsmToColdfrontFieldsFactory.get_overridable_attributes()
