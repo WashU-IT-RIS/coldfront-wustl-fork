@@ -22,15 +22,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         allocation_attributes_json = options.get("allocation_attributes")
-        if allocation_attributes_json is None:
-            allocation_attributes_json = "allocation_attributes_class_ris.json"
         with open(allocation_attributes_json, encoding="utf-8") as allocation_file:
             allocation_attributes_class_ris = json.load(allocation_file)
 
-        if not isinstance(allocation_attributes_class_ris, list) or not all(
-        isinstance(attributes, dict) for attributes in allocation_attributes_class_ris
-        ):
-            raise ValueError("Allocation attributes JSON must contain a list of objects.")
+        # if not isinstance(allocation_attributes_class_ris, list) or not all(
+        # isinstance(attributes, dict) for attributes in allocation_attributes_class_ris
+        # ):
+        #     raise ValueError("Allocation attributes JSON must contain a list of objects.")
 
 
         migrator = MigrateToColdfront()
