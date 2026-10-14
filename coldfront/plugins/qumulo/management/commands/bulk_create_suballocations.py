@@ -32,4 +32,4 @@ class Command(BaseCommand):
 
 
         migrator = MigrateToColdfront()
-        migrator.batch_create_allocations_and_sub_allocations("class_ris", "storage3", allocation_attributes_class_ris)
+        migrator.batch_create_allocations_and_sub_allocations("di2-cap", "Storage3", allocation_attributes_class_ris)
