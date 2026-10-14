@@ -251,8 +251,9 @@ def add_allocation_group_to_parent_ad_group(
                 time.sleep(3)
 
     if allocation_group_dn is None:
-        logger.error("Allocation AD group %s was not found", allocation_group_name)
-        return
+        message = f"Allocation AD group {allocation_group_name} was not found"
+        logger.error(message)
+        raise ValueError(message)
 
     try:
         active_directory_api.add_members_to_ad_group(
