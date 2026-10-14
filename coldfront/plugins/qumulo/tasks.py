@@ -265,11 +265,12 @@ def add_allocation_group_to_parent_ad_group(
             parent_group_name,
         )
     except Exception:
-        logger.warning(
+        logger.exception(
             "Error adding allocation AD group %s to parent group %s",
             allocation_group_name,
             parent_group_name,
         )
+        raise
 
 
 def __send_error_adding_users_email(
