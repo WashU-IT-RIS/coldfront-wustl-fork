@@ -13,6 +13,20 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
+            "--fileset",
+            dest="fileset",
+            type=str,
+            required=True,
+            help="The fileset name to create allocations for.",
+        )
+        parser.add_argument(
+            "--resource",
+            dest="resource",
+            type=str,
+            required=True,
+            help="The resource name to create allocations for. Currently this could be Storage2 or Storage3.",
+        )
+        parser.add_argument(
             "--allocation-attributes",
             dest="allocation_attributes",
             type=str,
@@ -21,15 +35,13 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        fileset = options.get("fileset")
+        resource = options.get("resource")
         allocation_attributes_json = options.get("allocation_attributes")
         with open(allocation_attributes_json, encoding="utf-8") as allocation_file:
             allocation_attributes_class_ris = json.load(allocation_file)
 
-        # if not isinstance(allocation_attributes_class_ris, list) or not all(
-        # isinstance(attributes, dict) for attributes in allocation_attributes_class_ris
-        # ):
-        #     raise ValueError("Allocation attributes JSON must contain a list of objects.")
-
-
         migrator = MigrateToColdfront()
-        migrator.batch_create_allocations_and_sub_allocations("di2-cap", "Storage3", allocation_attributes_class_ris)
+        migrator.batch_create_allocations_and_sub_allocations(
+            fileset, resource, allocation_attributes_class_ris
+        )
