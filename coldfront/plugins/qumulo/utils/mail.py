@@ -2,8 +2,9 @@ from coldfront.core.project.models import Project
 from coldfront.core.user.models import User
 from coldfront.core.utils.mail import email_template_context
 
-import os
+from django.conf import settings
 
+import os
 
 def email_template_context_for_service_desk() -> dict:
     template_context = email_template_context()
