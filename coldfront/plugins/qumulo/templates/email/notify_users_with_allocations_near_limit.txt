@@ -1,7 +1,7 @@
 Dear {{ addressee }}:
 
 The {{storage_name}} Active storage allocation at {{storage_path}} is
-currently consuming {{ usage }} and is near the {{ limit }} quota.
+currently consuming {{ usage }} and is near its {{ limit }} quota.
 
 Please see the Data Storage Platform Rates page, which contains additional
 information on Active tier pricing and model options:
