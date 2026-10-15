@@ -31,7 +31,7 @@ class Command(BaseCommand):
             dest="allocation_attributes",
             type=str,
             required=True,
-            help="Path to a JSON file containing a list of allocation attribute objects.",
+            help="Path to a JSON file containing attributes for a single parent allocation.",
         )
 
     def handle(self, *args, **options):
