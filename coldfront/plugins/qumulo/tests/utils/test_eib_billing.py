@@ -15,7 +15,13 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationLinkage,
 )
+<<<<<<< Updated upstream
 from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage
+=======
+from coldfront.plugins.qumulo.services.file_quota_service import (
+    ingest_quotas_with_daily_usage
+)
+>>>>>>> Stashed changes
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,

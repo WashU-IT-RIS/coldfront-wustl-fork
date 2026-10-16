@@ -22,6 +22,15 @@ from coldfront.core.resource.models import Resource
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
 
+<<<<<<< Updated upstream
+=======
+from coldfront.plugins.qumulo.services.file_quota_service import (
+    get_file_system_allocations_near_limit
+)
+from coldfront.plugins.qumulo.services.notifications_service import (
+    send_email_for_near_limit_allocation,
+)
+>>>>>>> Stashed changes
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -107,12 +116,32 @@ def conditionally_update_storage_allocation_statuses() -> None:
     for allocation in allocations:
         conditionally_update_storage_allocation_status(allocation)
 
+<<<<<<< Updated upstream
 
 # TODO: refactor the following methods to a service class
 def ingest_quotas_with_daily_usage() -> None:
     logger = logging.getLogger("task_qumulo_daily_quota_usages")
 
     connection_info = json.loads(os.environ.get("QUMULO_INFO", "{}"))
+=======
+def _zip_function(
+    allocation_values: AllocationQuerySet,
+    qumulo_allocations: list[dict]
+):
+    zipped_list = []
+    for qumulo_allocation in qumulo_allocations:
+        for value in allocation_values:
+            if (
+                value['allocationattribute__value'] == 
+                qumulo_allocation['path'].rstrip('/')
+            ):
+                copied_value = dict(value)
+                copied_value['usage'] = qumulo_allocation['capacity_usage']
+                copied_value['quota'] = qumulo_allocation['limit']
+                zipped_list.append(copied_value)
+                break
+    return zipped_list
+>>>>>>> Stashed changes
 
     base_allocation_quota_usages = []
     for storage_key in connection_info.keys():
