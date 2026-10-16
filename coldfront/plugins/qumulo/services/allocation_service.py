@@ -6,6 +6,7 @@ from typing import Any, Dict, Optional
 
 import json
 import os
+from pathlib import PurePosixPath
 
 from coldfront.core.allocation.models import (
     Allocation,
@@ -20,7 +21,10 @@ from coldfront.core.allocation.models import (
     User,
 )
 
-from coldfront.plugins.qumulo.tasks import addMembersToADGroup
+from coldfront.plugins.qumulo.tasks import (
+    add_allocation_group_to_parent_ad_group,
+    addMembersToADGroup,
+)
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 
@@ -72,6 +76,12 @@ class AllocationService:
         )
 
         active_directory_api = ActiveDirectoryAPI()
+        storage_filesystem_path = allocation.get_attribute(
+            name="storage_filesystem_path"
+        )
+        path_parts = PurePosixPath(storage_filesystem_path).parts
+        parent_group_name = path_parts[1]
+        
         for access_allocation in access_allocations:
             access_users = list(
                 AllocationUser.objects.filter(allocation=access_allocation)
@@ -82,8 +92,14 @@ class AllocationService:
             access_users = form_data[form_key]
 
             create_group_time = datetime.now()
-            active_directory_api.create_ad_group(
-                group_name=access_allocation.get_attribute(name="storage_acl_name")
+            allocation_group_name = access_allocation.get_attribute(
+                name="storage_acl_name"
+            )
+            active_directory_api.create_ad_group(group_name=allocation_group_name)
+            async_task(
+                add_allocation_group_to_parent_ad_group,
+                allocation_group_name,
+                parent_group_name,
             )
             async_task(
                 addMembersToADGroup, access_users, access_allocation, create_group_time

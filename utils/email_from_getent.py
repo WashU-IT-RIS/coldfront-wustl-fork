@@ -24,6 +24,7 @@ for line in sorted(set(sys.stdin.readlines())):
         print(e_mail_address)
 print("################################")
 print("UserIDs Without E-mail Addresses")
+print("################################")
 for uid in sorted(no_email):
     print(uid)
 sys.exit(0)
