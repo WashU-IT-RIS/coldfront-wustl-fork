@@ -43,6 +43,7 @@ class AllocationTableViewTests(TestCase):
         self.allocation = create_allocation(self.project, self.user, self.form_data)
 
     def test_get_queryset(self):
+        self.allocation.set_usage("storage_quota", 3.25 * 2**40)
         request = RequestFactory().get(
             "src/coldfront.plugins.qumulo/views/allocation_table_view.py"
         )
@@ -53,6 +54,7 @@ class AllocationTableViewTests(TestCase):
 
         self.assertEqual(len(qs), 1)
         self.assertEqual(qs[0].id, self.allocation.id)
+        self.assertEqual(qs[0].storage_quota, "3.25 / 7 TiB")
 
     def test_get_context_data_only_calls_queryset_once(self):
         request = RequestFactory().get(
