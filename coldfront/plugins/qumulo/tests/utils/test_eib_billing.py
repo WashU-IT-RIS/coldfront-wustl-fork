@@ -15,7 +15,9 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationLinkage,
 )
-from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage
+from coldfront.plugins.qumulo.tasks import (
+    ingest_quotas_with_daily_usage_log_wrapper
+)
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
@@ -293,7 +295,7 @@ class TestEIBBilling(TestCase):
             # Confirm the initial usage is 0
             self.assertEqual(float(row[3]) - 0, 0)
 
-        ingest_quotas_with_daily_usage()
+        ingest_quotas_with_daily_usage_log_wrapper()
 
         # Exam the billing usage of the allocation from the history table
         with connection.cursor() as cursor:
@@ -402,7 +404,7 @@ class TestEIBBilling(TestCase):
         )
         self.assertEqual(len(storage2_allocations), len(quota_service_rate_categories))
 
-        ingest_quotas_with_daily_usage()
+        ingest_quotas_with_daily_usage_log_wrapper()
         eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
         eib_billing.generate_monthly_billing_report()
 
@@ -513,7 +515,7 @@ class TestEIBBilling(TestCase):
 
         self.assertEqual(1, num_suballocations)
 
-        ingest_quotas_with_daily_usage()
+        ingest_quotas_with_daily_usage_log_wrapper()
         eib_billing = EIBBilling(datetime.now(timezone.utc).strftime("%Y-%m-%d"))
         eib_billing.generate_monthly_billing_report()
 
