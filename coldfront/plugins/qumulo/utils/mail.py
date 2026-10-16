@@ -12,7 +12,6 @@ def email_template_context_for_service_desk() -> dict:
     template_context["service_rate_categories_brouchure_url"] = os.environ.get(
         "SERVICE_RATE_CATEGORIES_BROUCHURE_URL"
     )
-    template_context["ris_home_url"] = os.environ.get("RIS_HOME_URL")
     return template_context
 
 
