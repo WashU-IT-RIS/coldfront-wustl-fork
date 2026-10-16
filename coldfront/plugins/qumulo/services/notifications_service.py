@@ -23,11 +23,12 @@ def send_email_for_near_limit_allocation(allocation_data: dict):
     allocation = Allocation.objects.filter(pk=allocation_data['id'])[0]
     user_receiver_list = allocation_user_recipients_for_ris(allocation.project)
 
-    subject = "Directory is close to its quota"
+    storage_name = allocation_data.get('storage_name')
+    subject = f"{storage_name} Allocation is Near Its Quota"
     template_path = "email/notify_users_with_allocations_near_limit.txt"
 
     template_context = email_template_context_for_service_desk()
-    template_context["storage_name"] = allocation_data.get('storage_name')
+    template_context["storage_name"] = storage_name
     template_context["storage_path"] = allocation_data.get(
         'allocationattribute__value'
     )
