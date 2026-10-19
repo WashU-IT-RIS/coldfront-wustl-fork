@@ -54,7 +54,7 @@ class AllocationTableViewTests(TestCase):
 
         self.assertEqual(len(qs), 1)
         self.assertEqual(qs[0].id, self.allocation.id)
-        self.assertEqual(qs[0].storage_quota, "3.25 / 7 TiB")
+        self.assertEqual(qs[0].storage_quota, "3.25 / 7 TB")
 
     def test_get_context_data_only_calls_queryset_once(self):
         request = RequestFactory().get(
