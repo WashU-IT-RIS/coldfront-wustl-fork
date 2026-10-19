@@ -55,7 +55,4 @@ def send_email_for_near_limit_allocation(allocation_data: dict):
 
 
 def get_email_sender() -> str:
-    # bmulligan 20261009: this needs to get reverted before production
-    # deployment
-    # return import_from_settings("DEFAULT_FROM_EMAIL")
-    return 'No Reply <noreply@gowustl.onmicrosoft.com>'
+    return import_from_settings("DEFAULT_FROM_EMAIL")
