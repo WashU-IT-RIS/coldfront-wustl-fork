@@ -15,7 +15,9 @@ from coldfront.core.allocation.models import (
     AllocationAttributeType,
     AllocationLinkage,
 )
-from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage
+from coldfront.plugins.qumulo.tasks import (
+    ingest_quotas_with_daily_usage_log_wrapper
+)
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     create_allocation,
@@ -248,7 +250,7 @@ class TestPrepaidBilling(TestCase):
         )
         self.assertEqual(len(storage2_allocations), len(quota_service_rate_categories))
 
-        ingest_quotas_with_daily_usage()
+        ingest_quotas_with_daily_usage_log_wrapper()
         prepaid_billing = PrepaidBilling(
             datetime.now(timezone.utc).strftime("%Y-%m-%d")
         )
@@ -355,7 +357,7 @@ class TestPrepaidBilling(TestCase):
 
         self.assertEqual(1, num_suballocations)
 
-        ingest_quotas_with_daily_usage()
+        ingest_quotas_with_daily_usage_log_wrapper()
         prepaid_billing = PrepaidBilling(
             datetime.now(timezone.utc).strftime("%Y-%m-%d")
         )

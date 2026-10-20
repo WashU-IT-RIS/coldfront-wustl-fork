@@ -1,0 +1,20 @@
+Dear {{ addressee }}:
+
+The {{storage_name}} Active storage allocation at {{storage_path}} is
+currently consuming {{ usage }} and is near its {{ limit }} quota.
+
+Please see the Data Storage Platform Rates page, which contains additional
+information on Active tier pricing and model options:
+
+  {{ service_rate_categories_brouchure_url }}
+
+For assistance with increasing the quota, optimizing or reducing your storage
+footprint or any additional questions, please contact RIS via the RIS Service
+Desk:
+
+    {{ service_desk_url }}
+
+Thank you,
+
+The RIS Team
+This is an automated message. Please do not reply to this email.
