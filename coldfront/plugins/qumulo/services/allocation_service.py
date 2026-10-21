@@ -145,6 +145,36 @@ class AllocationService:
         )
 
     @staticmethod
+    def create_sub_allocations_from_upload(
+        sub_allocations: list[dict[str, Any]],
+        parent_form_data: Dict[str, Any],
+        parent_allocation: Allocation,
+    ) -> list[Dict[str, Any]]:
+        results = []
+        for sub_allocation in sub_allocations:
+            sub_allocation_form_data = {
+                key: value
+                for key, value in parent_form_data.items()
+                if key != "suballocations"
+            }
+            name = sub_allocation["name"]
+            sub_allocation_form_data.update(
+                {
+                    "storage_name": name,
+                    "storage_filesystem_path": name,
+                    "rw_users": sub_allocation["rw"],
+                    "ro_users": sub_allocation["ro"],
+                }
+            )
+            results.append(
+                AllocationService.create_sub_allocation(
+                    sub_allocation_form_data=sub_allocation_form_data,
+                    parent_allocation=parent_allocation,
+                )
+            )
+        return results
+
+    @staticmethod
     def __handle_sub_allocation_scoping(
         sub_allocation_name: str, parent_allocation_name: str
     ):

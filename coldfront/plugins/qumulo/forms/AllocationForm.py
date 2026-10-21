@@ -1,3 +1,4 @@
+import json
 import re
 
 from typing import Any
@@ -21,6 +22,8 @@ from coldfront.plugins.qumulo.validators import (
     validate_relative_path,
     validate_parent_directory,
     validate_condo_project_quota,
+    validate_ad_users,
+    validate_storage_name,
 )
 
 from coldfront.plugins.qumulo.constants import (
@@ -222,6 +225,75 @@ class AllocationForm(forms.Form):
                 "storage_name",
                 "{:s}: --ol-s3 is an illegal suffix for S3 allocation".format(name),
             )
+
+    def clean_suballocations(self) -> list[dict[str, Any]]:
+        uploaded_file = self.cleaned_data.get("suballocations")
+        if uploaded_file is None:
+            return []
+
+        try:
+            document = json.loads(uploaded_file.read().decode("utf-8"))
+            sub_allocations = document["sub_allocations"]
+            if isinstance(sub_allocations, str):
+                sub_allocations = json.loads(sub_allocations)
+            if isinstance(sub_allocations, dict) and isinstance(
+                sub_allocations.get("dir_projects"), dict
+            ):
+                sub_allocations = sub_allocations["dir_projects"]
+        except (
+            AttributeError,
+            UnicodeDecodeError,
+            json.JSONDecodeError,
+            KeyError,
+            TypeError,
+        ):
+            raise forms.ValidationError(
+                "Upload a JSON object containing a sub_allocations object."
+            )
+
+        if not isinstance(sub_allocations, dict) or not sub_allocations:
+            raise forms.ValidationError(
+                "The sub_allocations value must contain at least one suballocation."
+            )
+
+        parsed_sub_allocations = []
+        seen_names = set()
+        for name, access in sub_allocations.items():
+            name = name.strip() if isinstance(name, str) else ""
+            if not name or name in seen_names:
+                raise forms.ValidationError(
+                    "Suballocation names must be non-empty and unique."
+                )
+            seen_names.add(name)
+            try:
+                validate_storage_name(name)
+                validate_relative_path(name)
+            except forms.ValidationError as error:
+                raise forms.ValidationError(
+                    f"Invalid suballocation name '{name}': {error.messages[0]}"
+                )
+
+            if not isinstance(access, dict):
+                raise forms.ValidationError(
+                    f"Suballocation '{name}' must contain rw and ro user lists."
+                )
+
+            users = {}
+            for access_type in ("rw", "ro"):
+                usernames = access.get(access_type, [])
+                if not isinstance(usernames, list) or not all(
+                    isinstance(username, str) for username in usernames
+                ):
+                    raise forms.ValidationError(
+                        f"The {access_type} value for '{name}' must be a list of usernames."
+                    )
+                if usernames:
+                    validate_ad_users(usernames)
+                users[access_type] = usernames
+
+            parsed_sub_allocations.append({"name": name, **users})
+
+        return parsed_sub_allocations
 
     def clean(self) -> dict[str, Any]:
         # Always call the parent's clean method to ensure basic validation is performed

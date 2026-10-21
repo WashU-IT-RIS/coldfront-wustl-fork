@@ -193,6 +193,44 @@ class AllocationViewTests(TestCase):
         )
         self.assertEqual(child_protocols.value, "[]")
 
+    def test_create_sub_allocations_from_upload_inherits_parent_attributes(
+        self,
+        mock_ActiveDirectoryAPI_validator: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
+        mock_async_task: MagicMock,
+    ):
+        parent_result = AllocationService.create_new_allocation(
+            self.parent_form_data.copy(), self.user
+        )
+
+        results = AllocationService.create_sub_allocations_from_upload(
+            sub_allocations=[
+                {"name": "uploaded_child", "rw": ["test2"], "ro": ["test3"]}
+            ],
+            parent_form_data=self.parent_form_data,
+            parent_allocation=parent_result["allocation"],
+        )
+
+        child = results[0]["allocation"]
+        self.assertEqual(
+            child.get_attribute("storage_quota"), self.parent_form_data["storage_quota"]
+        )
+        self.assertEqual(
+            child.get_attribute("storage_ticket"), self.parent_form_data["storage_ticket"]
+        )
+        self.assertEqual(
+            child.get_attribute("cost_center"), self.parent_form_data["cost_center"]
+        )
+        self.assertEqual(child.get_attribute("storage_name"), "baz-uploaded_child")
+
+        async_user_lists = [
+            call_args.args[1]
+            for call_args in mock_async_task.call_args_list
+            if len(call_args.args) > 1 and isinstance(call_args.args[1], list)
+        ]
+        self.assertIn(["test2"], async_user_lists)
+        self.assertIn(["test3"], async_user_lists)
+
     def test_suballocation_subsidized_does_not_inherit_from_parent(
         self,
         mock_ActiveDirectoryAPI_validator: MagicMock,

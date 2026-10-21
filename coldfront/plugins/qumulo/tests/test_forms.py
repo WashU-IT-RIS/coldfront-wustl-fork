@@ -74,6 +74,37 @@ class AllocationFormTests(TestCase):
     def _setupValidPathQumuloAPI(self):
         self.mock_qumulo_api.return_value.rc.fs.get_file_attr = ValidFormPathMock()
 
+    def test_clean_suballocations_reads_nested_json_sample(self):
+        upload_data = {
+            "sub_allocations": json.dumps(
+                {
+                    "dir_projects": {
+                        "sub_allocation_1": {
+                            "ro": ["ro_user"],
+                            "rw": ["rw_user"],
+                        }
+                    }
+                }
+            )
+        }
+        uploaded_file = SimpleUploadedFile(
+            "suballocations.json", json.dumps(upload_data).encode("utf-8")
+        )
+        form = AllocationForm(user_id=self.user.id)
+        form.cleaned_data = {"suballocations": uploaded_file}
+
+        with patch(
+            "coldfront.plugins.qumulo.forms.AllocationForm.validate_ad_users"
+        ) as validate_ad_users:
+            parsed = form.clean_suballocations()
+
+        self.assertEqual(
+            parsed,
+            [{"name": "sub_allocation_1", "rw": ["rw_user"], "ro": ["ro_user"]}],
+        )
+        validate_ad_users.assert_any_call(["rw_user"])
+        validate_ad_users.assert_any_call(["ro_user"])
+
     def test_suballocations_field_accepts_json_only(self):
         field = AllocationForm(user_id=self.user.id).fields["suballocations"]
 

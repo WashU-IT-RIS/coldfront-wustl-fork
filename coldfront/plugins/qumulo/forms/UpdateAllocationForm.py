@@ -5,6 +5,7 @@ class UpdateAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         self.allocation_id = kwargs.pop("allocation_id")
         super().__init__(*args, **kwargs)
+        self.fields.pop("suballocations", None)
         self.fields["storage_type"].disabled = True
 
         self.fields["storage_name"].disabled = True

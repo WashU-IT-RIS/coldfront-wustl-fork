@@ -7,6 +7,7 @@ class CreateSubAllocationForm(AllocationForm):
     def __init__(self, *args, **kwargs):
         self.allocation_id = kwargs.pop("allocation_id")
         super().__init__(*args, **kwargs)
+        self.fields.pop("suballocations", None)
         # hide the project field and show the parent allocation instead
         self.fields["project_pk"].widget = forms.HiddenInput()
         self.fields["parent_allocation"] = forms.CharField(
@@ -29,3 +30,4 @@ class CreateSubAllocationForm(AllocationForm):
 
         self.fields["storage_type"].disabled = True
         self.fields["subsidized"].widget = forms.HiddenInput()
+        self.fields["suballocations"].disabled = True

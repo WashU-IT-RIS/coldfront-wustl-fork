@@ -80,6 +80,17 @@ class AllocationView(LoginRequiredMixin, FormView):
         )
         self.success_id = self.new_allocation.get("allocation").id
 
+        if (
+            parent_allocation is None
+            and self.kwargs.get("allocation_id") is None
+            and form_data.get("suballocations")
+        ):
+            AllocationService.create_sub_allocations_from_upload(
+                sub_allocations=form_data["suballocations"],
+                parent_form_data=form_data,
+                parent_allocation=self.new_allocation["allocation"],
+            )
+
         return super().form_valid(form)
 
     def get_success_url(self):
