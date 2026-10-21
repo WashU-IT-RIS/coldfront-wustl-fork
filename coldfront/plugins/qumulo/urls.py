@@ -8,6 +8,7 @@ from coldfront.plugins.qumulo.views import (
     allocation_table_view,
     trigger_migrations_view,
     user_management_view,
+    bulk_suballocation_update_view,
 )
 from coldfront.plugins.qumulo.api.allocations import Allocations
 from coldfront.plugins.qumulo.api.active_directory_members import ActiveDirectoryMembers
@@ -42,6 +43,11 @@ urlpatterns = [
         "allocation-admin/user-access-management",
         user_management_view.UserAccessManagementView.as_view(),
         name="user-access-management",
+    ),
+    path(
+        "allocation-admin/user-access-management-copy",
+        bulk_suballocation_update_view.BulkSubAllocationUpdateView.as_view(),
+        name="user-access-management-copy",
     ),
     path("api/allocations", Allocations.as_view(), name="getAllocations"),
     path(
