@@ -362,6 +362,7 @@ class AllocationChangeRequestAdmin(admin.ModelAdmin):
 @admin.register(AllocationAttributeChangeRequest)
 class AllocationChangeStatusChoiceAdmin(admin.ModelAdmin):
     list_display = ('pk', 'allocation_change_request', 'allocation_attribute', 'new_value', )
+    readonly_fields = ('allocation_change_request', 'allocation_attribute', 'new_value', )
 
 @admin.register(AllocationLinkage)
 class AllocationLinkageAdmin(admin.ModelAdmin):
