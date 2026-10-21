@@ -2,6 +2,7 @@ import re
 
 from typing import Any
 from django import forms
+from django.core.validators import FileExtensionValidator
 
 from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.core.project.models import Project
@@ -159,6 +160,13 @@ class AllocationForm(forms.Form):
     )
     rw_users = ADUserField(label="Read/Write Users", initial="")
     ro_users = ADUserField(label="Read Only Users", initial="", required=False)
+    suballocations = forms.FileField(
+        label="SubAllocations",
+        required=False,
+        validators=[FileExtensionValidator(allowed_extensions=["json"])],
+        widget=forms.ClearableFileInput(attrs={"accept": ".json,application/json"}),
+    )
+    
 
     def _upper(self, val: Any) -> Any:
         return val.upper() if isinstance(val, str) else val

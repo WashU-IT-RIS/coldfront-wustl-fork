@@ -21,7 +21,7 @@ Create Allocation
     This allocation is marked as pending, please do not update until the status changes.
   </div>
   {% endif %}
-  <form method="post" id="allocation_form">
+  <form method="post" id="allocation_form" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form | crispy }}
     {{ status_allocation }}

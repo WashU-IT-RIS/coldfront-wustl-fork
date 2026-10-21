@@ -16,7 +16,7 @@ Update Allocation
 {% include "partials/_file_system_stats.html" %}
 
 <div>
-  <form method="post" id="allocation_form">
+  <form method="post" id="allocation_form" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form | crispy }}
     <div class="form-group mb-5">

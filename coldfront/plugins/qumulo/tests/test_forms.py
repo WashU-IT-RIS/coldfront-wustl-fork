@@ -3,6 +3,8 @@ import os
 import json
 
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from unittest.mock import patch
 
@@ -71,6 +73,17 @@ class AllocationFormTests(TestCase):
 
     def _setupValidPathQumuloAPI(self):
         self.mock_qumulo_api.return_value.rc.fs.get_file_attr = ValidFormPathMock()
+
+    def test_suballocations_field_accepts_json_only(self):
+        field = AllocationForm(user_id=self.user.id).fields["suballocations"]
+
+        self.assertIsInstance(field, forms.FileField)
+        self.assertEqual(
+            field.clean(SimpleUploadedFile("suballocations.json", b"{}")).name,
+            "suballocations.json",
+        )
+        with self.assertRaises(ValidationError):
+            field.clean(SimpleUploadedFile("suballocations.txt", b"{}"))
 
     def test_clean_method_with_valid_data(self):
         data = {
