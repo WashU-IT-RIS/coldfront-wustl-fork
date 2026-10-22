@@ -45,9 +45,9 @@ urlpatterns = [
         name="user-access-management",
     ),
     path(
-        "allocation-admin/user-access-management-copy",
+        "allocation-admin/bulk-suballocation-update",
         bulk_suballocation_update_view.BulkSubAllocationUpdateView.as_view(),
-        name="user-access-management-copy",
+        name="bulk-suballocation-update",
     ),
     path("api/allocations", Allocations.as_view(), name="getAllocations"),
     path(
