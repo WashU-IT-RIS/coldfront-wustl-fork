@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django_q.tasks import async_task
 
-from typing import Union, Optional
+from typing import Optional
 from datetime import datetime
 
 import json
@@ -28,8 +28,6 @@ from coldfront.plugins.qumulo.views.allocation_view import AllocationView
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from coldfront.config.base import Q_CLUSTER
-
-from settings import QC
 
 logger = logging.getLogger(__name__)
 
