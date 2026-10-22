@@ -2,10 +2,11 @@
 {% load static %}
 
 {% block title %}
-User Access Management Copy
+Bulk Suballocation Update
 {% endblock %}
 
 {% block content %}
+{{ bulk_attribute_config|json_script:"bulk-attribute-config" }}
 <div jquery-include="/static/UserAccessManagement/index.html"></div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
