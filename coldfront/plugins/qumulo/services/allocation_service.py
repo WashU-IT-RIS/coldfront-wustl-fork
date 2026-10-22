@@ -21,6 +21,8 @@ from coldfront.core.allocation.models import (
     User,
 )
 
+from coldfront.config.base import Q_CLUSTER
+
 from coldfront.plugins.qumulo.tasks import (
     add_allocation_group_to_parent_ad_group,
     addMembersToADGroup,
@@ -81,15 +83,15 @@ class AllocationService:
         )
         path_parts = PurePosixPath(storage_filesystem_path).parts
         parent_group_name = path_parts[1]
-        
+
         for access_allocation in access_allocations:
-            access_users = list(
-                AllocationUser.objects.filter(allocation=access_allocation)
-            )
+            # access_users = list(
+            #     AllocationUser.objects.filter(allocation=access_allocation)
+            # )
 
             resource = access_allocation.resources.first()
             form_key = f"{resource.name.lower()}_users"
-            access_users = form_data[form_key]
+            access_users: list[str] = form_data[form_key]
 
             create_group_time = datetime.now()
             allocation_group_name = access_allocation.get_attribute(
@@ -101,8 +103,18 @@ class AllocationService:
                 allocation_group_name,
                 parent_group_name,
             )
+
+            timeout_time = (
+                len(access_users) * 2
+                if len(access_users) * 2 > Q_CLUSTER.get("timeout", 0)
+                else Q_CLUSTER.get("timeout", 0)
+            )
             async_task(
-                addMembersToADGroup, access_users, access_allocation, create_group_time
+                addMembersToADGroup,
+                access_users,
+                access_allocation,
+                create_group_time,
+                q_options={"retry": timeout_time + 1, "timeout": timeout_time},
             )
 
         return {"allocation": allocation, "access_allocations": access_allocations}
@@ -355,7 +367,10 @@ class AllocationService:
 
     @staticmethod
     def add_access_users(
-        access_key: str, access_users: list[str], storage_allocation: Allocation, actor_user_id: Optional[int] = None,
+        access_key: str,
+        access_users: list[str],
+        storage_allocation: Allocation,
+        actor_user_id: Optional[int] = None,
     ):
         access_allocation = AclAllocations.get_access_allocation(
             storage_allocation, access_key
@@ -368,4 +383,16 @@ class AllocationService:
 
         users_to_add = list(set(access_users) - set(allocation_usernames))
         create_group_time = datetime.now()
-        async_task(addMembersToADGroup, users_to_add, access_allocation, create_group_time, actor_user_id)
+        timeout_time = (
+            len(users_to_add) * 2
+            if len(users_to_add) * 2 > Q_CLUSTER.get("timeout", 0)
+            else Q_CLUSTER.get("timeout", 0)
+        )
+        async_task(
+            addMembersToADGroup,
+            users_to_add,
+            access_allocation,
+            create_group_time,
+            actor_user_id,
+            q_options={"retry": timeout_time + 1, "timeout": timeout_time},
+        )

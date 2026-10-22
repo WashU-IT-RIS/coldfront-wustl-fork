@@ -27,7 +27,9 @@ from coldfront.plugins.qumulo.tasks import addMembersToADGroup, reset_allocation
 from coldfront.plugins.qumulo.views.allocation_view import AllocationView
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.config.base import Q_CLUSTER
 
+from settings import QC
 
 logger = logging.getLogger(__name__)
 
@@ -161,9 +163,7 @@ class UpdateAllocationView(AllocationView):
             )
 
             comparand = (
-                int(attribute.value)
-                if type(change[1]) is int
-                else attribute.value
+                int(attribute.value) if type(change[1]) is int else attribute.value
             )
             if comparand != change[1]:
                 new_values.append((change[0], change[1]))
@@ -257,12 +257,18 @@ class UpdateAllocationView(AllocationView):
         users_to_add = list(set(access_users) - set(allocation_usernames))
         create_group_time = datetime.now()
 
+        timeout_time = (
+            len(users_to_add) * 2
+            if len(users_to_add) > Q_CLUSTER.get("timeout", 0)
+            else Q_CLUSTER.get("timeout", 0)
+        )
         async_task(
             addMembersToADGroup,
             users_to_add,
             access_allocation,
             create_group_time,
             actor_user_id,
+            q_options={"retry": timeout_time + 1, "timeout": timeout_time},
         )
 
         users_to_remove = set(allocation_usernames) - set(access_users)
