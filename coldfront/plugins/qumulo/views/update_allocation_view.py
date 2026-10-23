@@ -22,6 +22,7 @@ from coldfront.core.allocation.models import (
 from coldfront.core.user.models import User
 
 from coldfront.plugins.qumulo.forms.UpdateAllocationForm import UpdateAllocationForm
+from coldfront.plugins.qumulo.services.allocation_service import AllocationService
 from coldfront.plugins.qumulo.hooks import acl_reset_complete_hook
 from coldfront.plugins.qumulo.tasks import addMembersToADGroup, reset_allocation_acls
 from coldfront.plugins.qumulo.views.allocation_view import AllocationView
@@ -107,6 +108,14 @@ class UpdateAllocationView(AllocationView):
             self._reset_acls()
         else:
             self._updated_fields_handler(form, parent_allocation)
+            if form.cleaned_data.get("suballocations"):
+                AllocationService.create_sub_allocations_from_upload(
+                    sub_allocations=form.cleaned_data["suballocations"],
+                    parent_form_data=form.cleaned_data,
+                    parent_allocation=Allocation.objects.get(
+                        pk=self.kwargs["allocation_id"]
+                    ),
+                )
         return super(AllocationView, self).form_valid(form=form)
 
     def _acl_reset_message(self):
