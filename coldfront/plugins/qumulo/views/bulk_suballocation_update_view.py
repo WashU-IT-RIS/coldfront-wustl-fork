@@ -40,9 +40,10 @@ class BulkSubAllocationUpdateView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        allocation_attributes = ["cost_center", "department_number", "technical_contact", "billing_contact", "billing_cycle", "service_rate_category", "storage_quota", "storage_protocols", "storage_ticket"]
         context["bulk_attribute_config"] = {
             "attributeTypes": list(
-                AllocationAttributeType.objects.order_by("name", "pk").values(
+                AllocationAttributeType.objects.filter(name__in=allocation_attributes).order_by("name", "pk").values(
                     "id", "name", "attribute_type__name"
                 )
             ),
