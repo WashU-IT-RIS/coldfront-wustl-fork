@@ -10,11 +10,13 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 
+from coldfront.core.constants import BILLING_CYCLE_OPTIONS
 from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
 )
+from coldfront.plugins.qumulo.constants import SERVICE_RATE_CATEGORIES
 
 
 class BulkAllocationAttributeForm(forms.Form):
@@ -48,6 +50,10 @@ class BulkSubAllocationUpdateView(
                 )
             ),
             "updateUrl": reverse("qumulo:bulk-suballocation-update"),
+            "billingCycleOptions": BILLING_CYCLE_OPTIONS,
+            "serviceRateCategories": sorted(
+                SERVICE_RATE_CATEGORIES, key=lambda option: option[1]
+            ),
         }
         return context
 

@@ -5,20 +5,8 @@ import Cookies from "universal-cookie";
 import AllocationSelector from "../../components/AllocationSelector/AllocationSelector";
 import GenericModal from "../../components/GenericModal/GenericModal";
 
-const billingCycleOptions = [
-  { value: "monthly", label: "Monthly" },
-  { value: "prepaid", label: "Prepaid" },
-];
-
 function getValueValidationError(attribute, value) {
   if (!attribute) return "";
-
-  if (
-    attribute.name === "billing_cycle" &&
-    !billingCycleOptions.some((option) => option.value === value)
-  ) {
-    return "Choose a billing cycle.";
-  }
 
   switch (attribute.attribute_type__name.trim()) {
     case "Int":
@@ -52,7 +40,12 @@ function getValueValidationError(attribute, value) {
 }
 
 function BulkSuballocationUpdate() {
-  const { attributeTypes, updateUrl } = JSON.parse(
+  const {
+    attributeTypes,
+    updateUrl,
+    billingCycleOptions,
+    serviceRateCategories,
+  } = JSON.parse(
     document.getElementById("bulk-attribute-config").textContent,
   );
   const [attributeTypeId, setAttributeTypeId] = useState("");
@@ -64,7 +57,22 @@ function BulkSuballocationUpdate() {
   const selectedType = attributeTypes.find(
     (attribute) => String(attribute.id) === attributeTypeId,
   );
-  const valueError = getValueValidationError(selectedType, value);
+  const valueOptions =
+    selectedType?.name === "billing_cycle"
+      ? billingCycleOptions
+      : selectedType?.name === "service_rate_category"
+        ? serviceRateCategories
+        : selectedType?.attribute_type__name.trim() === "Yes/No"
+          ? [
+              ["Yes", "Yes"],
+              ["No", "No"],
+            ]
+          : null;
+  const valueError = valueOptions
+    ? valueOptions.some(([optionValue]) => optionValue === value)
+      ? ""
+      : "Choose a valid option."
+    : getValueValidationError(selectedType, value);
 
   const onSubmit = async () => {
     setSubmitting(true);
@@ -131,8 +139,7 @@ function BulkSuballocationUpdate() {
         <label htmlFor="allocation-attribute-value">
           Value{selectedType ? ` (${selectedType.attribute_type__name})` : ""}
         </label>
-        {selectedType?.name === "billing_cycle" ||
-        selectedType?.attribute_type__name.trim() === "Yes/No" ? (
+        {valueOptions ? (
           <select
             id="allocation-attribute-value"
             className="form-control"
@@ -142,15 +149,9 @@ function BulkSuballocationUpdate() {
             onChange={(event) => setValue(event.target.value)}
           >
             <option value="">Select a value</option>
-            {(selectedType.name === "billing_cycle"
-              ? billingCycleOptions
-              : [
-                  { value: "Yes", label: "Yes" },
-                  { value: "No", label: "No" },
-                ]
-            ).map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            {valueOptions.map(([optionValue, optionLabel]) => (
+              <option key={optionValue} value={optionValue}>
+                {optionLabel}
               </option>
             ))}
           </select>
