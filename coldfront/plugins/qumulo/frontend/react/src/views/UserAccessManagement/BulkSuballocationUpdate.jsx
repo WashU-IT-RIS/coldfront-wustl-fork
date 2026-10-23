@@ -5,9 +5,55 @@ import Cookies from "universal-cookie";
 import AllocationSelector from "../../components/AllocationSelector/AllocationSelector";
 import GenericModal from "../../components/GenericModal/GenericModal";
 
+const billingCycleOptions = [
+  { value: "monthly", label: "Monthly" },
+  { value: "prepaid", label: "Prepaid" },
+];
+
+function getValueValidationError(attribute, value) {
+  if (!attribute) return "";
+
+  if (
+    attribute.name === "billing_cycle" &&
+    !billingCycleOptions.some((option) => option.value === value)
+  ) {
+    return "Choose a billing cycle.";
+  }
+
+  switch (attribute.attribute_type__name.trim()) {
+    case "Int":
+      return /^[+-]?\d+$/.test(value) ? "" : "Enter a whole number.";
+    case "Float":
+      return value.trim() && Number.isFinite(Number(value))
+        ? ""
+        : "Enter a number.";
+    case "Yes/No":
+      return value === "Yes" || value === "No" ? "" : "Choose Yes or No.";
+    case "Date": {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return "Enter a date in YYYY-MM-DD format.";
+      }
+      const date = new Date(`${value}T00:00:00Z`);
+      return !Number.isNaN(date.getTime()) &&
+        date.toISOString().slice(0, 10) === value
+        ? ""
+        : "Enter a valid date in YYYY-MM-DD format.";
+    }
+    case "JSON":
+      try {
+        JSON.parse(value);
+        return "";
+      } catch {
+        return "Enter valid JSON.";
+      }
+    default:
+      return "";
+  }
+}
+
 function BulkSuballocationUpdate() {
   const { attributeTypes, updateUrl } = JSON.parse(
-    document.getElementById("bulk-attribute-config").textContent
+    document.getElementById("bulk-attribute-config").textContent,
   );
   const [attributeTypeId, setAttributeTypeId] = useState("");
   const [value, setValue] = useState("");
@@ -16,8 +62,9 @@ function BulkSuballocationUpdate() {
   const [modal, setModal] = useState(null);
 
   const selectedType = attributeTypes.find(
-    (attribute) => String(attribute.id) === attributeTypeId
+    (attribute) => String(attribute.id) === attributeTypeId,
   );
+  const valueError = getValueValidationError(selectedType, value);
 
   const onSubmit = async () => {
     setSubmitting(true);
@@ -29,7 +76,7 @@ function BulkSuballocationUpdate() {
           value,
           allocationIds: allocations.map((allocation) => allocation.id),
         },
-        { headers: { "X-CSRFToken": new Cookies().get("csrftoken") } }
+        { headers: { "X-CSRFToken": new Cookies().get("csrftoken") } },
       );
       setModal({
         title: "Attributes Updated",
@@ -51,9 +98,10 @@ function BulkSuballocationUpdate() {
     <>
       <h2>Bulk Suballocation Update</h2>
       <p>
-        Choose an attribute and enter a value to apply to all selected allocations.
-        Existing values will be replaced; missing attributes will be added.
-        This updates ColdFront metadata only, not storage configuration or user access.
+        Choose an attribute and enter a value to apply to all selected
+        allocations. Existing values will be replaced; missing attributes will
+        be added. This updates ColdFront metadata only, not storage
+        configuration or user access.
       </p>
       <hr />
       <div className="form-group">
@@ -83,14 +131,61 @@ function BulkSuballocationUpdate() {
         <label htmlFor="allocation-attribute-value">
           Value{selectedType ? ` (${selectedType.attribute_type__name})` : ""}
         </label>
-        <textarea
-          id="allocation-attribute-value"
-          className="form-control"
-          value={value}
-          maxLength={8192}
-          disabled={submitting}
-          onChange={(event) => setValue(event.target.value)}
-        />
+        {selectedType?.name === "billing_cycle" ||
+        selectedType?.attribute_type__name.trim() === "Yes/No" ? (
+          <select
+            id="allocation-attribute-value"
+            className="form-control"
+            value={value}
+            disabled={submitting}
+            aria-invalid={Boolean(valueError)}
+            onChange={(event) => setValue(event.target.value)}
+          >
+            <option value="">Select a value</option>
+            {(selectedType.name === "billing_cycle"
+              ? billingCycleOptions
+              : [
+                  { value: "Yes", label: "Yes" },
+                  { value: "No", label: "No" },
+                ]
+            ).map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : ["Int", "Float", "Date"].includes(
+            selectedType?.attribute_type__name.trim(),
+          ) ? (
+          <input
+            id="allocation-attribute-value"
+            className="form-control"
+            type={
+              selectedType.attribute_type__name.trim() === "Date"
+                ? "date"
+                : "number"
+            }
+            step={
+              selectedType.attribute_type__name.trim() === "Int" ? "1" : "any"
+            }
+            value={value}
+            maxLength={8192}
+            disabled={submitting}
+            aria-invalid={Boolean(valueError)}
+            onChange={(event) => setValue(event.target.value)}
+          />
+        ) : (
+          <textarea
+            id="allocation-attribute-value"
+            className="form-control"
+            value={value}
+            maxLength={8192}
+            disabled={submitting}
+            aria-invalid={Boolean(valueError)}
+            onChange={(event) => setValue(event.target.value)}
+          />
+        )}
+        {value && valueError && <p role="alert">{valueError}</p>}
       </div>
       <AllocationSelector
         setSelectedAllocations={setAllocations}
@@ -102,7 +197,11 @@ function BulkSuballocationUpdate() {
           type="button"
           className="btn btn-primary mr-2"
           disabled={
-            submitting || !attributeTypeId || !value || allocations.length === 0
+            submitting ||
+            !attributeTypeId ||
+            !value ||
+            allocations.length === 0 ||
+            Boolean(valueError)
           }
           onClick={onSubmit}
         >
