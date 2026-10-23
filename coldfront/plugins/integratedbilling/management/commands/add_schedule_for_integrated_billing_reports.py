@@ -23,7 +23,7 @@ class Command(BaseCommand):
             name="Generate Integrated Monthly Billing Report",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_3_00_AM,
-            q_options={"timeout": _30_MINUTES_IN_SECONDS,}
+            q_options={"timeout": _30_MINUTES_IN_SECONDS, "retry": _30_MINUTES_IN_SECONDS + 60}
         )
 
 
