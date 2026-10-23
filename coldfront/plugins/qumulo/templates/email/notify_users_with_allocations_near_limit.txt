@@ -9,8 +9,8 @@ information on Active tier pricing and model options:
   {{ service_rate_categories_brouchure_url }}
 
 For assistance with increasing the quota, optimizing or reducing your storage
-footprint or any additional questions, please contact RIS via the RIS Service
-Desk:
+footprint or any additional questions, you may reply to this message or contact
+RIS via the RIS Service Desk:
 
     {{ service_desk_url }}
 
