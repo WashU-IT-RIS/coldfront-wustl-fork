@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 from datetime import datetime
@@ -13,8 +14,9 @@ from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
+logger = logging.getLogger(__name__)
 
-def ingest_quotas_with_daily_usage(logger) -> None:
+def ingest_quotas_with_daily_usage() -> None:
     connection_info = json.loads(os.environ.get("QUMULO_INFO"))
     base_allocation_quota_usages = []
     for storage_key in connection_info.keys():
@@ -27,8 +29,8 @@ def ingest_quotas_with_daily_usage(logger) -> None:
         base_allocation_quota_usages += _get_allocation_file_quota_usages(
             qumulo_api_conn=qumulo_api_conn, filtering_by=filtering_by
         )
-    _set_daily_quota_usages(base_allocation_quota_usages, logger)
-    _validate_results(base_allocation_quota_usages, logger)
+    _set_daily_quota_usages(base_allocation_quota_usages)
+    _validate_results(base_allocation_quota_usages)
 
 
 def get_file_system_allocations_near_limit() -> list:
@@ -63,21 +65,22 @@ def _get_allocation_file_quota_usages(
         )
     )
 
-def _set_daily_quota_usages(quotas, logger) -> None:
+def _set_daily_quota_usages(quotas) -> None:
     for quota in quotas:
-        allocation = _get_allocation(quota, logger)
+        allocation = _get_allocation(quota)
         if allocation is None:
             continue
         allocation.set_usage("storage_quota", quota.get("capacity_usage"))
 
-def _get_allocation(quota, logger) -> Optional[Allocation]:
+def _get_allocation(quota) -> Optional[Allocation]:
     path = quota.get("path")
     paths = [path, path[:-1]] if path[-1] == "/" else [path, f"{path}/"]
-    return _get_allocation_by_attribute(paths, "storage_filesystem_path", logger)
+    return _get_allocation_by_attribute(paths, "storage_filesystem_path")
 
 def _get_allocation_by_attribute(
-    values: list[str], attribute_type_name: str, logger
+    values: list[str], attribute_type_name: str
 ) -> Optional[Allocation]:
+    global logger
     try:
         attribute = AllocationAttribute.objects.select_related("allocation").get(
             value__in=values,
@@ -91,7 +94,8 @@ def _get_allocation_by_attribute(
     return attribute.allocation
 
 
-def _validate_results(quota_usages, logger) -> bool:
+def _validate_results(quota_usages) -> bool:
+    global logger
     today = datetime.today()
     year = today.year
     month = today.month

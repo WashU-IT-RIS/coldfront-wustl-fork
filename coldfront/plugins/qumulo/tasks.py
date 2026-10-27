@@ -114,9 +114,8 @@ def conditionally_update_storage_allocation_statuses() -> None:
         conditionally_update_storage_allocation_status(allocation)
 
 
-def ingest_quotas_with_daily_usage_log_wrapper() -> None:
-    logger = logging.getLogger("task_qumulo_daily_quota_usages")
-    ingest_quotas_with_daily_usage(logger)
+def ingest_quotas_with_daily_usage_task() -> None:
+    ingest_quotas_with_daily_usage()
 
 def _zip_function(
     allocation_values: AllocationQuerySet,

@@ -6,7 +6,7 @@ from django.db import IntegrityError
 from django_q.tasks import schedule
 from django_q.models import Schedule
 
-from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage
+from coldfront.plugins.qumulo.tasks import ingest_quotas_with_daily_usage_task
 
 SCHEDULED_FOR_2_30_AM = (
     arrow.utcnow().replace(hour=2, minute=30).format(arrow.FORMAT_RFC3339)
@@ -29,4 +29,4 @@ class Command(BaseCommand):
 
 
 def poll_allocation_daily_usages() -> None:
-    ingest_quotas_with_daily_usage()
+    ingest_quotas_with_daily_usage_task()
