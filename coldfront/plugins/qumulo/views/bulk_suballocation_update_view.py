@@ -86,50 +86,51 @@ class BulkSubAllocationUpdateView(
         new_value = form.cleaned_data["value"]
         pending_status = AllocationChangeStatusChoice.objects.get(name="Pending")
         try:
-            for allocation in allocations.select_for_update().order_by("pk"):
-                attributes = list(
-                    AllocationAttribute.objects.filter(
-                        allocation=allocation,
-                        allocation_attribute_type=attribute_type,
-                    )
-                )
-                if not attributes:
-                    attributes = [
-                        AllocationAttribute(
+            with transaction.atomic():
+                for allocation in allocations.select_for_update().order_by("pk"):
+                    attributes = list(
+                        AllocationAttribute.objects.filter(
                             allocation=allocation,
                             allocation_attribute_type=attribute_type,
                         )
-                    ]
-                changed_attributes = []
-                for attribute in attributes:
-                    if attribute.value == new_value:
+                    )
+                    if not attributes:
+                        attributes = [
+                            AllocationAttribute(
+                                allocation=allocation,
+                                allocation_attribute_type=attribute_type,
+                            )
+                        ]
+                    changed_attributes = []
+                    for attribute in attributes:
+                        if attribute.value == new_value:
+                            continue
+
+                        previous_value = attribute.value
+                        attribute.value = new_value
+                        attribute.full_clean()
+                        attribute.value = previous_value
+                        if not attribute.pk:
+                            attribute.save()
+                        changed_attributes.append(attribute)
+
+                    if not changed_attributes:
                         continue
 
-                    previous_value = attribute.value
-                    attribute.value = new_value
-                    attribute.full_clean()
-                    attribute.value = previous_value
-                    if not attribute.pk:
-                        attribute.save()
-                    changed_attributes.append(attribute)
-
-                if not changed_attributes:
-                    continue
-
-                change_request = AllocationChangeRequest.objects.create(
-                    allocation=allocation,
-                    status=pending_status,
-                    justification="updating",
-                    notes="updating",
-                    end_date_extension=10,
-                    user=request.user,
-                )
-                for attribute in changed_attributes:
-                    AllocationAttributeChangeRequest.objects.create(
-                        allocation_attribute=attribute,
-                        allocation_change_request=change_request,
-                        new_value=new_value,
+                    change_request = AllocationChangeRequest.objects.create(
+                        allocation=allocation,
+                        status=pending_status,
+                        justification="updating",
+                        notes="updating",
+                        end_date_extension=10,
+                        user=request.user,
                     )
+                    for attribute in changed_attributes:
+                        AllocationAttributeChangeRequest.objects.create(
+                            allocation_attribute=attribute,
+                            allocation_change_request=change_request,
+                            new_value=new_value,
+                        )
         except ValidationError as error:
             return JsonResponse({"error": " ".join(error.messages)}, status=400)
 
