@@ -19,7 +19,7 @@ from coldfront.core.allocation.models import (
     AllocationChangeRequest,
     AllocationChangeStatusChoice,
 )
-from coldfront.plugins.qumulo.constants import SERVICE_RATE_CATEGORIES
+from coldfront.plugins.qumulo.constants import PROTOCOL_OPTIONS, SERVICE_RATE_CATEGORIES
 
 
 class BulkAllocationAttributeForm(forms.Form):
@@ -54,6 +54,7 @@ class BulkSubAllocationUpdateView(
             ),
             "updateUrl": reverse("qumulo:bulk-suballocation-update"),
             "billingCycleOptions": BILLING_CYCLE_OPTIONS,
+            "protocolOptions": PROTOCOL_OPTIONS,
             "serviceRateCategories": SERVICE_RATE_CATEGORIES,
         }
         return context
