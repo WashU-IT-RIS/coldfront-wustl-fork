@@ -15,6 +15,9 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
+    AllocationAttributeChangeRequest,
+    AllocationChangeRequest,
+    AllocationChangeStatusChoice,
 )
 from coldfront.plugins.qumulo.constants import SERVICE_RATE_CATEGORIES
 
@@ -23,7 +26,7 @@ class BulkAllocationAttributeForm(forms.Form):
     attributeTypeId = forms.ModelChoiceField(
         queryset=AllocationAttributeType.objects.all()
     )
-    value = forms.CharField(max_length=8192, strip=False)
+    value = forms.CharField(max_length=128, strip=False)
     allocationIds = forms.ModelMultipleChoiceField(
         queryset=Allocation.objects.filter(
             resources__resource_type__name="Storage"
@@ -51,9 +54,7 @@ class BulkSubAllocationUpdateView(
             ),
             "updateUrl": reverse("qumulo:bulk-suballocation-update"),
             "billingCycleOptions": BILLING_CYCLE_OPTIONS,
-            "serviceRateCategories": sorted(
-                SERVICE_RATE_CATEGORIES, key=lambda option: option[1]
-            ),
+            "serviceRateCategories": SERVICE_RATE_CATEGORIES,
         }
         return context
 
@@ -82,26 +83,53 @@ class BulkSubAllocationUpdateView(
         allocations = Allocation.objects.filter(
             pk__in=form.cleaned_data["allocationIds"].values("pk")
         )
+        new_value = form.cleaned_data["value"]
+        pending_status = AllocationChangeStatusChoice.objects.get(name="Pending")
         try:
-            with transaction.atomic():
-                for allocation in allocations.select_for_update().order_by("pk"):
-                    attributes = list(
-                        AllocationAttribute.objects.filter(
+            for allocation in allocations.select_for_update().order_by("pk"):
+                attributes = list(
+                    AllocationAttribute.objects.filter(
+                        allocation=allocation,
+                        allocation_attribute_type=attribute_type,
+                    )
+                )
+                if not attributes:
+                    attributes = [
+                        AllocationAttribute(
                             allocation=allocation,
                             allocation_attribute_type=attribute_type,
                         )
-                    )
-                    if not attributes:
-                        attributes = [
-                            AllocationAttribute(
-                                allocation=allocation,
-                                allocation_attribute_type=attribute_type,
-                            )
-                        ]
-                    for attribute in attributes:
-                        attribute.value = form.cleaned_data["value"]
-                        attribute.full_clean()
+                    ]
+                changed_attributes = []
+                for attribute in attributes:
+                    if attribute.value == new_value:
+                        continue
+
+                    previous_value = attribute.value
+                    attribute.value = new_value
+                    attribute.full_clean()
+                    attribute.value = previous_value
+                    if not attribute.pk:
                         attribute.save()
+                    changed_attributes.append(attribute)
+
+                if not changed_attributes:
+                    continue
+
+                change_request = AllocationChangeRequest.objects.create(
+                    allocation=allocation,
+                    status=pending_status,
+                    justification="updating",
+                    notes="updating",
+                    end_date_extension=10,
+                    user=request.user,
+                )
+                for attribute in changed_attributes:
+                    AllocationAttributeChangeRequest.objects.create(
+                        allocation_attribute=attribute,
+                        allocation_change_request=change_request,
+                        new_value=new_value,
+                    )
         except ValidationError as error:
             return JsonResponse({"error": " ".join(error.messages)}, status=400)
 
