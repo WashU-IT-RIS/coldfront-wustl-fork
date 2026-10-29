@@ -58,6 +58,9 @@ function BulkSuballocationUpdate() {
     (attribute) => String(attribute.id) === attributeTypeId,
   );
   const isProtocols = selectedType?.name === "storage_protocols";
+  const isContactAttribute = ["billing_contact", "technical_contact"].includes(
+    selectedType?.name,
+  );
   const valueOptions =
     selectedType?.name === "billing_cycle"
       ? billingCycleOptions
@@ -78,6 +81,21 @@ function BulkSuballocationUpdate() {
   const onSubmit = async () => {
     setSubmitting(true);
     try {
+      if (isContactAttribute) {
+        const response = await axios.get(
+          "/qumulo/api/active-directory-members",
+          { params: { members: [value] } },
+        );
+        const validUsers = response.data.validNames;
+        if (!validUsers.includes(value)) {
+          setModal({
+            title: "Invalid User",
+            text: `The following user was not found: ${value}`,
+          });
+          return;
+        }
+      }
+
       const response = await axios.post(
         updateUrl,
         {
