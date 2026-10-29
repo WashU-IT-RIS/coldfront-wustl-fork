@@ -76,7 +76,6 @@ class AllocationForm(forms.Form):
         choices=[("Yes", "Yes"), ("No", "No")],
         initial="No",
         widget=forms.RadioSelect,
-        required=True,
     )
     subsidized = forms.ChoiceField(
         help_text="Subsidized allocation is offerred once per PI. Sub allocations will not inherit the subsidized status.",
@@ -84,11 +83,11 @@ class AllocationForm(forms.Form):
         choices=[("Yes", "Yes"), ("No", "No")],
         initial="No",
         widget=forms.RadioSelect,
-        required=True,
     )
     department_number = forms.CharField(
         help_text="The department for billing",
         label="Department Number",
+        required=False,
     )
     technical_contact = forms.CharField(
         help_text="Who should be contacted regarding technical details. Accepts one WUSTL key.",
@@ -107,7 +106,6 @@ class AllocationForm(forms.Form):
         initial="monthly",
         label="Billing Cycle Options",
         help_text="Choose one billing cycle option from the above list",
-        required=True,
     )
     service_rate_category = forms.ChoiceField(
         help_text="Service rate category options for the storage allocation",

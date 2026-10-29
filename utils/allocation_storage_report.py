@@ -25,15 +25,16 @@ ap.add_argument(
 args = ap.parse_args()
 cau = ColdfrontAdUtils()
 allocations = list()
-for user_file in ['Storage1', 'Storage2', 'Storage3']:
-    path = f'./{user_file}-AllocationPIs.csv'
+for storage_name in ['Storage1', 'Storage2', 'Storage3']:
+    path = f'{args.root}/{storage_name}-AllocationPIs.csv'
     if os.path.isfile(path):
         with open(path) as path_file:
             allocations.extend(
                 [line.rstrip() for line in path_file.readlines()]
             )
     else:
-        print(f'Warning: no input found for {service}; skipping.')
+        print(f'Warning: no input found for {storage_name}; skipping.')
+
 if len(allocations):
     print('Allocation Name,PI Name,PI User ID,Department Name', flush=True)
     for allocation in allocations:
@@ -54,4 +55,5 @@ if len(allocations):
 else:
     print('No allocations to report')
     sys.exit(1)
+
 sys.exit(0)
