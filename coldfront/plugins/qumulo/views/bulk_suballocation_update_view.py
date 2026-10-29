@@ -19,7 +19,12 @@ from coldfront.core.allocation.models import (
     AllocationChangeRequest,
     AllocationChangeStatusChoice,
 )
+from coldfront.core.utils.validate import (
+    AllocationAttributeValidator,
+    AttributeValidator,
+)
 from coldfront.plugins.qumulo.constants import PROTOCOL_OPTIONS, SERVICE_RATE_CATEGORIES
+from coldfront.plugins.qumulo.validators import validate_ad_users, validate_ticket
 
 
 class BulkAllocationAttributeForm(forms.Form):
@@ -32,6 +37,64 @@ class BulkAllocationAttributeForm(forms.Form):
             resources__resource_type__name="Storage"
         ).distinct()
     )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        attribute_type = cleaned_data.get("attributeTypeId")
+        value = cleaned_data.get("value")
+        if not attribute_type or value is None:
+            return cleaned_data
+
+        try:
+            attribute_data_type = attribute_type.attribute_type.name.strip()
+            attribute_validator = AttributeValidator(value)
+            if attribute_data_type == "Int":
+                attribute_validator.validate_int()
+            elif attribute_data_type == "Float":
+                attribute_validator.validate_float()
+            elif attribute_data_type == "Yes/No":
+                attribute_validator.validate_yes_no()
+            elif attribute_data_type == "Date":
+                attribute_validator.validate_date()
+            elif attribute_data_type == "JSON":
+                attribute_validator.validate_json()
+
+            if attribute_type.name == "billing_cycle":
+                AllocationAttributeValidator(value).validate_billing_cycle()
+            elif attribute_type.name == "storage_ticket":
+                value = value.upper()
+                validate_ticket(value)
+                if not value.startswith("ITSD-"):
+                    value = f"ITSD-{value}"
+                if len(value) > 128:
+                    raise ValidationError(
+                        "Ensure this value has at most 128 characters."
+                    )
+                cleaned_data["value"] = value
+            elif attribute_type.name in {"billing_contact", "technical_contact"}:
+                validate_ad_users([value])
+            elif attribute_type.name == "service_rate_category":
+                if value not in dict(SERVICE_RATE_CATEGORIES):
+                    raise ValidationError("Choose a valid service rate category.")
+            elif attribute_type.name == "storage_protocols":
+                protocols = json.loads(value)
+                valid_protocols = {option[0] for option in PROTOCOL_OPTIONS}
+                if not isinstance(protocols, list) or any(
+                    not isinstance(protocol, str) or protocol not in valid_protocols
+                    for protocol in protocols
+                ):
+                    raise ValidationError("Choose valid storage protocols.")
+
+            if attribute_type.name == "storage_quota":
+                quota = int(value)
+                if quota < 0 or quota > 2000:
+                    raise ValidationError(
+                        "Ensure this value is between 0 and 2000."
+                    )
+        except (ValidationError, json.JSONDecodeError) as error:
+            self.add_error("value", error)
+
+        return cleaned_data
 
 
 @method_decorator(ensure_csrf_cookie, name="dispatch")

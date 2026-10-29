@@ -8,6 +8,12 @@ import GenericModal from "../../components/GenericModal/GenericModal";
 function getValueValidationError(attribute, value) {
   if (!attribute) return "";
 
+  if (attribute.name === "storage_ticket") {
+    return /^(?:ITSD-)?\d+$/i.test(value)
+      ? ""
+      : "Enter a ticket in ITSD-12345 or 12345 format.";
+  }
+
   switch (attribute.attribute_type__name.trim()) {
     case "Int":
       return /^[+-]?\d+$/.test(value) ? "" : "Enter a whole number.";
@@ -221,6 +227,11 @@ function BulkSuballocationUpdate() {
               }
               value={value}
               maxLength={8192}
+              placeholder={
+                selectedType?.name === "storage_ticket"
+                  ? "ITSD-12345 or 12345"
+                  : undefined
+              }
               disabled={submitting}
               aria-invalid={Boolean(valueError)}
               onChange={(event) => setValue(event.target.value)}
