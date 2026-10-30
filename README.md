@@ -151,6 +151,23 @@ python manage.py migrate oauth2_provider
 
 ## Documentation
 
+### Uploading suballocations
+
+The allocation creation and update forms both accept an optional **SubAllocations**
+JSON file. On the update form, submitting a file creates new children under the
+allocation being edited, using the form's shared settings and each child's name
+and access lists. Existing children are not updated by this upload. The **Reset
+ACLs** action does not create uploaded children.
+
+```json
+{
+  "sub_allocations": {
+    "child_one": {"rw": ["wustlkey1"], "ro": ["wustlkey2"]},
+    "child_two": {"rw": ["wustlkey1"], "ro": []}
+  }
+}
+```
+
 For more information on installing and using ColdFront see our [documentation here](https://coldfront.readthedocs.io)
 
 ## Contact Information

@@ -507,6 +507,56 @@ class UpdateAllocationViewTests(TestCase):
         response = UpdateAllocationView.as_view()(self.request, allocation_id=1)
         self.assertEqual(response.status_code, 200)
 
+    def test_update_upload_creates_children_only_on_normal_submit(
+        self,
+        mock_ActiveDirectoryAPI: MagicMock,
+        mock_async_task: MagicMock,
+        mock_file_system_service: MagicMock,
+    ):
+        suballocations = [{"name": "new_child", "rw": ["test"], "ro": []}]
+        for reset_acls, upload in (
+            (False, suballocations),
+            (False, []),
+            (True, suballocations),
+        ):
+            with self.subTest(reset_acls=reset_acls, upload=upload):
+                request = RequestFactory().post(
+                    "/irrelevant", {"reset_acls": "set"} if reset_acls else {}
+                )
+                request.user = self.user
+                form = UpdateAllocationForm(
+                    user_id=self.user.id,
+                    allocation_id=self.storage_allocation.pk,
+                )
+                form.cleaned_data = {**self.form_data, "suballocations": upload}
+                view = UpdateAllocationView()
+                view.setup(request, allocation_id=self.storage_allocation.pk)
+                view.success_id = self.storage_allocation.pk
+                with (
+                    patch.object(view, "_updated_fields_handler") as update_fields,
+                    patch.object(view, "_reset_acls") as reset,
+                    patch(
+                        "coldfront.plugins.qumulo.views.update_allocation_view."
+                        "AllocationService.create_sub_allocations_from_upload"
+                    ) as create_children,
+                ):
+                    response = view.form_valid(form)
+                self.assertEqual(response.status_code, 302)
+                if reset_acls:
+                    reset.assert_called_once()
+                    update_fields.assert_not_called()
+                else:
+                    update_fields.assert_called_once_with(form, None)
+                    reset.assert_not_called()
+                if upload and not reset_acls:
+                    create_children.assert_called_once_with(
+                        sub_allocations=upload,
+                        parent_form_data=form.cleaned_data,
+                        parent_allocation=self.storage_allocation,
+                    )
+                else:
+                    create_children.assert_not_called()
+
     def test_context_data_no_linkage(
         self,
         mock_ActiveDirectoryAPI: MagicMock,

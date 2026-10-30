@@ -116,6 +116,34 @@ class AllocationFormTests(TestCase):
         with self.assertRaises(ValidationError):
             field.clean(SimpleUploadedFile("suballocations.txt", b"{}"))
 
+    def test_update_form_accepts_suballocations_json_upload(self):
+        uploaded_file = SimpleUploadedFile(
+            "suballocations.json",
+            json.dumps({
+                "sub_allocations": {
+                    "new_child": {"rw": ["test"], "ro": []}
+                }
+            }).encode("utf-8"),
+        )
+        form = UpdateAllocationForm(
+            user_id=self.user.id,
+            allocation_id=1,
+            files={"suballocations": uploaded_file},
+        )
+        field = form.fields["suballocations"]
+        self.assertFalse(field.required)
+        form.cleaned_data = {"suballocations": field.clean(form.files["suballocations"])}
+        with patch(
+            "coldfront.plugins.qumulo.forms.AllocationForm.validate_ad_users"
+        ) as validate_ad_users:
+            self.assertEqual(
+                form.clean_suballocations(),
+                [{"name": "new_child", "rw": ["test"], "ro": []}],
+            )
+        validate_ad_users.assert_called_once_with(["test"])
+        with self.assertRaises(ValidationError):
+            field.clean(SimpleUploadedFile("suballocations.txt", b"{}"))
+
     def test_clean_method_with_valid_data(self):
         data = {
             "project_pk": self.project1.id,
