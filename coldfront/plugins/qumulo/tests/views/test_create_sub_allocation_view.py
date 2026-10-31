@@ -196,8 +196,8 @@ class AllocationViewTests(TestCase):
     def test_create_sub_allocations_from_upload_inherits_parent_attributes(
         self,
         mock_ActiveDirectoryAPI_validator: MagicMock,
-        mock_ActiveDirectoryAPI: MagicMock,
         mock_async_task: MagicMock,
+        mock_ActiveDirectoryAPI: MagicMock,
     ):
         parent_result = AllocationService.create_new_allocation(
             self.parent_form_data.copy(), self.user
