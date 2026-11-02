@@ -5,6 +5,7 @@ from coldfront.core.allocation.models import (
     AllocationLinkage,
     AllocationQuerySet,
 )
+from coldfront.core.project.models import Project
 from datetime import datetime, date, time
 from typing import Any, Optional
 import re
@@ -94,6 +95,14 @@ class StorageUsageReport:
         )
         return allocations
 
+    def get_allocations_by_project(self, project: str) -> AllocationQuerySet:
+        project_object = Project.objects.get(name=project)
+        project_id = project_object.pk
+        return Allocation.objects.parents().filter(
+            project__pk=project_id,
+            status__name="Active",
+        )
+
     def _get_suballocation_ids(self) -> list[int]:
         suballoc_ids = list()
         for linkage in AllocationLinkage.objects.all():
@@ -130,9 +139,43 @@ class StorageUsageReport:
         sorted_usages_by_pi = sorted(pi_usages, key=lambda x: x["pi"])
         return sorted_usages_by_pi
 
+    def get_usages_by_pi_for_project(self, project: str) -> list[dict[str, Any]]:
+            pi_usages = list()
+            allocations = self.get_allocations_by_project(project)
+            for allocation in allocations:
+                pi = allocation.project.pi.username
+                usage = allocation.get_usage_kb_by_date(self.usage_date)
+                if usage is None:
+                    continue
+                if any(entry["pi"] == pi for entry in pi_usages):
+                    for entry in pi_usages:
+                        if entry["pi"] == pi:
+                            entry["usage_kb"] = str(float(entry["usage_kb"]) + usage)
+                            entry[
+                                "filesystem_path"
+                            ] += f", {allocation.get_attribute('storage_filesystem_path')}"
+                else:
+                    usage_entry = dict()
+                    usage_entry["pi"] = pi
+                    usage_entry["usage_kb"] = str(usage)
+                    usage_entry["filesystem_path"] = allocation.get_attribute(
+                        "storage_filesystem_path"
+                    )
+                    pi_usages.append(usage_entry)
+    
+            if not pi_usages:
+                return []
+            sorted_usages_by_pi = sorted(pi_usages, key=lambda x: x["pi"])
+            return sorted_usages_by_pi
+    
+
     def _find_max_length_of_key(self, usage_list: list, key: str) -> int:
         return max(len(entry[key]) for entry in usage_list) if usage_list else 0
 
     def generate_report_for_school(self, school_unit="ALL") -> str:
         usages = self.get_usages_by_pi_for_school(school_unit)
         return self._format_usage_report(usages)
+
+    def generate_report_for_project(self, project: Any) -> str:
+            usages = self.get_usages_by_pi_for_project(project)
+            return self._format_usage_report(usages)
