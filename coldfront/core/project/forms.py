@@ -33,6 +33,7 @@ class ProjectCreateForm(forms.ModelForm):
     sponsor_department_number = forms.CharField(
         help_text="The department for billing associated with the sponsor (can be different than that for underlying allocations)",
         label="Sponsor Department Number",
+        required=False
     )
 
 class ProjectSearchForm(forms.Form):
