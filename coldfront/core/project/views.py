@@ -1,7 +1,4 @@
 import datetime
-from pipes import Template
-import pprint
-import django
 import logging 
 from django import forms
 
@@ -9,18 +6,16 @@ from django.conf import settings
 from django.contrib import messages
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from coldfront.core.utils.common import import_from_settings
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Q, OuterRef, Subquery
-from django.forms import formset_factory, modelformset_factory
-from django.http import (HttpResponse, HttpResponseForbidden,
-                         HttpResponseRedirect)
+from django.forms import formset_factory
+from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
 from coldfront.core.allocation.utils import generate_guauge_data_from_usage
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
@@ -60,8 +55,7 @@ from coldfront.core.publication.models import Publication
 from coldfront.core.research_output.models import ResearchOutput
 from coldfront.core.user.forms import UserSearchForm
 from coldfront.core.user.utils import CombinedUserSearch
-from coldfront.core.utils.common import get_domain_url, import_from_settings
-from coldfront.core.utils.mail import send_email, send_email_template
+from coldfront.core.utils.common import import_from_settings
 
 EMAIL_ENABLED = import_from_settings('EMAIL_ENABLED', False)
 ALLOCATION_ENABLE_ALLOCATION_RENEWAL = import_from_settings(
@@ -489,20 +483,21 @@ class ProjectCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         project_obj.save()
         self.object = project_obj
 
-        project_user_obj = ProjectUser.objects.create(
+        ProjectUser.objects.create(
             user=self.request.user,
             project=project_obj,
             role=ProjectUserRoleChoice.objects.get(name='Manager'),
             status=ProjectUserStatusChoice.objects.get(name='Active')
         )
 
-        # create the project attributes for this new project
-        dep_type = ProjectAttributeType.objects.get(name="sponsor_department_number")
-        ProjectAttribute.objects.create(
-            proj_attr_type=dep_type,
-            project=project_obj,
-            value=form_data.get('sponsor_department_number', 'Unknown')
-        )
+        sponsor_department_number = form_data.get('sponsor_department_number')
+        if sponsor_department_number is not None:
+            dep_type = ProjectAttributeType.objects.get(name="sponsor_department_number")
+            ProjectAttribute.objects.create(
+                proj_attr_type=dep_type,
+                project=project_obj,
+                value=sponsor_department_number
+            )
 
         return super().form_valid(form)
 
@@ -531,7 +526,7 @@ class ProjectUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestM
        
     def form_valid(self, form):
         sponsor_department_attribute = self.get_object().projectattribute_set.filter(proj_attr_type__name="sponsor_department_number").first()
-        sponsor_department_attribute.value = form.cleaned_data.get('sponsor_department_number', '')
+        sponsor_department_attribute.value = form.cleaned_data.get('sponsor_department_number')
         sponsor_department_attribute.save()
             
         return super().form_valid(form)   
@@ -540,7 +535,7 @@ class ProjectUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestM
         kwargs = super().get_form_kwargs()
         
         sponsor_department_attribute = self.object.projectattribute_set.filter(proj_attr_type__name="sponsor_department_number").first()
-        kwargs['initial']['sponsor_department_number'] = sponsor_department_attribute.value if sponsor_department_attribute else ''
+        kwargs['initial']['sponsor_department_number'] = sponsor_department_attribute.value if sponsor_department_attribute else None
         
         return kwargs
 
