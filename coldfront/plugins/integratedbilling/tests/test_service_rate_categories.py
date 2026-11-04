@@ -38,7 +38,7 @@ class TestServiceRateCategories(TestCase):
             .for_cycle(cycle)
         )
 
-        self.assertEquals(categories.count(), 1)
+        self.assertEqual(categories.count(), 1)
         category = categories.get()
         self.assertEqual(category.model_name, model_name)
         self.assertEqual(category.tier_name, tier_name)
@@ -58,7 +58,7 @@ class TestServiceRateCategories(TestCase):
             .for_tier(tier_name)
             .for_cycle(cycle)
         )
-        self.assertEquals(categories.count(), 0)
+        self.assertEqual(categories.count(), 0)
 
     def test_service_rate_category_multiple_matches(self):
         usage_date = date(2024, 6, 15)

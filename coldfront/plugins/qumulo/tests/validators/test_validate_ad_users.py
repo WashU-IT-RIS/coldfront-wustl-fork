@@ -58,8 +58,8 @@ class TestValidateAdUsers(TestCase):
         with self.assertRaises(ValidationError) as context_manager:
             validate_ad_users([user])
 
-        self.assertEquals(context_manager.exception.error_list[0].message, user)
-        self.assertEquals(context_manager.exception.error_list[0].code, "invalid")
+        self.assertEqual(context_manager.exception.error_list[0].message, user)
+        self.assertEqual(context_manager.exception.error_list[0].code, "invalid")
 
         self.mock_get_user.side_effect = ValueError("foo")
         user = "userkey"
@@ -67,10 +67,10 @@ class TestValidateAdUsers(TestCase):
         with self.assertRaises(ValidationError) as context_manager:
             validate_single_ad_user(user)
 
-        self.assertEquals(
+        self.assertEqual(
             context_manager.exception.message, "This WUSTL Key could not be validated"
         )
-        self.assertEquals(context_manager.exception.code, "invalid")
+        self.assertEqual(context_manager.exception.code, "invalid")
 
     def test_validates_multiple_users(self):
         users = ["userkey", "userkey2", "userkey3"]

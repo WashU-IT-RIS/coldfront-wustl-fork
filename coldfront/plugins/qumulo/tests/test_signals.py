@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.test import TestCase, Client
 from unittest.mock import patch, MagicMock, call
 
@@ -200,7 +202,7 @@ class TestSignals(TestCase):
     ):
         sub_alloc = self._createSubAllocation()
         sub_alloc2 = self._createSubAllocation()
-        qumulo_instance = mock_create_connection.return_value
+        qumulo_instance: MagicMock = mock_create_connection.return_value
 
         allocation_change_approved.send(
             sender=self.__class__,
@@ -218,14 +220,16 @@ class TestSignals(TestCase):
             limit_in_bytes=byte_limit,
         )
 
-        qumulo_instance.update_quota.has_calls(
-            call(
-                fs_path=sub_alloc.get_attribute(name="storage_filesystem_path"),
-                limit_in_bytes=byte_limit,
-            ),
-            call(
-                fs_path=sub_alloc2.get_attribute(name="storage_filesystem_path"),
-                limit_in_bytes=byte_limit,
+        cast(MagicMock, qumulo_instance.update_quota).assert_has_calls(
+            (
+                call(
+                    fs_path=sub_alloc.get_attribute(name="storage_filesystem_path"),
+                    limit_in_bytes=byte_limit,
+                ),
+                call(
+                    fs_path=sub_alloc2.get_attribute(name="storage_filesystem_path"),
+                    limit_in_bytes=byte_limit,
+                ),
             ),
         )
         self.assertEqual(sub_alloc.get_attribute(name="storage_quota"), tb_limit)
