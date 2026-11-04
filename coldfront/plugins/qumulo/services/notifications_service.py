@@ -1,5 +1,3 @@
-import os
-
 from coldfront.core.allocation.models import Allocation
 from coldfront.plugins.qumulo.utils.mail import send_email_template
 from coldfront.core.user.models import User
