@@ -1,5 +1,6 @@
 import json
 import os
+import logging
 
 from datetime import datetime
 from typing import Optional
@@ -14,7 +15,7 @@ from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.storage_controller import StorageControllerFactory
 
 
-def ingest_quotas_with_daily_usage(logger) -> None:
+def ingest_quotas_with_daily_usage(logger: logging.Logger) -> None:
     connection_info = json.loads(os.environ.get("QUMULO_INFO"))
     base_allocation_quota_usages = []
     for storage_key in connection_info.keys():
