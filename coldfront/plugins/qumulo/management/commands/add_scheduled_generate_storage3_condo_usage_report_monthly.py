@@ -1,4 +1,10 @@
 import arrow
+from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
+from coldfront.core.allocation.models import (
+    Allocation,
+    AllocationAttributeUsage,
+    AllocationAttribute,
+)
 from django.core.management.base import BaseCommand
 from django.core.mail import send_mail
 from django_q.tasks import schedule
@@ -43,13 +49,25 @@ def generate_storage3_condo_usage_report(
     print(f"Generating Storage3 Monthly Usage Report for {project} emailing to {email}.")
 
     report_generator = StorageUsageReport(usage_date=usage_date)
-    usage_report = report_generator.generate_report_for_school(project)
+    usage_report = report_generator.generate_report_for_project(project)
     print(usage_report)
 
     subject = f"Storage3 Monthly Usage Report with consumptions on {usage_date} for {project}"
     message = f"Here is the Storage2&3 usage report with consumptions on {usage_date} for {project} by PIs:\n\n{usage_report}"
     from_email = 'noreply@gowustl.onmicrosoft.com'
     recipient_list = [email] if email else []
+
+    billing_contacts = []
+    for allocation in getattr(usage_report, 'allocations', []) or []:
+        active_directory_api = ActiveDirectoryAPI()
+        billing_contact = allocation.get_attribute("billing_contact")
+        billing_contact_email = active_directory_api.get_user(billing_contact)
+        if billing_contact_email:
+            billing_contacts.append(billing_contact_email)
+
+    recipient_list = list(dict.fromkeys(email for email in billing_contacts if email))
+    if not recipient_list and email:
+        recipient_list = [email]
 
     if recipient_list:
         send_mail(
@@ -59,7 +77,7 @@ def generate_storage3_condo_usage_report(
             recipient_list,
             fail_silently=False,
         )
-        print(f"Storage3 Monthly Usage Report for {project} with consumptions on {usage_date} has been sent via email to {email}.")
+        print(f"Storage3 Monthly Usage Report for {project} with consumptions on {usage_date} has been sent via email to {', '.join(recipient_list)}.")
     else:
         print("No recipient email provided. Report not sent.")
 
