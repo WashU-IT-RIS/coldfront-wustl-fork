@@ -3,7 +3,6 @@ from unittest.mock import patch, call, MagicMock
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from ldap3 import MODIFY_DELETE
 
-
 os_environ = {
     "AD_SERVER_NAME": "test_server",
     "AD_USERNAME": "test_user",
@@ -269,3 +268,7 @@ class TestActiveDirectoryAPI(TestCase):
             self.mock_connection.response = not_in_faculty_group_response
             result = self.ad_api.is_faculty_member(wustlkey)
             self.assertFalse(result)
+
+
+# class TestGetGroupMembers(TestCase):
+#     def test_

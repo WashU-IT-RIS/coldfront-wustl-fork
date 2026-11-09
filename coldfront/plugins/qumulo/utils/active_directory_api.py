@@ -105,6 +105,26 @@ class ActiveDirectoryAPI:
 
         return self.conn.response
 
+    def get_members_by_dn(self, dns: list[str]):
+        if not dns:
+            return []
+
+        search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
+
+        member_filter_base = lambda member: f"(distinguishedName={member})"
+        member_filters = f"(|{''.join(map(member_filter_base, dns))})"
+
+        self.conn.search(
+            search_base,
+            f"(&(|(objectClass=group)(objectClass=person)){member_filters})",
+            attributes=["sAMAccountName", "objectClass"],
+        )
+
+        if not self.conn.response:
+            return []
+
+        return self.conn.response
+
     def get_user_by_email(
         self,
         email: str,
@@ -167,6 +187,31 @@ class ActiveDirectoryAPI:
 
     def get_group_dn(self, group_name: str) -> str:
         return self.get_group(group_name)["dn"]
+
+    def get_group_members(self, group_name: str) -> list[dict]:
+        groups_OU = os.environ.get("AD_GROUPS_OU")
+
+        self.conn.search(
+            search_base=groups_OU,
+            search_filter=f"(&(objectClass=group)(sAMAccountName={group_name}))",
+            search_scope="SUBTREE",
+            attributes=["member"],
+        )
+
+        if not self.conn.response:
+            raise ValueError("Invalid group DN")
+
+        member_dns = self.conn.response[0].get("attributes", {}).get("member", [])
+        if not member_dns:
+            raise ValueError("No members found for the group")
+
+        members = self.get_members_by_dn(member_dns)
+
+        members = map(
+            lambda member: member.get("attributes", {}).get("sAMAccountName"), members
+        )
+
+        return list(members)
 
     def delete_ad_group(self, group_name: str):
         group_dn = self.get_group_dn(group_name)
