@@ -85,10 +85,6 @@ class AllocationService:
         parent_group_name = path_parts[1]
 
         for access_allocation in access_allocations:
-            # access_users = list(
-            #     AllocationUser.objects.filter(allocation=access_allocation)
-            # )
-
             resource = access_allocation.resources.first()
             form_key = f"{resource.name.lower()}_users"
             access_users: list[str] = form_data[form_key]
