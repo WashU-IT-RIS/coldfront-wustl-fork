@@ -489,12 +489,10 @@ class ProjectCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
             role=ProjectUserRoleChoice.objects.get(name='Manager'),
             status=ProjectUserStatusChoice.objects.get(name='Active')
         )
-
         sponsor_department_number = form_data.get('sponsor_department_number')
-        if sponsor_department_number is not None:
-            dep_type = ProjectAttributeType.objects.get(name="sponsor_department_number")
-            ProjectAttribute.objects.create(
-                proj_attr_type=dep_type,
+        if sponsor_department_number:
+            ProjectAttribute.objects.get(
+                proj_attr_type__name="sponsor_department_number",
                 project=project_obj,
                 value=sponsor_department_number
             )
