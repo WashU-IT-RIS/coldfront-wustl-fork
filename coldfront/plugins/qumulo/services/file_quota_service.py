@@ -80,7 +80,6 @@ def _get_allocation(quota) -> Optional[Allocation]:
 def _get_allocation_by_attribute(
     values: list[str], attribute_type_name: str
 ) -> Optional[Allocation]:
-    global logger
     try:
         attribute = AllocationAttribute.objects.select_related("allocation").get(
             value__in=values,
@@ -95,7 +94,6 @@ def _get_allocation_by_attribute(
 
 
 def _validate_results(quota_usages) -> bool:
-    global logger
     today = datetime.today()
     year = today.year
     month = today.month
