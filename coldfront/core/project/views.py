@@ -524,8 +524,9 @@ class ProjectUpdateView(SuccessMessageMixin, LoginRequiredMixin, UserPassesTestM
        
     def form_valid(self, form):
         sponsor_department_attribute = self.get_object().projectattribute_set.filter(proj_attr_type__name="sponsor_department_number").first()
-        sponsor_department_attribute.value = form.cleaned_data.get('sponsor_department_number')
-        sponsor_department_attribute.save()
+        if sponsor_department_attribute:
+            sponsor_department_attribute.value = form.cleaned_data.get('sponsor_department_number')
+            sponsor_department_attribute.save()
             
         return super().form_valid(form)   
         
