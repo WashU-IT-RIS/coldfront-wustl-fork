@@ -100,13 +100,11 @@ class AclAllocations:
         return list(access_allocations)
 
     @staticmethod
-    def is_base_allocation(path: str, strorage_info: str) -> bool:
+    def is_base_allocation(path: str, storage_info: str) -> bool:
         connection_info = json.loads(os.environ.get("QUMULO_INFO"))
-        storage_path = connection_info[strorage_info].get("path", "").rstrip(" /")
+        storage_path = connection_info[storage_info].get("path", "").rstrip(" /")
 
-        purePath = PurePath(path)
-
-        return purePath.match(f"{storage_path}/*/")
+        return PurePath(path).match(f"{storage_path}/*/")
 
     @staticmethod
     def remove_acl_access(allocation: Allocation):

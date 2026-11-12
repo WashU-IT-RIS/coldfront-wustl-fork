@@ -14,7 +14,7 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
     default_form_data,
 )
 from coldfront.plugins.qumulo.tasks import (
-    ingest_quotas_with_daily_usage,
+    ingest_quotas_with_daily_usage_task,
 )
 from coldfront.plugins.qumulo import tasks as qumulo_api
 
@@ -48,7 +48,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
 
         self.status_active = AllocationStatusChoiceFactory(name="Active")
         self.status_ready_for_deletion = AllocationStatusChoiceFactory(
-            name="Ready for Deletion"
+            name="Ready for deletion"
         )
 
         for index, (path, value) in enumerate(
@@ -140,7 +140,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         create_connection_mock.return_value = qumulo_api
 
         try:
-            ingest_quotas_with_daily_usage()
+            ingest_quotas_with_daily_usage_task()
         except:
             self.fail("Ingest quotas raised exception")
 
@@ -180,7 +180,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         create_connection_mock.return_value = qumulo_api
 
         try:
-            ingest_quotas_with_daily_usage()
+            ingest_quotas_with_daily_usage_task()
         except:
             self.fail("Ingest quotas raised exception")
 
@@ -257,7 +257,7 @@ class TestIngestQuotasWithDailyUsages(TestCase):
         allocation_ready_for_deletion.save()
 
         try:
-            ingest_quotas_with_daily_usage()
+            ingest_quotas_with_daily_usage_task()
         except:
             self.fail("ingest_quotas failed")
 

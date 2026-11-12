@@ -2,3 +2,4 @@ qumulo-api >= 6.2, < 6.3
 python-dotenv
 ldap3
 deepdiff
+django-oauth-toolkit==2.3.0

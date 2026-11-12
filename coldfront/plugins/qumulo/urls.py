@@ -1,5 +1,6 @@
 from django.urls import path
 
+from coldfront.plugins.qumulo.api import allocation_users, user_allocations
 from coldfront.plugins.qumulo.views import (
     allocation_view,
     update_allocation_view,
@@ -50,4 +51,14 @@ urlpatterns = [
     ),
     path("api/usages", Usages.as_view(), name="usage"),
     path("api/usage/allocations", UsageAllocations.as_view(), name="usageAllocations"),
+    path(
+        "allocation/<int:allocation_id>/access-users/",
+        allocation_users.AllocationUsersApi.as_view(),
+        name="allocation-users-api",
+    ),
+    path(
+        "allocation/users/<str:username>/",
+        user_allocations.UserAllocationsApi.as_view(),
+        name="user-allocations-api",
+    ),
 ]

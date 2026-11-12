@@ -61,6 +61,17 @@ class MigrateToColdfront:
         result = self.__create_by(storage_provision_name, itsm_result, resource_name)
         return result
 
+    def batch_create_allocations_and_sub_allocations(
+        self,
+        fileset_name: str,
+        resource_name: str,
+        allocation_attributes_dict: dict[str, Any],
+    ) -> None:
+        result = self.__create_by(
+            fileset_name, [allocation_attributes_dict], resource_name
+        )
+        return result
+
     def set_override(self, itsm_field_name: str, value: any) -> None:
         overridable_fields = ItsmToColdfrontFieldsFactory.get_overridable_attributes()
         if itsm_field_name not in overridable_fields:

@@ -508,6 +508,7 @@ itsm_to_coldfront_map:
       attribute: quota
       type: string
       nulls: true
+      overridable: true
   allow_nonfaculty:
     coldfront:
       - entity: project_attribute

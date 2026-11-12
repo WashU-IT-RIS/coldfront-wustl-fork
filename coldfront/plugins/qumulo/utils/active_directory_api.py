@@ -141,7 +141,10 @@ class ActiveDirectoryAPI:
     def add_members_to_ad_group(self, member_dns: list[str], group_name: str):
         group_dn = self.get_group_dn(group_name)
 
-        ad_add_members_to_groups(self.conn, member_dns, group_dn)
+        if not ad_add_members_to_groups(self.conn, member_dns, group_dn):
+            raise RuntimeError(
+                f"Failed to add members to AD group {group_name}: {self.conn.result}"
+            )
 
     def add_user_to_ad_group(self, wustlkey: str, group_name: str):
         group_dn = self.get_group_dn(group_name)
