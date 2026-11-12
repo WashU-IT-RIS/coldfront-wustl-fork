@@ -50,8 +50,17 @@ class ColdfrontParser(HTMLParser):
 username = os.environ.get('API_USER', False) or input('Enter WUSTL key: ')
 password = os.environ.get('API_PASS', False) or \
     getpass.getpass('Enter Password: ')
+coldfront_base_url = (
+    os
+    .environ 
+    .get(
+        'COLDFRONT_BASE_URL',
+        'https://coldfront-qa.ris.wustl.edu'
+    )
+    .rstrip('/')
+)
 with requests.Session() as session:
-    loginUrl = 'https://coldfront.ris.wustl.edu/user/login?next='
+    loginUrl = f'{coldfront_base_url}/user/login?next='
     loginResp = session.get(
         loginUrl,
         verify=False
@@ -65,42 +74,18 @@ with requests.Session() as session:
         'Content-type': 'application/x-www-form-urlencoded',
         'Referer': loginUrl
     })
-    # print(f'Pre-post session headers: {session.headers}')
-    # print(f'Pre-post session cookies: {session.cookies}')
     loginResp = session.post(
         loginUrl,
-        # data=f'csrfmiddlewaretoken={parser.csrf_token}&username={username}&password={password}'
         data={
             'csrfmiddlewaretoken': parser.csrf_token,
             'username': username,
             'password': password
-        }
+        },
+        verify=False
     )
-    # print(f'Here is your "login" response code: {loginResp.status_code}')
-    # print(f'Here is your "login" response headers: {loginResp.headers}')
-    # print(f'Here is your "login" response page: {loginResp.text}')
-    # print(f'Here are your session cookies: {session.cookies}')
-    # print(f'Here are your login response cookies: {loginResp.cookies}')
     apiResp = session.get(
-        'https://coldfront.ris.wustl.edu/qumulo/api/allocations',
+        f'{coldfront_base_url}/qumulo/api/allocations',
         verify=False
     )
     print(apiResp.text)
-# tokenheader = loginresp.headers.get('set-cookie', false)
-# print(loginresp.headers)
-# print(loginresp.text)
-# sys.exit(0)
-# if not tokenheader:
-#     print(f'login failed: {loginresp.text}')
-#     sys.exit(1)
-# token = tokenheader.split('; ')[0].split('=')[-1]
-# print(token)
-# apiresp = requests.get(
-#     'https://coldfront.ris.wustl.edu/qumulo/api/allocations',
-#     auth=httpbasicauth(username, password),
-#     headers={'authorization': f'token {token}'},
-#     verify=false
-#     )
-# print(apiresp.headers)
-# print(apiresp.text)
 sys.exit(0)
