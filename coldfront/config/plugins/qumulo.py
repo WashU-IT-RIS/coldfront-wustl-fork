@@ -7,6 +7,7 @@ from coldfront.config.base import (
 
 INSTALLED_APPS += [
     "coldfront.plugins.qumulo",
+    "oauth2_provider",
 ]
 
 STATICFILES_DIRS += [
