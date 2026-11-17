@@ -6,8 +6,11 @@ from coldfront.core.test_helpers.factories import (
     AllocationAttributeFactory,
     AllocationAttributeTypeFactory,
     AllocationAttributeUsageFactory,
+    AllocationStatusChoiceFactory,
+    ProjectFactory,
     ResourceFactory,
 )
+from coldfront.core.project.models import Project
 from coldfront.plugins.qumulo.tests import fixtures
 from coldfront.plugins.qumulo.reports.storage_usage_report import StorageUsageReport
 import re
@@ -77,6 +80,30 @@ class StorageUsageReportFactoryTests(TestCase):
         expected = sorted([alloc1.id, alloc2.id])
         actual = sorted([a.id for a in allocs])
         self.assertEqual(actual, expected)
+
+    def test_get_allocations_by_project_returns_only_active_allocations_for_project(
+        self,
+    ):
+        project = ProjectFactory()
+        other_project = ProjectFactory()
+        active_alloc = AllocationFactory(project=project)
+        AllocationFactory(project=other_project)
+
+        allocs = list(self.report.get_allocations_by_project(project.title))
+        self.assertEqual(allocs, [active_alloc])
+
+    def test_get_allocations_by_project_excludes_inactive_allocations(self):
+        project = ProjectFactory()
+        AllocationFactory(
+            project=project, status=AllocationStatusChoiceFactory(name="Inactive")
+        )
+
+        allocs = self.report.get_allocations_by_project(project.title)
+        self.assertEqual(allocs.count(), 0)
+
+    def test_get_allocations_by_project_unknown_project_raises(self):
+        with self.assertRaises(Project.DoesNotExist):
+            self.report.get_allocations_by_project("no-such-project")
 
     def test_get_suballocation_ids_with_factory(self):
         # Create parent and child allocations

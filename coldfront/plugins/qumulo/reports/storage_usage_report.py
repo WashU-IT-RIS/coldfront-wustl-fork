@@ -96,7 +96,7 @@ class StorageUsageReport:
         return allocations
 
     def get_allocations_by_project(self, project: str) -> AllocationQuerySet:
-        project_object = Project.objects.get(name=project)
+        project_object = Project.objects.get(title=project)
         project_id = project_object.pk
         return Allocation.objects.parents().filter(
             project__pk=project_id,
