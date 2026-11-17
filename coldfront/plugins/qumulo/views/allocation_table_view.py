@@ -2,7 +2,8 @@ from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, Paginator
-from django.db.models import Prefetch
+from django.db.models import FloatField, Prefetch
+from django.db.models.functions import Cast
 from django.db.models.query import QuerySet
 from django.views.generic import ListView
 
@@ -132,6 +133,8 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 name=Subquery(storage_name_sub_q),
                 storage_quota=Subquery(storage_quota_sub_q),
                 storage_usage=Subquery(storage_usage_sub_q),
+            ).annotate(
+                storage_quota_numeric=Cast("storage_quota", FloatField()),
             ).select_related(
                 "project__pi",
                 "status",
@@ -191,6 +194,8 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 file_path=Subquery(file_path_sub_q),
                 service_rate_category=Subquery(service_rate_category_sub_q),
                 storage_quota=Subquery(storage_quota_sub_q),
+            ).annotate(
+                storage_quota_numeric=Cast("storage_quota", FloatField()),
             ).order_by(order_by)
 
             allocation_linkages = AllocationLinkage.objects.filter(
