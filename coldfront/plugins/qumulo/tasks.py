@@ -28,6 +28,7 @@ from coldfront.plugins.qumulo.services.file_quota_service import (
 from coldfront.plugins.qumulo.services.notifications_service import (
     send_email_for_near_limit_allocation,
 )
+
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
 from coldfront.plugins.qumulo.utils.acl_allocations import AclAllocations
@@ -114,9 +115,8 @@ def conditionally_update_storage_allocation_statuses() -> None:
         conditionally_update_storage_allocation_status(allocation)
 
 
-def ingest_quotas_with_daily_usage_log_wrapper() -> None:
-    logger = logging.getLogger("task_qumulo_daily_quota_usages")
-    ingest_quotas_with_daily_usage(logger)
+def ingest_quotas_with_daily_usage_task() -> None:
+    ingest_quotas_with_daily_usage()
 
 def _zip_function(
     allocation_values: AllocationQuerySet,
@@ -160,7 +160,6 @@ def notify_users_with_allocations_near_limit() -> None:
 
     for allocation_data in _zip_function(allocation_values, qumulo_allocations):
         send_email_for_near_limit_allocation(allocation_data)
-
 
 def addMembersToADGroup(
     wustlkeys: list[str],
