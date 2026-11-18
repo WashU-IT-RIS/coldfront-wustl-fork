@@ -266,6 +266,68 @@ class StorageUsageReportFactoryTests(TestCase):
         self.assertIn("Usage (TB)", report)
         self.assertNotIn("Usage (KB)", report)
 
+    def test_get_project_summary(self):
+        allocation = AllocationFactory()
+        # storage_quota is in TB; usage value is in bytes
+        self._add_usage(allocation, "/fs1", value=10)
+        second = AllocationFactory()
+        second.project = allocation.project
+        second.save()
+        self._add_usage(second, "/fs2", value=10)
+        used_kb = {allocation.pk: 6 * 1024**3, second.pk: 1.5 * 1024**3}
+        with patch.object(
+            self.report,
+            "get_allocations_by_project",
+            return_value=[allocation, second],
+        ), patch.object(
+            type(allocation),
+            "get_usage_kb_by_date",
+            autospec=True,
+            side_effect=lambda alloc, _date: used_kb[alloc.pk],
+        ):
+            summary = self.report.get_project_summary(allocation.project.title)
+
+        self.assertEqual(summary["total_quota_tb"], 1000)
+        self.assertEqual(summary["allocated_tb"], 20)
+        self.assertEqual(summary["unallocated_tb"], 980)
+        self.assertAlmostEqual(summary["used_tb"], 7.5)
+
+    def test_format_project_summary(self):
+        text = self.report._format_project_summary(
+            {
+                "total_quota_tb": 100.0,
+                "allocated_tb": 27.0,
+                "unallocated_tb": 73.0,
+                "used_tb": 18.9,
+            }
+        )
+        self.assertEqual(
+            text,
+            "Total condo quota: 100 TB\n"
+            "Allocated to PIs: 27 TB (27%)\n"
+            "Unallocated: 73 TB\n"
+            "Used: 18.90 TB (70% of allocated)",
+        )
+
+    def test_format_project_summary_nothing_allocated(self):
+        text = self.report._format_project_summary(
+            {
+                "total_quota_tb": 100.0,
+                "allocated_tb": 0.0,
+                "unallocated_tb": 100.0,
+                "used_tb": 0.0,
+            }
+        )
+        self.assertIn("Used: 0 TB (N/A of allocated)", text)
+
+    def test_generate_report_for_project_starts_with_summary(self):
+        allocation = AllocationFactory()
+        self._add_usage(allocation, "/fs1")
+
+        report = self.report.generate_report_for_project(allocation.project.title)
+        self.assertTrue(report.startswith("Total condo quota: "))
+        self.assertLess(report.index("Used: "), report.index("Usage (GB)"))
+
     def test_generate_report_for_school(self):
         # Setup allocation and usage
         allocation = AllocationFactory()

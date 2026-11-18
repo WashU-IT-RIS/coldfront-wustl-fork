@@ -6,6 +6,7 @@ from coldfront.core.allocation.models import (
     AllocationQuerySet,
 )
 from coldfront.core.project.models import Project
+from coldfront.core.constants import CONDO_PROJECT_QUOTA
 from datetime import datetime, date, time
 from typing import Any, Optional
 import re
@@ -201,6 +202,51 @@ class StorageUsageReport:
         usages = self.get_usages_by_pi_for_school(school_unit)
         return self._format_usage_report(usages)
 
+    def get_project_summary(self, project: str) -> dict[str, float]:
+        """
+        Summarize the condo's quota and usage, all values in TB.
+        storage_quota is stored in TB; usage is converted from KB (1 TB = 1024**3 KB).
+        """
+        allocated_tb = 0.0
+        used_tb = 0.0
+        for allocation in self.get_allocations_by_project(project):
+            quota = allocation.get_attribute("storage_quota")
+            if quota is not None:
+                allocated_tb += float(quota)
+            usage_kb = allocation.get_usage_kb_by_date(self.usage_date)
+            if usage_kb is not None:
+                used_tb += usage_kb / 1024**3
+
+        return {
+            "total_quota_tb": float(CONDO_PROJECT_QUOTA),
+            "allocated_tb": allocated_tb,
+            "unallocated_tb": CONDO_PROJECT_QUOTA - allocated_tb,
+            "used_tb": used_tb,
+        }
+
+    def _format_tb(self, value: float) -> str:
+        # Show whole numbers without decimals, otherwise 2 decimal places
+        return f"{value:,.0f} TB" if value == int(value) else f"{value:,.2f} TB"
+
+    def _format_percent(self, part: float, whole: float) -> str:
+        return f"{part / whole * 100:.0f}%" if whole else "N/A"
+
+    def _format_project_summary(self, summary: dict[str, float]) -> str:
+        total = summary["total_quota_tb"]
+        allocated = summary["allocated_tb"]
+        return "\n".join(
+            [
+                f"Total condo quota: {self._format_tb(total)}",
+                f"Allocated to PIs: {self._format_tb(allocated)}"
+                f" ({self._format_percent(allocated, total)})",
+                f"Unallocated: {self._format_tb(summary['unallocated_tb'])}",
+                f"Used: {self._format_tb(summary['used_tb'])}"
+                f" ({self._format_percent(summary['used_tb'], allocated)} of allocated)",
+            ]
+        )
+
     def generate_report_for_project(self, project: Any) -> str:
+            summary = self._format_project_summary(self.get_project_summary(project))
             usages = self.get_usages_by_pi_for_project(project)
-            return self._format_usage_report(self._convert_usage_units(usages))
+            table = self._format_usage_report(self._convert_usage_units(usages))
+            return f"{summary}\n\n{table}"
