@@ -237,23 +237,25 @@ class StorageUsageReportFactoryTests(TestCase):
             self.report.get_usages_by_pi_for_project(allocation.project.title), []
         )
 
-    def test_get_usages_by_pi_for_project_aggregates_same_pi(self):
+    def test_get_usages_by_pi_for_project_one_row_per_allocation(self):
         allocation = AllocationFactory()
-        self._add_usage(allocation, "/fs1")
-        # Stub the query so two allocations share one PI
+        self._add_usage(allocation, "/fs2")
+        # Two allocations in the same project share the project's PI
         second = AllocationFactory()
         second.project = allocation.project
         second.save()
-        self._add_usage(second, "/fs2")
+        self._add_usage(second, "/fs1", value=4096)
         with patch.object(
             self.report,
             "get_allocations_by_project",
             return_value=[allocation, second],
         ):
             usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
-        self.assertEqual(len(usages), 1)
-        self.assertEqual(usages[0]["filesystem_path"], "/fs1, /fs2")
-        self.assertEqual(float(usages[0]["usage_kb"]), 4.0)
+        self.assertEqual(len(usages), 2)
+        # Sorted by filesystem path within the PI
+        self.assertEqual([u["filesystem_path"] for u in usages], ["/fs1", "/fs2"])
+        self.assertEqual([float(u["usage_kb"]) for u in usages], [4.0, 2.0])
+        self.assertTrue(all(u["pi"] == allocation.project.pi.username for u in usages))
 
     def test_generate_report_for_project(self):
         allocation = AllocationFactory()

@@ -166,34 +166,26 @@ class StorageUsageReport:
         return sorted_usages_by_pi
 
     def get_usages_by_pi_for_project(self, project: str) -> list[dict[str, Any]]:
-            pi_usages = list()
-            allocations = self.get_allocations_by_project(project)
-            for allocation in allocations:
-                pi = allocation.project.pi.username
-                usage = allocation.get_usage_kb_by_date(self.usage_date)
-                if usage is None:
-                    continue
-                if any(entry["pi"] == pi for entry in pi_usages):
-                    for entry in pi_usages:
-                        if entry["pi"] == pi:
-                            entry["usage_kb"] = str(float(entry["usage_kb"]) + usage)
-                            entry[
-                                "filesystem_path"
-                            ] += f", {allocation.get_attribute('storage_filesystem_path')}"
-                else:
-                    usage_entry = dict()
-                    usage_entry["pi"] = pi
-                    usage_entry["usage_kb"] = str(usage)
-                    usage_entry["filesystem_path"] = allocation.get_attribute(
+        """
+        One row per allocation in the project. Allocations are not merged by PI,
+        because every allocation in a project shares the project's PI.
+        """
+        usages = list()
+        for allocation in self.get_allocations_by_project(project):
+            usage = allocation.get_usage_kb_by_date(self.usage_date)
+            if usage is None:
+                continue
+            usages.append(
+                {
+                    "pi": allocation.project.pi.username,
+                    "usage_kb": str(usage),
+                    "filesystem_path": allocation.get_attribute(
                         "storage_filesystem_path"
-                    )
-                    pi_usages.append(usage_entry)
-    
-            if not pi_usages:
-                return []
-            sorted_usages_by_pi = sorted(pi_usages, key=lambda x: x["pi"])
-            return sorted_usages_by_pi
-    
+                    ),
+                }
+            )
+
+        return sorted(usages, key=lambda x: (x["pi"], str(x["filesystem_path"])))
 
     def _find_max_length_of_key(self, usage_list: list, key: str) -> int:
         return max(len(entry[key]) for entry in usage_list) if usage_list else 0
