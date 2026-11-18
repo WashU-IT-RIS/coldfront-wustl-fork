@@ -17,6 +17,24 @@ class StorageUsageReport:
             usage_date = datetime.combine(date.today(), time.min)
         self.usage_date = usage_date
 
+    def _convert_usage_units(self, usages: list) -> list:
+        """
+        Replace the usage_kb column with usage_gb and usage_tb columns,
+        keeping the original column position.
+        """
+        converted = []
+        for entry in usages:
+            new_entry = {}
+            for key, val in entry.items():
+                if key == "usage_kb":
+                    usage_kb = float(val)
+                    new_entry["usage_gb"] = str(usage_kb / 1024**2)
+                    new_entry["usage_tb"] = str(usage_kb / 1024**3)
+                else:
+                    new_entry[key] = val
+            converted.append(new_entry)
+        return converted
+
     def _format_usage_report(self, usages: list) -> str:
         """
         Format the list of usages as a table-like report string.
@@ -30,15 +48,20 @@ class StorageUsageReport:
         col_title = {}
         max_col_width = {}
         is_float_col = {}
+        decimals = {}
         for key in keys:
+            # GB/TB values are often small, so show them with 2 decimal places
+            decimals[key] = 2 if key in ("usage_gb", "usage_tb") else 0
             col_title[key] = re.sub(
-                r" Kb$", " (KB)", re.sub(r"^Pi$", "PI", key.replace("_", " ").title())
+                r" (Kb|Gb|Tb)$",
+                lambda m: f" ({m.group(1).upper()})",
+                re.sub(r"^Pi$", "PI", key.replace("_", " ").title()),
             )
             # Check if column is float by checking all values
             is_float_col[key] = all(is_float(entry[key]) for entry in usages)
             max_val_len = max(
                 (
-                    len(f"{float(entry[key]):,.0f}")
+                    len(f"{float(entry[key]):,.{decimals[key]}f}")
                     if is_float_col[key]
                     else len(str(entry[key]))
                 )
@@ -57,7 +80,9 @@ class StorageUsageReport:
             for key in keys:
                 val = entry[key]
                 if is_float_col[key]:
-                    val_str = f"{float(val):,.0f}".rjust(max_col_width[key])
+                    val_str = f"{float(val):,.{decimals[key]}f}".rjust(
+                        max_col_width[key]
+                    )
                 else:
                     val_str = str(val).ljust(max_col_width[key])
                 row.append(val_str)
@@ -178,4 +203,4 @@ class StorageUsageReport:
 
     def generate_report_for_project(self, project: Any) -> str:
             usages = self.get_usages_by_pi_for_project(project)
-            return self._format_usage_report(usages)
+            return self._format_usage_report(self._convert_usage_units(usages))

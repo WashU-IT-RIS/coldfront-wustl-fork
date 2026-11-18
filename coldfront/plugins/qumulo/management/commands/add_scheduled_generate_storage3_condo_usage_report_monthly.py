@@ -53,7 +53,7 @@ def generate_storage3_condo_usage_report(
     print(usage_report)
 
     subject = f"Storage3 Monthly Usage Report with consumptions on {usage_date} for {project}"
-    message = f"Here is the Storage2&3 usage report with consumptions on {usage_date} for {project} by PIs:\n\n{usage_report}"
+    message = f"Here is the Storage 3 usage report with consumptions on {usage_date} for {project} by PIs:\n\n{usage_report}"
     from_email = 'noreply@gowustl.onmicrosoft.com'
     recipient_list = [email] if email else []
 

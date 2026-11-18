@@ -33,9 +33,33 @@ class StorageUsageReportFactoryTests(TestCase):
         ]
         table = self.report._format_usage_report(usages)
         self.assertIn("PI", table)
+        self.assertIn("Usage (KB)", table)
+        self.assertNotIn("Usage (GB)", table)
         self.assertIn("alice", table)
         self.assertIn("/fs1", table)
         self.assertIn("67,890", table)
+        self.assertNotIn("67,890.00", table)
+
+    def test_format_usage_report_table_gb_tb(self):
+        usages = [
+            {"pi": "alice", "usage_kb": str(5 * 1024**2), "filesystem_path": "/fs1"},
+            {"pi": "bob", "usage_kb": str(2.5 * 1024**3), "filesystem_path": "/fs2"},
+        ]
+        table = self.report._format_usage_report(
+            self.report._convert_usage_units(usages)
+        )
+        header = table.splitlines()[0]
+        self.assertIn("PI", header)
+        self.assertIn("Usage (GB)", header)
+        self.assertIn("Usage (TB)", header)
+        self.assertNotIn("Usage (KB)", header)
+        self.assertLess(header.index("Usage (GB)"), header.index("Usage (TB)"))
+        self.assertIn("alice", table)
+        self.assertIn("/fs1", table)
+        # alice: 5 GB, 0.00 TB; bob: 2,560 GB, 2.50 TB
+        self.assertIn("5.00", table)
+        self.assertIn("2,560.00", table)
+        self.assertIn("2.50", table)
 
     @patch("coldfront.plugins.qumulo.reports.storage_usage_report.ItsmClientHandler")
     def test_get_departments_by_school(self, mock_itsm):
@@ -164,6 +188,84 @@ class StorageUsageReportFactoryTests(TestCase):
         self.assertTrue(any(u["pi"] == allocation.project.pi.username for u in usages))
         self.assertTrue(any(u["filesystem_path"] == "/fs1" for u in usages))
 
+    def _add_usage(self, allocation, path, value=2048):
+        AllocationAttributeFactory(
+            allocation=allocation,
+            allocation_attribute_type=AllocationAttributeTypeFactory(
+                name="storage_filesystem_path"
+            ),
+            value=path,
+        )
+        usage = AllocationAttributeUsageFactory(
+            allocation_attribute=AllocationAttributeFactory(
+                allocation=allocation,
+                allocation_attribute_type=AllocationAttributeTypeFactory(
+                    name="storage_quota"
+                ),
+                value=value,
+            ),
+            value=value,
+        )
+        usage.history.create(
+            allocation_attribute=usage.allocation_attribute,
+            value=value,
+            history_date=self.usage_date,
+        )
+
+    def test_get_usages_by_pi_for_project_with_factory(self):
+        allocation = AllocationFactory()
+        self._add_usage(allocation, "/fs1")
+
+        usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
+        self.assertEqual(len(usages), 1)
+        self.assertEqual(usages[0]["pi"], allocation.project.pi.username)
+        self.assertEqual(usages[0]["filesystem_path"], "/fs1")
+
+    def test_get_usages_by_pi_for_project_excludes_other_projects(self):
+        allocation = AllocationFactory()
+        self._add_usage(allocation, "/fs1")
+        other = AllocationFactory()
+        self._add_usage(other, "/fs2")
+
+        usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
+        paths = [u["filesystem_path"] for u in usages]
+        self.assertEqual(paths, ["/fs1"])
+
+    def test_get_usages_by_pi_for_project_no_usage_returns_empty(self):
+        allocation = AllocationFactory()
+        self.assertEqual(
+            self.report.get_usages_by_pi_for_project(allocation.project.title), []
+        )
+
+    def test_get_usages_by_pi_for_project_aggregates_same_pi(self):
+        allocation = AllocationFactory()
+        self._add_usage(allocation, "/fs1")
+        # Stub the query so two allocations share one PI
+        second = AllocationFactory()
+        second.project = allocation.project
+        second.save()
+        self._add_usage(second, "/fs2")
+        with patch.object(
+            self.report,
+            "get_allocations_by_project",
+            return_value=[allocation, second],
+        ):
+            usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
+        self.assertEqual(len(usages), 1)
+        self.assertEqual(usages[0]["filesystem_path"], "/fs1, /fs2")
+        self.assertEqual(float(usages[0]["usage_kb"]), 4.0)
+
+    def test_generate_report_for_project(self):
+        allocation = AllocationFactory()
+        self._add_usage(allocation, "/fs1")
+
+        report = self.report.generate_report_for_project(allocation.project.title)
+        self.assertIn("PI", report)
+        self.assertIn("/fs1", report)
+        self.assertIn("Usage (GB)", report)
+        self.assertIn("Usage (TB)", report)
+        self.assertNotIn("Usage (KB)", report)
+
     def test_generate_report_for_school(self):
         # Setup allocation and usage
         allocation = AllocationFactory()
@@ -203,6 +305,9 @@ class StorageUsageReportFactoryTests(TestCase):
         report = self.report.generate_report_for_school("ENG")
         self.assertIn("PI", report)
         self.assertIn("/fs1", report)
+        self.assertIn("Usage (KB)", report)
+        self.assertNotIn("Usage (GB)", report)
+        self.assertNotIn("Usage (TB)", report)
 
     def test_allocation_with_no_usage_is_excluded(self):
         """
