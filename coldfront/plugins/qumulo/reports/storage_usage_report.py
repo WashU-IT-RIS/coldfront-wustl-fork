@@ -224,11 +224,11 @@ class StorageUsageReport:
             "used_tb": used_tb,
         }
 
-    def _format_tb(self, value: float) -> str:
-        return f"{value:,.3f} TB"
+    def _format_tb(self, value: float, decimals: int = 0) -> str:
+        return f"{value:,.{decimals}f} TB"
 
     def _format_percent(self, part: float, whole: float) -> str:
-        return f"{part / whole * 100:.0f}%" if whole else "N/A"
+        return f"{part / whole * 100:.3f}%" if whole else "N/A"
 
     def _format_project_summary(self, summary: dict[str, float]) -> str:
         total = summary["total_quota_tb"]
@@ -239,7 +239,7 @@ class StorageUsageReport:
                 f"Allocated to PIs: {self._format_tb(allocated)}"
                 f" ({self._format_percent(allocated, total)})",
                 f"Unallocated: {self._format_tb(summary['unallocated_tb'])}",
-                f"Used: {self._format_tb(summary['used_tb'])}"
+                f"Used: {self._format_tb(summary['used_tb'], decimals=3)}"
                 f" ({self._format_percent(summary['used_tb'], allocated)} of allocated)",
             ]
         )
