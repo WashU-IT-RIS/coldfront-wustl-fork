@@ -303,10 +303,10 @@ class StorageUsageReportFactoryTests(TestCase):
         )
         self.assertEqual(
             text,
-            "Total condo quota: 100 TB\n"
-            "Allocated to PIs: 27 TB (27%)\n"
-            "Unallocated: 73 TB\n"
-            "Used: 18.90 TB (70% of allocated)",
+            "Total condo quota: 100.000 TB\n"
+            "Allocated to PIs: 27.000 TB (27%)\n"
+            "Unallocated: 73.000 TB\n"
+            "Used: 18.900 TB (70% of allocated)",
         )
 
     def test_format_project_summary_nothing_allocated(self):
@@ -318,7 +318,8 @@ class StorageUsageReportFactoryTests(TestCase):
                 "used_tb": 0.0,
             }
         )
-        self.assertIn("Used: 0 TB (N/A of allocated)", text)
+        self.assertIn("Allocated to PIs: 0.000 TB (0%)", text)
+        self.assertIn("Used: 0.000 TB (N/A of allocated)", text)
 
     def test_generate_report_for_project_starts_with_summary(self):
         allocation = AllocationFactory()

@@ -225,8 +225,7 @@ class StorageUsageReport:
         }
 
     def _format_tb(self, value: float) -> str:
-        # Show whole numbers without decimals, otherwise 2 decimal places
-        return f"{value:,.0f} TB" if value == int(value) else f"{value:,.2f} TB"
+        return f"{value:,.3f} TB"
 
     def _format_percent(self, part: float, whole: float) -> str:
         return f"{part / whole * 100:.0f}%" if whole else "N/A"
