@@ -4,6 +4,7 @@ from ldap3 import Server, Connection, ALL, NTLM, MODIFY_DELETE
 from ldap3.extend.microsoft.addMembersToGroups import (
     ad_add_members_to_groups,
 )
+from ldap3.utils.conv import escape_filter_chars
 
 import os
 from dotenv import load_dotenv
@@ -44,12 +45,12 @@ class ActiveDirectoryAPI:
 
         self.conn.search(
             search_base,
-            f"(&(objectClass=person)(sAMAccountName={wustlkey}){memberof_clause})",
+            f"(&(objectClass=person)(sAMAccountName={escape_filter_chars(wustlkey)}){memberof_clause})",
             attributes=attributes,
         )
 
         if not self.conn.response:
-            raise ValueError("Invalid wustlkey")
+            raise ValueError(f"Invalid wustlkey: {wustlkey}")
 
         return self.conn.response[0]
 
@@ -111,7 +112,9 @@ class ActiveDirectoryAPI:
 
         search_base = "dc=accounts,dc=ad,dc=wustl,dc=edu"
 
-        member_filter_base = lambda member: f"(distinguishedName={member})"
+        member_filter_base = (
+            lambda member: f"(distinguishedName={escape_filter_chars(member)})"
+        )
         member_filters = f"(|{''.join(map(member_filter_base, dns))})"
 
         self.conn.search(
@@ -191,19 +194,20 @@ class ActiveDirectoryAPI:
     def get_group_members(self, group_name: str) -> list[dict]:
         groups_OU = os.environ.get("AD_GROUPS_OU")
 
+        cleaned_group_name = escape_filter_chars(group_name.strip())
+
         self.conn.search(
             search_base=groups_OU,
-            search_filter=f"(&(objectClass=group)(sAMAccountName={group_name}))",
-            search_scope="SUBTREE",
+            search_filter=f"(&(objectClass=group)(sAMAccountName={cleaned_group_name}))",
             attributes=["member"],
         )
 
         if not self.conn.response:
             raise ValueError("Invalid group DN")
 
-        member_dns = self.conn.response[0].get("attributes", {}).get("member", [])
-        if not member_dns:
-            raise ValueError("No members found for the group")
+        member_dns: list[str] = (
+            self.conn.response[0].get("attributes", {}).get("member")
+        )
 
         members = self.get_members_by_dn(member_dns)
 
