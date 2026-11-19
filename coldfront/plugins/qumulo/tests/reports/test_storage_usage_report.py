@@ -315,6 +315,10 @@ class StorageUsageReportFactoryTests(TestCase):
         report = self.report.generate_report_for_project(allocation.project.title)
         table_header = report.split("\n\n", 1)[1].splitlines()[0]
         self.assertNotIn("PI", table_header)
+        self.assertEqual(
+            [col.strip() for col in table_header.split("|")],
+            ["Filesystem Path", "Usage (GB)", "Usage (TB)"],
+        )
         self.assertIn("/fs1", report)
         self.assertIn("Usage (GB)", report)
         self.assertIn("Usage (TB)", report)

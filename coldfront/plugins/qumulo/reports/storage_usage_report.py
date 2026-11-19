@@ -186,10 +186,10 @@ class StorageUsageReport:
             usage = allocation.get_usage_kb_by_date(self.usage_date)
             usages.append(
                 {
-                    "usage_kb": NO_USAGE_DATA if usage is None else str(usage),
                     "filesystem_path": allocation.get_attribute(
                         "storage_filesystem_path"
                     ),
+                    "usage_kb": NO_USAGE_DATA if usage is None else str(usage),
                 }
             )
 
