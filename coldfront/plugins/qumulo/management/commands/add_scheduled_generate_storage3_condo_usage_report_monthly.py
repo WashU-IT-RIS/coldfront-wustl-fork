@@ -55,7 +55,6 @@ def generate_storage3_condo_usage_report(
     subject = f"Storage3 Monthly Usage Report with consumptions on {usage_date} for {project}"
     message = f"Here is the Storage 3 usage report with consumptions on {usage_date} for {project} by PIs:\n\n{usage_report}"
     from_email = 'noreply@gowustl.onmicrosoft.com'
-    recipient_list = [email] if email else []
 
     billing_contacts = []
     for allocation in getattr(usage_report, 'allocations', []) or []:
@@ -66,8 +65,6 @@ def generate_storage3_condo_usage_report(
             billing_contacts.append(billing_contact_email)
 
     recipient_list = list(dict.fromkeys(email for email in billing_contacts if email))
-    if not recipient_list and email:
-        recipient_list = [email]
 
     if recipient_list:
         send_mail(
