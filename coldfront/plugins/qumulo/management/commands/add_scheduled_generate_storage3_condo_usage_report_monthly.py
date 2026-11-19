@@ -76,7 +76,7 @@ def generate_storage3_condo_usage_report(
     print(f"Generating Storage3 Monthly Usage Report for {project}.")
 
     report_generator = StorageUsageReport(usage_date=usage_date)
-    usages = report_generator.get_usages_by_pi_for_project(project)
+    usages = report_generator.get_usages_for_project(project)
     if all(usage["usage_kb"] == NO_USAGE_DATA for usage in usages):
         raise ValueError(
             f"No usage data recorded on {usage_date} for any of the {len(usages)} "
@@ -88,7 +88,7 @@ def generate_storage3_condo_usage_report(
     print(usage_report)
 
     subject = f"Storage3 Monthly Usage Report with consumptions on {usage_date} for {project}"
-    message = f"Here is the Storage 3 usage report with consumptions on {usage_date} for {project} by PIs:\n\n{usage_report}"
+    message = f"Here is the Storage 3 usage report with consumptions on {usage_date} for {project}:\n\n{usage_report}"
 
     allocations = report_generator.get_allocations_by_project(project)
     recipient_list = get_billing_contact_emails(allocations)

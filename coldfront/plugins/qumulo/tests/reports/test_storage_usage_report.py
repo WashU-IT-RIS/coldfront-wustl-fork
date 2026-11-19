@@ -248,36 +248,36 @@ class StorageUsageReportFactoryTests(TestCase):
             history_date=self.usage_date,
         )
 
-    def test_get_usages_by_pi_for_project_with_factory(self):
+    def test_get_usages_for_project_with_factory(self):
         allocation = AllocationFactory()
         self._add_usage(allocation, "/fs1")
 
-        usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
+        usages = self.report.get_usages_for_project(allocation.project.title)
         self.assertEqual(len(usages), 1)
-        self.assertEqual(usages[0]["pi"], allocation.project.pi.username)
+        self.assertNotIn("pi", usages[0])
         self.assertEqual(usages[0]["filesystem_path"], "/fs1")
 
-    def test_get_usages_by_pi_for_project_excludes_other_projects(self):
+    def test_get_usages_for_project_excludes_other_projects(self):
         allocation = AllocationFactory()
         self._add_usage(allocation, "/fs1")
         other = AllocationFactory()
         self._add_usage(other, "/fs2")
 
-        usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
+        usages = self.report.get_usages_for_project(allocation.project.title)
         paths = [u["filesystem_path"] for u in usages]
         self.assertEqual(paths, ["/fs1"])
 
-    def test_get_usages_by_pi_for_project_no_usage_shows_no_data_row(self):
+    def test_get_usages_for_project_no_usage_shows_no_data_row(self):
         allocation = AllocationFactory()
         allocation.resources.add(self._storage_resource())
-        usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
+        usages = self.report.get_usages_for_project(allocation.project.title)
         self.assertEqual(len(usages), 1)
         self.assertEqual(usages[0]["usage_kb"], NO_USAGE_DATA)
 
     def test_format_usage_report_with_no_data_rows(self):
         usages = [
-            {"pi": "alice", "usage_kb": str(5 * 1024**2), "filesystem_path": "/fs1"},
-            {"pi": "alice", "usage_kb": NO_USAGE_DATA, "filesystem_path": "/fs2"},
+            {"usage_kb": str(5 * 1024**2), "filesystem_path": "/fs1"},
+            {"usage_kb": NO_USAGE_DATA, "filesystem_path": "/fs2"},
         ]
         table = self.report._format_usage_report(
             self.report._convert_usage_units(usages)
@@ -290,10 +290,9 @@ class StorageUsageReportFactoryTests(TestCase):
         # Numeric columns stay right-aligned and the same width
         self.assertEqual(len(rows[0]), len(rows[1]))
 
-    def test_get_usages_by_pi_for_project_one_row_per_allocation(self):
+    def test_get_usages_for_project_one_row_per_allocation(self):
         allocation = AllocationFactory()
         self._add_usage(allocation, "/fs2")
-        # Two allocations in the same project share the project's PI
         second = AllocationFactory()
         second.project = allocation.project
         second.save()
@@ -303,19 +302,19 @@ class StorageUsageReportFactoryTests(TestCase):
             "get_allocations_by_project",
             return_value=[allocation, second],
         ):
-            usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
+            usages = self.report.get_usages_for_project(allocation.project.title)
         self.assertEqual(len(usages), 2)
-        # Sorted by filesystem path within the PI
+        # Sorted by filesystem path
         self.assertEqual([u["filesystem_path"] for u in usages], ["/fs1", "/fs2"])
         self.assertEqual([float(u["usage_kb"]) for u in usages], [4.0, 2.0])
-        self.assertTrue(all(u["pi"] == allocation.project.pi.username for u in usages))
 
     def test_generate_report_for_project(self):
         allocation = AllocationFactory()
         self._add_usage(allocation, "/fs1")
 
         report = self.report.generate_report_for_project(allocation.project.title)
-        self.assertIn("PI", report)
+        table_header = report.split("\n\n", 1)[1].splitlines()[0]
+        self.assertNotIn("PI", table_header)
         self.assertIn("/fs1", report)
         self.assertIn("Usage (GB)", report)
         self.assertIn("Usage (TB)", report)

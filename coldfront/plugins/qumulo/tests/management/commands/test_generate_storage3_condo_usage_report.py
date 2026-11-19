@@ -30,7 +30,7 @@ def _allocation(pk, billing_contact):
 
 
 def _usage(usage_kb):
-    return {"pi": "pi", "usage_kb": usage_kb, "filesystem_path": "/path"}
+    return {"usage_kb": usage_kb, "filesystem_path": "/path"}
 
 
 AD_USERS = {
@@ -80,7 +80,7 @@ class GenerateStorage3CondoUsageReportTests(TestCase):
     def _setup_report(self, mock_report_cls, mock_ad, usages=None, allocations=None):
         report = mock_report_cls.return_value
         report.generate_report_for_project.return_value = "REPORT"
-        report.get_usages_by_pi_for_project.return_value = (
+        report.get_usages_for_project.return_value = (
             usages if usages is not None else [_usage("100.0")]
         )
         report.get_allocations_by_project.return_value = (

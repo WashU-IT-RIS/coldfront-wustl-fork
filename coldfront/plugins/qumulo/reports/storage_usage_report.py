@@ -176,10 +176,9 @@ class StorageUsageReport:
         sorted_usages_by_pi = sorted(pi_usages, key=lambda x: x["pi"])
         return sorted_usages_by_pi
 
-    def get_usages_by_pi_for_project(self, project: str) -> list[dict[str, Any]]:
+    def get_usages_for_project(self, project: str) -> list[dict[str, Any]]:
         """
-        One row per allocation in the project. Allocations are not merged by PI,
-        because every allocation in a project shares the project's PI.
+        One row per allocation in the project, sorted by filesystem path.
         Allocations with no usage recorded on the report date get NO_USAGE_DATA.
         """
         usages = list()
@@ -187,7 +186,6 @@ class StorageUsageReport:
             usage = allocation.get_usage_kb_by_date(self.usage_date)
             usages.append(
                 {
-                    "pi": allocation.project.pi.username,
                     "usage_kb": NO_USAGE_DATA if usage is None else str(usage),
                     "filesystem_path": allocation.get_attribute(
                         "storage_filesystem_path"
@@ -195,7 +193,7 @@ class StorageUsageReport:
                 }
             )
 
-        return sorted(usages, key=lambda x: (x["pi"], str(x["filesystem_path"])))
+        return sorted(usages, key=lambda x: str(x["filesystem_path"]))
 
     def _find_max_length_of_key(self, usage_list: list, key: str) -> int:
         return max(len(entry[key]) for entry in usage_list) if usage_list else 0
@@ -248,6 +246,6 @@ class StorageUsageReport:
 
     def generate_report_for_project(self, project: Any) -> str:
             summary = self._format_project_summary(self.get_project_summary(project))
-            usages = self.get_usages_by_pi_for_project(project)
+            usages = self.get_usages_for_project(project)
             table = self._format_usage_report(self._convert_usage_units(usages))
             return f"{summary}\n\n{table}"
