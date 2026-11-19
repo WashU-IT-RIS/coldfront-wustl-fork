@@ -26,26 +26,30 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         project = options['project']
         email = options['email']
-        print(f"Scheduling to generate storage2&3 monthly usage report to {email} for condo {project}...")
+        print(f"Scheduling to generate storage 3 monthly usage report to {email} for condo {project}...")
         schedule(
             func="coldfront.plugins.qumulo.management.commands.add_scheduled_generate_storage3_condo_usage_report_monthly.generate_storage3_condo_usage_report",
             name=f"Generate Storage3 Monthly Usage Report for {project}",
             schedule_type=Schedule.MONTHLY,
             next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_6_AM,
+            hook="coldfront.plugins.qumulo.hooks.notify_on_call_on_failure_hook",
             project=project,
             email=email,
         )
 
 
 def generate_storage3_condo_usage_report(
-        usage_date = datetime.now(timezone.utc).strftime("%Y-%m-01"),
+        usage_date: str = None,
         project: str = 'Genetics Storage 3 Condo',
         email: str = None,
         **kwargs
     ):
     """
     Generate the Storage3 Monthly Usage Report for the given project and email it.
+    usage_date defaults to the 1st of the current month, computed at call time.
     """
+    if usage_date is None:
+        usage_date = datetime.now(timezone.utc).strftime("%Y-%m-01")
     print(f"Generating Storage3 Monthly Usage Report for {project} emailing to {email}.")
 
     report_generator = StorageUsageReport(usage_date=usage_date)
