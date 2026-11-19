@@ -12,6 +12,9 @@ from typing import Any, Optional
 import re
 
 
+NO_USAGE_DATA = "No data"
+
+
 class StorageUsageReport:
     def __init__(self, usage_date=None):
         if usage_date is None:
@@ -27,7 +30,10 @@ class StorageUsageReport:
         for entry in usages:
             new_entry = {}
             for key, val in entry.items():
-                if key == "usage_kb":
+                if key == "usage_kb" and val == NO_USAGE_DATA:
+                    new_entry["usage_gb"] = NO_USAGE_DATA
+                    new_entry["usage_tb"] = NO_USAGE_DATA
+                elif key == "usage_kb":
                     usage_kb = float(val)
                     new_entry["usage_gb"] = str(usage_kb / 1024**2)
                     new_entry["usage_tb"] = str(usage_kb / 1024**3)
@@ -40,6 +46,7 @@ class StorageUsageReport:
         """
         Format the list of usages as a table-like report string.
         If the column is float, align its values to the right, else, align to the left.
+        A float column may also contain NO_USAGE_DATA, which is right-aligned as-is.
         """
         if not usages:
             return "No usage data available."
@@ -58,14 +65,12 @@ class StorageUsageReport:
                 lambda m: f" ({m.group(1).upper()})",
                 re.sub(r"^Pi$", "PI", key.replace("_", " ").title()),
             )
-            # Check if column is float by checking all values
-            is_float_col[key] = all(is_float(entry[key]) for entry in usages)
+            # Column is float if every value is a float or NO_USAGE_DATA (and some are floats)
+            is_float_col[key] = all(
+                is_float(entry[key]) or entry[key] == NO_USAGE_DATA for entry in usages
+            ) and any(is_float(entry[key]) for entry in usages)
             max_val_len = max(
-                (
-                    len(f"{float(entry[key]):,.{decimals[key]}f}")
-                    if is_float_col[key]
-                    else len(str(entry[key]))
-                )
+                len(self._format_cell(entry[key], is_float_col[key], decimals[key]))
                 for entry in usages
             )
             max_col_width[key] = max(len(col_title[key]), max_val_len)
@@ -79,18 +84,21 @@ class StorageUsageReport:
         for entry in usages:
             row = []
             for key in keys:
-                val = entry[key]
+                val_str = self._format_cell(entry[key], is_float_col[key], decimals[key])
                 if is_float_col[key]:
-                    val_str = f"{float(val):,.{decimals[key]}f}".rjust(
-                        max_col_width[key]
-                    )
+                    val_str = val_str.rjust(max_col_width[key])
                 else:
-                    val_str = str(val).ljust(max_col_width[key])
+                    val_str = val_str.ljust(max_col_width[key])
                 row.append(val_str)
             rows.append(" | ".join(row))
 
         report = "\n".join([header, separator] + rows)
         return report
+
+    def _format_cell(self, val: Any, is_float_col: bool, decimals: int) -> str:
+        if is_float_col and is_float(val):
+            return f"{float(val):,.{decimals}f}"
+        return str(val)
 
     def get_departments_by_school(self, school_unit="ALL") -> list:
         itsm_client = ItsmClientHandler("/v2/rest/attr/info/department")
@@ -124,9 +132,12 @@ class StorageUsageReport:
     def get_allocations_by_project(self, project: str) -> AllocationQuerySet:
         project_object = Project.objects.get(title=project)
         project_id = project_object.pk
-        return Allocation.objects.parents().filter(
-            project__pk=project_id,
-            status__name="Active",
+        # Every active, top-level storage allocation in the project (no sub-allocations)
+        return (
+            Allocation.objects.parents()
+            .active_storage()
+            .filter(project__pk=project_id)
+            .distinct()
         )
 
     def _get_suballocation_ids(self) -> list[int]:
@@ -169,16 +180,15 @@ class StorageUsageReport:
         """
         One row per allocation in the project. Allocations are not merged by PI,
         because every allocation in a project shares the project's PI.
+        Allocations with no usage recorded on the report date get NO_USAGE_DATA.
         """
         usages = list()
         for allocation in self.get_allocations_by_project(project):
             usage = allocation.get_usage_kb_by_date(self.usage_date)
-            if usage is None:
-                continue
             usages.append(
                 {
                     "pi": allocation.project.pi.username,
-                    "usage_kb": str(usage),
+                    "usage_kb": NO_USAGE_DATA if usage is None else str(usage),
                     "filesystem_path": allocation.get_attribute(
                         "storage_filesystem_path"
                     ),

@@ -9,10 +9,14 @@ from coldfront.core.test_helpers.factories import (
     AllocationStatusChoiceFactory,
     ProjectFactory,
     ResourceFactory,
+    ResourceTypeFactory,
 )
 from coldfront.core.project.models import Project
 from coldfront.plugins.qumulo.tests import fixtures
-from coldfront.plugins.qumulo.reports.storage_usage_report import StorageUsageReport
+from coldfront.plugins.qumulo.reports.storage_usage_report import (
+    NO_USAGE_DATA,
+    StorageUsageReport,
+)
 import re
 
 
@@ -111,10 +115,36 @@ class StorageUsageReportFactoryTests(TestCase):
         project = ProjectFactory()
         other_project = ProjectFactory()
         active_alloc = AllocationFactory(project=project)
-        AllocationFactory(project=other_project)
+        active_alloc.resources.add(self._storage_resource())
+        other = AllocationFactory(project=other_project)
+        other.resources.add(self._storage_resource())
 
         allocs = list(self.report.get_allocations_by_project(project.title))
         self.assertEqual(allocs, [active_alloc])
+
+    def test_get_allocations_by_project_excludes_suballocations(self):
+        parent = AllocationFactory()
+        parent.resources.add(self._storage_resource())
+        # AllocationFactory gets-or-creates by project, so move the child after
+        child = AllocationFactory()
+        child.project = parent.project
+        child.save()
+        child.resources.add(self._storage_resource())
+        fixtures.create_allocation_linkage(parent, [child])
+
+        allocs = self.report.get_allocations_by_project(parent.project.title)
+        self.assertEqual(list(allocs), [parent])
+
+    def test_get_allocations_by_project_excludes_non_storage_allocations(self):
+        allocation = AllocationFactory()
+        allocation.resources.add(
+            ResourceFactory(
+                name="compute", resource_type=ResourceTypeFactory(name="Cluster")
+            )
+        )
+
+        allocs = self.report.get_allocations_by_project(allocation.project.title)
+        self.assertEqual(allocs.count(), 0)
 
     def test_get_allocations_by_project_excludes_inactive_allocations(self):
         project = ProjectFactory()
@@ -188,7 +218,13 @@ class StorageUsageReportFactoryTests(TestCase):
         self.assertTrue(any(u["pi"] == allocation.project.pi.username for u in usages))
         self.assertTrue(any(u["filesystem_path"] == "/fs1" for u in usages))
 
+    def _storage_resource(self):
+        return ResourceFactory(
+            name="Storage2", resource_type=ResourceTypeFactory(name="Storage")
+        )
+
     def _add_usage(self, allocation, path, value=2048):
+        allocation.resources.add(self._storage_resource())
         AllocationAttributeFactory(
             allocation=allocation,
             allocation_attribute_type=AllocationAttributeTypeFactory(
@@ -231,11 +267,28 @@ class StorageUsageReportFactoryTests(TestCase):
         paths = [u["filesystem_path"] for u in usages]
         self.assertEqual(paths, ["/fs1"])
 
-    def test_get_usages_by_pi_for_project_no_usage_returns_empty(self):
+    def test_get_usages_by_pi_for_project_no_usage_shows_no_data_row(self):
         allocation = AllocationFactory()
-        self.assertEqual(
-            self.report.get_usages_by_pi_for_project(allocation.project.title), []
+        allocation.resources.add(self._storage_resource())
+        usages = self.report.get_usages_by_pi_for_project(allocation.project.title)
+        self.assertEqual(len(usages), 1)
+        self.assertEqual(usages[0]["usage_kb"], NO_USAGE_DATA)
+
+    def test_format_usage_report_with_no_data_rows(self):
+        usages = [
+            {"pi": "alice", "usage_kb": str(5 * 1024**2), "filesystem_path": "/fs1"},
+            {"pi": "alice", "usage_kb": NO_USAGE_DATA, "filesystem_path": "/fs2"},
+        ]
+        table = self.report._format_usage_report(
+            self.report._convert_usage_units(usages)
         )
+        rows = table.splitlines()[2:]
+        self.assertIn("5.00", rows[0])
+        self.assertIn("/fs1", rows[0])
+        self.assertEqual(rows[1].count(NO_USAGE_DATA), 2)
+        self.assertIn("/fs2", rows[1])
+        # Numeric columns stay right-aligned and the same width
+        self.assertEqual(len(rows[0]), len(rows[1]))
 
     def test_get_usages_by_pi_for_project_one_row_per_allocation(self):
         allocation = AllocationFactory()
