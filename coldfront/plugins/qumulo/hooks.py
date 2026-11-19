@@ -24,14 +24,14 @@ def acl_reset_complete_hook(task_object):
 
 def notify_on_call_on_failure_hook(task_object):
     """
-    django-q hook: email the on-call list when a task fails.
+    django-q hook: email the on-call address when a task fails.
     On failure django-q stores "<error> : <traceback>" in task_object.result.
     """
     if task_object.success:
         return
     if not EMAIL_ON_CALL:
         logger.error(
-            f"Task {task_object.name} failed but EMAIL_ON_CALL_LIST is empty; "
+            f"Task {task_object.name} failed but EMAIL_ON_CALL is not set; "
             f"no failure email sent. Result: {task_object.result}"
         )
         return
@@ -52,4 +52,4 @@ def notify_on_call_on_failure_hook(task_object):
             str(task_object.result),
         ]
     )
-    send_email(subject, body, EMAIL_SENDER, EMAIL_ON_CALL)
+    send_email(subject, body, EMAIL_SENDER, [EMAIL_ON_CALL])
