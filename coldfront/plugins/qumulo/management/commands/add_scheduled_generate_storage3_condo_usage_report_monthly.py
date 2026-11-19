@@ -56,15 +56,8 @@ def generate_storage3_condo_usage_report(
     message = f"Here is the Storage 3 usage report with consumptions on {usage_date} for {project} by PIs:\n\n{usage_report}"
     from_email = 'noreply@gowustl.onmicrosoft.com'
 
-    billing_contacts = []
-    for allocation in getattr(usage_report, 'allocations', []) or []:
-        active_directory_api = ActiveDirectoryAPI()
-        billing_contact = allocation.get_attribute("billing_contact")
-        billing_contact_email = active_directory_api.get_user(billing_contact)
-        if billing_contact_email:
-            billing_contacts.append(billing_contact_email)
-
-    recipient_list = list(dict.fromkeys(email for email in billing_contacts if email))
+    allocations = report_generator.get_allocations_by_project(project)
+    recipient_list = get_billing_contact_emails(allocations)
 
     if recipient_list:
         send_mail(
@@ -76,5 +69,30 @@ def generate_storage3_condo_usage_report(
         )
         print(f"Storage3 Monthly Usage Report for {project} with consumptions on {usage_date} has been sent via email to {', '.join(recipient_list)}.")
     else:
-        print("No recipient email provided. Report not sent.")
+        print("No billing contact emails found. Report not sent.")
+
+
+def get_billing_contact_emails(allocations) -> list[str]:
+    """
+    Look up the email address of each allocation's billing contact in Active Directory.
+    Returns unique addresses in allocation order; contacts that can't be found are skipped.
+    """
+    active_directory_api = ActiveDirectoryAPI()
+    emails = []
+    for allocation in allocations:
+        billing_contact = allocation.get_attribute("billing_contact")
+        if not billing_contact:
+            print(f"Allocation {allocation.pk} has no billing contact; skipping.")
+            continue
+        try:
+            mail = active_directory_api.get_user(billing_contact)["attributes"]["mail"]
+        except (ValueError, KeyError) as error:
+            print(f"Could not find an email for billing contact {billing_contact} of allocation {allocation.pk}: {error}")
+            continue
+        # ldap3 can return a single-valued attribute as a list
+        if isinstance(mail, list):
+            mail = mail[0] if mail else None
+        if mail and mail not in emails:
+            emails.append(mail)
+    return emails
 
