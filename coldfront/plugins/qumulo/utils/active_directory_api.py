@@ -49,6 +49,8 @@ class ActiveDirectoryAPI:
         )
 
         if not self.conn.response:
+            print(f'DEBUG No response for wustlkey: {wustlkey}')
+            print(f'DEBUG LDAP search filter used: (&(objectClass=person)(sAMAccountName={wustlkey}){memberof_clause})')
             raise ValueError("Invalid wustlkey")
 
         return self.conn.response[0]
