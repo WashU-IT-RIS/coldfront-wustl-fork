@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import arrow
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
 from django_q.models import Schedule
 
@@ -158,20 +158,6 @@ class GenerateStorage3CondoUsageReportTests(TestCase):
 
         mock_send_mail.assert_not_called()
 
-    @override_settings(DEBUG=True)
-    @patch(f"{MODULE}.EMAIL_DEVELOPMENT_EMAIL_LIST", ["dev@example.edu"])
-    def test_debug_sends_to_development_list_not_billing_contacts(
-        self, mock_report_cls, mock_ad, mock_send_mail
-    ):
-        self._setup_report(mock_report_cls, mock_ad)
-
-        generate_storage3_condo_usage_report(
-            usage_date="2026-11-01", project="Test Condo"
-        )
-
-        mock_send_mail.assert_called_once()
-        self.assertEqual(mock_send_mail.call_args.args[3], ["dev@example.edu"])
-
     def test_send_failure_raises(self, mock_report_cls, mock_ad, mock_send_mail):
         self._setup_report(mock_report_cls, mock_ad)
         mock_send_mail.side_effect = OSError("SMTP down")
@@ -233,6 +219,7 @@ class ScheduleCommandTests(TestCase):
         self.assertEqual(kwargs["project"], "Test Condo")
         self.assertEqual(kwargs["q_options"], {"timeout": REPORT_TIMEOUT_SECONDS})
         self.assertIs(kwargs["dry_run"], False)
+        self.assertIs(kwargs["debug"], False)
 
     def test_rerunning_replaces_schedule_instead_of_duplicating(self):
         call_command(COMMAND, "--project", "Test Condo")

@@ -1,7 +1,7 @@
 import arrow
 from coldfront.plugins.qumulo.utils.active_directory_api import ActiveDirectoryAPI
 from django.conf import settings
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.core.mail import send_mail
 from django_q.tasks import schedule
 from django_q.models import Schedule
@@ -37,12 +37,22 @@ class Command(BaseCommand):
         parser.add_argument('--project', type=str, default='Genetics Storage 3 Condo', help='Project (default: Genetics Storage 3 Condo)')
         parser.add_argument(
             '--dry-run',
+            action='store_true',
+            default=False,
             help='Schedule the report to be generated and logged each month without emailing it.',
+        )
+        parser.add_argument(
+            '--debug',
+            action='store_true',
+            help='Email the report to EMAIL_DEVELOPMENT_EMAIL_LIST instead of the billing contacts.',
         )
 
     def handle(self, *args, **options):
         project = options['project']
         dry_run = options['dry_run']
+        debug = options['debug']
+        if debug and not EMAIL_DEVELOPMENT_EMAIL_LIST:
+            raise CommandError("--debug needs EMAIL_DEVELOPMENT_EMAIL_LIST to be set; it is empty.")
         name = f"Generate Storage3 Monthly Usage Report for {project}"
 
         # Re-running the command replaces the schedule instead of adding a
@@ -52,8 +62,13 @@ class Command(BaseCommand):
             print(f"Replacing {deleted} existing schedule(s) named '{name}'.")
 
         next_run = next_run_on_2nd_at_6_am_utc()
-        dry_run_note = " (dry run: the report will not be emailed)" if dry_run else ""
-        print(f"Scheduling to generate storage 3 monthly usage report for condo {project}, first run at {next_run}{dry_run_note}...")
+        notes = []
+        if dry_run:
+            notes.append("dry run: the report will not be emailed")
+        if debug:
+            notes.append(f"debug: recipients are {', '.join(EMAIL_DEVELOPMENT_EMAIL_LIST)}")
+        note = f" ({'; '.join(notes)})" if notes else ""
+        print(f"Scheduling to generate storage 3 monthly usage report for condo {project}, first run at {next_run}{note}...")
         schedule(
             func=REPORT_FUNC,
             name=name,
@@ -63,6 +78,7 @@ class Command(BaseCommand):
             q_options={"timeout": REPORT_TIMEOUT_SECONDS},
             project=project,
             dry_run=dry_run,
+            debug=debug,
         )
 
 
@@ -70,12 +86,15 @@ def generate_storage3_condo_usage_report(
         usage_date: str = None,
         project: str = 'Genetics Storage 3 Condo',
         dry_run: bool = False,
+        debug: bool = False,
         **kwargs
     ):
     """
     Generate the Storage3 Monthly Usage Report for the given project and email it.
     usage_date defaults to the 1st of the current month, computed at call time.
     With dry_run, the report and its recipients are logged but no email is sent.
+    With debug, the report goes to EMAIL_DEVELOPMENT_EMAIL_LIST instead of the
+    billing contacts (who are still looked up and logged).
     Raises if no allocation has usage recorded on usage_date, so the failure
     hook alerts on-call instead of an empty report going to billing contacts.
     """
@@ -105,13 +124,15 @@ def generate_storage3_condo_usage_report(
         print("No billing contact emails found. Report not sent.")
         return
 
-    if dry_run:
-        print(f"Dry run: report not sent to billing contacts {', '.join(recipient_list)}.")
-        return
-
-    # Outside production, send to the developers instead of real billing contacts.
-    if settings.DEBUG:
+    if debug:
+        print(f"Debug: sending to developers instead of billing contacts {', '.join(recipient_list)}.")
         recipient_list = EMAIL_DEVELOPMENT_EMAIL_LIST
+        if not recipient_list:
+            raise ValueError("Debug is on but EMAIL_DEVELOPMENT_EMAIL_LIST is empty. Report not sent.")
+
+    if dry_run:
+        print(f"Dry run: report not sent to {', '.join(recipient_list)}.")
+        return
 
     # Not the send_email helper: it swallows SMTP errors, and a failed send must
     # raise so the failure hook alerts on-call.
