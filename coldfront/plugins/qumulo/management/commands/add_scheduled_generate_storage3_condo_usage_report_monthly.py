@@ -105,13 +105,13 @@ def generate_storage3_condo_usage_report(
         print("No billing contact emails found. Report not sent.")
         return
 
+    if dry_run:
+        print(f"Dry run: report not sent to billing contacts {', '.join(recipient_list)}.")
+        return
+
     # Outside production, send to the developers instead of real billing contacts.
     if settings.DEBUG:
         recipient_list = EMAIL_DEVELOPMENT_EMAIL_LIST
-
-    if dry_run:
-        print(f"Dry run: report not sent to {', '.join(recipient_list)}.")
-        return
 
     # Not the send_email helper: it swallows SMTP errors, and a failed send must
     # raise so the failure hook alerts on-call.
