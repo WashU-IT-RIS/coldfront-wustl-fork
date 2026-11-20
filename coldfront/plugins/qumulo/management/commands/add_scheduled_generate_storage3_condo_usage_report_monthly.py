@@ -19,7 +19,6 @@ FAILURE_HOOK = "coldfront.plugins.qumulo.hooks.notify_on_call_on_failure_hook"
 # being recorded as failed, so it would never reach the failure hook.
 REPORT_TIMEOUT_SECONDS = 600
 
-EMAIL_ENABLED = import_from_settings("EMAIL_ENABLED", False)
 EMAIL_DEVELOPMENT_EMAIL_LIST = import_from_settings("EMAIL_DEVELOPMENT_EMAIL_LIST", [])
 
 
@@ -36,9 +35,14 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--project', type=str, default='Genetics Storage 3 Condo', help='Project (default: Genetics Storage 3 Condo)')
+        parser.add_argument(
+            '--dry-run',
+            help='Schedule the report to be generated and logged each month without emailing it.',
+        )
 
     def handle(self, *args, **options):
         project = options['project']
+        dry_run = options['dry_run']
         name = f"Generate Storage3 Monthly Usage Report for {project}"
 
         # Re-running the command replaces the schedule instead of adding a
@@ -48,7 +52,8 @@ class Command(BaseCommand):
             print(f"Replacing {deleted} existing schedule(s) named '{name}'.")
 
         next_run = next_run_on_2nd_at_6_am_utc()
-        print(f"Scheduling to generate storage 3 monthly usage report for condo {project}, first run at {next_run}...")
+        dry_run_note = " (dry run: the report will not be emailed)" if dry_run else ""
+        print(f"Scheduling to generate storage 3 monthly usage report for condo {project}, first run at {next_run}{dry_run_note}...")
         schedule(
             func=REPORT_FUNC,
             name=name,
@@ -57,17 +62,20 @@ class Command(BaseCommand):
             hook=FAILURE_HOOK,
             q_options={"timeout": REPORT_TIMEOUT_SECONDS},
             project=project,
+            dry_run=dry_run,
         )
 
 
 def generate_storage3_condo_usage_report(
         usage_date: str = None,
         project: str = 'Genetics Storage 3 Condo',
+        dry_run: bool = False,
         **kwargs
     ):
     """
     Generate the Storage3 Monthly Usage Report for the given project and email it.
     usage_date defaults to the 1st of the current month, computed at call time.
+    With dry_run, the report and its recipients are logged but no email is sent.
     Raises if no allocation has usage recorded on usage_date, so the failure
     hook alerts on-call instead of an empty report going to billing contacts.
     """
@@ -97,13 +105,13 @@ def generate_storage3_condo_usage_report(
         print("No billing contact emails found. Report not sent.")
         return
 
-    if not EMAIL_ENABLED:
-        print(f"EMAIL_ENABLED is off. Report not sent to {', '.join(recipient_list)}.")
-        return
-
     # Outside production, send to the developers instead of real billing contacts.
     if settings.DEBUG:
         recipient_list = EMAIL_DEVELOPMENT_EMAIL_LIST
+
+    if dry_run:
+        print(f"Dry run: report not sent to {', '.join(recipient_list)}.")
+        return
 
     # Not the send_email helper: it swallows SMTP errors, and a failed send must
     # raise so the failure hook alerts on-call.

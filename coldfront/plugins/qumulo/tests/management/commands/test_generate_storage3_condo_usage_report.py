@@ -72,7 +72,6 @@ class GetBillingContactEmailsTests(TestCase):
 
 
 @override_settings(DEBUG=False, DEFAULT_FROM_EMAIL="noreply@example.edu")
-@patch(f"{MODULE}.EMAIL_ENABLED", True)
 @patch(f"{MODULE}.send_mail")
 @patch(f"{MODULE}.ActiveDirectoryAPI")
 @patch(f"{MODULE}.StorageUsageReport")
@@ -159,18 +158,6 @@ class GenerateStorage3CondoUsageReportTests(TestCase):
 
         mock_send_mail.assert_not_called()
 
-    def test_email_disabled_sends_nothing(
-        self, mock_report_cls, mock_ad, mock_send_mail
-    ):
-        self._setup_report(mock_report_cls, mock_ad)
-
-        with patch(f"{MODULE}.EMAIL_ENABLED", False):
-            generate_storage3_condo_usage_report(
-                usage_date="2026-11-01", project="Test Condo"
-            )
-
-        mock_send_mail.assert_not_called()
-
     @override_settings(DEBUG=True)
     @patch(f"{MODULE}.EMAIL_DEVELOPMENT_EMAIL_LIST", ["dev@example.edu"])
     def test_debug_sends_to_development_list_not_billing_contacts(
@@ -245,6 +232,7 @@ class ScheduleCommandTests(TestCase):
         kwargs = eval(f"dict({schedule.kwargs})")
         self.assertEqual(kwargs["project"], "Test Condo")
         self.assertEqual(kwargs["q_options"], {"timeout": REPORT_TIMEOUT_SECONDS})
+        self.assertIs(kwargs["dry_run"], False)
 
     def test_rerunning_replaces_schedule_instead_of_duplicating(self):
         call_command(COMMAND, "--project", "Test Condo")
