@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import ldap3
 import os
 import smtplib
 import subprocess
@@ -8,9 +7,6 @@ import sys
 
 from argparse import ArgumentParser
 from email.message import EmailMessage
-from email.mime.base import MIMEBase
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 from datetime import date
 from utils.coldfront_ad_utils import ColdfrontAdUtils
 
@@ -66,7 +62,12 @@ def generate_report(group, debug=False):
         ['/usr/bin/getent', 'group', group],
         capture_output=True
     )
-    for line in completed_proc.stdout.decode('utf-8').split('\n'):
+
+    response_lines = completed_proc.stdout.decode('utf-8').split('\n')
+    if debug:
+        print(f'DEBUG Completed getent command with return code: {completed_proc.returncode}')
+        print(f'DEBUG Response lines: {response_lines}')
+    for line in response_lines:
         for uid in list(sorted(set(line.split(':')[-1].split(',')))):
             if not uid:
                 if debug:
