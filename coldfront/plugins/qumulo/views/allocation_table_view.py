@@ -2,7 +2,8 @@ from typing import List
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, Paginator
-from django.db.models import Prefetch
+from django.db.models import FloatField, Prefetch
+from django.db.models.functions import Cast
 from django.db.models.query import QuerySet
 from django.views.generic import ListView
 
@@ -15,6 +16,7 @@ from coldfront.core.allocation.models import (
     Allocation,
     AllocationAttribute,
     AllocationAttributeType,
+    AllocationAttributeUsage,
     AllocationLinkage,
 )
 from coldfront.core.resource.models import Resource, ResourceType
@@ -22,6 +24,16 @@ from coldfront.core.resource.models import Resource, ResourceType
 from django.db.models import OuterRef, Subquery
 
 from collections import defaultdict
+
+from pint import UnitRegistry
+
+ureg = UnitRegistry()
+
+
+def _bytes_to_tb(usage_bytes) -> float:
+    # storage_usage is None when the allocation has no usage record yet
+    return (max(0, usage_bytes or 0) * ureg.byte).to(ureg.tebibyte).magnitude
+
 
 class AllocationListItem:
     id: int
@@ -89,6 +101,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 name="service_rate_category"
             )
 
+            storage_quota_type = AllocationAttributeType.objects.get(
+                name="storage_quota"
+            )
+
             # add sub-queries
             department_sub_q = AllocationAttribute.objects.filter(
                 allocation=OuterRef("pk"), allocation_attribute_type=department_type
@@ -110,12 +126,27 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 allocation=OuterRef("pk"), allocation_attribute_type=storage_name_type
             ).values("value")[:1]
 
+            storage_quota_sub_q = AllocationAttribute.objects.filter(
+                allocation=OuterRef("pk"), allocation_attribute_type=storage_quota_type
+            ).values("value")[:1]
+
+            storage_usage_sub_q = AllocationAttributeUsage.objects.filter(
+                allocation_attribute__allocation=OuterRef("pk"),
+                allocation_attribute__allocation_attribute_type=storage_quota_type,
+            ).values("value")[:1]
+
             allocations = allocations.annotate(
                 department_number=Subquery(department_sub_q),
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
                 file_path=Subquery(file_path_sub_q),
                 service_rate_category=Subquery(service_rate_category_sub_q),
                 name=Subquery(storage_name_sub_q),
+                storage_quota=Subquery(storage_quota_sub_q),
+                storage_usage=Subquery(storage_usage_sub_q),
+            ).annotate(
+                # storage_quota is AllocationAttribute.value (a CharField), so cast
+                # it for numeric sorting; otherwise "100" sorts before "20".
+                storage_quota_numeric=Cast("storage_quota", FloatField()),
             ).select_related(
                 "project__pi",
                 "status",
@@ -174,6 +205,9 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 itsd_ticket=Subquery(itsd_ticket_sub_q),
                 file_path=Subquery(file_path_sub_q),
                 service_rate_category=Subquery(service_rate_category_sub_q),
+                storage_quota=Subquery(storage_quota_sub_q),
+            ).annotate(
+                storage_quota_numeric=Cast("storage_quota", FloatField()),
             ).order_by(order_by)
 
             allocation_linkages = AllocationLinkage.objects.filter(
@@ -210,6 +244,10 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                     "itsd_ticket": allocation.itsd_ticket,
                     "file_path": allocation.file_path,
                     "service_rate_category": allocation.service_rate_category,
+                    "storage_quota": (
+                        f"{_bytes_to_tb(allocation.storage_usage):.2f} / "
+                        f"{allocation.storage_quota} TB"
+                    ),
                 }
 
             all_children = set()
