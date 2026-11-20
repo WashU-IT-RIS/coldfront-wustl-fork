@@ -76,6 +76,7 @@ def generate_report(group, debug=False):
             uid_resp = cau.get_user(uid)
             e_mail_address = uid_resp.get('attributes', {}).get('mail', 'N/A')
             if len(e_mail_address) == 0:
+                print(f'DEBUG No e-mail address for uid: {uid} (user info: {uid_resp})')
                 no_email.add(uid)
                 continue
             report += f'{e_mail_address}\n'
