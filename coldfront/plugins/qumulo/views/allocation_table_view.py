@@ -25,6 +25,16 @@ from django.db.models import OuterRef, Subquery
 
 from collections import defaultdict
 
+from pint import UnitRegistry
+
+ureg = UnitRegistry()
+
+
+def _bytes_to_tb(usage_bytes) -> float:
+    # storage_usage is None when the allocation has no usage record yet
+    return (max(0, usage_bytes or 0) * ureg.byte).to(ureg.tebibyte).magnitude
+
+
 class AllocationListItem:
     id: int
     project_id: int
@@ -134,6 +144,8 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                 storage_quota=Subquery(storage_quota_sub_q),
                 storage_usage=Subquery(storage_usage_sub_q),
             ).annotate(
+                # storage_quota is AllocationAttribute.value (a CharField), so cast
+                # it for numeric sorting; otherwise "100" sorts before "20".
                 storage_quota_numeric=Cast("storage_quota", FloatField()),
             ).select_related(
                 "project__pi",
@@ -233,7 +245,7 @@ class AllocationTableView(LoginRequiredMixin, ListView):
                     "file_path": allocation.file_path,
                     "service_rate_category": allocation.service_rate_category,
                     "storage_quota": (
-                        f"{(allocation.storage_usage or 0) / 2**40:.2f} / "
+                        f"{_bytes_to_tb(allocation.storage_usage):.2f} / "
                         f"{allocation.storage_quota} TB"
                     ),
                 }
