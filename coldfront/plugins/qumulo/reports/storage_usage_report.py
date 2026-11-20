@@ -211,8 +211,7 @@ class StorageUsageReport:
         used_tb = 0.0
         for allocation in self.get_allocations_by_project(project):
             quota = allocation.get_attribute("storage_quota")
-            if quota is not None:
-                allocated_tb += float(quota)
+            allocated_tb += float(quota)
             usage_kb = allocation.get_usage_kb_by_date(self.usage_date)
             if usage_kb is not None:
                 used_tb += usage_kb / 1024**3

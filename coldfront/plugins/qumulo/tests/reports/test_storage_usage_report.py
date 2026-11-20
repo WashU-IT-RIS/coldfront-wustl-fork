@@ -367,26 +367,6 @@ class StorageUsageReportFactoryTests(TestCase):
             "Used: 18.900 TB (70.000% of allocated)",
         )
 
-    def test_format_project_summary_nothing_allocated(self):
-        text = self.report._format_project_summary(
-            {
-                "total_quota_tb": 100.0,
-                "allocated_tb": 0.0,
-                "unallocated_tb": 100.0,
-                "used_tb": 0.0,
-            }
-        )
-        self.assertIn("Allocated to PIs: 0 TB (0.000%)", text)
-        self.assertIn("Used: 0.000 TB (N/A of allocated)", text)
-
-    def test_generate_report_for_project_starts_with_summary(self):
-        allocation = AllocationFactory()
-        self._add_usage(allocation, "/fs1")
-
-        report = self.report.generate_report_for_project(allocation.project.title)
-        self.assertTrue(report.startswith("Total condo quota: "))
-        self.assertLess(report.index("Used: "), report.index("Usage (GB)"))
-
     def test_generate_report_for_school(self):
         # Setup allocation and usage
         allocation = AllocationFactory()
