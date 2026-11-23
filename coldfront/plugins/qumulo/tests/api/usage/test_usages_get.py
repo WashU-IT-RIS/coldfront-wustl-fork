@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time, timezone
 from dateutil.relativedelta import relativedelta
 from random import randint
 
@@ -289,6 +289,16 @@ class TestUsageGet(TestCase):
         expected_usage_data.reverse()
         expected_quota_data.reverse()
 
+        quota_as_of_start = [
+            history
+            for history in quota_history
+            if date.fromisoformat(history["date"]) <= start_date
+        ][-1]
+        if expected_quota_data[-1]["date"] != start_date.isoformat():
+            expected_quota_data.append(
+                {"quota": quota_as_of_start["quota"], "date": start_date.isoformat()}
+            )
+
         self.request.GET.update(
             {
                 "allocation_id": storage_allocation.pk,
@@ -526,7 +536,8 @@ class TestGetQuotas(TestCase):
         write_quota_history(storage_allocation.pk, start_date, quota_tib)
         expected_quotas.append({"quota": quota_tib * 2**10, "date": start_date})
 
-        quotas = _get_quotas(storage_allocation.pk, start_date)
+        start_datetime = datetime.combine(start_date, time.min, tzinfo=timezone.utc)
+        quotas = _get_quotas(storage_allocation.pk, start_datetime)
 
         expected_quotas.sort(reverse=True, key=lambda element: element["date"])
 
@@ -554,7 +565,8 @@ class TestGetQuotas(TestCase):
             if this_date <= end_date:
                 expected_quotas.append({"quota": quota_tib * 2**10, "date": this_date})
 
-        quotas = _get_quotas(storage_allocation.pk, end_date=end_date)
+        end_datetime = datetime.combine(end_date, time.min, tzinfo=timezone.utc)
+        quotas = _get_quotas(storage_allocation.pk, end_date=end_datetime)
 
         expected_quotas.sort(reverse=True, key=lambda element: element["date"])
 
@@ -649,7 +661,8 @@ class TestGetUsagesByMonth(TestCase):
         write_usage_history(storage_usage_object, start_date, start_usage_tib)
         expected_usages.append({"date": start_date, "usage": start_usage_tib * 2**10})
 
-        usages = _get_usages_by_month(storage_allocation.pk, start_date=start_date)
+        start_datetime = datetime.combine(start_date, time.min, tzinfo=timezone.utc)
+        usages = _get_usages_by_month(storage_allocation.pk, start_date=start_datetime)
 
         self.assertIsInstance(usages, list)
         self.assertListEqual(expected_usages, usages)
@@ -673,7 +686,8 @@ class TestGetUsagesByMonth(TestCase):
             if this_date <= end_date:
                 expected_usages.append({"date": this_date, "usage": usage_tib * 2**10})
 
-        usages = _get_usages_by_month(storage_allocation.pk, end_date=end_date)
+        end_datetime = datetime.combine(end_date, time.min, tzinfo=timezone.utc)
+        usages = _get_usages_by_month(storage_allocation.pk, end_date=end_datetime)
 
         self.assertIsInstance(usages, list)
         self.assertListEqual(expected_usages, usages)

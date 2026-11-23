@@ -1,0 +1,5571 @@
+[
+  {
+    "additional_errors": [],
+    "allocation_pk": 4790,
+    "group_name": "storage3-piston-export-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["tbroekel"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5729,
+    "group_name": "storage3-jtrani-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["s.pal"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4326,
+    "group_name": "storage3-sidpuram-neoantigen-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["bryanfisk"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 663,
+    "group_name": "storage-rhead-Research-NGS-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5601,
+    "group_name": "storage3-jacobsn-projects-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["k.subash"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 173,
+    "group_name": "storage-epigenome-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "spencerd"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4289,
+    "group_name": "storage3-nathan.singh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "agata",
+      "l.jack",
+      "lattinj",
+      "meselli",
+      "t.chang",
+      "yu-sung"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1004,
+    "group_name": "storage-groves.a-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["helenm"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3071,
+    "group_name": "storage3-gzhao-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["gzhao"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4452,
+    "group_name": "storage3-gdhugo-markerless_projections-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["riblettmj"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4634,
+    "group_name": "storage3-stallings-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "bpatty",
+      "fhenry",
+      "kieranm",
+      "reillyw",
+      "schavez",
+      "amanda.s",
+      "ismaaeel",
+      "rlkinsella",
+      "wang.yating",
+      "samuel.mckee",
+      "yassin.mreyoud"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4643,
+    "group_name": "storage3-ygoo-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["acloud", "steppig", "vaddanam"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6095,
+    "group_name": "storage3-mmitreva-mitrevalab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["aarun"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5249,
+    "group_name": "storage3-gpdunn-Project_0001_Clinical-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "mjimmy",
+      "dschwab",
+      "mmclella",
+      "MGI-SVC-BGA-run"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 528,
+    "group_name": "storage-epigenome-c.justinchen-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2579,
+    "group_name": "storage3-bmajor-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["somas", "emilyz", "kaufmann", "kyle.lapak"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4199,
+    "group_name": "storage3-berezinm-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dmishra", "eanisman", "sudlowgp"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4967,
+    "group_name": "storage3-qingyunli-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["luzhou", "h.vedder"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4430,
+    "group_name": "storage3-anjohnson-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["deanh", "amruta", "o.tiffany", "yingqiudu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1334,
+    "group_name": "storage-cahsper-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["linsc"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 296,
+    "group_name": "storage-ris_snowflake_backup-rw",
+    "in_ad_not_in_allocation": ["ris-syseng"],
+    "in_allocation_not_in_ad": ["cspohl"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3890,
+    "group_name": "storage3-taehokim-Lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dao.lam", "juyoung", "huangyi1", "jae-ik.shin"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2864,
+    "group_name": "storage3-dluke-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["nlobbdougherty"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3374,
+    "group_name": "storage3-menneris-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "shuh",
+      "ajeet",
+      "benza",
+      "imorduk",
+      "menneris",
+      "plambert",
+      "richard.ni"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4343,
+    "group_name": "storage3-yaochen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sokolik"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 862,
+    "group_name": "storage-rgovindan-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["bryanfisk"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1265,
+    "group_name": "storage-bphilip-10_Connectivity-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "aakash",
+      "mcavoy",
+      "taewon",
+      "bphilip",
+      "h.shujin",
+      "sfletcher",
+      "madelinethompson"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2486,
+    "group_name": "storage3-anastasio-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "uvilla",
+      "WG-gjeong",
+      "WG-hkevin",
+      "WG-joseph",
+      "WG-kechen",
+      "WG-sourya",
+      "WG-jgranstedt",
+      "WG-seonyeongpark",
+      "WG-xiaohui.zhang"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2498,
+    "group_name": "storage3-andrejspec-cmsrani_analysis-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pmazi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4151,
+    "group_name": "storage3-p.ruzycki-Protocols-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["byrnee"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4433,
+    "group_name": "storage2-lu-l.jin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["l.jin"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5291,
+    "group_name": "storage3-jin.zhang-cervix_institute_WGS_normal-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["desait"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5262,
+    "group_name": "storage3-jin.zhang-cervix_institute_WGS-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abisha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 431,
+    "group_name": "storage-epigenome-shared_hprc-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4574,
+    "group_name": "storage3-gutmannd-sims.s-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sims.s"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 855,
+    "group_name": "storage-gurnettc-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "charngw",
+      "c.m.choi",
+      "gurnettc",
+      "brian.leon-ricardo"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3905,
+    "group_name": "storage3-tbraver-EmotCueEEG-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["antonios"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2292,
+    "group_name": "storage2-cahsper-unos-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["manian.nina"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3686,
+    "group_name": "storage3-sheila.stewart-SequencingNeoag-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jaydenz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 461,
+    "group_name": "storage-firsztj-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["holdent"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3653,
+    "group_name": "storage3-sandelll-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["joongho.kim"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3908,
+    "group_name": "storage3-tbraver-ILM-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mayaq", "lyanli", "antonios"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4254,
+    "group_name": "storage3-libraries_gdc-geospatial_data-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "a.vahid",
+      "averbeck",
+      "bambrick",
+      "claudiac",
+      "miavogel",
+      "b.cameryn",
+      "brittanyk",
+      "b.f.hoffman",
+      "castellanos",
+      "a.dichristofano"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4607,
+    "group_name": "storage3-jnerbonne-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wwang25", "jlransdell", "AD-DEVBIONerbonneLab"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 444,
+    "group_name": "storage-epigenome-raw_data_hprc-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 537,
+    "group_name": "storage-epigenome-tianjie-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4106,
+    "group_name": "storage3-doering-lab_members-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "edel",
+      "chasem",
+      "guohuac",
+      "walyssa",
+      "a.marianna",
+      "daniel.agustinho"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5285,
+    "group_name": "storage3-jin.zhang-17_cervical_ding-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["azhao"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2816,
+    "group_name": "storage3-crossa-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pandhey", "WG-fmaria", "vlevasseur"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 852,
+    "group_name": "storage-abby.green-Green-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["brookeh", "hua.sun", "WG-nmeth", "bednarski_j"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4613,
+    "group_name": "storage3-philips.j.a-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["rtyagi", "gideon.e", "heloise.coullon"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4919,
+    "group_name": "storage3-mdan-forest-inventory-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abradley"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3956,
+    "group_name": "storage3-vesoulis_z-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "aysuna",
+      "binaei",
+      "devons",
+      "nlalos",
+      "damanda",
+      "callie.m",
+      "lmatwood",
+      "llinneman"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6743,
+    "group_name": "storage3-davidballard-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["anushae", "bishop.g", "ujammalamadaka"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2762,
+    "group_name": "storage3-ckelleher-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["cosgroved"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 627,
+    "group_name": "storage-rhead-Agreements-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6269,
+    "group_name": "storage3-yooa-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "oh.y",
+      "leese",
+      "chensw",
+      "yangyan",
+      "zhao.sun",
+      "joongho.kim"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 989,
+    "group_name": "storage-christopherking-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["japrewitt"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4301,
+    "group_name": "storage3-ren.zhen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-zhao", "hernandez.p", "j.p.atkinson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2117,
+    "group_name": "storage3-emily.wroblewski-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["egomezgomez", "emily.wroblewski"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 642,
+    "group_name": "storage-rhead-DropBox-archive-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4826,
+    "group_name": "storage3-swamidass-rw",
+    "in_ad_not_in_allocation": ["swamidass"],
+    "in_allocation_not_in_ad": ["kevin.boehm"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1001,
+    "group_name": "storage-erabinowitz-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["yiq"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3710,
+    "group_name": "storage2-lu-patricklynch-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ruiqi.w"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3812,
+    "group_name": "storage3-shinung-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hayoung", "singhmf"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2939,
+    "group_name": "storage3-fritz.s-Staph_Prevalence_Study_Restored-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["anndesai"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4658,
+    "group_name": "storage3-yvorobeychik-project-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["zhoukai", "junlin.wu", "michael.davinroy"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3596,
+    "group_name": "storage3-rka-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["k.mike"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 606,
+    "group_name": "storage-epigenome-l.ronghan-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "x.zilan",
+      "jiawei.s",
+      "tang.zitian",
+      "ruttenberg.andrew"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2852,
+    "group_name": "storage3-dharr-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["c.julien"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4421,
+    "group_name": "storage3-lubyj-Student_Admin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sjaime", "s.engle", "efleuchaus"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 846,
+    "group_name": "storage-r.lawrence-TrainingDatasets-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["roberts.t"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3239,
+    "group_name": "storage3-lding-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "satok",
+      "mvahed",
+      "nataly",
+      "ritalu",
+      "hua.sun",
+      "fernanda",
+      "miglesia",
+      "siqichen",
+      "WG-liting",
+      "houxiang.zhu",
+      "nvterekhanova"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2075,
+    "group_name": "storage3-ghazaleh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kaufmann"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5424,
+    "group_name": "storage3-cooper_m-exome_database-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["n.udomkittivorakul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4950,
+    "group_name": "storage3-gillandersw-Project_0001_Clinical_Trials-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["j.l.yang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4424,
+    "group_name": "storage3-tannerjohanns-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mmclella", "khan.saad", "allegra.petti"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 269,
+    "group_name": "storage-btc-yanoh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["speidell"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5363,
+    "group_name": "storage3-jin.zhang-azhao-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["azhao"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5423,
+    "group_name": "storage3-cooper_m-exome_database-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["schnietz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3191,
+    "group_name": "storage3-jward2-archive-Project_HRPO_202104143_Clinical_Trial-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mmclella", "MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5096,
+    "group_name": "storage3-wangyong-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "j.lehr",
+      "kouakam",
+      "OBWANGLAB",
+      "margaret.b",
+      "zichao.wen"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2756,
+    "group_name": "storage3-cicerot-Cicero_lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "ayresk",
+      "howardmn",
+      "ahrens.liz",
+      "a.brandon-watkins"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5231,
+    "group_name": "storage3-gjrandolph-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "antonk",
+      "rahulr",
+      "n.zhang",
+      "wohltmann",
+      "rczepielewski"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1028,
+    "group_name": "storage-christopherking-mimic3-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sandhyat"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3509,
+    "group_name": "storage3-emarti-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["elfatimi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1979,
+    "group_name": "storage2-nardhy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dustyn", "eloise", "potuckoval"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5298,
+    "group_name": "storage3-jin.zhang-microbiome-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["desait"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3050,
+    "group_name": "storage3-gilbertk-Studies-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "baerl",
+      "cleah",
+      "loida",
+      "aimeew",
+      "bgoing",
+      "kocsis",
+      "kim.tan",
+      "s.engle",
+      "massmann",
+      "a.a.freeman",
+      "s.d.solomon",
+      "zhang.zirui",
+      "e.judsonellis",
+      "katherine.pope"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5405,
+    "group_name": "storage3-cooper_m-CnT_ACLY-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["k.yulia"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3461,
+    "group_name": "storage3-nstitziel-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "sthussu",
+      "p.hannah",
+      "jelenbaas",
+      "wang.jason",
+      "a.a.alqazaha"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4772,
+    "group_name": "storage3-kmurphy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["liu.t", "sunkyung.kim"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 217,
+    "group_name": "storage-elyn-ro",
+    "in_ad_not_in_allocation": ["sleong"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3248,
+    "group_name": "storage3-li-shiun-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sextro"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5624,
+    "group_name": "storage3-rudloff-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["emilija"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2444,
+    "group_name": "storage3-a.jha-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["aldrich.s"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3590,
+    "group_name": "storage3-ribeiropereirap-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["c.luo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4010,
+    "group_name": "storage3-woodardp-CCIR-raw-data-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "ctori",
+      "slove",
+      "hatamis",
+      "wilnellys",
+      "lindabecker"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6293,
+    "group_name": "storage3-PedsRes-Silverman-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "ems",
+      "yuel",
+      "kaurs",
+      "klily",
+      "vallon",
+      "coffman",
+      "briannan",
+      "ramirezc",
+      "fielder.s",
+      "craig.hill"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4052,
+    "group_name": "storage3-zaydmanm-rw",
+    "in_ad_not_in_allocation": ["swamidass"],
+    "in_allocation_not_in_ad": ["wg-spies"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5345,
+    "group_name": "storage3-jin.zhang-cervix_AllPrep_51-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abisha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2546,
+    "group_name": "storage3-axelbaum-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "dishant",
+      "WG-osamuel",
+      "yang.zhiwei",
+      "irace.phillip"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3587,
+    "group_name": "storage3-rbose-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["xiaoqing.cheng"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1514,
+    "group_name": "storage-abby.green-R_libraries-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hua.sun", "WG-nmeth"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4193,
+    "group_name": "storage3-bagnall-Bagnall_lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["piekarz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1481,
+    "group_name": "storage-leeay-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["saiyu", "alisonl", "smutian"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5393,
+    "group_name": "storage3-cooper_m-alex.paul-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 566,
+    "group_name": "storage-hartman_m-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hartman_m"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4334,
+    "group_name": "storage3-smarco-Sardiello-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alij", "bei.g"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1520,
+    "group_name": "storage-abby.green-Users-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hua.sun", "WG-nmeth"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2519,
+    "group_name": "storage3-aorvedahl-Lab-Share-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "ata",
+      "guo.c",
+      "dkailey",
+      "briannan",
+      "brittanyd",
+      "zhiqiangxu",
+      "sheebathomas"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2510,
+    "group_name": "storage3-andrey-From_R-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "mcneil",
+      "emileek",
+      "ashley.m",
+      "c.lederer",
+      "ma.william",
+      "korucuogluo",
+      "alexander.jess"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 398,
+    "group_name": "storage-kirilloff-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kirilloff"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5282,
+    "group_name": "storage3-jin.zhang-scripts-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abisha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5885,
+    "group_name": "storage3-jmillman-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["le.t", "jameslu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4118,
+    "group_name": "storage3-jboon-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mds", "idaziati"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3431,
+    "group_name": "storage3-nbrossier-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["m.ann", "koneru", "amanish", "kailong"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4280,
+    "group_name": "storage3-kornfeld-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["scharfa", "ramirezc", "AD-DEVBIOKornfeldLab"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5286,
+    "group_name": "storage3-jin.zhang-17_cervical_ding-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abisha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2729,
+    "group_name": "storage3-chakinalam-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["juliesmith"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4220,
+    "group_name": "storage3-eklechevsky-SURGPATH-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abbyb", "garin"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3329,
+    "group_name": "storage3-mars-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alimian", "bherter"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 672,
+    "group_name": "storage-epigenome-ruttenberg.andrew-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1454,
+    "group_name": "storage-r.schwarzlose-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["w.zhaoxuan", "christina.luo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4415,
+    "group_name": "storage3-lubyj-PCIT-ED_RCT_Therapy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-leah.w"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4793,
+    "group_name": "storage3-piston-Lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["tbroekel", "jeongmin.lee"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3581,
+    "group_name": "storage3-rans-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kamhasan", "l.zhongyuan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5427,
+    "group_name": "storage3-cooper_m-gmsroot-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["n.udomkittivorakul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1541,
+    "group_name": "storage-vandillenl-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["billie", "k.krueger", "m.l.moeslein"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3797,
+    "group_name": "storage3-abramsz-pinocchio_archive-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ethanh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 971,
+    "group_name": "storage-hprc-xzhuo-rw",
+    "in_ad_not_in_allocation": ["gchang"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 879,
+    "group_name": "storage-klavine-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "ma.p",
+      "llulu",
+      "alkoenig",
+      "gamache.j",
+      "samanthag",
+      "caroline.c",
+      "j.e.kapustin",
+      "dymonnjohnson",
+      "oleksandr.dmytrenko"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4928,
+    "group_name": "storage2-mdan-secure-sdoh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["c.israel"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2795,
+    "group_name": "storage3-cnichols-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kaufmann"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1169,
+    "group_name": "storage-joshua.yuan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ckainan", "d.puneet", "hazlehurst-johnson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1994,
+    "group_name": "storage2-r.lawrence-2025_AcromialMorph-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["l.kahan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4724,
+    "group_name": "storage3-grantchallen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["nancy.issa", "christine.zhang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2495,
+    "group_name": "storage3-andrejspec-cmsrani-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["chill"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1031,
+    "group_name": "storage-christopherking-sandhyat-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sandhyat"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3914,
+    "group_name": "storage3-tbraver-MURI-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mayaq", "i.merve", "antonios", "angelica.h"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5210,
+    "group_name": "storage3-clopezzalaquett-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "emna",
+      "felt",
+      "musa",
+      "tambo",
+      "bdeena",
+      "r.daniel",
+      "holthausen",
+      "hanaa.saleh"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 251,
+    "group_name": "storage-btc-alberthkim-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["fyiwei"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6323,
+    "group_name": "storage3-kipnis-Antoine-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["drieu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3470,
+    "group_name": "storage3-pathaka-lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["akashts", "hongshengyu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4203,
+    "group_name": "storage3-bisiademuyiwa-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["bryanfisk"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2732,
+    "group_name": "storage3-chakrabarty-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jieluo", "bsumlin", "c.ganeshchelluboyina"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1082,
+    "group_name": "storage-r.lawrence-2024_SSM-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["l.m.nicholson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6311,
+    "group_name": "storage3-holtzman-CryoEM-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mjrau"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 789,
+    "group_name": "storage-x.cui-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["rabia", "song1", "mminner", "sdegeorgia"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6815,
+    "group_name": "storage3-toddcombs-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jornstein"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1466,
+    "group_name": "storage-brianallen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["fnick"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 560,
+    "group_name": "storage-satochihiro-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["krama"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3683,
+    "group_name": "storage3-sheila.stewart-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kaufmann"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2492,
+    "group_name": "storage3-andrejspec-Candidemia_data-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pmazi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4397,
+    "group_name": "storage3-lubyj-archive-PCIT-ED_RCT_Therapy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-leah.w", "efleuchaus", "WG-e.caron"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5474,
+    "group_name": "storage3-cooper_m-storage0-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6836,
+    "group_name": "storage3-smumm-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["antonacci.t.j"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3575,
+    "group_name": "storage3-rachel.penczykowski-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mbugay"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 666,
+    "group_name": "storage-rhead-Somalogic_7k-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 216,
+    "group_name": "storage-elyn-rw",
+    "in_ad_not_in_allocation": ["jcaroline"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5516,
+    "group_name": "storage3-jmilbrandt-9p_project-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "claire.hou",
+      "kbelhassan",
+      "victoriatate",
+      "antonacci.t.j"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4244,
+    "group_name": "storage3-horani_a-Horani_Shared-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hadasn", "neupanes"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5390,
+    "group_name": "storage3-cooper_m-shared-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["schnietz", "n.udomkittivorakul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3554,
+    "group_name": "storage3-qinliu-haowu.jiang-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["haowu.jiang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4649,
+    "group_name": "storage3-yvorobeychik-aml-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["zhoukai", "junlin.wu", "michael.davinroy"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3839,
+    "group_name": "storage3-steeda-Steed-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kmei", "ccolin"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3599,
+    "group_name": "storage3-rogersc-rw",
+    "in_ad_not_in_allocation": ["jessica.boyer"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 434,
+    "group_name": "storage-epigenome-shared_smaht-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "x.zilan",
+      "yung-chun",
+      "tang.zitian",
+      "ruttenberg.andrew"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4802,
+    "group_name": "storage3-taylorcbrown-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ha", "gothoum", "d.m.maciuca"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1091,
+    "group_name": "storage-sibley-All-Other-Folders-rw",
+    "in_ad_not_in_allocation": ["rouse"],
+    "in_allocation_not_in_ad": ["greigert", "a.marianna", "iti.saraav"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4007,
+    "group_name": "storage3-woodardp-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["bgandesbery"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6068,
+    "group_name": "storage3-KerschensteinerD-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["vitale", "bingwang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4784,
+    "group_name": "storage3-mvahey-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["anbenegal", "carolyn.x", "l.s.woodbury"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5228,
+    "group_name": "storage3-ferrarof-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["agata", "cclement"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2576,
+    "group_name": "storage3-bjuba-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jakee"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4625,
+    "group_name": "storage3-rkpachynski-Project_0001_Clinical_Trials-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1913,
+    "group_name": "storage2-smyserc-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["loida"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2441,
+    "group_name": "storage3-yenp-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jix"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4406,
+    "group_name": "storage3-lubyj-eLABE-rw",
+    "in_ad_not_in_allocation": ["ndaom", "swamidass"],
+    "in_allocation_not_in_ad": ["shannon.ohara", "sydney.kaplan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4931,
+    "group_name": "storage2-daphne.lew-DTRC2026-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["c.israel"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4667,
+    "group_name": "storage3-prwillia-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "alsu",
+      "stom",
+      "shabani",
+      "e.s.shen",
+      "WG-ahall",
+      "allison.h",
+      "smccracken",
+      "christopher.z"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1049,
+    "group_name": "storage-apte-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "ryot",
+      "taku",
+      "t.lee",
+      "dan.du",
+      "fshiau",
+      "l.jiayi",
+      "cpfeifer",
+      "h.keitaro",
+      "mitsukuni",
+      "brian.sohn",
+      "zelun.wang",
+      "nicolas.ledru",
+      "darksha.usmani",
+      "jasoncolasanti"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 747,
+    "group_name": "storage-daryls3-omerodata-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ayush"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1008,
+    "group_name": "storage-christopherking-ActFastData-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["liuhao", "jerry.kong"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3794,
+    "group_name": "storage3-abramsz-pinocchio-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ethanh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2333,
+    "group_name": "storage3-myu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["felixhu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5339,
+    "group_name": "storage3-jin.zhang-cervix_institute_snRNA-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["desait"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1907,
+    "group_name": "storage2-sara.r-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.hamdaoui"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6830,
+    "group_name": "storage3-zyou-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dhanya", "kaufmann"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 645,
+    "group_name": "storage-rhead-Extractions-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5495,
+    "group_name": "storage3-cooper_m-storage0_transfer-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4358,
+    "group_name": "storage3-chien-ju.ho-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.dichristofano"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6362,
+    "group_name": "storage3-kipnis-Jenolyn-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["herz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1038,
+    "group_name": "storage-christopherking-tectonics-a-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["liuhao", "jerry.kong"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2273,
+    "group_name": "storage3-bga-site-locks-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "gvan",
+      "hluke",
+      "abisha",
+      "bobbah",
+      "btyler",
+      "c.adam",
+      "habibn",
+      "chebolu",
+      "jaydenz",
+      "cweihang"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4361,
+    "group_name": "storage3-cynthiaxma-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dhanusha", "miglesia", "WG-anurag"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5573,
+    "group_name": "storage3-remco-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sahota"]
+  },
+  {
+    "additional_errors": ["Group storage-amlai_test-ro missing in AD."],
+    "allocation_pk": 39,
+    "group_name": "storage-amlai_test-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["japrewitt"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3263,
+    "group_name": "storage3-linda.richards-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lisam"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5598,
+    "group_name": "storage3-jacobsn-users-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["k.subash"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3428,
+    "group_name": "storage3-natasha-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pmei"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3539,
+    "group_name": "storage3-pjfowler-Fowler-IDB-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hchai", "sujoy", "sanmay"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3692,
+    "group_name": "storage3-lyc-target-ALS-WGS-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["tang.zitian"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 657,
+    "group_name": "storage-rhead-ICTS-awarded-JITs-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3245,
+    "group_name": "storage3-lfuentes-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["r.delgado", "jacob.murphy", "meyers.rachel"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4904,
+    "group_name": "storage3-sniderj-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["allysonwuest"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4238,
+    "group_name": "storage3-hirosek-Hirose_lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.cicalo", "marshallw", "jacob.loredo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3122,
+    "group_name": "storage3-jcui-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lei.h", "alex.gu", "panpanhou", "kang.powei"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 525,
+    "group_name": "storage-epigenome-ebelter-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4319,
+    "group_name": "storage3-sidpuram-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["emilyz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1938,
+    "group_name": "storage3-path-gmp-cgl-mopath-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hernandez.p"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4100,
+    "group_name": "storage3-doering-Archive-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["chasem", "guohuac"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 531,
+    "group_name": "storage-epigenome-mgraser-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5648,
+    "group_name": "storage3-abby.green-R_libraries-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-nmeth"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 546,
+    "group_name": "storage-epigenome-zdong-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "xu.z1",
+      "xzhuo",
+      "nahyun",
+      "wenjin",
+      "tianjie",
+      "x.zilan",
+      "tang.zitian",
+      "ruttenberg.andrew"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 297,
+    "group_name": "storage-ris_snowflake_backup-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["bober", "cspohl"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3791,
+    "group_name": "storage3-abramsz-ALS_data-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ethanh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4346,
+    "group_name": "storage3-yin.cao-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["asina", "ruiyi", "hong.d"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4616,
+    "group_name": "storage3-rkpachynski-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pandhey", "mmclella", "a.atkocius"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1383,
+    "group_name": "storage-i2db-students-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ruichen.y"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2678,
+    "group_name": "storage3-bsinopoli-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["rizzo", "WG-guiducci"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 497,
+    "group_name": "storage-epigenome-tang.zitian-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["tang.zitian"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4352,
+    "group_name": "storage3-yin.cao-PREDICT-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-long"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4185,
+    "group_name": "storage3-smaht_analysis-raw_data-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["yung-chun", "tang.zitian"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4331,
+    "group_name": "storage3-smarco-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alij"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3224,
+    "group_name": "storage3-kristinguilliams-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "bjade",
+      "m.streb",
+      "luisagildiaz",
+      "n.polavarapu",
+      "yewandetaiwo"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2315,
+    "group_name": "storage2-rvmartin-s.siyuan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["s.siyuan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4796,
+    "group_name": "storage3-silvajm-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dhanusha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5057,
+    "group_name": "storage2-epigenome-wxin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "spencerd"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4943,
+    "group_name": "storage3-d.goldfarb-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["emilyz", "maherb", "kaufmann", "anh.h.nguyen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 908,
+    "group_name": "storage-hprc-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2402,
+    "group_name": "storage2-lu-eating-disorder-chatbot-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ruiqi.w"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 396,
+    "group_name": "storage-vtieppofrancio-HumanSubjectsResearch-ro",
+    "in_ad_not_in_allocation": ["lab-clinical-research-admins-ro"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3053,
+    "group_name": "storage3-gjpattij-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["xiangfengniu", "m.schwaiger-haber"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3552,
+    "group_name": "storage3-qinliu-cjguo-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["haowu.jiang", "xiaoleishen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4697,
+    "group_name": "storage3-bedelson-shared_with_max-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "shpakb",
+      "a.swain",
+      "pandhey",
+      "WG-fmaria",
+      "aladyeva.e",
+      "againullina",
+      "german.demidov",
+      "ilya.kizhvatov",
+      "denis.mogilenko",
+      "shchukina.irina"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4478,
+    "group_name": "storage3-gordon.mae-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["karenclark", "shawn.m.leonard"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3434,
+    "group_name": "storage3-nicolg-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["schweigerj"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4337,
+    "group_name": "storage3-snielsen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "dsai",
+      "faustim",
+      "killionj",
+      "brittanyk",
+      "wendy.dlamini"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3974,
+    "group_name": "storage3-wbosch-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wbosch", "straube"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 584,
+    "group_name": "storage-cfritz-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["chimdinma"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 831,
+    "group_name": "storage-r.lawrence-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["seifried"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6074,
+    "group_name": "storage3-linda.richards.projects-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lisam"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4961,
+    "group_name": "storage3-ibanezl-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["charissa"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 891,
+    "group_name": "storage-g.goodhill-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "qrong",
+      "wyize",
+      "lancer",
+      "mjorge",
+      "piriou",
+      "belmont",
+      "d.harry",
+      "ruihong",
+      "darveniza.t",
+      "WG-michaelm"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3116,
+    "group_name": "storage3-jbubeck-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["reuben.olaniyi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6137,
+    "group_name": "storage2-leeay-datasets-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alisonl"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5489,
+    "group_name": "storage3-cooper_m-covid-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5519,
+    "group_name": "storage3-jmilbrandt-UDN_project-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4043,
+    "group_name": "storage3-DPS-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6689,
+    "group_name": "storage3-dgoldberg-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["daniel.wychrij"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 867,
+    "group_name": "storage-rgovindan-Smokers_Susceptibility-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wileyb"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5261,
+    "group_name": "storage3-jin.zhang-cervix_institute_WGS-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["azhao", "desait"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1067,
+    "group_name": "storage-rouse-test-rw",
+    "in_ad_not_in_allocation": [
+      "rpokorne",
+      "storage-rpokorne-.test_itsd-34148-rw"
+    ],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4640,
+    "group_name": "storage3-stoh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kgshim", "jsfowles"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 257,
+    "group_name": "storage-btc-bhuvic.patel-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["s.pugazenthi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3707,
+    "group_name": "storage2-lu-mod-actigraphy-advanced-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ruiqi.w"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4781,
+    "group_name": "storage3-mcneillh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "illy",
+      "ccruz",
+      "evanc",
+      "pagec",
+      "julick",
+      "bednarek",
+      "a.fulford",
+      "borsevikrant",
+      "chloe.potter"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4091,
+    "group_name": "storage3-gsmith-ES_Cardiac_Scans-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ctori"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6308,
+    "group_name": "storage3-holtzman-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "finnm",
+      "seo.d",
+      "mansel",
+      "wangchao977",
+      "chanung.wang",
+      "maud.gratuze"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2735,
+    "group_name": "storage3-chang.su-hsin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["q.tan", "m.ziyun", "k.yuan-hung"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5834,
+    "group_name": "storage3-ddenardo-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["xiutingliu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1196,
+    "group_name": "storage-r.lawrence-2024_GHOA_Morph-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["l.kahan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2672,
+    "group_name": "storage3-brian.s.clark-archive-Single_Cell_Raw-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.jade"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3338,
+    "group_name": "storage3-mchheda-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lucianogaldieri"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 557,
+    "group_name": "storage-zhour-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wg-que"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 170,
+    "group_name": "storage-rvmartin-rw",
+    "in_ad_not_in_allocation": [
+      "ren.yuxuan",
+      "yany1",
+      "yuanjian.z",
+      "zhuoran.sun"
+    ],
+    "in_allocation_not_in_ad": [
+      "emmie",
+      "pawar",
+      "bcroft",
+      "f.kyla",
+      "jasonl",
+      "aaron.l",
+      "brwalsh",
+      "t.yidan",
+      "dandan.z",
+      "ekwalter",
+      "jmcneill",
+      "jun.meng",
+      "k.subash",
+      "d.guinter",
+      "haihuizhu",
+      "kabaira.m",
+      "graham.r.p",
+      "emily.stone",
+      "erin.mcduffie",
+      "e.k.sharafuddin",
+      "inderjeet.singh",
+      "deepangsuchatterjee"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3564,
+    "group_name": "storage3-qinliu-weikai-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["haowu.jiang", "xiaoleishen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6092,
+    "group_name": "storage3-mmitreva-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["aarun", "bigham", "phawiya"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4466,
+    "group_name": "storage3-gdhugo-cac-project-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["czhuo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1835,
+    "group_name": "storage2-chaoc-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["p.zhuoyu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 630,
+    "group_name": "storage-rhead-AWS-Glacier-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2496,
+    "group_name": "storage3-andrejspec-cmsrani-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pmazi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 543,
+    "group_name": "storage-epigenome-xzhuo-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2798,
+    "group_name": "storage3-conwaycr-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dodi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6320,
+    "group_name": "storage3-kipnis-Andrea-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["salvador"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4721,
+    "group_name": "storage3-adopic-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["christopher.owen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6098,
+    "group_name": "storage3-rdschreiber-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["feihan", "yoshiko"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2516,
+    "group_name": "storage3-aorvedahl-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["fitzgeralds"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2912,
+    "group_name": "storage3-forda-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["igwe", "eadam", "slove", "luisagildiaz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2666,
+    "group_name": "storage3-brian.s.clark-archive-Single_Cell_Bam-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.jade"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1412,
+    "group_name": "storage-igegeorge-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["j.nicholas"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 260,
+    "group_name": "storage-btc-mathios-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["bekir", "bkorte", "h.miguel"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4256,
+    "group_name": "storage2-mdan-common-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["c.israel", "k.subash"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 825,
+    "group_name": "storage-bphilip-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "aakash",
+      "dgrace",
+      "mcavoy",
+      "taewon",
+      "nabaune",
+      "w.xinye",
+      "h.shujin",
+      "deannalee",
+      "sfletcher",
+      "barnes.j.a",
+      "dbmcintyre",
+      "h.jacqueline",
+      "katherinewatson",
+      "madelinethompson"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5090,
+    "group_name": "storage3-strahlej-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "lizer",
+      "raval",
+      "koller",
+      "bethelt",
+      "isabeln",
+      "a.m.dunbar",
+      "prabagaran.esakky"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 549,
+    "group_name": "storage-epigenome-juanj-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 612,
+    "group_name": "storage-rhead-2100-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 765,
+    "group_name": "storage-hdean-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kierank"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4775,
+    "group_name": "storage3-kmurphy-surgpath-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["paget"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1797,
+    "group_name": "storage3-cig_references-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "x.zilan",
+      "jiawei.s",
+      "yung-chun",
+      "tang.zitian"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5861,
+    "group_name": "storage3-fangqiong-mantilla-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mantilla"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1517,
+    "group_name": "storage-abby.green-_STARtmp-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hua.sun", "WG-nmeth"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5381,
+    "group_name": "storage3-alberthkim-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "aum.d",
+      "day.s",
+      "fyiwei",
+      "irisch",
+      "markus",
+      "chenhao",
+      "dagiles",
+      "danting",
+      "dpmartin",
+      "khan.saad",
+      "jeniehwang",
+      "k.mcgeehan",
+      "m.shinghei",
+      "bhuvic.patel",
+      "allegra.petti",
+      "colinmccornack",
+      "MGI-SVC-BGA-run"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4445,
+    "group_name": "storage3-christine.e.edwards-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.eduardo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2624,
+    "group_name": "storage3-brestoff-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["xinya"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3197,
+    "group_name": "storage3-kevin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["luisg", "grossen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4763,
+    "group_name": "storage3-lu-l.jin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["l.jin"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1322,
+    "group_name": "storage-dspencer-clinseq-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["walczak"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5654,
+    "group_name": "storage3-abby.green-Users-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-nmeth"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3272,
+    "group_name": "storage3-loriholtz-Holtz-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "coker",
+      "c.johnny",
+      "a.a.adebisi",
+      "martin-giacalone"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3866,
+    "group_name": "storage3-strassmann-bga1641-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2279,
+    "group_name": "storage3-amynah-Human_Subjects_Research-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.jhoan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 636,
+    "group_name": "storage-rhead-Clinical-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lab-GMP-CGL"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3386,
+    "group_name": "storage3-meyerg-Protocols-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "d.kamm",
+      "j.singer",
+      "karen.shen",
+      "jacob.parson",
+      "kelseycollins"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4136,
+    "group_name": "storage3-p.ruzycki-Databases-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["byrnee"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3119,
+    "group_name": "storage3-jbubeck-Bubeck_Wardenburg-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["craig.hill"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1511,
+    "group_name": "storage-abby.green-RawData-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hua.sun", "WG-nmeth"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2483,
+    "group_name": "storage3-albert.a.davis-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ksalman"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1011,
+    "group_name": "storage-christopherking-ActFastExports-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lavanya"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5384,
+    "group_name": "storage3-alberthkim-MGI-transfer-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["nsharifai", "antonacci.t.j"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4442,
+    "group_name": "storage3-cavalliv-CavalliLab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["anilg", "jsebastian", "kathleen.leahy"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 751,
+    "group_name": "storage-epigenome-jiawei.s-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 504,
+    "group_name": "storage-epigenome-nahyun-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3926,
+    "group_name": "storage3-thomas.papouin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hallieyouker", "AD-Papouinlab"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4952,
+    "group_name": "storage3-gillandersw-tcrseq-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mmclella"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3365,
+    "group_name": "storage3-meachamjm-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.narayan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5382,
+    "group_name": "storage3-alberthkim-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["maod", "g.y.qi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 404,
+    "group_name": "storage-kongf-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dlavacot", "yzhongyu", "l.longhan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 516,
+    "group_name": "storage-epigenome-x.zilan-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 395,
+    "group_name": "storage-vtieppofrancio-HumanSubjectsResearch-rw",
+    "in_ad_not_in_allocation": ["lab-clinical-research-admins-rw"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 882,
+    "group_name": "storage-klavine-shared-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pandhey", "shchukina.irina"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 669,
+    "group_name": "storage-rhead-USERS-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3983,
+    "group_name": "storage3-weikai-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["nmishra"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5342,
+    "group_name": "storage3-jin.zhang-gene_fusions-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abisha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5831,
+    "group_name": "storage3-culverj-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["f.wiete"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 995,
+    "group_name": "storage-akepecs-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["qchevy"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3938,
+    "group_name": "storage3-tmazur-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["chassanzadeh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5411,
+    "group_name": "storage3-cooper_m-cooper_m-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6431,
+    "group_name": "storage3-kipnis-Shared-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "yu1",
+      "herz",
+      "drieu",
+      "kalil",
+      "bsusan",
+      "dylang",
+      "bgiorgi",
+      "rjustin",
+      "goliadze",
+      "janghyun",
+      "kanamori",
+      "salvador"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2642,
+    "group_name": "storage3-brian.s.clark-General-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.jade", "bachrack", "mendozav"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2855,
+    "group_name": "storage3-dhunstad-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hrehat"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4407,
+    "group_name": "storage3-lubyj-eLABE-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["swamidass"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 440,
+    "group_name": "storage-RADONC-ViewRay-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["zhut"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3854,
+    "group_name": "storage3-storch-storch-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "hgula",
+      "bherter",
+      "lmaguire",
+      "RIS-SVC-genome-admin"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5093,
+    "group_name": "storage3-strahlej-RedefiningChiari-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["aubreyc", "ashley.m"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1025,
+    "group_name": "storage-christopherking-llm-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["xuebing", "sandhyat"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4298,
+    "group_name": "storage3-pagliarini-lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "edna",
+      "datta",
+      "fangz",
+      "j.tai",
+      "a.sung",
+      "bakerz",
+      "rashan",
+      "manicki",
+      "murrayn",
+      "jschmitz",
+      "WG-kyler",
+      "abigail.b",
+      "jrensvold",
+      "WG-zachary",
+      "l.h.steenberge"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2891,
+    "group_name": "storage3-fitzgeraldr-ADDM-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["fnicole"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 699,
+    "group_name": "storage-syidan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["p.cody", "wg-shan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 534,
+    "group_name": "storage-epigenome-dalbrach-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1403,
+    "group_name": "storage-dt-summer-corp-common-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "dev.g",
+      "ilang",
+      "l.john",
+      "hellerk",
+      "xyuqing",
+      "chenyehu",
+      "k.subash",
+      "c.daedalus",
+      "cindy.zhang",
+      "ben.m.watkins"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 222,
+    "group_name": "storage-xmartin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["rabimba"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4610,
+    "group_name": "storage3-kummert-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["agwu.chidera"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3635,
+    "group_name": "storage3-rogersc-WUNDER-rw",
+    "in_ad_not_in_allocation": ["jessica.boyer"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3422,
+    "group_name": "storage3-nagulu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "hota",
+      "uppal",
+      "nagulu",
+      "npatil",
+      "p.ziyi",
+      "sasank",
+      "kareemr",
+      "yi.zhuang"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3047,
+    "group_name": "storage3-gilbertk-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sudite", "s.engle", "efleuchaus", "s.genovese"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 563,
+    "group_name": "storage-btc-fyiwei-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["fyiwei"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1616,
+    "group_name": "storage-fyingying-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["yuntian", "d.m.young"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4274,
+    "group_name": "storage3-kodi-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ejon", "ankita.s", "gasperino"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3827,
+    "group_name": "storage3-smith-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "sgaby",
+      "r.butler",
+      "jornstein",
+      "hedwig.lee",
+      "steven.webster",
+      "thomas.johnson"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4769,
+    "group_name": "storage3-kfuh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.favour"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4949,
+    "group_name": "storage3-gillandersw-Project_0001_Clinical_Trials-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hluke"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 816,
+    "group_name": "storage-UMD-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul", "antonacci.t.j"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 507,
+    "group_name": "storage-epigenome-dongs-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5453,
+    "group_name": "storage3-cooper_m-n.udomkittivorakul-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["n.udomkittivorakul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5465,
+    "group_name": "storage3-cooper_m-schnietz-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["schnietz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 519,
+    "group_name": "storage-epigenome-wenjin-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3101,
+    "group_name": "storage3-hongyuan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["eadam", "p.eshrag", "sihaochen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2345,
+    "group_name": "storage3-b.green-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["daydin", "renpingli"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2303,
+    "group_name": "storage2-sutcliffes-PLUS_RISE_V1-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ganyu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5444,
+    "group_name": "storage3-cooper_m-kstrammel-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3944,
+    "group_name": "storage3-tmazur-development-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.price", "chassanzadeh", "jfwilliamson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 639,
+    "group_name": "storage-rhead-Covid-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4379,
+    "group_name": "storage2-mdan-forest-inventory-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abradley"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3608,
+    "group_name": "storage3-rogersc-Autism_Clinical_Center-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["cwoodcock", "aqdashaider", "bryansewing"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4829,
+    "group_name": "storage3-pbudge-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kobrien"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 498,
+    "group_name": "storage-epigenome-tang.zitian-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3860,
+    "group_name": "storage3-strassmann-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dbrock"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1793,
+    "group_name": "storage3-kwylie-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["demily", "naughton"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2879,
+    "group_name": "storage3-egawat-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["m.k.murphy", "sunniehsiung"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4049,
+    "group_name": "storage3-yshin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dain.lee"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5828,
+    "group_name": "storage3-cruchagac-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "arda",
+      "ksen",
+      "sohn",
+      "bnovotny",
+      "gorijala",
+      "d.gomez-fonseca"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3572,
+    "group_name": "storage3-r.mishra-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jianan.w", "johnmaxwell"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2948,
+    "group_name": "storage3-gachhm-ViewRay_MRI_Data_Archive-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["uvilla", "yangdeshan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1976,
+    "group_name": "storage3-nelson-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sean"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1253,
+    "group_name": "storage-a.wilcox-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["davila-garcia"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3626,
+    "group_name": "storage3-rogersc-SDS_Lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "hraia",
+      "poper",
+      "hobbsm",
+      "eforsen",
+      "polancs",
+      "sandrew",
+      "bocchetti",
+      "cwoodcock",
+      "WG-zohreh",
+      "aqdashaider",
+      "jfishereastep",
+      "l.m.vilna-santos"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4094,
+    "group_name": "storage3-said_a-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["j.e.sagel"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 837,
+    "group_name": "storage-r.lawrence-2022_R00_CuffEtiology-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "baldwin.s",
+      "roberts.t",
+      "c.a.dechiro",
+      "l.m.nicholson"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5270,
+    "group_name": "storage3-jin.zhang-HLA-EM-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.zach"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 870,
+    "group_name": "storage-rgovindan-Analysis-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["cgiordano"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3290,
+    "group_name": "storage3-m.miller-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["m.miller", "samantha.hamilton"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 843,
+    "group_name": "storage-r.lawrence-MATLAB-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "ivensr",
+      "l.kahan",
+      "baldwin.s",
+      "roberts.t",
+      "c.a.dechiro",
+      "l.m.nicholson"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 447,
+    "group_name": "storage-epigenome-raw_data_smaht-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "x.zilan",
+      "yung-chun",
+      "tang.zitian",
+      "ruttenberg.andrew"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 624,
+    "group_name": "storage-rhead-Abbvie_project_information-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3815,
+    "group_name": "storage3-shokeenm-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dhanusha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5450,
+    "group_name": "storage3-cooper_m-mcimpean-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1316,
+    "group_name": "storage-shen.m-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["rshang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4733,
+    "group_name": "storage3-jschwarz-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["desait"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3536,
+    "group_name": "storage3-pjfowler-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["juliesmith"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3519,
+    "group_name": "storage3-path-gmp-cgl-mopath-dev-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hernandez.p"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 621,
+    "group_name": "storage-rhead-Research-rw",
+    "in_ad_not_in_allocation": [
+      "mharriso",
+      "mjohnson",
+      "mminton",
+      "mschall",
+      "ntrapp",
+      "pingliu",
+      "rrupp",
+      "sara.kohlberg"
+    ],
+    "in_allocation_not_in_ad": [
+      "carlyd",
+      "cstull",
+      "haileyw",
+      "jgotway",
+      "schatzc",
+      "abentlag",
+      "saudrain",
+      "AD-GTAC-RNANGS"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1382,
+    "group_name": "storage-i2db-students-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ricejp", "warren.thomas"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4460,
+    "group_name": "storage3-gdhugo-aiqa-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["czhuo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3899,
+    "group_name": "storage3-tarr-Tarr-rw",
+    "in_ad_not_in_allocation": ["ndaom"],
+    "in_allocation_not_in_ad": [
+      "renay",
+      "b.frye",
+      "parr.b",
+      "sherrie",
+      "dewitton",
+      "llinneman",
+      "hoffmann_j",
+      "mcdonough_r",
+      "p.crittenden",
+      "lucina.c.rouggly"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6077,
+    "group_name": "storage3-linda.richards.projects-Dunnarts-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lisam"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3449,
+    "group_name": "storage3-nmmaher-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3716,
+    "group_name": "storage2-lu-SmartKitchen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ruiqi.w"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1106,
+    "group_name": "storage-e.g.schmitt-schnietz-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["schnietz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1052,
+    "group_name": "storage-debabratapatra-jmalone-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jmalone"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1202,
+    "group_name": "storage-rhead-Illumina_production-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jgotway", "btfulton", "littlesara"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4730,
+    "group_name": "storage3-jcorbo-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "cfei",
+      "cmyers",
+      "drebeca",
+      "gretchens",
+      "ogawayohei"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2930,
+    "group_name": "storage3-freedlak-Statistical_Toolbox-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["steinmeb"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4283,
+    "group_name": "storage3-kutluay-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["yiqingw"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3275,
+    "group_name": "storage3-lorisetton-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["milad", "alexandradavis"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4286,
+    "group_name": "storage3-kweilbae-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["aesser", "gothoum"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2942,
+    "group_name": "storage3-g.gallardo-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["antheaweng", "carolynmann"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3347,
+    "group_name": "storage3-mdinauer-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dyoo", "mcgratht"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4388,
+    "group_name": "storage2-mdan-dtrc2026-workshop-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["c.israel", "k.subash"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2918,
+    "group_name": "storage3-freedlak-Admin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jessica.winker"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 459,
+    "group_name": "storage-epigenome-juanfmacias-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3305,
+    "group_name": "storage2-harterj-omerodata-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["RIS-SVC-WUCCI"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2669,
+    "group_name": "storage3-brian.s.clark-archive-Single_Cell_fastq-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.jade"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 248,
+    "group_name": "storage-btc-yeli-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ramesh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 858,
+    "group_name": "storage-sanjayjain-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "camryn",
+      "kalyan",
+      "mhoshi",
+      "nwanne",
+      "sofiam",
+      "takunda",
+      "barton.e",
+      "lagwankar",
+      "samanthaz",
+      "siddharths"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2813,
+    "group_name": "storage3-criswells-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "dsai",
+      "faustim",
+      "killionj",
+      "brittanyk",
+      "wendy.dlamini"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5280,
+    "group_name": "storage3-jin.zhang-reference-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["azhao", "abisha", "desait"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5207,
+    "group_name": "storage3-cjluke-Luke-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["aarond", "coffman", "craig.hill"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3836,
+    "group_name": "storage3-steeda-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["steeda", "arafael"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5372,
+    "group_name": "storage3-nareshas-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["elizabethl", "vlevasseur"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4142,
+    "group_name": "storage3-p.ruzycki-Lab_Projects-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["byrnee"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6083,
+    "group_name": "storage3-mageej-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["denby", "yanan.li"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3566,
+    "group_name": "storage3-qinliu-xiaoleishen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["xiaoleishen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3446,
+    "group_name": "storage3-nlin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sizhe", "jin.zekai"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2351,
+    "group_name": "storage2-apte-Mitsu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lagwankar"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3077,
+    "group_name": "storage3-hammondross-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jornstein", "lydia.reader"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4025,
+    "group_name": "storage3-yanoh-Kim_Lab_Overflow-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["allegra.petti"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1982,
+    "group_name": "storage2-r.lawrence-2025_MorphASF-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["l.kahan", "c.a.dechiro"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5378,
+    "group_name": "storage3-hultgren-cryoem-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mjrau"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 651,
+    "group_name": "storage-rhead-Fluidigm-Projects-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": ["Group storage-amlai_test-rw missing in AD."],
+    "allocation_pk": 38,
+    "group_name": "storage-amlai_test-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["amlai", "sean.yu", "japrewitt", "aditigupta"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4202,
+    "group_name": "storage3-bisiademuyiwa-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["anamika.basu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6857,
+    "group_name": "storage3-carlson.bruce-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mfukutomi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3182,
+    "group_name": "storage3-juy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["tran.peter"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 633,
+    "group_name": "storage-rhead-BarTender-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4265,
+    "group_name": "storage3-karchc-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["yous", "ritamartinez", "mahali.sidhartha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 450,
+    "group_name": "storage-epigenome-dli23-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3395,
+    "group_name": "storage3-meyerg-Users-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "d.kamm",
+      "j.singer",
+      "karen.shen",
+      "jacob.parson",
+      "kelseycollins"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4482,
+    "group_name": "storage3-gordon.mae-OHTS1-2-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-g.czanner"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6302,
+    "group_name": "storage3-guilak-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "melle",
+      "leilas",
+      "sorial",
+      "feini.qu",
+      "p.sarada",
+      "daniellez",
+      "chia-lung.wu",
+      "harasymowiczn",
+      "kelseycollins",
+      "stewardnancys"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3284,
+    "group_name": "storage3-ltague-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["koetjen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 774,
+    "group_name": "storage-bol-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wg-shi-jun"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1385,
+    "group_name": "storage-r.thompson-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["d.j.pace", "aberkowitz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2645,
+    "group_name": "storage3-brian.s.clark-Jade-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.jade"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 894,
+    "group_name": "storage-g.goodhill-Q3367_SA-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["g.goodhill"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4178,
+    "group_name": "storage3-eversa-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "b.jad",
+      "fukada",
+      "hiroki",
+      "leiwang",
+      "murthy.c",
+      "zhihuihe",
+      "chan.jeffrey"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1424,
+    "group_name": "storage-j.jackson-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["m.xi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6164,
+    "group_name": "storage3-t.theunissen-temp-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["cchaoyi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3980,
+    "group_name": "storage3-weihlc-rw",
+    "in_ad_not_in_allocation": ["shunn"],
+    "in_allocation_not_in_ad": [
+      "briers",
+      "michio",
+      "oyamam",
+      "kelly.c",
+      "k.renatta",
+      "c.a.suarez",
+      "andrew.moran",
+      "saraherobinson",
+      "bengoecheaibacetar"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4718,
+    "group_name": "storage3-gfwu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pandhey", "WG-fmaria", "malexandra"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3662,
+    "group_name": "storage3-sdietmann-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ponomarev"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5147,
+    "group_name": "storage3-g.goodhill-uq_lsm-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wyize"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6713,
+    "group_name": "storage3-xiaowei.wang-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["juliesmith", "xiaowei.wang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4778,
+    "group_name": "storage3-lake.s-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["yashk", "beames", "andrewo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 819,
+    "group_name": "storage-sanadkaram-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["donnellyk", "chloe.hodgson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2561,
+    "group_name": "storage3-bcopits-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["krakesh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3452,
+    "group_name": "storage3-nmmaher-maherlab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ha", "gothoum"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 660,
+    "group_name": "storage-rhead-Microarray-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5081,
+    "group_name": "storage3-jdipersi-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["xiaobei"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3266,
+    "group_name": "storage3-lohman-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hot", "sumit", "kozlov"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3516,
+    "group_name": "storage3-path-gmp-cgl-mopath-test-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hernandez.p"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1085,
+    "group_name": "storage-sibley-Cp-Oral-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["iti.saraav"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3188,
+    "group_name": "storage3-jward2-Project_HRPO_202104143_Clinical_Trial-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mmclella", "MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2627,
+    "group_name": "storage3-brian.rogers-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sun.k", "ArtSci-SVC-MISSEL"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4163,
+    "group_name": "storage3-p.ruzycki-tmp_callingcards-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["chasem"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6779,
+    "group_name": "storage3-aherrlich-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["aadhav", "fkhamissi", "akshayakeerthi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4577,
+    "group_name": "storage3-gutmannd-ethanh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ethanh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6338,
+    "group_name": "storage3-kipnis-Dylan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dylang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3410,
+    "group_name": "storage3-mwarchol-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mwarchol"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3302,
+    "group_name": "storage3-mariofeldman-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "le.n",
+      "cluca",
+      "gsycz",
+      "mejia",
+      "dakota",
+      "distel",
+      "haydes",
+      "cemilie",
+      "jjcalix",
+      "sbenomar"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 772,
+    "group_name": "storage-lu-MDS-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["peiqi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 254,
+    "group_name": "storage-btc-stegh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["seunghyun"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 377,
+    "group_name": "storage-daryls3-teamfolder-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ayush"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2489,
+    "group_name": "storage3-andrejspec-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["chill"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3872,
+    "group_name": "storage3-svandyken-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["do-hyun.kim", "lauryn.mosby"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4226,
+    "group_name": "storage3-glongmore-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.favour", "craig.barcus"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4937,
+    "group_name": "storage3-mmokalled-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["amruta", "fgiana", "c.a.weinholtz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4205,
+    "group_name": "storage3-chenda-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["minjun"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4439,
+    "group_name": "storage3-cavalliv-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mmckee"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1634,
+    "group_name": "storage-shaox-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jin.zekai"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3578,
+    "group_name": "storage3-rajagopalr-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["zhangsheng"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3713,
+    "group_name": "storage2-lu-peiqi-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ruiqi.w"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3620,
+    "group_name": "storage3-rogersc-Genome_Group-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["cspatrick", "WG-zohreh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 510,
+    "group_name": "storage-epigenome-johnegarza-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 515,
+    "group_name": "storage-epigenome-x.zilan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1256,
+    "group_name": "storage-belloy2-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["satheshkumar"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 213,
+    "group_name": "storage-cao.yang-rw",
+    "in_ad_not_in_allocation": ["lab-gmp-cgl"],
+    "in_allocation_not_in_ad": ["PATH-SVC-GMP-CGL"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3942,
+    "group_name": "storage3-tmazur-data-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.price", "chassanzadeh", "jfwilliamson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4583,
+    "group_name": "storage3-gutmannd-stephanie.shearman-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["stephanie.shearman"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4805,
+    "group_name": "storage3-wyeoh-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["amatog"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3095,
+    "group_name": "storage3-herzog-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jonesjeffr", "c.a.martin-fairey"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3962,
+    "group_name": "storage3-virgin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wang.yating"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5246,
+    "group_name": "storage3-gpdunn-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "khan.saad",
+      "rupen.desai",
+      "allegra.petti",
+      "antonacci.t.j"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1421,
+    "group_name": "storage-igegeorge-mktscn-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["j.nicholas"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 828,
+    "group_name": "storage-abby.green-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["thi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4946,
+    "group_name": "storage3-gillandersw-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mmclella"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6377,
+    "group_name": "storage3-kipnis-Justin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["rjustin"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2259,
+    "group_name": "storage3-bga-shared-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hluke", "abisha", "jaydenz", "cweihang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4544,
+    "group_name": "storage3-gutmannd-nbrossier-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kailong"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1463,
+    "group_name": "storage-hui-comscore-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["spring.zhou"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4427,
+    "group_name": "storage3-tannerjohanns-Project_0001_Clinical-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5099,
+    "group_name": "storage3-diantonio-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["oconnorj"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1007,
+    "group_name": "storage-christopherking-ActFastData-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["plyons", "sandhyat"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3287,
+    "group_name": "storage3-luceyb-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "luceyb",
+      "tredrick",
+      "howellsa1",
+      "allysonwuest"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5463,
+    "group_name": "storage3-cooper_m-Projects-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["n.udomkittivorakul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4139,
+    "group_name": "storage3-p.ruzycki-Lab_Members-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["byrnee"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1325,
+    "group_name": "storage-dspencer-spencerlab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["walczak", "d.w.wang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 501,
+    "group_name": "storage-epigenome-benpeng-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4916,
+    "group_name": "storage3-mdan-common-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["c.israel", "k.subash"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6281,
+    "group_name": "storage3-ellebedy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["anders.madsen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3918,
+    "group_name": "storage3-tbraver-MURI_readonly-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mayaq", "i.merve", "antonios"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3570,
+    "group_name": "storage3-qinliu-zhiyao.wang-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["haowu.jiang", "xiaoleishen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1259,
+    "group_name": "storage-harterj-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["RIS-SVC-WUCCI"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2171,
+    "group_name": "storage3-gtac-mgi-general-Illumina_production-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jgotway", "btfulton", "littlesara"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3212,
+    "group_name": "storage3-kkroll-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["paresh", "salehm", "pgontarz", "emily.lewis"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 676,
+    "group_name": "storage-epigenome-elvisa-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "x.zilan",
+      "jiawei.s",
+      "tang.zitian",
+      "ruttenberg.andrew"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3041,
+    "group_name": "storage3-geislers-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["baih"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3674,
+    "group_name": "storage3-shantanu-project-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ENGR-SVC-Aimlab", "ENGR-SVC-AimlabAdmin"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3392,
+    "group_name": "storage3-meyerg-Tools-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "d.kamm",
+      "j.singer",
+      "karen.shen",
+      "jacob.parson",
+      "kelseycollins"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 840,
+    "group_name": "storage-r.lawrence-Dissemination-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ivensr", "baldwin.s", "l.m.nicholson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5432,
+    "group_name": "storage3-cooper_m-Human_Samples-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hannahc", "alex.paul", "n.udomkittivorakul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4679,
+    "group_name": "storage3-gic-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["turner.k"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5492,
+    "group_name": "storage3-cooper_m-exomes-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2306,
+    "group_name": "storage2-sutcliffes-VIEW-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ganyu", "k.a.urga"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4377,
+    "group_name": "storage3-Libraries_DC-L2_All-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["cassidyw", "laura.brugger", "thomas.johnson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3380,
+    "group_name": "storage3-meyerg-Inventories-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "d.kamm",
+      "j.singer",
+      "karen.shen",
+      "jacob.parson",
+      "kelseycollins"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1544,
+    "group_name": "storage-IMSE-ARM300_IMSE-rw",
+    "in_ad_not_in_allocation": ["ad-ris-qa"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3419,
+    "group_name": "storage3-nabumrad-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["pechev", "mjacome", "cifarelli"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3971,
+    "group_name": "storage3-wambachj-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ansley", "alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4109,
+    "group_name": "storage3-nhuebsch-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["b.bahareh", "k.oguntuyo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1910,
+    "group_name": "storage2-dittoj-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ksahu", "oishi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3923,
+    "group_name": "storage3-thomas.k-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["liemn", "nathann"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4046,
+    "group_name": "storage3-yongjianliu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lanllou", "xuefeng.gao", "zhangxiaohui"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3371,
+    "group_name": "storage3-meghanc-PrecisionPD_R01-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["grossen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4526,
+    "group_name": "storage3-gutmannd-kailong-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kailong"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3893,
+    "group_name": "storage3-tammy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["acrosby", "j.h.lan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4349,
+    "group_name": "storage3-yin.cao-UKBBGenomicData-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["asina", "hong.d"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4112,
+    "group_name": "storage3-rubin_j-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["warrington_n"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5408,
+    "group_name": "storage3-cooper_m-Cooper_Genomics-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2225,
+    "group_name": "storage3-amanela-ManelaLab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["cindy.lu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3458,
+    "group_name": "storage3-norrisa-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sholloway", "aaron.cone"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6851,
+    "group_name": "storage3-saori-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["landreoli"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6854,
+    "group_name": "storage3-chaozhou-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mingy"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5105,
+    "group_name": "storage3-solnical-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "brush",
+      "stamp",
+      "roszkoi",
+      "sepichd",
+      "ssimone",
+      "zachary",
+      "pgontarz"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2453,
+    "group_name": "storage3-abuamery-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["arram", "ke.ke", "WG-cwu", "timrpeterson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3821,
+    "group_name": "storage3-simon.tang-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.liefer"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 974,
+    "group_name": "storage-hprc-x.zilan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1406,
+    "group_name": "storage-dt-summer-corp-secure-ai-mental-health-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ilang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3110,
+    "group_name": "storage3-jasonyi-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wallacej"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4187,
+    "group_name": "storage3-smaht_analysis-analysis-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["yung-chun", "tang.zitian"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2570,
+    "group_name": "storage3-bherzog-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["varuns"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5651,
+    "group_name": "storage3-abby.green-_STARtmp-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-nmeth"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3341,
+    "group_name": "storage3-mdiamond-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hassan", "c.miliotis"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3629,
+    "group_name": "storage3-rogersc-SYNCHRONY-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dudeko", "hobbsm", "polancs", "tandonm"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6278,
+    "group_name": "storage3-rtownsend-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "jmalone",
+      "rconnors",
+      "a.e.davis",
+      "o.el-ghazzawy",
+      "robert.sprung"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1871,
+    "group_name": "storage2-cbcooper-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.e.lim", "haowei.m", "l.shan-yu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1529,
+    "group_name": "storage-jzellers-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mcspedon"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2924,
+    "group_name": "storage3-freedlak-Lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "sarah.s",
+      "herzingp",
+      "steinmeb",
+      "jessica.winker"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4592,
+    "group_name": "storage3-gutmannd-g.anna-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["g.anna"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 892,
+    "group_name": "storage-g.goodhill-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["z.ma", "tianchi.y"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2660,
+    "group_name": "storage3-brian.s.clark-archive-General-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.jade"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6359,
+    "group_name": "storage3-kipnis-Jay-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["janghyun"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1154,
+    "group_name": "storage-faccior-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["eeul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3185,
+    "group_name": "storage3-jward2-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["mmclella"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3194,
+    "group_name": "storage3-kast-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kaufmann", "p.krishnamoorthy"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1010,
+    "group_name": "storage-christopherking-ActFastExports-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["junbo.s", "xuebing", "sandhyat"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3356,
+    "group_name": "storage3-mdlew-LewLabBackup-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["RIS-IT-ADMIN"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4053,
+    "group_name": "storage3-zaydmanm-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["swamidass"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6848,
+    "group_name": "storage3-mciorba-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["lamm"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6833,
+    "group_name": "storage3-reeves-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "sgaby",
+      "cassidyw",
+      "jornstein",
+      "hedwig.lee",
+      "steven.webster"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3086,
+    "group_name": "storage3-harrismi-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "emma.b",
+      "wg-atkin",
+      "wg-rivas",
+      "wg-goetzj",
+      "brecca.gaffney"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2247,
+    "group_name": "storage3-bga-gmsroot-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hluke", "abisha", "jaydenz", "cweihang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5523,
+    "group_name": "storage3-jacobsn-datasets-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["k.subash"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4004,
+    "group_name": "storage3-wilfleyd-Lab_Member-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "ginaj",
+      "laboe",
+      "fanice",
+      "fravel",
+      "mwayne",
+      "clairem",
+      "dmaggie",
+      "ishmael",
+      "mmcnair",
+      "rsteins",
+      "brendans",
+      "gabberts",
+      "bdepietro",
+      "natalie.m",
+      "angeladlima",
+      "lauren.fowler",
+      "melissa.ramel",
+      "rebecca.ehlich",
+      "regina.mccarthy"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 338,
+    "group_name": "storage-jmding-j.shiyu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["j.shiyu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6695,
+    "group_name": "storage3-jacooper-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["daltonw"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1260,
+    "group_name": "storage-harterj-ro",
+    "in_ad_not_in_allocation": ["gunnar"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4835,
+    "group_name": "storage3-imaishin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "unno",
+      "cisse",
+      "zhu.a",
+      "k.megumi",
+      "pajilore",
+      "k.nakamura",
+      "k.tokizane",
+      "maurya.shailendra"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4799,
+    "group_name": "storage3-songhu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["naidisun"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 834,
+    "group_name": "storage-r.lawrence-2020_K99_CuffEtiology-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ivensr", "c.a.dechiro", "l.m.nicholson"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4253,
+    "group_name": "storage3-libraries_gdc-geospatial_data-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["averbeck"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3857,
+    "group_name": "storage3-storch-twylie_storch_lab-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "hgula",
+      "bherter",
+      "lmaguire",
+      "RIS-SVC-genome-admin"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 618,
+    "group_name": "storage-rhead-_surgpathcopy-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3542,
+    "group_name": "storage3-pjfowler-dcds-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.dichristofano"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3368,
+    "group_name": "storage3-meghanc-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["maame"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5258,
+    "group_name": "storage3-jin.zhang-desait-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["desait"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5639,
+    "group_name": "storage3-abby.green-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["thi"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1625,
+    "group_name": "storage-g.goodhill-dunnart-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["z.ma"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2460,
+    "group_name": "storage3-dspencer-chromoseq-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abonney"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1037,
+    "group_name": "storage-christopherking-tectonics-a-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sandhyat"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 753,
+    "group_name": "storage-wbuchser-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "mds",
+      "remi",
+      "ikede",
+      "kylan",
+      "egerbi",
+      "alyenkin",
+      "cshively",
+      "jcbramley",
+      "s.n.weiss",
+      "mjliebeskind",
+      "chandrasekaran.vinay"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6071,
+    "group_name": "storage3-leuthardte-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "hohyun",
+      "sharsh",
+      "swiftj",
+      "h.huiling",
+      "mohammadaminn",
+      "rustamov.nabi",
+      "bidhanlamichhane"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4664,
+    "group_name": "storage3-dmullen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "wbosch",
+      "leschen",
+      "manogna",
+      "sfergus",
+      "jscordova"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6479,
+    "group_name": "storage3-pappu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "aposey",
+      "louiss",
+      "a.keeley",
+      "mstaller",
+      "cakornacki",
+      "martinfossat"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2984,
+    "group_name": "storage3-bealsjw-ES_Cardiac_Scans-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ctori"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5066,
+    "group_name": "storage3-yanike-UKB-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["wg-que"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 914,
+    "group_name": "storage-hprc-raw-data-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5493,
+    "group_name": "storage3-cooper_m-exomes-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["n.udomkittivorakul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2765,
+    "group_name": "storage3-clair.crewe-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["bop", "sabio", "kaufmann"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5498,
+    "group_name": "storage3-cooper_m-TLR8-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1058,
+    "group_name": "storage-dspencer-shared-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["thi", "walczak"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 231,
+    "group_name": "storage-yixin.chen-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["liuhao", "jerry.kong", "feng.jiarui"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5292,
+    "group_name": "storage3-jin.zhang-cervix_institute_WGS_normal-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["azhao", "abisha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4398,
+    "group_name": "storage3-lubyj-archive-PCIT-ED_RCT_Therapy-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-a.russo", "WG-m.legere"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1439,
+    "group_name": "storage-saifus-mktscan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["fzhang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 341,
+    "group_name": "storage-w.qian-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["sarkars"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2747,
+    "group_name": "storage3-christopherm-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["antonacci.t.j"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3227,
+    "group_name": "storage3-laura-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["garavagliajr"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 192,
+    "group_name": "storage-debabratapatra-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["juliesmith"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3833,
+    "group_name": "storage3-sstone-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["liu.k", "christophera"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 522,
+    "group_name": "storage-epigenome-ctomlins-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3878,
+    "group_name": "storage3-ta-chiang.liu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "atika",
+      "hmiki",
+      "fachijl",
+      "flanders",
+      "hana.janova"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1094,
+    "group_name": "storage-sibley-Crypto-Resources-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["greigert", "a.marianna", "iti.saraav"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4436,
+    "group_name": "storage3-benzingert-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kdombrowski", "aylin.dincer"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3113,
+    "group_name": "storage3-jblosos-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dbock", "aryehmiller"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5318,
+    "group_name": "storage3-jin.zhang-cervix_institute_68-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["desait"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2663,
+    "group_name": "storage3-brian.s.clark-archive-Single_Cell_Matrices-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.jade"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4412,
+    "group_name": "storage3-lubyj-Jennings_Therapy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["fowlerg", "WG-zoripaul", "jenniferharper"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3947,
+    "group_name": "storage3-twylie-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hgula", "bherter"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1346,
+    "group_name": "storage-hirbea-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "WG-badej",
+      "WG-cmoon",
+      "paul.a.jones",
+      "kuangyingyang"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4661,
+    "group_name": "storage3-yvorobeychik-cps-brown-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ahne"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 673,
+    "group_name": "storage-epigenome-ruttenberg.andrew-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "x.zilan",
+      "jiawei.s",
+      "tang.zitian",
+      "ruttenberg.andrew"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 540,
+    "group_name": "storage-epigenome-xu.z1-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["x.zilan", "tang.zitian", "ruttenberg.andrew"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3038,
+    "group_name": "storage3-garnett-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hchai", "WG-j.shali"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4074,
+    "group_name": "storage3-zhu740-Students-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["tnie", "m.xue"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1019,
+    "group_name": "storage-christopherking-haoliu-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["haoliu"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2480,
+    "group_name": "storage3-agelman-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "parksa",
+      "dscozzi",
+      "hkulkarn",
+      "jihongzhu",
+      "jackferreira"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4655,
+    "group_name": "storage3-yvorobeychik-sna-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["zhoukai"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4011,
+    "group_name": "storage3-woodardp-CCIR-raw-data-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["buryd"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1499,
+    "group_name": "storage-zting-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["dylan.lawrence"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 654,
+    "group_name": "storage-rhead-GTAC-BILLING-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": []
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2648,
+    "group_name": "storage3-brian.s.clark-References-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.jade"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4964,
+    "group_name": "storage3-jian-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["maiqi.z"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4403,
+    "group_name": "storage3-lubyj-EEDP-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "baerl",
+      "cleah",
+      "loida",
+      "luisg",
+      "maryk",
+      "aimeew",
+      "bgoing",
+      "a.gooch",
+      "kim.tan",
+      "luelena",
+      "maywood",
+      "s.engle",
+      "massmann",
+      "a.b.brody",
+      "a.a.freeman",
+      "s.d.solomon",
+      "zhang.zirui",
+      "katherine.pope"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4970,
+    "group_name": "storage3-sheetsl-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "asaettele",
+      "david.s.lee",
+      "keziah-khue",
+      "kyle.newton"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6755,
+    "group_name": "storage3-manarymj-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["kiddp", "e.cimo"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3389,
+    "group_name": "storage3-meyerg-Purchasing-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["karen.shen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3803,
+    "group_name": "storage3-abramsz-Ethan-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ethanh"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4973,
+    "group_name": "storage3-urano-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "devynn",
+      "rieasada",
+      "weilizhang",
+      "shuntaro.morikawa"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1043,
+    "group_name": "storage-hellerk-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["hellerk"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2240,
+    "group_name": "storage3-bga-alex.paul-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alex.paul"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3863,
+    "group_name": "storage3-strassmann-brc_regulome-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 697,
+    "group_name": "storage-epigenome-c.yuchenalana-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "x.zilan",
+      "jiawei.s",
+      "tang.zitian",
+      "ruttenberg.andrew"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 104,
+    "group_name": "storage-sleong_summer-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["e.wang1", "hellerk", "juliesmith"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 179,
+    "group_name": "storage-cmasteller-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "j.prata",
+      "dorosin.s",
+      "i.v.lopez",
+      "kostynick.r"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5330,
+    "group_name": "storage3-jin.zhang-abisha-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abisha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2693,
+    "group_name": "storage3-cbergom-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["clarkerin"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2573,
+    "group_name": "storage3-bherzog-KPL_project_share-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jaydenz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2174,
+    "group_name": "storage3-gtac-mgi-general-Bioinformatics_analysis-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6380,
+    "group_name": "storage3-kipnis-Kalil-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["herz", "kalil"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3567,
+    "group_name": "storage3-qinliu-xiaoleishen-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["haowu.jiang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 603,
+    "group_name": "storage-epigenome-f.qichen-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "x.zilan",
+      "jiawei.s",
+      "tang.zitian",
+      "ruttenberg.andrew"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 771,
+    "group_name": "storage-lu-MDS-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ruiqi.w", "jiezhong"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3089,
+    "group_name": "storage3-hastingsmk-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "klove",
+      "d.trenton",
+      "c.johnathon",
+      "g.genevieve",
+      "m.l.moeslein",
+      "WUIT-SVC-PUltraScan"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3485,
+    "group_name": "storage3-dtbundy-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["c.ortizmenendez"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3293,
+    "group_name": "storage3-mabbs-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["a.pratichhya"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 861,
+    "group_name": "storage-rgovindan-rw",
+    "in_ad_not_in_allocation": ["bryanfisk"],
+    "in_allocation_not_in_ad": ["cgiordano", "sdevarakonda", "MGI-SVC-BGA-run"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3851,
+    "group_name": "storage3-storch-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["bherter"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 2966,
+    "group_name": "storage3-csemenko-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["guifangdong"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4409,
+    "group_name": "storage3-lubyj-eLABE_Noldus-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["samantha.cohen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 990,
+    "group_name": "storage-christopherking-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["japrewitt"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 905,
+    "group_name": "storage-hwgabel-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "nicoleh",
+      "wyaomin",
+      "denniswu",
+      "mendozav",
+      "snettles",
+      "covarrubias"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1379,
+    "group_name": "storage-campisi-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["ltanya"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1532,
+    "group_name": "storage-jzellers-1_Projects-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["jzellers"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3044,
+    "group_name": "storage3-ghaller-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["gengw", "jwilborn"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3401,
+    "group_name": "storage3-micchelli-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["m.reichert", "AD-DEVBIOMicchelli"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6842,
+    "group_name": "storage3-leyao.wang-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["saran", "bquinn", "cheyenned", "leyao.wang"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3638,
+    "group_name": "storage3-rosend-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": [
+      "goltz",
+      "mackel",
+      "adahler",
+      "m.mckee",
+      "r.wasbotten",
+      "c.d.morffysmith"
+    ]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3911,
+    "group_name": "storage3-tbraver-MLX-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["antonios"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5300,
+    "group_name": "storage3-jin.zhang-yufei-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["abisha"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 1904,
+    "group_name": "storage2-epigenome-yung-chun-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["yung-chun"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6761,
+    "group_name": "storage3-peggy.kendall-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["alanab"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5588,
+    "group_name": "storage3-doering-extra-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["chasem"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 3555,
+    "group_name": "storage3-qinliu-haowu.jiang-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["xiaoleishen"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6356,
+    "group_name": "storage3-kipnis-Jasmin-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["herz"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5645,
+    "group_name": "storage3-abby.green-RawData-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-nmeth"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 6740,
+    "group_name": "storage3-cabraham-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["joseph.dise"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 648,
+    "group_name": "storage-rhead-Favorites-rw",
+    "in_ad_not_in_allocation": ["storage-rhead-research-rw"],
+    "in_allocation_not_in_ad": ["rhead"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 4827,
+    "group_name": "storage3-swamidass-ro",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["swamidass"]
+  },
+  {
+    "additional_errors": [],
+    "allocation_pk": 5642,
+    "group_name": "storage3-abby.green-Green-rw",
+    "in_ad_not_in_allocation": [],
+    "in_allocation_not_in_ad": ["WG-nmeth"]
+  }
+]

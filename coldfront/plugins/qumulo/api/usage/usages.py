@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time, timezone
 from dateutil.relativedelta import relativedelta
 
 from django.http import (
@@ -56,12 +56,24 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
         start_date_str = request.GET.get("start_date", "")
         end_date_str = request.GET.get("end_date", "")
 
-        start_date = date.fromisoformat(start_date_str) if start_date_str else None
-        end_date = date.fromisoformat(end_date_str) if end_date_str else None
+        start_date = (
+            datetime.combine(
+                date.fromisoformat(start_date_str), time.min, tzinfo=timezone.utc
+            )
+            if start_date_str
+            else None
+        )
+        end_date = (
+            datetime.combine(
+                date.fromisoformat(end_date_str), time.min, tzinfo=timezone.utc
+            )
+            if end_date_str
+            else None
+        )
 
         if (
-            isinstance(start_date, date)
-            and isinstance(end_date, date)
+            isinstance(start_date, datetime)
+            and isinstance(end_date, datetime)
             and start_date > end_date
         ):
             return HttpResponseBadRequest(
@@ -88,21 +100,21 @@ class Usages(LoginRequiredMixin, UserPassesTestMixin, View):
 
 def _get_quotas(
     allocation_id: int,
-    start_date: Union[date, None] = None,
-    end_date: Union[date, None] = None,
+    start_date: Union[datetime, None] = None,
+    end_date: Union[datetime, None] = None,
 ) -> list:
     quota_attribute_history = AllocationAttribute.history.filter(
         allocation__pk=allocation_id,
         allocation_attribute_type__name="storage_quota",
     )
 
-    if isinstance(start_date, date):
+    if isinstance(start_date, datetime):
         next_date = start_date - relativedelta(days=1)
 
         quota_attribute_history = quota_attribute_history.filter(
             history_date__gt=next_date
         )
-    if isinstance(end_date, date):
+    if isinstance(end_date, datetime):
         quota_attribute_history = quota_attribute_history.filter(
             history_date__lte=end_date
         )
@@ -115,6 +127,27 @@ def _get_quotas(
         quota_attribute_history,
     )
     history_iter = list(history_iter)
+
+    if isinstance(start_date, datetime):
+        quota_as_of_start = (
+            AllocationAttribute.history.as_of(start_date)
+            .filter(
+                allocation__pk=allocation_id,
+                allocation_attribute_type__name="storage_quota",
+            )
+            .first()
+        )
+
+        if quota_as_of_start is not None and (
+            len(history_iter) == 0 or history_iter[-1].get("date") != start_date.date()
+        ):
+            history_iter.append(
+                {
+                    "quota": int(quota_as_of_start.value) * 2**10,
+                    "date": start_date.date(),
+                }
+            )
+
     if len(history_iter) > 1 and history_iter[0] == history_iter[1]:
         history_iter.pop(0)
 
@@ -123,22 +156,20 @@ def _get_quotas(
 
 def _get_usages_by_month(
     allocation_id: int,
-    start_date: Union[date, None] = None,
-    end_date: Union[date, None] = None,
+    start_date: Union[datetime, None] = None,
+    end_date: Union[datetime, None] = None,
 ):
     usage_history = AllocationAttributeUsage.history.filter(
         allocation_attribute__allocation__pk=allocation_id,
         allocation_attribute__allocation_attribute_type__name="storage_quota",
     )
 
-    if isinstance(start_date, date):
+    if isinstance(start_date, datetime):
         usage_history = usage_history.filter(
             history_date__gt=start_date - relativedelta(days=1)
         )
-    if isinstance(end_date, date):
-        usage_history = usage_history.filter(
-            history_date__lt=end_date + relativedelta(days=1)
-        )
+    if isinstance(end_date, datetime):
+        usage_history = usage_history.filter(history_date__lte=end_date)
 
     history_iter = map(
         lambda element: {
