@@ -88,9 +88,9 @@ class TestValidators(TestCase):
         )
 
     def test_string_parsing_quota_and_unit_to_integer(self):
-        self.assertEquals(string_parsing_quota_and_unit_to_integer("80T"), 80)
-        self.assertEquals(string_parsing_quota_and_unit_to_integer("500G"), 1)
-        self.assertEquals(string_parsing_quota_and_unit_to_integer("1500G"), 2)
+        self.assertEqual(string_parsing_quota_and_unit_to_integer("80T"), 80)
+        self.assertEqual(string_parsing_quota_and_unit_to_integer("500G"), 1)
+        self.assertEqual(string_parsing_quota_and_unit_to_integer("1500G"), 2)
 
         for bad_value in ["80", "80bogus", None]:
             message = f'The quota "{bad_value}" is not valid. The unit is not T (for TB) or G (for GB), or it is missing.'
@@ -123,13 +123,13 @@ class TestValidators(TestCase):
 
 
 def test_truthy_or_falsy_to_yes(self):
-        self.assertEqual("Yes", truthy_or_falsy_to_yes("True"))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes("False"))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes(None))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes("Bogus Data"))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes("1"))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes("0"))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes(1))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes(0))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes(True))
-        self.assertEqual("Yes", truthy_or_falsy_to_yes(False))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes("True"))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes("False"))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes(None))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes("Bogus Data"))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes("1"))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes("0"))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes(1))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes(0))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes(True))
+    self.assertEqual("Yes", truthy_or_falsy_to_yes(False))

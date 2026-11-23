@@ -14,6 +14,7 @@ import {
 import { Line } from "react-chartjs-2";
 
 import * as chartjsAdapter from "chartjs-adapter-dayjs-4";
+import "./StorageChart.css";
 
 ChartJS.register(
   CategoryScale,
@@ -32,9 +33,10 @@ interface StorageChartProps {
     quota: { x: string; y: number }[];
     path: string;
   };
+  isLoading: Boolean;
 }
 
-function StorageChart({ data }: StorageChartProps) {
+function StorageChart({ data, isLoading }: StorageChartProps) {
   const getMaxQuota = () => {
     let maxQuota = 0;
     for (const element of data.quota) {
@@ -91,6 +93,24 @@ function StorageChart({ data }: StorageChartProps) {
     },
   };
 
+  if (data.usage.length && data.quota.length) {
+    if (data.usage[0].x > data.quota[0].x) {
+      data.quota = [{ x: data.usage[0].x, y: data.quota[0].y }, ...data.quota];
+    }
+    if (data.quota[0].x > data.usage[0].x) {
+      data.usage = [{ x: data.quota[0].x, y: data.usage[0].y }, ...data.usage];
+    }
+
+    const lastUsage = data.usage[data.usage.length - 1];
+    const lastQuota = data.quota[data.quota.length - 1];
+    if (lastUsage.x < lastQuota.x) {
+      data.quota = [{ x: lastUsage.x, y: lastQuota.y }, ...data.quota];
+    }
+    if (lastQuota.x < lastUsage.x) {
+      data.usage = [{ x: lastQuota.x, y: lastUsage.y }, ...data.usage];
+    }
+  }
+
   const chartData = {
     datasets: [
       {
@@ -114,11 +134,20 @@ function StorageChart({ data }: StorageChartProps) {
   };
 
   return (
-    <>
+    <div className="storage-chart">
       {/* 
 // @ts-ignore */}
-      <Line options={options as LineOptions} data={chartData} />
-    </>
+      <Line
+        className="storage-chart-child"
+        options={options as LineOptions}
+        data={chartData}
+      />
+      {isLoading && (
+        <div className="storage-chart-child storage-chart-spinner d-flex justify-content-center align-items-center">
+          <div className="spinner-border" role="status" />
+        </div>
+      )}
+    </div>
   );
 }
 

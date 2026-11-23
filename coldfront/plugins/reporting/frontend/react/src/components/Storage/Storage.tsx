@@ -5,10 +5,16 @@ import Select, { SingleValue } from "react-select";
 
 import axios from "axios";
 
-type usageData = { date: string; usage: number; quota: number }[];
+type usageResponse = {
+  usage_data: { date: string; usage: number }[];
+  quota_data: { date: string; quota: number }[];
+};
 
 function Storage() {
-  const [usage, setUsage] = useState([] as usageData);
+  const [usageResponse, setUsageResponse] = useState({
+    usage_data: [],
+    quota_data: [],
+  } as usageResponse);
   const [endDate, setEndDate] = useState(
     new Date().toISOString().split("T")[0],
   );
@@ -19,12 +25,15 @@ function Storage() {
   const [allocationOptions, setAllocationOptions] = useState(
     [] as AllocationOption[],
   );
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (selectedAllocation) {
+      setIsLoading(true);
       getAllocationUsage(startDate, endDate, selectedAllocation).then(
-        (usageData) => {
-          setUsage(usageData);
+        (usageResponse) => {
+          setUsageResponse(usageResponse);
+          setIsLoading(false);
         },
       );
     }
@@ -67,7 +76,7 @@ function Storage() {
         <Select
           options={getOptions()}
           onChange={(newValue) => onSelectChange(newValue)}
-          defaultValue={{
+          value={{
             value: selectedAllocation?.id,
             label: selectedAllocation?.path,
           }}
@@ -89,16 +98,17 @@ function Storage() {
       </div>
       <StorageChart
         data={{
-          usage: usage.map((element) => ({
+          usage: usageResponse.usage_data.map((element) => ({
             x: element.date,
             y: GiBtoTiB(element.usage),
           })),
-          quota: usage.map((element) => ({
+          quota: usageResponse.quota_data.map((element) => ({
             x: element.date,
             y: GiBtoTiB(element.quota),
           })),
           path: selectedAllocation?.path || "",
         }}
+        isLoading={isLoading}
       />
     </>
   );
@@ -143,8 +153,8 @@ async function getAllocationUsage(
     },
   });
 
-  const { usage_data } = response.data;
-  return usage_data as usageData;
+  const { usage_data, quota_data } = response.data;
+  return { usage_data, quota_data } as usageResponse;
 }
 
 async function getAllocationOptions() {
