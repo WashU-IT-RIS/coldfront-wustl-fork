@@ -14,8 +14,6 @@ jobs:
     environment: test
     steps:
       - uses: actions/checkout@v3
-        with:
-          python-version: "3.9"
 
       - name: install python packages
         run: |
