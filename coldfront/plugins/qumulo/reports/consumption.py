@@ -4,8 +4,9 @@ from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from django.db.models import Avg, Max, Min, StdDev, Variance, Count
-from django.db.models.expressions import OuterRef, Star, Subquery
+from django.db.models.expressions import Star
 from django.db.models.query import QuerySet
+from django.db.models import OuterRef, Subquery
 
 from coldfront.core.allocation.models import (
     Allocation,

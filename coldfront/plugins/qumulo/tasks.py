@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery
 from django.contrib.auth.models import User
 
 from typing import Optional
@@ -12,15 +12,22 @@ from datetime import datetime
 from coldfront.config.env import ENV
 from coldfront.core.allocation.models import (
     Allocation,
-    AllocationStatusChoice,
     AllocationAttribute,
-    AllocationAttributeType,
-    AllocationAttributeUsage,
+    AllocationStatusChoice,
     AllocationLinkage,
+    AllocationQuerySet,
 )
 from coldfront.core.resource.models import Resource
 from coldfront.core.utils.mail import send_email_template, email_template_context
 from coldfront.core.utils.common import import_from_settings
+
+from coldfront.plugins.qumulo.services.file_quota_service import (
+    get_file_system_allocations_near_limit,
+    ingest_quotas_with_daily_usage,
+)
+from coldfront.plugins.qumulo.services.notifications_service import (
+    send_email_for_near_limit_allocation,
+)
 
 from coldfront.plugins.qumulo.utils.aces_manager import AcesManager
 from coldfront.plugins.qumulo.utils.qumulo_api import QumuloAPI
@@ -56,7 +63,7 @@ def poll_ad_group(
         qumulo_api.rc.ad.distinguished_name_to_ad_account(group_dn)
         success = True
     except RequestError as qumulo_request_error:
-        logger.warn(f'Allocation Group "{group_dn}" not found')
+        logger.warning(f'Allocation Group "{group_dn}" not found')
         success = False
 
     acl_group_name = acl_allocation.get_attribute("storage_acl_name")
@@ -64,9 +71,9 @@ def poll_ad_group(
 
     if success:
         acl_allocation.status = AllocationStatusChoice.objects.get(name="Active")
-        logger.warn(f'Allocation Group "{acl_group_name}" found')
+        logger.warning(f'Allocation Group "{acl_group_name}" found')
     elif time_since_creation > expiration_seconds:
-        logger.warn(
+        logger.warning(
             f'Allocation Group "{acl_group_name}" not found after {expiration_seconds/SECONDS_IN_AN_HOUR} hours'
         )
         acl_allocation.status = AllocationStatusChoice.objects.get(name="Expired")
@@ -80,7 +87,7 @@ def poll_ad_groups() -> None:
         status__name="Pending", resources__in=resources
     )
 
-    logger.warn(f"Polling {len(acl_allocations)} ACL allocations")
+    logger.warning(f"Polling {len(acl_allocations)} ACL allocations")
 
     for acl_allocation in acl_allocations:
         poll_ad_group(acl_allocation)
@@ -102,34 +109,57 @@ def conditionally_update_storage_allocation_statuses() -> None:
     allocations = Allocation.objects.filter(
         status__name="Pending", resources__in=storage_resources
     )
-    logger.warn(f"Checking {len(allocations)} qumulo allocations")
+    logger.warning(f"Checking {len(allocations)} qumulo allocations")
 
     for allocation in allocations:
         conditionally_update_storage_allocation_status(allocation)
 
 
-# TODO: refactor the following methods to a service class
-def ingest_quotas_with_daily_usage() -> None:
-    logger = logging.getLogger("task_qumulo_daily_quota_usages")
+def ingest_quotas_with_daily_usage_task() -> None:
+    ingest_quotas_with_daily_usage()
 
-    connection_info = json.loads(os.environ.get("QUMULO_INFO", "{}"))
+def _zip_function(
+    allocation_values: AllocationQuerySet,
+    qumulo_allocations: list[dict]
+):
+    zipped_list = []
+    for qumulo_allocation in qumulo_allocations:
+        for value in allocation_values:
+            if (
+                value['allocationattribute__value'] == 
+                qumulo_allocation['path'].rstrip('/')
+            ):
+                copied_value = dict(value)
+                copied_value['usage'] = qumulo_allocation['capacity_usage']
+                copied_value['quota'] = qumulo_allocation['limit']
+                zipped_list.append(copied_value)
+                break
+    return zipped_list
 
-    base_allocation_quota_usages = []
-    for storage_key in connection_info.keys():
-        qumulo_api = StorageControllerFactory().create_connection(storage_key)
-        quota_usages = qumulo_api.get_all_quotas_with_usage()["quotas"]
-        base_allocation_quota_usages += list(
-            filter(
-                lambda quota_usage: AclAllocations.is_base_allocation(
-                    quota_usage["path"], storage_key
-                ),
-                quota_usages,
-            )
+def notify_users_with_allocations_near_limit() -> None:
+    qumulo_allocations = get_file_system_allocations_near_limit()
+    as_it_paths = list(map(lambda quota: quota["path"], qumulo_allocations))
+    paths_without_trailing_slash = list(map(lambda path: path.rstrip("/"), as_it_paths))
+    storage_names_subquery = Subquery(
+        AllocationAttribute.objects.filter(
+            allocation=OuterRef("pk"),
+            allocation_attribute_type__name="storage_name",
+        ).values("value")
+    )
+
+    allocation_values = (
+        Allocation.objects.annotate(storage_name=storage_names_subquery)
+        .parents()
+        .active_storage()
+        .filter(
+            allocationattribute__allocation_attribute_type__name="storage_filesystem_path",
+            allocationattribute__value__in=as_it_paths + paths_without_trailing_slash,
         )
+        .values("id", "project__pi__last_name", "project__pi__email", "storage_name", "allocationattribute__value")
+    )
 
-    __set_daily_quota_usages(base_allocation_quota_usages, logger)
-    __validate_results(base_allocation_quota_usages, logger)
-
+    for allocation_data in _zip_function(allocation_values, qumulo_allocations):
+        send_email_for_near_limit_allocation(allocation_data)
 
 def addMembersToADGroup(
     wustlkeys: list[str],
@@ -227,6 +257,52 @@ def __add_members_and_handle_errors(
     return
 
 
+def add_allocation_group_to_parent_ad_group(
+    allocation_group_name: str,
+    parent_group_name: str,
+) -> None:
+    logger = logging.getLogger("task_qumulo_allocation_group_membership")
+    active_directory_api = ActiveDirectoryAPI()
+
+    allocation_group_dn = None
+    for attempt in range(1, 5):
+        try:
+            allocation_group_dn = active_directory_api.get_group_dn(
+                allocation_group_name
+            )
+            break
+        except ValueError:
+            logger.warning(
+                "Allocation AD group %s not found on try %s",
+                allocation_group_name,
+                attempt,
+            )
+            if attempt < 4:
+                time.sleep(3)
+
+    if allocation_group_dn is None:
+        message = f"Allocation AD group {allocation_group_name} was not found"
+        logger.error(message)
+        raise ValueError(message)
+
+    try:
+        active_directory_api.add_members_to_ad_group(
+            [allocation_group_dn], parent_group_name
+        )
+        logger.warning(
+            "Added allocation AD group %s to storage parent group %s",
+            allocation_group_name,
+            parent_group_name,
+        )
+    except Exception:
+        logger.exception(
+            "Error adding allocation AD group %s to parent group %s",
+            allocation_group_name,
+            parent_group_name,
+        )
+        raise
+
+
 def __send_error_adding_users_email(
     acl_allocation: Allocation, wustlkeys: list[str]
 ) -> None:
@@ -271,73 +347,6 @@ def __send_invalid_users_email(acl_allocation: Allocation, bad_keys: list[str]) 
         sender=import_from_settings("DEFAULT_FROM_EMAIL"),
         receiver_list=user_support_emails,
     )
-
-
-def __set_daily_quota_usages(quotas, logger) -> None:
-    # Iterate and populate allocation_attribute_usage records
-    storage_filesystem_path_attribute_type = AllocationAttributeType.objects.get(
-        name="storage_filesystem_path"
-    )
-    active_status = AllocationStatusChoice.objects.get(name="Active")
-
-    for quota in quotas:
-        path = quota.get("path")
-
-        allocation = __get_allocation_by_attribute(
-            storage_filesystem_path_attribute_type, path, active_status
-        )
-        if allocation is None:
-            if path[-1] != "/":
-                continue
-
-            value = path[:-1]
-            logger.warn(f"Attempting to find allocation without the trailing slash...")
-            allocation = __get_allocation_by_attribute(
-                storage_filesystem_path_attribute_type, value, active_status
-            )
-            if allocation is None:
-                continue
-
-        allocation.set_usage("storage_quota", quota.get("capacity_usage"))
-
-
-def __get_allocation_by_attribute(attribute_type, value, for_status):
-    try:
-        attribute = AllocationAttribute.objects.select_related("allocation").get(
-            value=value,
-            allocation_attribute_type=attribute_type,
-            allocation__status=for_status,
-        )
-    except AllocationAttribute.DoesNotExist:
-        logger.warn(f"Allocation record for {value} path was not found")
-        return None
-
-    logger.warn(f"Allocation record for {value} path was found")
-    return attribute.allocation
-
-
-def __validate_results(quota_usages, logger) -> bool:
-    today = datetime.today()
-    year = today.year
-    month = today.month
-    day = today.day
-
-    daily_usage_ingested = AllocationAttributeUsage.objects.filter(
-        modified__year=year, modified__month=month, modified__day=day
-    ).count()
-    usage_pulled_from_qumulo = len(quota_usages)
-
-    success = usage_pulled_from_qumulo == daily_usage_ingested
-    if success:
-        logger.warn("Successful ingestion of quota daily usage.")
-    else:
-        logger.warn(
-            "Unsuccessful ingestion of quota daily usage. Not all the QUMULO usage data was stored in Coldfront."
-        )
-        logger.warn(f"Usages pulled from QUMULO: {usage_pulled_from_qumulo}")
-        logger.warn(f"Usages ingested for today: {daily_usage_ingested}")
-
-    return success
 
 
 class ResetAcl:

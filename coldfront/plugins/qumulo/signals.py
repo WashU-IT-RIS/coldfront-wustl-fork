@@ -119,6 +119,13 @@ def on_allocation_change_approved(sender, **kwargs):
     except AllocationLinkage.DoesNotExist:
         return
 
+    # Skip child quota updates for the course allocation.
+    # REMOVE IN JULY OF 2027, this is a special case to avoid updating the quota for the children of the course allocation.
+    course_allocation_name = "di2cap"
+    if name == course_allocation_name:
+        # Skip quota update for course allocations
+        return
+    
     children = allocation_link.children.all()
     for child in children:
         child_fs_path = child.get_attribute(name="storage_filesystem_path")
