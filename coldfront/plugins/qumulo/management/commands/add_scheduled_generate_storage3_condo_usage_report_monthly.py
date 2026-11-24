@@ -120,7 +120,7 @@ def generate_storage3_condo_usage_report(
     allocations = report_generator.get_allocations_by_project(project)
     recipient_list = get_billing_contact_emails(allocations)
 
-    if not recipient_list:
+    if not recipient_list and not debug:
         print("No billing contact emails found. Report not sent.")
         return
 
