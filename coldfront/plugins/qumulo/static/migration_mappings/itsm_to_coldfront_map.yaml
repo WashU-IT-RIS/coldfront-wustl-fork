@@ -54,9 +54,9 @@ itsm_to_coldfront_map:
               type: string
               transforms: null
               validates:
-                presence: true
                 length:
                   maximum: 128
+                  allow_blank: true
       - entity: allocation_form
         attributes:
           - name: department_number
@@ -64,9 +64,9 @@ itsm_to_coldfront_map:
               type: string
               transforms: null
               validates:
-                presence: true
                 length:
                   maximum: 128
+                  allow_blank: true
       - entity: sub_allocation_form
         attributes:
           - name: department_number
@@ -74,9 +74,9 @@ itsm_to_coldfront_map:
               type: string
               transforms: null
               validates:
-                presence: true
                 length:
                   maximum: 128
+                  allow_blank: true
     itsm_value:
       entity: service_provision
       attribute: department_number
@@ -259,7 +259,7 @@ itsm_to_coldfront_map:
       attribute: sponsor_department_number
       type: string
       nulls: true
-      defaults_to: ""
+      defaults_to: null
   fileset_name:
     coldfront:
       - entity: allocation_attribute
@@ -565,7 +565,6 @@ itsm_to_coldfront_map:
       defaults_to: false
   id: null
   name: null
-  department_name: null
   creation_timestamp: null
   service_id: null
   status: null
