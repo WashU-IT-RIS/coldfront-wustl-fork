@@ -55,12 +55,6 @@ class Command(BaseCommand):
             raise CommandError("--debug needs EMAIL_DEVELOPMENT_EMAIL_LIST to be set; it is empty.")
         name = f"Generate Storage3 Monthly Usage Report for {project}"
 
-        # Re-running the command replaces the schedule instead of adding a
-        # second one, which would email every billing contact twice a month.
-        deleted, _ = Schedule.objects.filter(name=name, func=REPORT_FUNC).delete()
-        if deleted:
-            print(f"Replacing {deleted} existing schedule(s) named '{name}'.")
-
         next_run = next_run_on_2nd_at_6_am_utc()
         notes = []
         if dry_run:
