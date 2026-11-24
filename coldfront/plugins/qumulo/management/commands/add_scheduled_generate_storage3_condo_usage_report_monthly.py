@@ -74,7 +74,7 @@ class Command(BaseCommand):
             name=name,
             schedule_type=Schedule.MONTHLY,
             next_run=next_run,
-            hook=FAILURE_HOOK,
+            hook=None if dry_run else FAILURE_HOOK,
             q_options={"timeout": REPORT_TIMEOUT_SECONDS},
             project=project,
             dry_run=dry_run,
