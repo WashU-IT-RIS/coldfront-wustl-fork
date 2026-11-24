@@ -18,6 +18,7 @@ FAILURE_HOOK = "coldfront.plugins.qumulo.hooks.notify_on_call_on_failure_hook"
 # more time than the cluster default (120s). A timed-out task is killed without
 # being recorded as failed, so it would never reach the failure hook.
 REPORT_TIMEOUT_SECONDS = 600
+REPORT_RETRY_SECONDS = 900
 
 EMAIL_DEVELOPMENT_EMAIL_LIST = import_from_settings("EMAIL_DEVELOPMENT_EMAIL_LIST", [])
 
@@ -69,7 +70,7 @@ class Command(BaseCommand):
             schedule_type=Schedule.MONTHLY,
             next_run=next_run,
             hook=None if dry_run else FAILURE_HOOK,
-            q_options={"timeout": REPORT_TIMEOUT_SECONDS},
+            q_options={"timeout": REPORT_TIMEOUT_SECONDS, "retry": REPORT_RETRY_SECONDS},
             project=project,
             dry_run=dry_run,
             debug=debug,
