@@ -136,6 +136,13 @@ def generate_storage3_condo_usage_report(
 
     # Not the send_email helper: it swallows SMTP errors, and a failed send must
     # raise so the failure hook alerts on-call.
+    if not import_from_settings("EMAIL_ENABLED", False):
+        print("Email is disabled. Report not sent.")
+        return
+    if settings.DEBUG:
+        recipient_list = EMAIL_DEVELOPMENT_EMAIL_LIST
+        if not recipient_list:
+            raise ValueError("DEBUG is on but EMAIL_DEVELOPMENT_EMAIL_LIST is empty. Report not sent.")
     send_mail(
         subject,
         message,
