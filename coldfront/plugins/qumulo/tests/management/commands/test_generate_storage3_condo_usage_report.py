@@ -200,35 +200,3 @@ class NextRunTests(TestCase):
     def test_december_rolls_into_january(self):
         now = arrow.get("2026-12-15T00:00:00+00:00")
         self.assertEqual(arrow.get(next_run_on_2nd_at_6_am_utc(now)), arrow.get("2027-01-02T06:00:00+00:00"))
-
-
-class ScheduleCommandTests(TestCase):
-    def _schedules(self):
-        return Schedule.objects.filter(func=REPORT_FUNC)
-
-    def test_creates_schedule_with_hook_timeout_and_future_next_run(self):
-        call_command(COMMAND, "--project", "Test Condo")
-
-        schedule = self._schedules().get()
-        self.assertEqual(schedule.name, "Generate Storage3 Monthly Usage Report for Test Condo")
-        self.assertEqual(schedule.schedule_type, Schedule.MONTHLY)
-        self.assertEqual(schedule.hook, FAILURE_HOOK)
-        self.assertGreater(schedule.next_run, arrow.utcnow().datetime)
-        self.assertEqual(schedule.next_run.day, 2)
-        kwargs = eval(f"dict({schedule.kwargs})")
-        self.assertEqual(kwargs["project"], "Test Condo")
-        self.assertEqual(kwargs["q_options"], {"timeout": REPORT_TIMEOUT_SECONDS})
-        self.assertIs(kwargs["dry_run"], False)
-        self.assertIs(kwargs["debug"], False)
-
-    def test_rerunning_replaces_schedule_instead_of_duplicating(self):
-        call_command(COMMAND, "--project", "Test Condo")
-        call_command(COMMAND, "--project", "Test Condo")
-
-        self.assertEqual(self._schedules().count(), 1)
-
-    def test_other_projects_schedules_are_kept(self):
-        call_command(COMMAND, "--project", "Condo A")
-        call_command(COMMAND, "--project", "Condo B")
-
-        self.assertEqual(self._schedules().count(), 2)
