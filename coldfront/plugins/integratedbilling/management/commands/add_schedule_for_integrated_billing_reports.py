@@ -10,7 +10,7 @@ from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
 _30_MINUTES_IN_SECONDS = 1800
 
 
-def __next_2nd_day_of_month_at_3_00_am() -> str:
+def _next_2nd_day_of_month_at_3_00_am() -> str:
     now = arrow.now()
     next_run = now.replace(day=2, hour=3, minute=0, second=0, microsecond=0)
     if next_run <= now:
@@ -24,14 +24,15 @@ class Command(BaseCommand):
         print("Scheduling task for generating integrated billing report monthly...")
         # django-q 1.3.9's Schedule has no q_options field; per-task options are
         # read from the `kwargs` text field. Only `timeout` is per-task: `retry`
-        # is cluster-wide, so Q_CLUSTER_RETRY must be set above this timeout or
-        # the broker will redeliver the task while it is still running.
+        # is cluster-wide (Q_CLUSTER_RETRY). It has no effect on the default
+        # Redis broker, but on the ORM/SQS/Mongo brokers it must be set above
+        # this timeout or the task will be redelivered while still running.
         Schedule.objects.update_or_create(
             name="Generate Integrated Monthly Billing Report",
             defaults={
                 "func": "coldfront.plugins.integratedbilling.management.commands.add_schedule_for_integrated_billing_reports.generate_integrated_billing_report",
                 "schedule_type": Schedule.MONTHLY,
-                "next_run": __next_2nd_day_of_month_at_3_00_am(),
+                "next_run": _next_2nd_day_of_month_at_3_00_am(),
                 "kwargs": f"q_options={{'timeout': {_30_MINUTES_IN_SECONDS}}}",
             },
         )
