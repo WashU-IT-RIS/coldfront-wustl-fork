@@ -109,7 +109,7 @@ class Command(BaseCommand):
             name="department_number",
             defaults={
                 "attribute_type": AttributeType.objects.get(name="Text"),
-                "is_required": True,
+                "is_required": False,
                 "is_private": False,
                 "is_unique": True,
                 "is_changeable": False,
@@ -120,7 +120,7 @@ class Command(BaseCommand):
             name="department_name",
             defaults={
                 "attribute_type": AttributeType.objects.get(name="Text"),
-                "is_required": True,
+                "is_required": False,
                 "is_private": False,
                 "is_unique": True,
                 "is_changeable": False,
