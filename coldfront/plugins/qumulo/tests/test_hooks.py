@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import MagicMock, patch
 
 from django.test import TestCase
@@ -18,6 +19,13 @@ def _task(success, result):
 
 @patch("coldfront.plugins.qumulo.hooks.send_email")
 class NotifyOnCallOnFailureHookTests(TestCase):
+    def setUp(self):
+        # Other test modules call logging.disable(CRITICAL) at import time,
+        # which silences the logs assertLogs checks for. Re-enable here.
+        previous = logging.root.manager.disable
+        logging.disable(logging.NOTSET)
+        self.addCleanup(logging.disable, previous)
+
     @patch("coldfront.plugins.qumulo.hooks.EMAIL_ON_CALL", ON_CALL)
     def test_failure_emails_on_call_with_stack_trace(self, mock_send_email):
         trace = 'boom : Traceback (most recent call last):\n  File "x.py", line 1\nValueError: boom'
