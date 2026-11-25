@@ -1,5 +1,6 @@
 import json
 import os
+from unittest import skip
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
@@ -7,8 +8,23 @@ from django.core.management import call_command
 
 from unittest.mock import patch, MagicMock
 
+from factory import faker
+
+from coldfront.core.allocation.models import Allocation, AllocationAttribute
 from coldfront.core.project.models import Project
+from coldfront.core.test_helpers.factories import (
+    AllocationAttributeFactory,
+    AllocationAttributeTypeFactory,
+)
+from coldfront.core.test_helpers.factories import AllocationAttributeTypeFactory
 from coldfront.plugins.qumulo.services.allocation_service import AllocationService
+from coldfront.plugins.qumulo.tests.fixtures import (
+    create_allocation_attribute,
+    create_allocation_with_allocation_attributes,
+    create_metadata_for_testing,
+    create_sub_allocation,
+)
+from coldfront.plugins.qumulo.tests.helper_classes.factories import Storage3Factory
 from coldfront.plugins.qumulo.tests.utils.mock_data import (
     build_models,
     default_form_data,
@@ -18,12 +34,9 @@ from coldfront.plugins.qumulo.tests.utils.mock_data import (
 from io import StringIO
 
 
-@patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
-@patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
-@patch("coldfront.plugins.qumulo.tasks.ActiveDirectoryAPI")
-@patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
 class TestExportSuballocationPsv(TestCase):
     def setUp(self) -> None:
+
         self.client = Client()
 
         build_data = build_models()
@@ -38,6 +51,10 @@ class TestExportSuballocationPsv(TestCase):
 
         self.create_allocation = AllocationService.create_new_allocation
 
+        self.storage_filesystem_path_type = AllocationAttributeTypeFactory(
+            name="storage_filesystem_path"
+        )
+
         return super().setUp()
 
     def call_command(self, *args, **kwargs):
@@ -51,99 +68,84 @@ class TestExportSuballocationPsv(TestCase):
         )
         return out.getvalue(), err.getvalue()
 
-    def test_single_parent_prints_expected_output(
-        self,
-        mock_active_directory_api: MagicMock,
-        mock_allocation_view_AD: MagicMock,
-        mock_allocation_view_async_task: MagicMock,
-    ):
-        self.form_data["storage_type"] = "Storage3"
-        filesystem_path = (
-            f"{mock_qumulo_info[self.form_data['storage_type']]['path']}/foo"
+    def test_single_parent_prints_expected_output(self):
+        filesystem_path = f"/storage3/fs1//foo"
+        create_allocation_with_allocation_attributes(
+            storage_factory=Storage3Factory, storage_filesystem_path=filesystem_path
         )
-        self.form_data["storage_filesystem_path"] = filesystem_path
 
-        self.create_allocation(user=self.user, form_data=self.form_data)
-
-        out, err = self.call_command(
+        out, _ = self.call_command(
             "export_suballocation_psv", "--allocations", filesystem_path
         )
 
-        expected_output = filesystem_path + "|{}\n"
+        expected_output = f"{filesystem_path}|{{}}\n"
 
         self.assertEqual(expected_output, out)
 
-    def test_single_parent_with_child(
-        self,
-        mock_active_directory_api: MagicMock,
-        mock_allocation_view_AD: MagicMock,
-        mock_allocation_view_async_task: MagicMock,
-    ):
-        self.form_data["storage_type"] = "Storage3"
-        filesystem_path = (
-            f"{mock_qumulo_info[self.form_data['storage_type']]['path']}/foo"
-        )
-        self.form_data["storage_filesystem_path"] = filesystem_path
-
-        allocation = self.create_allocation(user=self.user, form_data=self.form_data)[
-            "allocation"
-        ]
-
-        suballocation_form_data = default_form_data.copy()
-        suballocation_subpath = "bar"
-        suballocation_form_data["storage_type"] = "Storage3"
-        suballocation_form_data["project_pk"] = self.project.id
-        suballocation_form_data["storage_filesystem_path"] = suballocation_subpath
-
-        self.create_allocation(
-            user=self.user,
-            form_data=suballocation_form_data,
-            parent_allocation=allocation,
+    def test_single_parent_with_child(self):
+        filesystem_path = f"/storage3/fs1/foo"
+        suballocation_subpath = f"{filesystem_path}/bah"
+        parent_allocation = create_allocation_with_allocation_attributes(
+            storage_factory=Storage3Factory, storage_filesystem_path=filesystem_path
+        )["allocations"]["storage_allocation"]
+        sub_allocation = create_sub_allocation(parent=parent_allocation)
+        create_allocation_attribute(
+            sub_allocation, "storage_filesystem_path", suballocation_subpath
         )
 
-        out, err = self.call_command(
+        out, _ = self.call_command(
             "export_suballocation_psv", "--allocations", filesystem_path
         )
 
-        expected_output = filesystem_path + "|{" + suballocation_subpath + "}\n"
+        expected_output = f"{filesystem_path}|{{{suballocation_subpath}}}\n"
         self.assertEqual(expected_output, out)
 
-    def test_multiple_basic_allocations(
-        self,
-        mock_active_directory_api: MagicMock,
-        mock_allocation_view_AD: MagicMock,
-        mock_allocation_view_async_task: MagicMock,
-    ):
-        self.form_data["storage_type"] = "Storage3"
-        filesystem_path = (
-            f"{mock_qumulo_info[self.form_data['storage_type']]['path']}/foo"
-        )
-        self.form_data["storage_filesystem_path"] = filesystem_path
+    def test_multiple_basic_allocations(self):
 
-        self.create_allocation(user=self.user, form_data=self.form_data)
+        allocations: list[Allocation] = Storage3Factory.create_batch(2)
+        paths: list[str] = []
+        for allocation in allocations:
+            allocation_attribute = create_allocation_attribute(
+                allocation, "storage_filesystem_path", faker.Faker("file_path", depth=2)
+            )
+            paths.append(allocation_attribute.value)
 
-        allocation_2_form_data = default_form_data.copy()
-        allocation_2_form_data["project_pk"] = self.project.id
-        allocation2_filesystem_path = (
-            f"{mock_qumulo_info[allocation_2_form_data['storage_type']]['path']}/bar"
-        )
-        allocation_2_form_data["storage_filesystem_path"] = allocation2_filesystem_path
-
-        self.create_allocation(user=self.user, form_data=allocation_2_form_data)
-
-        out, err = self.call_command(
+        out, _ = self.call_command(
             "export_suballocation_psv",
             "--allocations",
-            filesystem_path,
-            allocation2_filesystem_path,
+            *paths,
         )
-
-        expected_output = (
-            filesystem_path + "|{}\n" + allocation2_filesystem_path + "|{}\n"
-        )
+        expected_output = "".join(f"{path}|{{}}\n" for path in paths)
 
         self.assertEqual(expected_output, out)
 
+    def test_multiple_basic_allocations_from_allocation_attributes(self):
+        storage_filesystem_paths: list[AllocationAttribute] = (
+            AllocationAttributeFactory.create_batch(
+                2,
+                value=faker.Faker("file_path", depth=3, extension=""),
+                allocation_attribute_type=self.storage_filesystem_path_type,
+            )
+        )
+        paths = [attr.value for attr in storage_filesystem_paths]
+
+        out, _ = self.call_command(
+            "export_suballocation_psv",
+            "--allocations",
+            *paths,
+        )
+        expected_output = "".join(f"{path}|{{}}\n" for path in paths)
+
+        self.assertEqual(expected_output, out)
+
+        # has an allocation!
+        for attr in storage_filesystem_paths:
+            self.assertIsNotNone(attr.allocation)
+
+    @patch("coldfront.plugins.qumulo.services.allocation_service.async_task")
+    @patch("coldfront.plugins.qumulo.services.allocation_service.ActiveDirectoryAPI")
+    @patch("coldfront.plugins.qumulo.tasks.ActiveDirectoryAPI")
+    @patch.dict(os.environ, {"QUMULO_INFO": json.dumps(mock_qumulo_info)})
     def test_multiple_allocations(
         self,
         mock_active_directory_api: MagicMock,
