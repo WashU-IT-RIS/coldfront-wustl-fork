@@ -203,6 +203,32 @@ class TestMigrateToColdfront(TestCase):
             ),
         ]
 
+        self.expected_allocation_attributes_department_blank = [
+            ("storage_name", "mocker"),
+            ("storage_quota", "200"),
+            ("storage_protocols", '["smb"]'),
+            ("storage_filesystem_path", f"{storage2_path}/mocker"),
+            ("storage_export_path", f"{storage2_path}/mocker"),
+            ("cost_center", "CC0004259"),
+            ("service_rate_category", "consumption"),
+            ("secure", "No"),
+            ("audit", "No"),
+            ("billing_exempt", "Yes"),
+            ("subsidized", "No"),
+            ("billing_contact", "jin810"),
+            ("technical_contact", "jin810"),
+            ("storage_ticket", "ITSD-2222"),
+            ("billing_startdate", "2020-04-15T00: 00: 00.000Z"),
+            ("fileset_name", "mocker_active"),
+            ("fileset_alias", "mocker_active"),
+            (
+                "itsm_comment",
+                '{"afm_cache_enable":true,"_jenkins":"https://systems-ci.gsc.wustl.edu/job/storage1_allocation/2652","add_archive":"true"}',
+            ),
+            ("billing_cycle", "monthly"),
+            ("sla_name", ""),
+        ]
+
     def tearDown(self):
         patch.stopall()
         return super().tearDown()
@@ -809,3 +835,44 @@ class TestMigrateToColdfront(TestCase):
             project=result["project_id"]
         )
         self.assertEqual(len(project_attributes), 3)
+
+    def test_migrate_to_coldfront_department_number_allow_blank(
+        self,
+        mock_async_task: mock.MagicMock,
+        mock_active_directory_api: mock.MagicMock,
+        mock_itsm_client: mock.MagicMock,
+        mock_ad_api_in_validator: mock.MagicMock,
+    ) -> None:
+        with open(
+            "coldfront/plugins/qumulo/static/migration_mappings/mock_itsm_response_body_department_blank.json",
+            "r",
+        ) as file:
+            mock_response = json.load(file)["data"]
+            itsm_client = mock.MagicMock()
+            itsm_client.get_fs1_allocation_by_fileset_name.return_value = mock_response
+            mock_itsm_client.return_value = itsm_client
+
+        mock_ad_api_in_validator.get_user.side_effect = ad_lookup_get_user_side_effect
+        self.mock_qumulo_api.rc.fs.get_file_attr = ValidFormPathMock()
+
+        name = "mocker"
+        result = MigrateToColdfront().by_fileset_name(f"{name}_active", "Storage2")
+
+        allocation_attributes = AllocationAttribute.objects.filter(
+            allocation=result["allocation_id"]
+        )
+        allocation_attribute_values = allocation_attributes.values_list(
+            "allocation_attribute_type__name", "value"
+        )
+
+        for attribute_value in self.expected_allocation_attributes_department_blank:
+            self.assertIn(attribute_value, allocation_attribute_values)
+
+        self.assertEqual(allocation_attributes.count(), 20)
+
+        # Ensure that the department_number attribute is not present in the allocation attributes.
+        self.assertFalse(
+            allocation_attribute_values.filter(
+                allocation_attribute_type__name="department_number"
+            ).exists()
+        )
