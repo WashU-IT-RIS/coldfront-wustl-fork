@@ -5,9 +5,14 @@ from coldfront.core.allocation.models import (
     AllocationLinkage,
     AllocationQuerySet,
 )
+from coldfront.core.project.models import Project
+from coldfront.core.constants import CONDO_PROJECT_QUOTA
 from datetime import datetime, date, time
 from typing import Any, Optional
 import re
+
+
+NO_USAGE_DATA = "No data"
 
 
 class StorageUsageReport:
@@ -16,10 +21,32 @@ class StorageUsageReport:
             usage_date = datetime.combine(date.today(), time.min)
         self.usage_date = usage_date
 
+    def _convert_usage_units(self, usages: list) -> list:
+        """
+        Replace the usage_kb column with usage_gb and usage_tb columns,
+        keeping the original column position.
+        """
+        converted = []
+        for entry in usages:
+            new_entry = {}
+            for key, val in entry.items():
+                if key == "usage_kb" and val == NO_USAGE_DATA:
+                    new_entry["usage_gb"] = NO_USAGE_DATA
+                    new_entry["usage_tb"] = NO_USAGE_DATA
+                elif key == "usage_kb":
+                    usage_kb = float(val)
+                    new_entry["usage_gb"] = str(usage_kb / 1024**2)
+                    new_entry["usage_tb"] = str(usage_kb / 1024**3)
+                else:
+                    new_entry[key] = val
+            converted.append(new_entry)
+        return converted
+
     def _format_usage_report(self, usages: list) -> str:
         """
         Format the list of usages as a table-like report string.
         If the column is float, align its values to the right, else, align to the left.
+        A float column may also contain NO_USAGE_DATA, which is right-aligned as-is.
         """
         if not usages:
             return "No usage data available."
@@ -29,18 +56,21 @@ class StorageUsageReport:
         col_title = {}
         max_col_width = {}
         is_float_col = {}
+        decimals = {}
         for key in keys:
+            # GB/TB values are often small, so show them with 2 decimal places
+            decimals[key] = 2 if key in ("usage_gb", "usage_tb") else 0
             col_title[key] = re.sub(
-                r" Kb$", " (KB)", re.sub(r"^Pi$", "PI", key.replace("_", " ").title())
+                r" (Kb|Gb|Tb)$",
+                lambda m: f" ({m.group(1).upper()})",
+                re.sub(r"^Pi$", "PI", key.replace("_", " ").title()),
             )
-            # Check if column is float by checking all values
-            is_float_col[key] = all(is_float(entry[key]) for entry in usages)
+            # Column is float if every value is a float or NO_USAGE_DATA (and some are floats)
+            is_float_col[key] = all(
+                is_float(entry[key]) or entry[key] == NO_USAGE_DATA for entry in usages
+            ) and any(is_float(entry[key]) for entry in usages)
             max_val_len = max(
-                (
-                    len(f"{float(entry[key]):,.0f}")
-                    if is_float_col[key]
-                    else len(str(entry[key]))
-                )
+                len(self._format_cell(entry[key], is_float_col[key], decimals[key]))
                 for entry in usages
             )
             max_col_width[key] = max(len(col_title[key]), max_val_len)
@@ -54,16 +84,21 @@ class StorageUsageReport:
         for entry in usages:
             row = []
             for key in keys:
-                val = entry[key]
+                val_str = self._format_cell(entry[key], is_float_col[key], decimals[key])
                 if is_float_col[key]:
-                    val_str = f"{float(val):,.0f}".rjust(max_col_width[key])
+                    val_str = val_str.rjust(max_col_width[key])
                 else:
-                    val_str = str(val).ljust(max_col_width[key])
+                    val_str = val_str.ljust(max_col_width[key])
                 row.append(val_str)
             rows.append(" | ".join(row))
 
         report = "\n".join([header, separator] + rows)
         return report
+
+    def _format_cell(self, val: Any, is_float_col: bool, decimals: int) -> str:
+        if is_float_col and is_float(val):
+            return f"{float(val):,.{decimals}f}"
+        return str(val)
 
     def get_departments_by_school(self, school_unit="ALL") -> list:
         itsm_client = ItsmClientHandler("/v2/rest/attr/info/department")
@@ -93,6 +128,17 @@ class StorageUsageReport:
             status__name="Active",
         )
         return allocations
+
+    def get_allocations_by_project(self, project: str) -> AllocationQuerySet:
+        project_object = Project.objects.get(title=project)
+        project_id = project_object.pk
+        # Every active, top-level storage allocation in the project (no sub-allocations)
+        return (
+            Allocation.objects.parents()
+            .active_storage()
+            .filter(project__pk=project_id)
+            .distinct()
+        )
 
     def _get_suballocation_ids(self) -> list[int]:
         suballoc_ids = list()
@@ -130,9 +176,75 @@ class StorageUsageReport:
         sorted_usages_by_pi = sorted(pi_usages, key=lambda x: x["pi"])
         return sorted_usages_by_pi
 
+    def get_usages_for_project(self, project: str) -> list[dict[str, Any]]:
+        """
+        One row per allocation in the project, sorted by filesystem path.
+        Allocations with no usage recorded on the report date get NO_USAGE_DATA.
+        """
+        usages = list()
+        for allocation in self.get_allocations_by_project(project):
+            usage = allocation.get_usage_kb_by_date(self.usage_date)
+            usages.append(
+                {
+                    "filesystem_path": allocation.get_attribute(
+                        "storage_filesystem_path"
+                    ),
+                    "usage_kb": NO_USAGE_DATA if usage is None else str(usage),
+                }
+            )
+
+        return sorted(usages, key=lambda x: str(x["filesystem_path"]))
+
     def _find_max_length_of_key(self, usage_list: list, key: str) -> int:
         return max(len(entry[key]) for entry in usage_list) if usage_list else 0
 
     def generate_report_for_school(self, school_unit="ALL") -> str:
         usages = self.get_usages_by_pi_for_school(school_unit)
         return self._format_usage_report(usages)
+
+    def get_project_summary(self, project: str) -> dict[str, float]:
+        """
+        Summarize the condo's quota and usage, all values in TB.
+        storage_quota is stored in TB; usage is converted from KB (1 TB = 1024**3 KB).
+        """
+        allocated_tb = 0.0
+        used_tb = 0.0
+        for allocation in self.get_allocations_by_project(project):
+            quota = allocation.get_attribute("storage_quota")
+            allocated_tb += float(quota)
+            usage_kb = allocation.get_usage_kb_by_date(self.usage_date)
+            if usage_kb is not None:
+                used_tb += usage_kb / 1024**3
+
+        return {
+            "total_quota_tb": float(CONDO_PROJECT_QUOTA),
+            "allocated_tb": allocated_tb,
+            "unallocated_tb": CONDO_PROJECT_QUOTA - allocated_tb,
+            "used_tb": used_tb,
+        }
+
+    def _format_tb(self, value: float, decimals: int = 0) -> str:
+        return f"{value:,.{decimals}f} TB"
+
+    def _format_percent(self, part: float, whole: float) -> str:
+        return f"{part / whole * 100:.3f}%" if whole else "N/A"
+
+    def _format_project_summary(self, summary: dict[str, float]) -> str:
+        total = summary["total_quota_tb"]
+        allocated = summary["allocated_tb"]
+        return "\n".join(
+            [
+                f"Total condo quota: {self._format_tb(total)}",
+                f"Allocated to PIs: {self._format_tb(allocated)}"
+                f" ({self._format_percent(allocated, total)})",
+                f"Unallocated: {self._format_tb(summary['unallocated_tb'])}",
+                f"Used: {self._format_tb(summary['used_tb'], decimals=3)}"
+                f" ({self._format_percent(summary['used_tb'], allocated)} of allocated)",
+            ]
+        )
+
+    def generate_report_for_project(self, project: Any) -> str:
+            summary = self._format_project_summary(self.get_project_summary(project))
+            usages = self.get_usages_for_project(project)
+            table = self._format_usage_report(self._convert_usage_units(usages))
+            return f"{summary}\n\n{table}"
