@@ -2,28 +2,38 @@ import arrow
 from datetime import datetime, timezone
 
 from django.core.management.base import BaseCommand
-from django_q.tasks import scheduleq
 from django_q.models import Schedule
 
 from coldfront.plugins.integratedbilling.constants import ServiceTiers
 from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
 
-SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_3_00_AM = (
-    arrow.now().replace(day=2, hour=3, minute=0).format(arrow.FORMAT_RFC3339)
-)
-
 _30_MINUTES_IN_SECONDS = 1800
+
+
+def __next_2nd_day_of_month_at_3_00_am() -> str:
+    now = arrow.now()
+    next_run = now.replace(day=2, hour=3, minute=0, second=0, microsecond=0)
+    if next_run <= now:
+        next_run = next_run.shift(months=1)
+    return next_run.format(arrow.FORMAT_RFC3339)
+
 
 class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         print("Scheduling task for generating integrated billing report monthly...")
-        schedule(
-            "Generate Integrated Monthly Billing Report",
-            "coldfront.plugins.integratedbilling.management.commands.add_schedule_for_integrated_billing_reports.generate_integrated_billing_report",
-            schedule_type=Schedule.MONTHLY,
-            next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_3_00_AM,
-            q_options={"timeout": _30_MINUTES_IN_SECONDS, "retry": _30_MINUTES_IN_SECONDS + 60},
+        # django-q 1.3.9's Schedule has no q_options field; per-task options are
+        # read from the `kwargs` text field. Only `timeout` is per-task: `retry`
+        # is cluster-wide, so Q_CLUSTER_RETRY must be set above this timeout or
+        # the broker will redeliver the task while it is still running.
+        Schedule.objects.update_or_create(
+            name="Generate Integrated Monthly Billing Report",
+            defaults={
+                "func": "coldfront.plugins.integratedbilling.management.commands.add_schedule_for_integrated_billing_reports.generate_integrated_billing_report",
+                "schedule_type": Schedule.MONTHLY,
+                "next_run": __next_2nd_day_of_month_at_3_00_am(),
+                "kwargs": f"q_options={{'timeout': {_30_MINUTES_IN_SECONDS}}}",
+            },
         )
 
 
