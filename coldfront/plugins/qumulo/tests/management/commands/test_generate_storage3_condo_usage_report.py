@@ -1,7 +1,9 @@
 from datetime import datetime, timezone
+from unittest import skipUnless
 from unittest.mock import MagicMock, patch
 
 import arrow
+from django.conf import settings
 from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
 from django_q.models import Schedule
@@ -17,6 +19,10 @@ from coldfront.plugins.qumulo.management.commands.add_scheduled_generate_storage
 from coldfront.plugins.qumulo.reports.storage_usage_report import NO_USAGE_DATA
 
 MODULE = "coldfront.plugins.qumulo.management.commands.add_scheduled_generate_storage3_condo_usage_report_monthly"
+
+requires_email = skipUnless(
+    getattr(settings, "EMAIL_ENABLED", False), "EMAIL_ENABLED is off"
+)
 COMMAND = "add_scheduled_generate_storage3_condo_usage_report_monthly"
 
 
@@ -90,6 +96,7 @@ class GenerateStorage3CondoUsageReportTests(TestCase):
         mock_ad.return_value.get_user.side_effect = _get_user
         return report
 
+    @requires_email
     def test_sends_one_email_to_all_billing_contacts(
         self, mock_report_cls, mock_ad, mock_send_mail
     ):
@@ -117,6 +124,7 @@ class GenerateStorage3CondoUsageReportTests(TestCase):
 
         mock_send_mail.assert_not_called()
 
+    @requires_email
     def test_some_allocations_without_usage_still_sends(
         self, mock_report_cls, mock_ad, mock_send_mail
     ):
@@ -158,6 +166,7 @@ class GenerateStorage3CondoUsageReportTests(TestCase):
 
         mock_send_mail.assert_not_called()
 
+    @requires_email
     def test_send_failure_raises(self, mock_report_cls, mock_ad, mock_send_mail):
         self._setup_report(mock_report_cls, mock_ad)
         mock_send_mail.side_effect = OSError("SMTP down")
