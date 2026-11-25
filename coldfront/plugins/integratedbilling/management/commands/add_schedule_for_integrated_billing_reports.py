@@ -2,9 +2,10 @@ import arrow
 from datetime import datetime, timezone
 
 from django.core.management.base import BaseCommand
-from coldfront.plugins.integratedbilling.constants import ServiceTiers
+from django_q.tasks import scheduleq
 from django_q.models import Schedule
 
+from coldfront.plugins.integratedbilling.constants import ServiceTiers
 from coldfront.plugins.integratedbilling.report_generator import ReportGenerator
 
 SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_3_00_AM = (
@@ -17,14 +18,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options) -> None:
         print("Scheduling task for generating integrated billing report monthly...")
-        Schedule.objects.update_or_create(
-            name="Generate Integrated Monthly Billing Report",
-            defaults={
-                "func": "coldfront.plugins.integratedbilling.management.commands.add_schedule_for_integrated_billing_reports.generate_integrated_billing_report",
-                "schedule_type": Schedule.MONTHLY,
-                "next_run": SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_3_00_AM,
-                "q_options": {"timeout": _30_MINUTES_IN_SECONDS, "retry": _30_MINUTES_IN_SECONDS + 60},
-            },
+        schedule(
+            "Generate Integrated Monthly Billing Report",
+            "coldfront.plugins.integratedbilling.management.commands.add_schedule_for_integrated_billing_reports.generate_integrated_billing_report",
+            schedule_type=Schedule.MONTHLY,
+            next_run=SCHEDULED_FOR_2ND_DAY_OF_MONTH_AT_3_00_AM,
+            q_options={"timeout": _30_MINUTES_IN_SECONDS, "retry": _30_MINUTES_IN_SECONDS + 60},
         )
 
 
